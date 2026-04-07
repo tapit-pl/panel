@@ -2346,6 +2346,10 @@ tailwind.config = {
     document.querySelectorAll('[id^="tab-"]').forEach(t => t.classList.add('hidden'));
     document.getElementById(tabId).classList.remove('hidden');
     document.getElementById(tabId).classList.add('fade-in');
+    if (tabId === 'tab-updates') {
+      document.getElementById('notif-badge')?.classList.add('hidden');
+      document.getElementById('notif-badge-tab')?.classList.add('hidden');
+    }
   }
 
   function openTour(id) {
