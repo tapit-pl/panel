@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thousand Miles – Admin Panel</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        brand: '#E8751A',
+        'brand-dark': '#C4611A',
+        'brand-light': '#FFF3E8',
+        dark: '#1e293b',
+      },
+      fontFamily: { sans: ['Inter', 'sans-serif'] }
+    }
+  }
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  .screen { display: none !important; }
+  .screen.active { display: flex !important; }
+  .fade-in { animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  .sidebar-link { transition: all 0.15s; }
+  .sidebar-link.active { background: rgba(232,117,26,0.12); color: #E8751A; }
+  .sidebar-link.active i { color: #E8751A; }
+  .sidebar-link:hover:not(.active) { background: rgba(255,255,255,0.06); }
+  .modal-bg { backdrop-filter: blur(4px); }
+  .status-paid    { background:#dcfce7; color:#16a34a; }
+  .status-pending { background:#fef9c3; color:#ca8a04; }
+  .status-cancelled { background:#fee2e2; color:#dc2626; }
+  .status-settled { background:#dbeafe; color:#2563eb; }
+  .source-bokun   { background:#ede9fe; color:#7c3aed; }
+  .source-website { background:#e0f2fe; color:#0284c7; }
+  .source-manual  { background:#f1f5f9; color:#475569; }
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+  .section { display: none; }
+  .section.active { display: block; }
+  input[type=range]::-webkit-slider-thumb { background: #E8751A; }
+</style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+<!-- ===================== SCREEN: LOGIN ===================== -->
+<div id="screen-login" class="screen active min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
+  <div class="w-full max-w-sm fade-in">
+    <div class="text-center mb-8">
+      <img src="assets/logo.png" alt="Thousand Miles" class="h-16 object-contain mx-auto mb-3 brightness-0 invert">
+      <span class="inline-block bg-brand/20 text-brand text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">Administration Panel</span>
+    </div>
+    <div class="bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-sm">
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1.5">Username</label>
+          <div class="relative">
+            <i class="fa-solid fa-user absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+            <input type="text" value="admin" class="w-full pl-9 pr-4 py-3 bg-white/8 border border-white/15 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand" style="background:rgba(255,255,255,0.07)">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1.5">Password</label>
+          <div class="relative">
+            <i class="fa-solid fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+            <input type="password" value="••••••••" class="w-full pl-9 pr-4 py-3 border border-white/15 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand" style="background:rgba(255,255,255,0.07)">
+          </div>
+        </div>
+        <div class="flex items-center justify-between text-xs">
+          <label class="flex items-center gap-2 text-slate-400 cursor-pointer">
+            <input type="checkbox" checked class="accent-brand"> Remember me
+          </label>
+          <span class="text-brand cursor-pointer hover:underline">Forgot password?</span>
+        </div>
+        <button onclick="goToAdmin()" class="w-full bg-brand hover:bg-brand-dark text-white font-semibold py-3.5 rounded-xl transition-colors text-sm mt-2">
+          Log in to Admin Panel
+        </button>
+      </div>
+    </div>
+    <p class="text-center text-xs text-slate-600 mt-6">← <a href="index.html" class="hover:text-slate-400 transition-colors">Back to Hotel Panel</a></p>
+  </div>
+</div>
+
+<!-- ===================== SCREEN: ADMIN DASHBOARD ===================== -->
+<div id="screen-admin" class="screen min-h-screen" style="display:none!important">
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="w-60 shrink-0 flex flex-col h-screen sticky top-0 overflow-y-auto" style="background:#1a2332">
+      <!-- Logo -->
+      <div class="px-5 py-5 border-b border-white/8">
+        <img src="assets/logo.png" alt="Thousand Miles" class="h-7 object-contain brightness-0 invert opacity-90">
+        <div class="text-xs text-slate-500 mt-1.5 font-medium tracking-wide uppercase">Admin Panel</div>
+      </div>
+
+      <!-- Nav -->
+      <nav class="flex-1 px-3 py-4 space-y-0.5">
+        <button onclick="showSection('dashboard')" class="sidebar-link active w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">
+          <i class="fa-solid fa-gauge w-4 text-slate-400 text-sm"></i>Dashboard
+        </button>
+        <button onclick="showSection('bookings')" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">
+          <i class="fa-solid fa-list-check w-4 text-slate-400 text-sm"></i>All Bookings
+          <span class="ml-auto bg-brand text-white text-xs font-bold px-1.5 py-0.5 rounded-full">10</span>
+        </button>
+        <button onclick="showSection('hotels')" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">
+          <i class="fa-solid fa-hotel w-4 text-slate-400 text-sm"></i>Hotels
+        </button>
+        <button onclick="showSection('settlement')" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">
+          <i class="fa-solid fa-percent w-4 text-slate-400 text-sm"></i>Commission Settlement
+        </button>
+        <button onclick="showSection('tours')" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">
+          <i class="fa-solid fa-compass w-4 text-slate-400 text-sm"></i>Tours & Pricing
+        </button>
+        <button onclick="showSection('staff')" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">
+          <i class="fa-solid fa-users w-4 text-slate-400 text-sm"></i>Staff
+        </button>
+      </nav>
+
+      <!-- Bottom user -->
+      <div class="px-3 py-4 border-t border-white/8">
+        <div class="flex items-center gap-3 px-3 py-2.5 rounded-xl">
+          <div class="w-8 h-8 bg-brand rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0">TM</div>
+          <div class="flex-1 min-w-0">
+            <div class="text-xs font-semibold text-white truncate">Thousand Miles</div>
+            <div class="text-xs text-slate-500">Owner</div>
+          </div>
+          <button onclick="goToLogin()" class="text-slate-500 hover:text-slate-300 transition-colors" title="Log out">
+            <i class="fa-solid fa-right-from-bracket text-sm"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-y-auto bg-gray-50">
+
+      <!-- Top header -->
+      <header class="bg-white border-b border-gray-200 sticky top-0 z-30">
+        <div class="h-14 px-6 flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3 flex-1 max-w-md">
+            <div class="relative flex-1">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+              <input type="text" placeholder="Search bookings, guests, hotels…" class="w-full pl-8 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-gray-400 hidden sm:block">Monday, April 7, 2026</span>
+            <button class="relative p-2 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">
+              <i class="fa-solid fa-bell text-gray-500 text-sm"></i>
+              <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">3</span>
+            </button>
+            <button onclick="openManualBooking()" class="flex items-center gap-2 bg-brand hover:bg-brand-dark text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors">
+              <i class="fa-solid fa-plus"></i>Add booking
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Section content -->
+      <main class="flex-1 p-6">
+
+        <!-- ===== SECTION: DASHBOARD ===== -->
+        <div id="section-dashboard" class="section active fade-in">
+
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h1 class="text-xl font-bold text-dark">Dashboard</h1>
+              <p class="text-xs text-gray-400 mt-0.5">Overview for today and this month</p>
+            </div>
+            <select class="text-xs border border-gray-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-brand/30 text-gray-600">
+              <option>April 2026</option>
+              <option>March 2026</option>
+              <option>February 2026</option>
+            </select>
+          </div>
+
+          <!-- KPI cards -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-2xl p-5 shadow-sm">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Today's bookings</span>
+                <div class="w-8 h-8 bg-brand-light rounded-xl flex items-center justify-center">
+                  <i class="fa-solid fa-calendar-day text-brand text-sm"></i>
+                </div>
+              </div>
+              <div class="text-3xl font-bold text-dark">4</div>
+              <div class="text-xs text-green-600 mt-1 font-medium"><i class="fa-solid fa-arrow-up text-xs mr-1"></i>+2 vs yesterday</div>
+            </div>
+            <div class="bg-white rounded-2xl p-5 shadow-sm">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Today's revenue</span>
+                <div class="w-8 h-8 bg-green-50 rounded-xl flex items-center justify-center">
+                  <i class="fa-solid fa-coins text-green-500 text-sm"></i>
+                </div>
+              </div>
+              <div class="text-3xl font-bold text-dark">2 180 <span class="text-base font-normal text-gray-400">zł</span></div>
+              <div class="text-xs text-green-600 mt-1 font-medium"><i class="fa-solid fa-arrow-up text-xs mr-1"></i>+14% vs yesterday</div>
+            </div>
+            <div class="bg-white rounded-2xl p-5 shadow-sm">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Month bookings</span>
+                <div class="w-8 h-8 bg-blue-50 rounded-xl flex items-center justify-center">
+                  <i class="fa-solid fa-chart-line text-blue-500 text-sm"></i>
+                </div>
+              </div>
+              <div class="text-3xl font-bold text-dark">47</div>
+              <div class="text-xs text-gray-400 mt-1">Goal: <span class="text-dark font-semibold">80</span> — 59% reached</div>
+            </div>
+            <div class="bg-white rounded-2xl p-5 shadow-sm">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Active hotels</span>
+                <div class="w-8 h-8 bg-purple-50 rounded-xl flex items-center justify-center">
+                  <i class="fa-solid fa-hotel text-purple-500 text-sm"></i>
+                </div>
+              </div>
+              <div class="text-3xl font-bold text-dark">4</div>
+              <div class="text-xs text-gray-400 mt-1">2 new enquiries pending</div>
+            </div>
+          </div>
+
+          <!-- Chart + top hotels -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+
+            <!-- Bookings chart -->
+            <div class="lg:col-span-2 bg-white rounded-2xl p-5 shadow-sm">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <div class="font-semibold text-dark text-sm">Bookings this month</div>
+                  <div class="text-xs text-gray-400 mt-0.5">April 2026 · daily view</div>
+                </div>
+                <div class="flex items-center gap-3 text-xs text-gray-400">
+                  <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-brand inline-block"></span>Bookings</span>
+                  <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-blue-300 inline-block"></span>Revenue (×10)</span>
+                </div>
+              </div>
+              <canvas id="dashboard-chart" height="120"></canvas>
+            </div>
+
+            <!-- Top hotels -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm">
+              <div class="font-semibold text-dark text-sm mb-1">Top hotels this month</div>
+              <div class="text-xs text-gray-400 mb-4">By number of bookings</div>
+              <div class="space-y-4">
+                <div>
+                  <div class="flex items-center justify-between text-xs mb-1.5">
+                    <span class="font-medium text-dark">Hotel Wawel Kraków</span>
+                    <span class="text-gray-500">6 bookings</span>
+                  </div>
+                  <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div class="h-full bg-brand rounded-full" style="width:75%"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex items-center justify-between text-xs mb-1.5">
+                    <span class="font-medium text-dark">Hotel Stary</span>
+                    <span class="text-gray-500">3 bookings</span>
+                  </div>
+                  <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div class="h-full bg-brand rounded-full" style="width:38%"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex items-center justify-between text-xs mb-1.5">
+                    <span class="font-medium text-dark">Hotel Copernicus</span>
+                    <span class="text-gray-500">2 bookings</span>
+                  </div>
+                  <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div class="h-full bg-brand rounded-full" style="width:25%"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex items-center justify-between text-xs mb-1.5">
+                    <span class="font-medium text-dark">Hotel Pod Różą</span>
+                    <span class="text-gray-500 italic">0 bookings</span>
+                  </div>
+                  <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div class="h-full bg-gray-300 rounded-full" style="width:2%"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Source breakdown -->
+              <div class="mt-5 pt-4 border-t border-gray-100">
+                <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Booking source</div>
+                <div class="space-y-2">
+                  <div class="flex items-center justify-between text-xs">
+                    <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-violet-400 inline-block"></span>Bokun</span>
+                    <span class="font-semibold">68%</span>
+                  </div>
+                  <div class="flex items-center justify-between text-xs">
+                    <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-400 inline-block"></span>Website</span>
+                    <span class="font-semibold">20%</span>
+                  </div>
+                  <div class="flex items-center justify-between text-xs">
+                    <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-gray-400 inline-block"></span>Manual</span>
+                    <span class="font-semibold">12%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent bookings -->
+          <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+              <div class="font-semibold text-dark text-sm">Recent bookings</div>
+              <button onclick="showSection('bookings')" class="text-xs text-brand hover:underline font-medium">View all →</button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs">
+                <thead>
+                  <tr class="border-b border-gray-100 bg-gray-50/60">
+                    <th class="text-left px-5 py-3 text-gray-400 font-semibold">#</th>
+                    <th class="text-left px-4 py-3 text-gray-400 font-semibold">Tour</th>
+                    <th class="text-left px-4 py-3 text-gray-400 font-semibold">Guest</th>
+                    <th class="text-left px-4 py-3 text-gray-400 font-semibold">Hotel</th>
+                    <th class="text-left px-4 py-3 text-gray-400 font-semibold">Date</th>
+                    <th class="text-right px-4 py-3 text-gray-400 font-semibold">Total</th>
+                    <th class="text-center px-4 py-3 text-gray-400 font-semibold">Source</th>
+                    <th class="text-center px-4 py-3 text-gray-400 font-semibold">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                  <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-5 py-3 text-gray-400 font-mono">#0875</td>
+                    <td class="px-4 py-3 font-medium text-dark">Bochnia Salt Mine</td>
+                    <td class="px-4 py-3 text-gray-600">Lisa Brown</td>
+                    <td class="px-4 py-3 text-gray-500">Copernicus</td>
+                    <td class="px-4 py-3 text-gray-500">Apr 15</td>
+                    <td class="px-4 py-3 text-right font-semibold text-dark">160 zł</td>
+                    <td class="px-4 py-3 text-center"><span class="source-manual text-xs font-semibold px-2 py-0.5 rounded-full">Manual</span></td>
+                    <td class="px-4 py-3 text-center"><span class="status-paid text-xs font-semibold px-2 py-0.5 rounded-full">Paid</span></td>
+                  </tr>
+                  <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-5 py-3 text-gray-400 font-mono">#0871</td>
+                    <td class="px-4 py-3 font-medium text-dark">Trip to Zakopane</td>
+                    <td class="px-4 py-3 text-gray-600">Piotr Nowak</td>
+                    <td class="px-4 py-3 text-gray-400 italic">—</td>
+                    <td class="px-4 py-3 text-gray-500">Apr 14</td>
+                    <td class="px-4 py-3 text-right font-semibold text-dark">600 zł</td>
+                    <td class="px-4 py-3 text-center"><span class="source-manual text-xs font-semibold px-2 py-0.5 rounded-full">Manual</span></td>
+                    <td class="px-4 py-3 text-center"><span class="status-paid text-xs font-semibold px-2 py-0.5 rounded-full">Paid</span></td>
+                  </tr>
+                  <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-5 py-3 text-gray-400 font-mono">#0869</td>
+                    <td class="px-4 py-3 font-medium text-dark">Transfer – KRK Airport</td>
+                    <td class="px-4 py-3 text-gray-600">Chen Wei</td>
+                    <td class="px-4 py-3 text-gray-500">Hotel Wawel</td>
+                    <td class="px-4 py-3 text-gray-500">Apr 19</td>
+                    <td class="px-4 py-3 text-right font-semibold text-dark">139 zł</td>
+                    <td class="px-4 py-3 text-center"><span class="source-bokun text-xs font-semibold px-2 py-0.5 rounded-full">Bokun</span></td>
+                    <td class="px-4 py-3 text-center"><span class="status-pending text-xs font-semibold px-2 py-0.5 rounded-full">Pending</span></td>
+                  </tr>
+                  <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-5 py-3 text-gray-400 font-mono">#0865</td>
+                    <td class="px-4 py-3 font-medium text-dark">Auschwitz-Birkenau</td>
+                    <td class="px-4 py-3 text-gray-600">Sophie Mueller</td>
+                    <td class="px-4 py-3 text-gray-500">Hotel Stary</td>
+                    <td class="px-4 py-3 text-gray-500">Apr 11</td>
+                    <td class="px-4 py-3 text-right font-semibold text-dark">260 zł</td>
+                    <td class="px-4 py-3 text-center"><span class="source-website text-xs font-semibold px-2 py-0.5 rounded-full">Website</span></td>
+                    <td class="px-4 py-3 text-center"><span class="status-paid text-xs font-semibold px-2 py-0.5 rounded-full">Paid</span></td>
+                  </tr>
+                  <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-5 py-3 text-gray-400 font-mono">#0863</td>
+                    <td class="px-4 py-3 font-medium text-dark">Trip to Zakopane</td>
+                    <td class="px-4 py-3 text-gray-600">David Smith</td>
+                    <td class="px-4 py-3 text-gray-500">Hotel Wawel</td>
+                    <td class="px-4 py-3 text-gray-500">Apr 16</td>
+                    <td class="px-4 py-3 text-right font-semibold text-dark">900 zł</td>
+                    <td class="px-4 py-3 text-center"><span class="source-bokun text-xs font-semibold px-2 py-0.5 rounded-full">Bokun</span></td>
+                    <td class="px-4 py-3 text-center"><span class="status-paid text-xs font-semibold px-2 py-0.5 rounded-full">Paid</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== SECTION: ALL BOOKINGS ===== -->
+        <div id="section-bookings" class="section fade-in">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h1 class="text-xl font-bold text-dark">All Bookings</h1>
+              <p class="text-xs text-gray-400 mt-0.5">10 bookings · April 2026</p>
+            </div>
+            <button onclick="openManualBooking()" class="flex items-center gap-2 bg-brand hover:bg-brand-dark text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors">
+              <i class="fa-solid fa-plus"></i>Add manual booking
+            </button>
+          </div>
+
+          <!-- Filters -->
+          <div class="bg-white rounded-2xl shadow-sm p-4 mb-4">
+            <div class="flex flex-wrap gap-3 items-center">
+              <div class="relative flex-1 min-w-48">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                <input type="text" id="booking-search" placeholder="Search guest, tour, booking #…" oninput="filterAllBookings()" class="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+              </div>
+              <select id="booking-filter-hotel" onchange="filterAllBookings()" class="text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 text-gray-600">
+                <option value="">All hotels</option>
+                <option>Hotel Wawel</option>
+                <option>Hotel Stary</option>
+                <option>Hotel Copernicus</option>
+                <option value="none">No hotel (direct)</option>
+              </select>
+              <select id="booking-filter-source" onchange="filterAllBookings()" class="text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 text-gray-600">
+                <option value="">All sources</option>
+                <option value="Bokun">Bokun</option>
+                <option value="Website">Website</option>
+                <option value="Manual">Manual</option>
+              </select>
+              <select id="booking-filter-status" onchange="filterAllBookings()" class="text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 text-gray-600">
+                <option value="">All statuses</option>
+                <option value="Paid">Paid</option>
+                <option value="Pending">Pending</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+              <span id="booking-count-label" class="text-xs text-gray-400 ml-auto">10 results</span>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs">
+                <thead>
+                  <tr class="border-b border-gray-100 bg-gray-50/60">
+                    <th class="text-left px-5 py-3 text-gray-400 font-semibold">#</th>
+                    <th class="text-left px-4 py-3 text-gray-400 font-semibold">Tour</th>
+                    <th class="text-left px-4 py-3 text-gray-400 font-semibold">Guest</th>
+                    <th class="text-left px-4 py-3 text-gray-400 font-semibold">Hotel</th>
+                    <th class="text-left px-4 py-3 text-gray-400 font-semibold">Date</th>
+                    <th class="text-center px-4 py-3 text-gray-400 font-semibold">Pax</th>
+                    <th class="text-right px-4 py-3 text-gray-400 font-semibold">Total</th>
+                    <th class="text-right px-4 py-3 text-gray-400 font-semibold">Commission</th>
+                    <th class="text-center px-4 py-3 text-gray-400 font-semibold">Source</th>
+                    <th class="text-center px-4 py-3 text-gray-400 font-semibold">Status</th>
+                    <th class="px-4 py-3"></th>
+                  </tr>
+                </thead>
+                <tbody id="all-bookings-tbody" class="divide-y divide-gray-50">
+                  <!-- rows injected by JS -->
+                </tbody>
+              </table>
+            </div>
+            <div id="bookings-no-results" class="hidden text-center py-12 text-gray-400">
+              <i class="fa-solid fa-magnifying-glass text-2xl text-gray-300 block mb-2"></i>
+              No bookings match your filters.
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== SECTION: HOTELS ===== -->
+        <div id="section-hotels" class="section fade-in">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h1 class="text-xl font-bold text-dark">Hotels</h1>
+              <p class="text-xs text-gray-400 mt-0.5">4 partner hotels · Kraków</p>
+            </div>
+            <button class="flex items-center gap-2 bg-brand hover:bg-brand-dark text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors">
+              <i class="fa-solid fa-plus"></i>Add hotel
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4">
+
+            <!-- Hotel 1 -->
+            <div class="bg-white rounded-2xl shadow-sm p-5 hover:shadow-md transition-shadow">
+              <div class="flex items-start justify-between mb-4">
+                <div class="w-12 h-12 bg-brand rounded-xl flex items-center justify-center text-white font-bold text-sm">HW</div>
+                <span class="text-xs bg-green-100 text-green-700 font-semibold px-2 py-0.5 rounded-full">Active</span>
+              </div>
+              <div class="font-bold text-dark text-sm mb-0.5">Hotel Wawel Kraków</div>
+              <div class="text-xs text-gray-400 mb-3">ul. Sławkowska 12 · ⭐⭐⭐⭐</div>
+              <div class="space-y-1.5 text-xs text-gray-500 mb-4">
+                <div><i class="fa-solid fa-user w-4 text-gray-300"></i>Jan Makowski</div>
+                <div><i class="fa-solid fa-phone w-4 text-gray-300"></i>+48 12 422 36 00</div>
+                <div><i class="fa-solid fa-calendar w-4 text-gray-300"></i>Partner since Jan 2023</div>
+              </div>
+              <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                <div class="text-center">
+                  <div class="text-lg font-bold text-dark">6</div>
+                  <div class="text-xs text-gray-400">bookings/mo</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-lg font-bold text-brand">1 460</div>
+                  <div class="text-xs text-gray-400">comm. pln</div>
+                </div>
+                <button onclick="showSection('settlement')" class="text-xs text-brand hover:underline font-medium">Settle →</button>
+              </div>
+            </div>
+
+            <!-- Hotel 2 -->
+            <div class="bg-white rounded-2xl shadow-sm p-5 hover:shadow-md transition-shadow">
+              <div class="flex items-start justify-between mb-4">
+                <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white font-bold text-sm">HS</div>
+                <span class="text-xs bg-green-100 text-green-700 font-semibold px-2 py-0.5 rounded-full">Active</span>
+              </div>
+              <div class="font-bold text-dark text-sm mb-0.5">Hotel Stary</div>
+              <div class="text-xs text-gray-400 mb-3">ul. Szczepańska 5 · ⭐⭐⭐⭐⭐</div>
+              <div class="space-y-1.5 text-xs text-gray-500 mb-4">
+                <div><i class="fa-solid fa-user w-4 text-gray-300"></i>Maria Wiśniewska</div>
+                <div><i class="fa-solid fa-phone w-4 text-gray-300"></i>+48 12 384 08 08</div>
+                <div><i class="fa-solid fa-calendar w-4 text-gray-300"></i>Partner since Feb 2022</div>
+              </div>
+              <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                <div class="text-center">
+                  <div class="text-lg font-bold text-dark">3</div>
+                  <div class="text-xs text-gray-400">bookings/mo</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-lg font-bold text-brand">475</div>
+                  <div class="text-xs text-gray-400">comm. pln</div>
+                </div>
+                <button onclick="showSection('settlement')" class="text-xs text-brand hover:underline font-medium">Settle →</button>
+              </div>
+            </div>
+
+            <!-- Hotel 3 -->
+            <div class="bg-white rounded-2xl shadow-sm p-5 hover:shadow-md transition-shadow">
+              <div class="flex items-start justify-between mb-4">
+                <div class="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center text-white font-bold text-sm">HC</div>
+                <span class="text-xs bg-green-100 text-green-700 font-semibold px-2 py-0.5 rounded-full">Active</span>
+              </div>
+              <div class="font-bold text-dark text-sm mb-0.5">Hotel Copernicus</div>
+              <div class="text-xs text-gray-400 mb-3">ul. Kanonicza 16 · ⭐⭐⭐⭐⭐</div>
+              <div class="space-y-1.5 text-xs text-gray-500 mb-4">
+                <div><i class="fa-solid fa-user w-4 text-gray-300"></i>Robert Kaczmarek</div>
+                <div><i class="fa-solid fa-phone w-4 text-gray-300"></i>+48 12 424 34 00</div>
+                <div><i class="fa-solid fa-calendar w-4 text-gray-300"></i>Partner since May 2024</div>
+              </div>
+              <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                <div class="text-center">
+                  <div class="text-lg font-bold text-dark">2</div>
+                  <div class="text-xs text-gray-400">bookings/mo</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-lg font-bold text-brand">280</div>
+                  <div class="text-xs text-gray-400">comm. pln</div>
+                </div>
+                <button onclick="showSection('settlement')" class="text-xs text-brand hover:underline font-medium">Settle →</button>
+              </div>
+            </div>
+
+            <!-- Hotel 4 -->
+            <div class="bg-white rounded-2xl shadow-sm p-5 hover:shadow-md transition-shadow">
+              <div class="flex items-start justify-between mb-4">
+                <div class="w-12 h-12 bg-rose-400 rounded-xl flex items-center justify-center text-white font-bold text-sm">HP</div>
+                <span class="text-xs bg-yellow-100 text-yellow-700 font-semibold px-2 py-0.5 rounded-full">Inactive</span>
+              </div>
+              <div class="font-bold text-dark text-sm mb-0.5">Hotel Pod Różą</div>
+              <div class="text-xs text-gray-400 mb-3">ul. Floriańska 14 · ⭐⭐⭐⭐</div>
+              <div class="space-y-1.5 text-xs text-gray-500 mb-4">
+                <div><i class="fa-solid fa-user w-4 text-gray-300"></i>Anna Zielińska</div>
+                <div><i class="fa-solid fa-phone w-4 text-gray-300"></i>+48 12 424 33 00</div>
+                <div><i class="fa-solid fa-calendar w-4 text-gray-300"></i>Partner since Mar 2021</div>
+              </div>
+              <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                <div class="text-center">
+                  <div class="text-lg font-bold text-gray-400">0</div>
+                  <div class="text-xs text-gray-400">bookings/mo</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-lg font-bold text-gray-400">—</div>
+                  <div class="text-xs text-gray-400">comm. pln</div>
+                </div>
+                <button class="text-xs text-gray-400 hover:text-brand font-medium transition-colors">Contact</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ===== SECTION: COMMISSION SETTLEMENT ===== -->
+        <div id="section-settlement" class="section fade-in">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h1 class="text-xl font-bold text-dark">Commission Settlement</h1>
+              <p class="text-xs text-gray-400 mt-0.5">Calculate and settle hotel commissions</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left: calculator -->
+            <div class="lg:col-span-2">
+              <div class="bg-white rounded-2xl shadow-sm p-6 mb-4">
+                <div class="text-sm font-semibold text-dark mb-4">Select hotel & period</div>
+                <div class="grid grid-cols-2 gap-4 mb-5">
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-1.5">Hotel</label>
+                    <select id="settle-hotel" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-dark">
+                      <option value="">— select hotel —</option>
+                      <option value="wawel" selected>Hotel Wawel Kraków</option>
+                      <option value="stary">Hotel Stary</option>
+                      <option value="copernicus">Hotel Copernicus</option>
+                      <option value="rozsa">Hotel Pod Różą</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-1.5">Month</label>
+                    <select id="settle-month" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-dark">
+                      <option value="2026-04" selected>April 2026</option>
+                      <option value="2026-03">March 2026</option>
+                      <option value="2026-02">February 2026</option>
+                      <option value="2026-01">January 2026</option>
+                    </select>
+                  </div>
+                </div>
+                <button onclick="calculateSettlement()" class="w-full bg-brand hover:bg-brand-dark text-white font-semibold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
+                  <i class="fa-solid fa-calculator"></i>Calculate commission
+                </button>
+              </div>
+
+              <!-- Result table -->
+              <div id="settlement-result" class="bg-white rounded-2xl shadow-sm overflow-hidden">
+                <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                  <div>
+                    <div class="font-semibold text-dark text-sm">Hotel Wawel Kraków · April 2026</div>
+                    <div class="text-xs text-gray-400 mt-0.5">6 bookings · auto-calculated from commission table</div>
+                  </div>
+                  <div class="flex gap-2">
+                    <button class="flex items-center gap-1.5 text-xs border border-gray-200 text-gray-600 hover:border-brand hover:text-brand px-3 py-2 rounded-xl transition-colors">
+                      <i class="fa-solid fa-file-pdf"></i>PDF
+                    </button>
+                    <button class="flex items-center gap-1.5 text-xs border border-gray-200 text-gray-600 hover:border-brand hover:text-brand px-3 py-2 rounded-xl transition-colors">
+                      <i class="fa-solid fa-envelope"></i>Email
+                    </button>
+                    <button onclick="markSettled()" class="flex items-center gap-1.5 text-xs bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-xl transition-colors font-semibold">
+                      <i class="fa-solid fa-check"></i>Mark as settled
+                    </button>
+                  </div>
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-xs">
+                    <thead>
+                      <tr class="border-b border-gray-100 bg-gray-50/60">
+                        <th class="text-left px-5 py-3 text-gray-400 font-semibold">Booking #</th>
+                        <th class="text-left px-4 py-3 text-gray-400 font-semibold">Tour / Package</th>
+                        <th class="text-left px-4 py-3 text-gray-400 font-semibold">Guest</th>
+                        <th class="text-left px-4 py-3 text-gray-400 font-semibold">Date</th>
+                        <th class="text-center px-4 py-3 text-gray-400 font-semibold">Pax</th>
+                        <th class="text-right px-4 py-3 text-gray-400 font-semibold">Rate/pax</th>
+                        <th class="text-right px-5 py-3 text-gray-400 font-semibold">Commission</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                      <tr class="hover:bg-gray-50">
+                        <td class="px-5 py-3 font-mono text-gray-400">#0847</td>
+                        <td class="px-4 py-3 font-medium text-dark">Zakopane · Standard Package</td>
+                        <td class="px-4 py-3 text-gray-600">Jan Kowalski</td>
+                        <td class="px-4 py-3 text-gray-500">Apr 8</td>
+                        <td class="px-4 py-3 text-center text-dark">2</td>
+                        <td class="px-4 py-3 text-right text-gray-600">100 pln</td>
+                        <td class="px-5 py-3 text-right font-bold text-dark">200 pln</td>
+                      </tr>
+                      <tr class="hover:bg-gray-50">
+                        <td class="px-5 py-3 font-mono text-gray-400">#0851</td>
+                        <td class="px-4 py-3 font-medium text-dark">Auschwitz · With guide</td>
+                        <td class="px-4 py-3 text-gray-600">Anna Nowak</td>
+                        <td class="px-4 py-3 text-gray-500">Apr 10</td>
+                        <td class="px-4 py-3 text-center text-dark">4</td>
+                        <td class="px-4 py-3 text-right text-gray-600">75 pln</td>
+                        <td class="px-5 py-3 text-right font-bold text-dark">300 pln</td>
+                      </tr>
+                      <tr class="hover:bg-gray-50">
+                        <td class="px-5 py-3 font-mono text-gray-400">#0854</td>
+                        <td class="px-4 py-3 font-medium text-dark">Shooting Range · Commando</td>
+                        <td class="px-4 py-3 text-gray-600">Tomasz Wiśniewski</td>
+                        <td class="px-4 py-3 text-gray-500">Apr 12</td>
+                        <td class="px-4 py-3 text-center text-dark">3</td>
+                        <td class="px-4 py-3 text-right text-gray-600">120 pln</td>
+                        <td class="px-5 py-3 text-right font-bold text-dark">360 pln</td>
+                      </tr>
+                      <tr class="hover:bg-gray-50">
+                        <td class="px-5 py-3 font-mono text-gray-400">#0861</td>
+                        <td class="px-4 py-3 font-medium text-dark">Wieliczka Salt Mine</td>
+                        <td class="px-4 py-3 text-gray-600">Maria García</td>
+                        <td class="px-4 py-3 text-gray-500">Apr 15</td>
+                        <td class="px-4 py-3 text-center text-dark">2</td>
+                        <td class="px-4 py-3 text-right text-gray-600">60 pln</td>
+                        <td class="px-5 py-3 text-right font-bold text-gray-400 line-through">120 pln <span class="text-xs font-normal not-italic text-red-400 no-underline" style="text-decoration:none">(cancelled)</span></td>
+                      </tr>
+                      <tr class="hover:bg-gray-50">
+                        <td class="px-5 py-3 font-mono text-gray-400">#0863</td>
+                        <td class="px-4 py-3 font-medium text-dark">Zakopane · Standard Package</td>
+                        <td class="px-4 py-3 text-gray-600">David Smith</td>
+                        <td class="px-4 py-3 text-gray-500">Apr 16</td>
+                        <td class="px-4 py-3 text-center text-dark">6</td>
+                        <td class="px-4 py-3 text-right text-gray-600">100 pln</td>
+                        <td class="px-5 py-3 text-right font-bold text-dark">600 pln</td>
+                      </tr>
+                      <tr class="hover:bg-gray-50">
+                        <td class="px-5 py-3 font-mono text-gray-400">#0869</td>
+                        <td class="px-4 py-3 font-medium text-dark">Transfer · Minivan</td>
+                        <td class="px-4 py-3 text-gray-600">Chen Wei</td>
+                        <td class="px-4 py-3 text-gray-500">Apr 19</td>
+                        <td class="px-4 py-3 text-center text-gray-400">1 veh</td>
+                        <td class="px-4 py-3 text-right text-gray-600">45 pln</td>
+                        <td class="px-5 py-3 text-right font-bold text-yellow-600">45 pln <span class="text-xs text-gray-400">(pending)</span></td>
+                      </tr>
+                    </tbody>
+                    <tfoot>
+                      <tr class="bg-brand-light border-t-2 border-brand/20">
+                        <td colspan="6" class="px-5 py-3.5 font-bold text-dark text-right text-sm">Total commission (confirmed):</td>
+                        <td class="px-5 py-3.5 text-right font-bold text-brand text-lg">1 460 pln</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: settlement history -->
+            <div>
+              <div class="bg-white rounded-2xl shadow-sm p-5">
+                <div class="font-semibold text-dark text-sm mb-4">Settlement history</div>
+                <div class="space-y-3">
+                  <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                    <div>
+                      <div class="text-xs font-semibold text-dark">Hotel Wawel · March 2026</div>
+                      <div class="text-xs text-gray-400 mt-0.5">8 bookings · settled Apr 3</div>
+                    </div>
+                    <div class="text-right">
+                      <div class="text-sm font-bold text-dark">2 340 pln</div>
+                      <span class="text-xs status-settled font-semibold px-2 py-0.5 rounded-full">Settled</span>
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                    <div>
+                      <div class="text-xs font-semibold text-dark">Hotel Stary · March 2026</div>
+                      <div class="text-xs text-gray-400 mt-0.5">5 bookings · settled Apr 3</div>
+                    </div>
+                    <div class="text-right">
+                      <div class="text-sm font-bold text-dark">890 pln</div>
+                      <span class="text-xs status-settled font-semibold px-2 py-0.5 rounded-full">Settled</span>
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                    <div>
+                      <div class="text-xs font-semibold text-dark">Hotel Wawel · Feb 2026</div>
+                      <div class="text-xs text-gray-400 mt-0.5">6 bookings · settled Mar 2</div>
+                    </div>
+                    <div class="text-right">
+                      <div class="text-sm font-bold text-dark">1 820 pln</div>
+                      <span class="text-xs status-settled font-semibold px-2 py-0.5 rounded-full">Settled</span>
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                    <div>
+                      <div class="text-xs font-semibold text-dark">Hotel Stary · Feb 2026</div>
+                      <div class="text-xs text-gray-400 mt-0.5">3 bookings · settled Mar 2</div>
+                    </div>
+                    <div class="text-right">
+                      <div class="text-sm font-bold text-dark">510 pln</div>
+                      <span class="text-xs status-settled font-semibold px-2 py-0.5 rounded-full">Settled</span>
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between py-3">
+                    <div>
+                      <div class="text-xs font-semibold text-dark">Hotel Copernicus · Feb 2026</div>
+                      <div class="text-xs text-gray-400 mt-0.5">1 booking</div>
+                    </div>
+                    <div class="text-right">
+                      <div class="text-sm font-bold text-dark">100 pln</div>
+                      <span class="text-xs status-pending font-semibold px-2 py-0.5 rounded-full">Pending</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== SECTION: TOURS & PRICING ===== -->
+        <div id="section-tours" class="section fade-in">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h1 class="text-xl font-bold text-dark">Tours & Pricing</h1>
+              <p class="text-xs text-gray-400 mt-0.5">Manage your tour catalogue and commission rates</p>
+            </div>
+            <button class="flex items-center gap-2 bg-brand hover:bg-brand-dark text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors">
+              <i class="fa-solid fa-plus"></i>Add tour
+            </button>
+          </div>
+
+          <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs">
+                <thead>
+                  <tr class="border-b border-gray-100 bg-gray-50/60">
+                    <th class="text-left px-5 py-3 text-gray-400 font-semibold">Tour name</th>
+                    <th class="text-left px-4 py-3 text-gray-400 font-semibold">Category</th>
+                    <th class="text-center px-4 py-3 text-gray-400 font-semibold">Packages</th>
+                    <th class="text-right px-4 py-3 text-gray-400 font-semibold">Base price</th>
+                    <th class="text-right px-4 py-3 text-gray-400 font-semibold">Commission range</th>
+                    <th class="text-center px-4 py-3 text-gray-400 font-semibold">Bookings/mo</th>
+                    <th class="text-center px-4 py-3 text-gray-400 font-semibold">Status</th>
+                    <th class="px-4 py-3"></th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50 text-xs">
+                  <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-5 py-3.5 font-semibold text-dark">Trip to Zakopane</td>
+                    <td class="px-4 py-3.5 text-gray-500">Day trip</td>
+                    <td class="px-4 py-3.5 text-center text-gray-600">3</td>
+                    <td class="px-4 py-3.5 text-right text-dark font-medium">150 zł/pax</td>
+                    <td class="px-4 py-3.5 text-right text-brand font-semibold">100–160 pln</td>
+                    <td class="px-4 py-3.5 text-center font-semibold text-dark">18</td>
+                    <td class="px-4 py-3.5 text-center"><span class="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">Active</span></td>
+                    <td class="px-4 py-3.5 text-right"><button class="text-gray-400 hover:text-brand transition-colors"><i class="fa-solid fa-pen-to-square"></i></button></td>
+                  </tr>
+                  <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-5 py-3.5 font-semibold text-dark">Auschwitz-Birkenau Tour</td>
+                    <td class="px-4 py-3.5 text-gray-500">Day trip</td>
+                    <td class="px-4 py-3.5 text-center text-gray-600">2</td>
+                    <td class="px-4 py-3.5 text-right text-dark font-medium">80 zł/pax</td>
+                    <td class="px-4 py-3.5 text-right text-brand font-semibold">50–75 pln</td>
+                    <td class="px-4 py-3.5 text-center font-semibold text-dark">12</td>
+                    <td class="px-4 py-3.5 text-center"><span class="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">Active</span></td>
+                    <td class="px-4 py-3.5 text-right"><button class="text-gray-400 hover:text-brand transition-colors"><i class="fa-solid fa-pen-to-square"></i></button></td>
+                  </tr>
+                  <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-5 py-3.5 font-semibold text-dark">Shooting Range – Combat Experience</td>
+                    <td class="px-4 py-3.5 text-gray-500">Attraction</td>
+                    <td class="px-4 py-3.5 text-center text-gray-600">4</td>
+                    <td class="px-4 py-3.5 text-right text-dark font-medium">120 zł/pax</td>
+                    <td class="px-4 py-3.5 text-right text-brand font-semibold">80–160 pln</td>
+                    <td class="px-4 py-3.5 text-center font-semibold text-dark">9</td>
+                    <td class="px-4 py-3.5 text-center"><span class="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">Active</span></td>
+                    <td class="px-4 py-3.5 text-right"><button class="text-gray-400 hover:text-brand transition-colors"><i class="fa-solid fa-pen-to-square"></i></button></td>
+                  </tr>
+                  <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-5 py-3.5 font-semibold text-dark">Wieliczka Salt Mine</td>
+                    <td class="px-4 py-3.5 text-gray-500">Day trip</td>
+                    <td class="px-4 py-3.5 text-center text-gray-600">2</td>
+                    <td class="px-4 py-3.5 text-right text-dark font-medium">90 zł/pax</td>
+                    <td class="px-4 py-3.5 text-right text-brand font-semibold">60–80 pln</td>
+                    <td class="px-4 py-3.5 text-center font-semibold text-dark">7</td>
+                    <td class="px-4 py-3.5 text-center"><span class="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">Active</span></td>
+                    <td class="px-4 py-3.5 text-right"><button class="text-gray-400 hover:text-brand transition-colors"><i class="fa-solid fa-pen-to-square"></i></button></td>
+                  </tr>
+                  <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-5 py-3.5 font-semibold text-dark">Night Tour of Kraków</td>
+                    <td class="px-4 py-3.5 text-gray-500">Attraction</td>
+                    <td class="px-4 py-3.5 text-center text-gray-600">1</td>
+                    <td class="px-4 py-3.5 text-right text-dark font-medium">70 zł/pax</td>
+                    <td class="px-4 py-3.5 text-right text-brand font-semibold">45 pln</td>
+                    <td class="px-4 py-3.5 text-center font-semibold text-dark">4</td>
+                    <td class="px-4 py-3.5 text-center"><span class="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">Active</span></td>
+                    <td class="px-4 py-3.5 text-right"><button class="text-gray-400 hover:text-brand transition-colors"><i class="fa-solid fa-pen-to-square"></i></button></td>
+                  </tr>
+                  <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-5 py-3.5 font-semibold text-dark">Bochnia Salt Mine</td>
+                    <td class="px-4 py-3.5 text-gray-500">Day trip</td>
+                    <td class="px-4 py-3.5 text-center text-gray-600">1</td>
+                    <td class="px-4 py-3.5 text-right text-dark font-medium">80 zł/pax</td>
+                    <td class="px-4 py-3.5 text-right text-brand font-semibold">50 pln</td>
+                    <td class="px-4 py-3.5 text-center font-semibold text-dark">2</td>
+                    <td class="px-4 py-3.5 text-center"><span class="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">Active</span></td>
+                    <td class="px-4 py-3.5 text-right"><button class="text-gray-400 hover:text-brand transition-colors"><i class="fa-solid fa-pen-to-square"></i></button></td>
+                  </tr>
+                  <tr class="hover:bg-gray-50 transition-colors opacity-60">
+                    <td class="px-5 py-3.5 font-semibold text-dark">Hot Air Balloon Flight</td>
+                    <td class="px-4 py-3.5 text-gray-500">Attraction</td>
+                    <td class="px-4 py-3.5 text-center text-gray-600">2</td>
+                    <td class="px-4 py-3.5 text-right text-dark font-medium">450 zł/pax</td>
+                    <td class="px-4 py-3.5 text-right text-gray-400 font-semibold">—</td>
+                    <td class="px-4 py-3.5 text-center font-semibold text-gray-400">0</td>
+                    <td class="px-4 py-3.5 text-center"><span class="bg-gray-100 text-gray-500 text-xs font-semibold px-2 py-0.5 rounded-full">Draft</span></td>
+                    <td class="px-4 py-3.5 text-right"><button class="text-gray-400 hover:text-brand transition-colors"><i class="fa-solid fa-pen-to-square"></i></button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== SECTION: STAFF ===== -->
+        <div id="section-staff" class="section fade-in">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h1 class="text-xl font-bold text-dark">Staff</h1>
+              <p class="text-xs text-gray-400 mt-0.5">4 team members</p>
+            </div>
+            <button class="flex items-center gap-2 bg-brand hover:bg-brand-dark text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors">
+              <i class="fa-solid fa-user-plus"></i>Add member
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+            <div class="bg-white rounded-2xl shadow-sm p-5">
+              <div class="flex items-start justify-between mb-4">
+                <div class="w-12 h-12 bg-brand rounded-xl flex items-center justify-center text-white font-bold">MK</div>
+                <span class="text-xs bg-violet-100 text-violet-700 font-bold px-2 py-0.5 rounded-full">Owner</span>
+              </div>
+              <div class="font-bold text-dark text-sm mb-0.5">Maciej Kowalski</div>
+              <div class="text-xs text-gray-400 mb-3">maciej@thousandmiles.pl</div>
+              <div class="text-xs text-gray-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 bg-green-400 rounded-full inline-block"></span>Active now
+              </div>
+              <div class="mt-4 pt-4 border-t border-gray-100 flex gap-2">
+                <button class="flex-1 text-xs text-gray-500 hover:text-brand border border-gray-200 rounded-lg py-1.5 transition-colors">Edit</button>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm p-5">
+              <div class="flex items-start justify-between mb-4">
+                <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white font-bold">AW</div>
+                <span class="text-xs bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded-full">Manager</span>
+              </div>
+              <div class="font-bold text-dark text-sm mb-0.5">Anna Wiśniewska</div>
+              <div class="text-xs text-gray-400 mb-3">anna@thousandmiles.pl</div>
+              <div class="text-xs text-gray-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 bg-green-400 rounded-full inline-block"></span>Active now
+              </div>
+              <div class="mt-4 pt-4 border-t border-gray-100 flex gap-2">
+                <button class="flex-1 text-xs text-gray-500 hover:text-brand border border-gray-200 rounded-lg py-1.5 transition-colors">Edit</button>
+                <button class="flex-1 text-xs text-red-400 hover:text-red-600 border border-gray-200 rounded-lg py-1.5 transition-colors">Remove</button>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm p-5">
+              <div class="flex items-start justify-between mb-4">
+                <div class="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center text-white font-bold">PJ</div>
+                <span class="text-xs bg-gray-100 text-gray-600 font-bold px-2 py-0.5 rounded-full">Employee</span>
+              </div>
+              <div class="font-bold text-dark text-sm mb-0.5">Piotr Jabłoński</div>
+              <div class="text-xs text-gray-400 mb-3">piotr@thousandmiles.pl</div>
+              <div class="text-xs text-gray-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 bg-gray-300 rounded-full inline-block"></span>Last seen 2h ago
+              </div>
+              <div class="mt-4 pt-4 border-t border-gray-100 flex gap-2">
+                <button class="flex-1 text-xs text-gray-500 hover:text-brand border border-gray-200 rounded-lg py-1.5 transition-colors">Edit</button>
+                <button class="flex-1 text-xs text-red-400 hover:text-red-600 border border-gray-200 rounded-lg py-1.5 transition-colors">Remove</button>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm p-5">
+              <div class="flex items-start justify-between mb-4">
+                <div class="w-12 h-12 bg-pink-400 rounded-xl flex items-center justify-center text-white font-bold">KN</div>
+                <span class="text-xs bg-gray-100 text-gray-600 font-bold px-2 py-0.5 rounded-full">Employee</span>
+              </div>
+              <div class="font-bold text-dark text-sm mb-0.5">Kasia Nowak</div>
+              <div class="text-xs text-gray-400 mb-3">kasia@thousandmiles.pl</div>
+              <div class="text-xs text-gray-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 bg-gray-300 rounded-full inline-block"></span>Last seen Apr 6
+              </div>
+              <div class="mt-4 pt-4 border-t border-gray-100 flex gap-2">
+                <button class="flex-1 text-xs text-gray-500 hover:text-brand border border-gray-200 rounded-lg py-1.5 transition-colors">Edit</button>
+                <button class="flex-1 text-xs text-red-400 hover:text-red-600 border border-gray-200 rounded-lg py-1.5 transition-colors">Remove</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MODAL: ADD MANUAL BOOKING ===================== -->
+<div id="modal-manual" class="fixed inset-0 z-50 hidden modal-bg bg-black/50 items-center justify-center p-4" onclick="if(event.target===this)closeManualBooking()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg fade-in overflow-hidden">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <div>
+        <div class="font-bold text-dark text-base">Add manual booking</div>
+        <div class="text-xs text-gray-400 mt-0.5">Create a booking not coming from Bokun or website</div>
+      </div>
+      <button onclick="closeManualBooking()" class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-gray-500 transition-colors">
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+    </div>
+    <div class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+
+      <!-- Tour + package -->
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Tour</label>
+          <select class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+            <option>Trip to Zakopane</option>
+            <option>Auschwitz-Birkenau</option>
+            <option>Shooting Range</option>
+            <option>Wieliczka Salt Mine</option>
+            <option>Night Tour of Kraków</option>
+            <option>Bochnia Salt Mine</option>
+            <option>Transfer – KRK Airport</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Package</label>
+          <select class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+            <option>Standard Package</option>
+            <option>Premium Package</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Date + time -->
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Date</label>
+          <input type="date" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Departure time</label>
+          <select class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+            <option>07:00</option>
+            <option>08:00</option>
+            <option>09:00</option>
+            <option>09:30</option>
+            <option>10:00</option>
+            <option>14:00</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="border-t border-gray-100 pt-4">
+        <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Guest information</div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">First name</label>
+            <input type="text" placeholder="John" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Last name</label>
+            <input type="text" placeholder="Smith" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+        </div>
+        <div class="mt-3">
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Email</label>
+          <input type="email" placeholder="guest@email.com" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        </div>
+        <div class="mt-3">
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Phone</label>
+          <input type="tel" placeholder="+48 600 000 000" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        </div>
+      </div>
+
+      <div class="border-t border-gray-100 pt-4">
+        <div class="grid grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Pax</label>
+            <input type="number" min="1" value="2" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Hotel (optional)</label>
+            <select class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+              <option value="">— direct —</option>
+              <option>Hotel Wawel</option>
+              <option>Hotel Stary</option>
+              <option>Hotel Copernicus</option>
+              <option>Hotel Pod Różą</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Payment</label>
+            <select class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+              <option>Paid</option>
+              <option>Pending</option>
+              <option>Cash on site</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="flex gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50/60">
+      <button onclick="closeManualBooking()" class="flex-1 text-sm text-gray-600 border border-gray-200 rounded-xl py-2.5 hover:bg-gray-100 transition-colors">Cancel</button>
+      <button onclick="saveManualBooking()" class="flex-1 text-sm bg-brand hover:bg-brand-dark text-white font-semibold rounded-xl py-2.5 transition-colors">
+        <i class="fa-solid fa-check mr-2"></i>Save booking
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MODAL: SETTLED CONFIRMATION ===================== -->
+<div id="modal-settled" class="fixed inset-0 z-50 hidden modal-bg bg-black/50 items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 fade-in text-center">
+    <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+      <i class="fa-solid fa-check text-white text-2xl"></i>
+    </div>
+    <h3 class="text-lg font-bold text-dark mb-1">Settlement recorded!</h3>
+    <p class="text-sm text-gray-500 mb-5">Hotel Wawel · April 2026 · <strong class="text-dark">1 460 pln</strong> has been marked as settled.</p>
+    <button onclick="document.getElementById('modal-settled').classList.add('hidden');document.getElementById('modal-settled').classList.remove('flex')" class="w-full bg-brand hover:bg-brand-dark text-white font-semibold py-3 rounded-xl transition-colors text-sm">Close</button>
+  </div>
+</div>
+
+<script>
+  // ===== Navigation =====
+  function goToAdmin() {
+    document.getElementById('screen-login').classList.remove('active');
+    const admin = document.getElementById('screen-admin');
+    admin.style.display = 'flex';
+    admin.style.setProperty('display','flex','important');
+    renderDashboardChart();
+    renderBookingsTable();
+  }
+
+  function goToLogin() {
+    document.getElementById('screen-admin').style.setProperty('display','none','important');
+    document.getElementById('screen-login').classList.add('active');
+  }
+
+  function showSection(name) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('section-' + name).classList.add('active');
+    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+    const btn = [...document.querySelectorAll('.sidebar-link')].find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes("'" + name + "'"));
+    if (btn) btn.classList.add('active');
+  }
+
+  // ===== Dashboard chart =====
+  let dashChart = null;
+  function renderDashboardChart() {
+    const ctx = document.getElementById('dashboard-chart');
+    if (!ctx) return;
+    if (dashChart) dashChart.destroy();
+    const labels = Array.from({length: 7}, (_,i) => 'Apr ' + (i+1));
+    const bookings = [3,5,4,6,2,5,4];
+    const revenue  = [180,320,250,480,140,390,218]; // divide by 10 for display parity
+    dashChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Bookings', data: bookings, backgroundColor: 'rgba(232,117,26,0.85)', borderRadius: 6, order: 1 },
+          { label: 'Revenue (×10 zł)', data: revenue.map(v => v/100), backgroundColor: 'rgba(147,197,253,0.5)', borderRadius: 6, order: 2 }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y } } },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#9ca3af' } },
+          y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 11 }, color: '#9ca3af' } }
+        }
+      }
+    });
+  }
+
+  // ===== Bookings data =====
+  const allBookings = [
+    { id:'0875', tour:'Bochnia Salt Mine',       guest:'Lisa Brown',          phone:'+1 555 234 567',  hotel:'Copernicus', date:'Apr 15', pax:2,       total:160, comm:100,  source:'Manual',  status:'Paid' },
+    { id:'0871', tour:'Trip to Zakopane',         guest:'Piotr Nowak',         phone:'+48 601 234 567', hotel:'—',          date:'Apr 14', pax:4,       total:600, comm:400,  source:'Manual',  status:'Paid' },
+    { id:'0869', tour:'Transfer – KRK Airport',   guest:'Chen Wei',            phone:'+86 138 001 380', hotel:'Wawel',      date:'Apr 19', pax:'1 veh', total:139, comm:45,   source:'Bokun',   status:'Pending' },
+    { id:'0865', tour:'Auschwitz-Birkenau',        guest:'Sophie Mueller',      phone:'+49 151 234 567', hotel:'Stary',      date:'Apr 11', pax:2,       total:260, comm:150,  source:'Website', status:'Paid' },
+    { id:'0863', tour:'Trip to Zakopane',         guest:'David Smith',          phone:'+44 7911 123456', hotel:'Wawel',      date:'Apr 16', pax:6,       total:900, comm:600,  source:'Bokun',   status:'Paid' },
+    { id:'0861', tour:'Wieliczka Salt Mine',       guest:'Maria García',        phone:'+34 612 345 678', hotel:'Wawel',      date:'Apr 15', pax:2,       total:180, comm:0,    source:'Bokun',   status:'Cancelled' },
+    { id:'0860', tour:'Wieliczka Salt Mine',       guest:'Carlos Mendez',       phone:'+52 55 1234 5678',hotel:'Copernicus', date:'Apr 9',  pax:3,       total:270, comm:180,  source:'Manual',  status:'Paid' },
+    { id:'0855', tour:'Trip to Zakopane',         guest:'Emma Johnson',         phone:'+1 212 555 0100', hotel:'Stary',      date:'Apr 8',  pax:5,       total:750, comm:500,  source:'Website', status:'Paid' },
+    { id:'0854', tour:'Shooting Range – Commando',guest:'Tomasz Wiśniewski',   phone:'+44 753 210 987', hotel:'Wawel',      date:'Apr 12', pax:3,       total:540, comm:360,  source:'Bokun',   status:'Paid' },
+    { id:'0851', tour:'Auschwitz-Birkenau',        guest:'Anna Nowak',          phone:'+48 501 987 654', hotel:'Wawel',      date:'Apr 10', pax:4,       total:520, comm:300,  source:'Bokun',   status:'Pending' },
+    { id:'0847', tour:'Trip to Zakopane',         guest:'Jan Kowalski',         phone:'+48 600 123 456', hotel:'Wawel',      date:'Apr 8',  pax:2,       total:300, comm:200,  source:'Bokun',   status:'Paid' },
+  ];
+
+  function renderBookingsTable(data) {
+    const rows = data || allBookings;
+    const tbody = document.getElementById('all-bookings-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    rows.forEach(b => {
+      const sourceClass = b.source === 'Bokun' ? 'source-bokun' : b.source === 'Website' ? 'source-website' : 'source-manual';
+      const statusClass = b.status === 'Paid' ? 'status-paid' : b.status === 'Pending' ? 'status-pending' : 'status-cancelled';
+      tbody.insertAdjacentHTML('beforeend', `
+        <tr class="hover:bg-gray-50 transition-colors text-xs" data-id="${b.id}" data-hotel="${b.hotel}" data-source="${b.source}" data-status="${b.status}">
+          <td class="px-5 py-3 font-mono text-gray-400">#${b.id}</td>
+          <td class="px-4 py-3 font-medium text-dark max-w-xs truncate">${b.tour}</td>
+          <td class="px-4 py-3 text-gray-600">${b.guest}</td>
+          <td class="px-4 py-3 text-gray-500">${b.hotel}</td>
+          <td class="px-4 py-3 text-gray-500 whitespace-nowrap">${b.date}</td>
+          <td class="px-4 py-3 text-center text-dark">${b.pax}</td>
+          <td class="px-4 py-3 text-right font-semibold text-dark whitespace-nowrap">${b.total} zł</td>
+          <td class="px-4 py-3 text-right font-semibold text-brand whitespace-nowrap">${b.comm > 0 ? b.comm + ' pln' : '—'}</td>
+          <td class="px-4 py-3 text-center"><span class="${sourceClass} text-xs font-semibold px-2 py-0.5 rounded-full">${b.source}</span></td>
+          <td class="px-4 py-3 text-center"><span class="${statusClass} text-xs font-semibold px-2 py-0.5 rounded-full">${b.status}</span></td>
+          <td class="px-4 py-3 text-right">
+            <button class="text-gray-300 hover:text-brand transition-colors ml-1"><i class="fa-solid fa-pen text-xs"></i></button>
+            <button class="text-gray-300 hover:text-brand transition-colors ml-1"><i class="fa-solid fa-file-pdf text-xs"></i></button>
+          </td>
+        </tr>`);
+    });
+    const label = document.getElementById('booking-count-label');
+    if (label) label.textContent = rows.length + ' result' + (rows.length !== 1 ? 's' : '');
+    document.getElementById('bookings-no-results').classList.toggle('hidden', rows.length > 0);
+  }
+
+  function filterAllBookings() {
+    const q      = (document.getElementById('booking-search')?.value || '').toLowerCase();
+    const hotel  = document.getElementById('booking-filter-hotel')?.value || '';
+    const source = document.getElementById('booking-filter-source')?.value || '';
+    const status = document.getElementById('booking-filter-status')?.value || '';
+    const filtered = allBookings.filter(b => {
+      const matchQ      = !q      || b.tour.toLowerCase().includes(q) || b.guest.toLowerCase().includes(q) || b.id.includes(q);
+      const matchHotel  = !hotel  || (hotel === 'none' ? b.hotel === '—' : b.hotel.toLowerCase().includes(hotel.toLowerCase().split(' ')[1] || hotel.toLowerCase()));
+      const matchSource = !source || b.source === source;
+      const matchStatus = !status || b.status === status;
+      return matchQ && matchHotel && matchSource && matchStatus;
+    });
+    renderBookingsTable(filtered);
+  }
+
+  // ===== Manual booking modal =====
+  function openManualBooking() {
+    const m = document.getElementById('modal-manual');
+    m.classList.remove('hidden'); m.classList.add('flex');
+  }
+  function closeManualBooking() {
+    const m = document.getElementById('modal-manual');
+    m.classList.add('hidden'); m.classList.remove('flex');
+  }
+  function saveManualBooking() {
+    closeManualBooking();
+    // Show quick success toast
+    const toast = document.createElement('div');
+    toast.className = 'fixed bottom-6 right-6 z-50 bg-green-500 text-white text-sm font-semibold px-5 py-3.5 rounded-xl shadow-xl flex items-center gap-2 fade-in';
+    toast.innerHTML = '<i class="fa-solid fa-check"></i> Booking saved successfully!';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+  }
+
+  // ===== Settlement =====
+  function calculateSettlement() {
+    document.getElementById('settlement-result').classList.remove('hidden');
+    document.getElementById('settlement-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function markSettled() {
+    const m = document.getElementById('modal-settled');
+    m.classList.remove('hidden'); m.classList.add('flex');
+  }
+</script>
+</body>
+</html>
