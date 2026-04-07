@@ -51,44 +51,6 @@ tailwind.config = {
 </head>
 <body class="bg-gray-100 min-h-screen">
 
-<!-- ===================== SCREEN: LOGIN ===================== -->
-<div id="screen-login" class="screen active min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
-  <div class="w-full max-w-sm fade-in">
-    <div class="text-center mb-8">
-      <img src="assets/logo.png" alt="Thousand Miles" class="h-16 object-contain mx-auto mb-3 brightness-0 invert">
-      <span class="inline-block bg-brand/20 text-brand text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">Administration Panel</span>
-    </div>
-    <div class="bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-sm">
-      <div class="space-y-4">
-        <div>
-          <label class="block text-xs font-medium text-slate-400 mb-1.5">Username</label>
-          <div class="relative">
-            <i class="fa-solid fa-user absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
-            <input type="text" value="admin" class="w-full pl-9 pr-4 py-3 bg-white/8 border border-white/15 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand" style="background:rgba(255,255,255,0.07)">
-          </div>
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-slate-400 mb-1.5">Password</label>
-          <div class="relative">
-            <i class="fa-solid fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
-            <input type="password" value="••••••••" class="w-full pl-9 pr-4 py-3 border border-white/15 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand" style="background:rgba(255,255,255,0.07)">
-          </div>
-        </div>
-        <div class="flex items-center justify-between text-xs">
-          <label class="flex items-center gap-2 text-slate-400 cursor-pointer">
-            <input type="checkbox" checked class="accent-brand"> Remember me
-          </label>
-          <span class="text-brand cursor-pointer hover:underline">Forgot password?</span>
-        </div>
-        <button onclick="goToAdmin()" class="w-full bg-brand hover:bg-brand-dark text-white font-semibold py-3.5 rounded-xl transition-colors text-sm mt-2">
-          Log in to Admin Panel
-        </button>
-      </div>
-    </div>
-    <p class="text-center text-xs text-slate-600 mt-6">← <a href="index.html" class="hover:text-slate-400 transition-colors">Back to Hotel Panel</a></p>
-  </div>
-</div>
-
 <!-- ===================== SCREEN: ADMIN DASHBOARD ===================== -->
 <div id="screen-admin" class="screen active min-h-screen">
   <div class="flex h-screen overflow-hidden">
