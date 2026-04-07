@@ -90,7 +90,7 @@ tailwind.config = {
 </div>
 
 <!-- ===================== SCREEN: ADMIN DASHBOARD ===================== -->
-<div id="screen-admin" class="screen min-h-screen" style="display:none!important">
+<div id="screen-admin" class="screen active min-h-screen">
   <div class="flex h-screen overflow-hidden">
 
     <!-- SIDEBAR -->
@@ -1097,19 +1097,14 @@ tailwind.config = {
 </div>
 
 <script>
-  // ===== Navigation =====
-  function goToAdmin() {
-    document.getElementById('screen-login').classList.remove('active');
-    const admin = document.getElementById('screen-admin');
-    admin.style.display = 'flex';
-    admin.style.setProperty('display','flex','important');
+  // ===== Init =====
+  document.addEventListener('DOMContentLoaded', function() {
     renderDashboardChart();
     renderBookingsTable();
-  }
+  });
 
   function goToLogin() {
-    document.getElementById('screen-admin').style.setProperty('display','none','important');
-    document.getElementById('screen-login').classList.add('active');
+    window.location.href = 'index.html';
   }
 
   function showSection(name) {
