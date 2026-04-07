@@ -139,7 +139,7 @@ tailwind.config = {
         <!-- Notifications -->
         <button onclick="goToUpdates()" class="relative p-2.5 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">
           <i class="fa-solid fa-bell text-gray-500 text-base"></i>
-          <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">2</span>
+          <span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">2</span>
         </button>
         <!-- Help button -->
         <button onclick="openHelpPanel()" class="p-2.5 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors" title="Help & Support">
@@ -200,7 +200,7 @@ tailwind.config = {
         <i class="fa-solid fa-bus-simple mr-1.5"></i>Today's departures
       </button>
       <button class="tab-btn whitespace-nowrap px-4 py-2.5 text-xs font-medium text-gray-600 hover:text-brand transition-colors" onclick="setTab(this, 'tab-updates')">
-        <i class="fa-solid fa-bell mr-1.5"></i>Updates <span class="ml-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">2</span>
+        <i class="fa-solid fa-bell mr-1.5"></i>Updates <span id="notif-badge-tab" class="ml-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">2</span>
       </button>
       <button class="tab-btn whitespace-nowrap px-4 py-2.5 text-xs font-medium text-gray-600 hover:text-brand transition-colors" onclick="setTab(this, 'tab-faq')">
         <i class="fa-solid fa-percent mr-1.5"></i>Commissions
@@ -2872,6 +2872,11 @@ tailwind.config = {
     let targetBtn = null;
     allBtns.forEach(b => { if (b.getAttribute('onclick') && b.getAttribute('onclick').includes('tab-updates')) targetBtn = b; });
     if (targetBtn) setTab(targetBtn, 'tab-updates');
+    // Clear notification badges
+    const badge    = document.getElementById('notif-badge');
+    const badgeTab = document.getElementById('notif-badge-tab');
+    if (badge)    badge.classList.add('hidden');
+    if (badgeTab) badgeTab.classList.add('hidden');
   }
 
   // Transfer direction toggle
