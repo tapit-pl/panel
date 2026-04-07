@@ -1488,8 +1488,8 @@ tailwind.config = {
               <div class="text-xs opacity-70">15 spots left</div>
             </button>
           </div>
-          <!-- Hold button + countdown -->
-          <div id="hold-area-1" class="mt-3 hidden">
+          <!-- Hold button + countdown — TODO: enable after Bokun API integration -->
+          <div id="hold-area-1" class="mt-3 hidden" data-bokun-feature="hold">
             <button id="hold-btn-1" onclick="startHold('1')" class="flex items-center gap-2 bg-brand-light text-brand border border-brand/30 text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-brand hover:text-white transition-colors">
               <i class="fa-solid fa-lock"></i>Hold for 10 min
             </button>
@@ -2091,10 +2091,10 @@ tailwind.config = {
         </div>
       </div>
 
-      <!-- 5. Special requests -->
+      <!-- 5. Extra info -->
       <div>
-        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Special requests</label>
-        <textarea placeholder="e.g. allergies, special requirements..." rows="2" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand resize-none"></textarea>
+        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Extra info <span class="font-normal text-gray-400">(optional)</span></label>
+        <textarea rows="2" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand resize-none"></textarea>
       </div>
 
       <!-- 6. Pick-up point -->
@@ -2209,54 +2209,116 @@ tailwind.config = {
 
 <!-- ===================== VOUCHER PREVIEW ===================== -->
 <div id="modal-voucher" class="fixed inset-0 z-50 hidden modal-bg bg-black/50 items-center justify-center p-4">
-  <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl fade-in overflow-hidden">
-    <!-- Voucher content -->
-    <div class="p-6 border-b-4 border-brand">
-      <div class="flex items-center justify-between mb-6">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-brand rounded-lg flex items-center justify-center">
-            <i class="fa-solid fa-road text-white"></i>
+  <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl fade-in overflow-hidden">
+
+    <!-- Voucher document -->
+    <div id="voucher-printable" class="p-8">
+
+      <!-- Header: company left, hotel right -->
+      <div class="flex items-start justify-between mb-6 pb-6 border-b-2 border-brand">
+        <div class="flex items-start gap-3">
+          <img src="assets/logo.png" alt="Thousand Miles" class="h-10 object-contain">
+          <div class="text-xs text-gray-500 leading-relaxed mt-0.5">
+            <div class="font-bold text-dark text-sm">Thousand Miles Kraków sp. z o.o.</div>
+            <div>Szczepański Square 8/101</div>
+            <div>31-011 Kraków</div>
+            <div>tel. +48 607 896 523</div>
+            <div>www.thousandmiles.pl</div>
           </div>
-          <div>
-            <div class="font-bold text-dark">Thousand <span class="text-brand">miles</span></div>
-            <div class="text-xs text-gray-400">www.thousandmiles.pl</div>
-          </div>
         </div>
-        <div class="text-right">
-          <div class="text-xs text-gray-400">Booking No.</div>
-          <div class="font-bold text-dark">#TM-2025-0847</div>
-        </div>
-      </div>
-      <div class="bg-gray-50 rounded-xl p-4 mb-4">
-        <h2 class="text-lg font-bold text-dark mb-3">Trip to Zakopane</h2>
-        <div class="grid grid-cols-2 gap-3 text-sm">
-          <div><span class="text-gray-500">Date:</span> <span class="font-semibold">April 8, 2025</span></div>
-          <div><span class="text-gray-500">Departure:</span> <span class="font-semibold">07:00</span></div>
-          <div><span class="text-gray-500">Package:</span> <span class="font-semibold">Standard</span></div>
-          <div><span class="text-gray-500">Guests:</span> <span class="font-semibold">2 persons</span></div>
-          <div><span class="text-gray-500">Guest:</span> <span class="font-semibold">Jan Kowalski</span></div>
-          <div><span class="text-gray-500">Hotel:</span> <span class="font-semibold">Hotel Wawel</span></div>
+        <div class="text-right text-xs text-gray-500 leading-relaxed">
+          <div class="font-bold text-dark text-sm">Hotel Wawel Kraków</div>
+          <div>ul. Sławkowska 12</div>
+          <div>31-014 Kraków</div>
+          <div>tel. +48 12 422 36 00</div>
+          <div class="mt-2 text-gray-400">Kraków, April 8, 2026</div>
         </div>
       </div>
-      <!-- Important info - big and bold -->
-      <div class="border-2 border-red-300 bg-red-50 rounded-xl p-4 mb-4">
-        <div class="text-center font-black text-base text-red-700 uppercase tracking-wide leading-snug">
-          FREE CANCELLATION<br>UP TO 24 HOURS BEFORE THE TOUR
+
+      <!-- Title -->
+      <div class="text-center mb-6">
+        <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Document</div>
+        <h2 class="text-2xl font-black text-dark uppercase tracking-wide">Reservation Confirmation</h2>
+        <div class="text-sm text-gray-400 mt-1">Booking No. <span class="font-bold text-brand">#TM-2026-0847</span></div>
+      </div>
+
+      <!-- Tour + guest details -->
+      <div class="bg-gray-50 rounded-2xl p-5 mb-5">
+        <div class="text-lg font-black text-dark mb-4">Trip to Zakopane</div>
+        <div class="grid grid-cols-2 gap-x-8 gap-y-2.5 text-sm">
+          <div class="flex items-center gap-2"><i class="fa-regular fa-calendar text-brand w-4"></i><span class="text-gray-500">Date:</span> <span class="font-semibold ml-1">Monday, April 8, 2026</span></div>
+          <div class="flex items-center gap-2"><i class="fa-regular fa-clock text-brand w-4"></i><span class="text-gray-500">Departure:</span> <span class="font-semibold ml-1">07:00</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-users text-brand w-4"></i><span class="text-gray-500">Participants:</span> <span class="font-semibold ml-1">2 persons</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-tag text-brand w-4"></i><span class="text-gray-500">Package:</span> <span class="font-semibold ml-1">Standard</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-coins text-brand w-4"></i><span class="text-gray-500">Total price:</span> <span class="font-bold text-brand ml-1">300 zł</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-location-dot text-brand w-4"></i><span class="text-gray-500">Pick-up:</span> <span class="font-semibold ml-1">Hotel Wawel Kraków</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-user text-brand w-4"></i><span class="text-gray-500">Guest:</span> <span class="font-semibold ml-1">Jan Kowalski</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-phone text-brand w-4"></i><span class="text-gray-500">Phone:</span> <span class="font-semibold ml-1">+48 600 123 456</span></div>
+          <div class="flex items-center gap-2 col-span-2"><i class="fa-solid fa-envelope text-brand w-4"></i><span class="text-gray-500">Email:</span> <span class="font-semibold ml-1">jan.kowalski@email.com</span></div>
         </div>
       </div>
-      <div class="bg-green-50 border border-green-200 rounded-xl p-3 flex items-center gap-3 text-sm text-green-800">
+
+      <!-- Pick-up confirmation -->
+      <div class="bg-green-50 border border-green-200 rounded-xl p-3.5 mb-5 flex items-center gap-3 text-sm text-green-800">
         <i class="fa-brands fa-whatsapp text-green-500 text-xl shrink-0"></i>
-        <strong>The exact pick-up time will be confirmed via SMS/WhatsApp the evening before the tour.</strong>
+        <strong>The exact pick-up time will be confirmed via WhatsApp/SMS the evening before the tour.</strong>
       </div>
+
+      <!-- Tour details from Bokun -->
+      <div class="space-y-3 text-sm">
+
+        <div class="border border-gray-200 rounded-xl overflow-hidden">
+          <div class="bg-gray-50 px-4 py-2.5 font-bold text-dark text-xs uppercase tracking-wide border-b border-gray-200">Tour duration</div>
+          <div class="px-4 py-3 text-gray-600">Full day — approximately <strong>10 hours</strong> (departure 07:00, return ~17:00)</div>
+        </div>
+
+        <div class="border border-gray-200 rounded-xl overflow-hidden">
+          <div class="bg-gray-50 px-4 py-2.5 font-bold text-dark text-xs uppercase tracking-wide border-b border-gray-200">What's included</div>
+          <div class="px-4 py-3 text-gray-600">
+            <ul class="space-y-1">
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs w-3"></i>Return transport from Kraków</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs w-3"></i>Licensed English-speaking guide</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs w-3"></i>Cable car ticket to Kasprowy Wierch (Standard package)</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs w-3"></i>Free time in Zakopane town centre</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="border border-gray-200 rounded-xl overflow-hidden">
+          <div class="bg-gray-50 px-4 py-2.5 font-bold text-dark text-xs uppercase tracking-wide border-b border-gray-200">What's not included</div>
+          <div class="px-4 py-3 text-gray-600">
+            <ul class="space-y-1">
+              <li class="flex items-center gap-2"><i class="fa-solid fa-xmark text-red-400 text-xs w-3"></i>Meals and drinks</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-xmark text-red-400 text-xs w-3"></i>Personal travel insurance</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-xmark text-red-400 text-xs w-3"></i>Tips for the guide (optional)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="border border-gray-200 rounded-xl overflow-hidden">
+          <div class="bg-gray-50 px-4 py-2.5 font-bold text-dark text-xs uppercase tracking-wide border-b border-gray-200">What to bring</div>
+          <div class="px-4 py-3 text-gray-600">Comfortable walking shoes, weather-appropriate clothing (layers recommended), water, sunscreen. This voucher or booking confirmation on your phone.</div>
+        </div>
+
+        <div class="border-2 border-red-200 rounded-xl overflow-hidden">
+          <div class="bg-red-50 px-4 py-2.5 font-bold text-red-700 text-xs uppercase tracking-wide border-b border-red-200">Cancellation policy</div>
+          <div class="px-4 py-3 text-gray-600"><strong class="text-red-600">Free cancellation</strong> up to 24 hours before departure. Cancellations within 24 hours are non-refundable. To cancel, contact us at <span class="text-brand font-semibold">+48 607 896 523</span>.</div>
+        </div>
+
+      </div>
+
     </div>
-    <div class="p-4 flex gap-3">
-      <button class="flex-1 bg-brand hover:bg-brand-dark text-white font-bold py-3 rounded-xl text-sm transition-colors flex items-center justify-center gap-2">
-        <i class="fa-solid fa-print"></i>Print voucher
+
+    <!-- Actions -->
+    <div class="px-8 py-4 border-t border-gray-100 bg-gray-50 flex gap-3">
+      <button onclick="window.print()" class="flex-1 bg-brand hover:bg-brand-dark text-white font-bold py-3 rounded-xl text-sm transition-colors flex items-center justify-center gap-2">
+        <i class="fa-solid fa-print"></i>Print / Save as PDF
       </button>
-      <button onclick="document.getElementById('modal-voucher').classList.add('hidden'); document.getElementById('modal-voucher').classList.remove('flex')" class="px-4 py-3 border-2 border-gray-200 text-gray-600 font-bold rounded-xl text-sm hover:bg-gray-50 transition-colors">
+      <button onclick="document.getElementById('modal-voucher').classList.add('hidden'); document.getElementById('modal-voucher').classList.remove('flex')" class="px-5 py-3 border-2 border-gray-200 text-gray-600 font-bold rounded-xl text-sm hover:bg-white transition-colors">
         Close
       </button>
     </div>
+
   </div>
 </div>
 
