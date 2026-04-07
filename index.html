@@ -1474,19 +1474,35 @@ tailwind.config = {
         <div>
           <h3 class="font-semibold text-dark text-sm mb-3"><span class="w-5 h-5 bg-brand text-white text-xs rounded-full inline-flex items-center justify-center mr-2">2</span>Select departure time</h3>
           <div class="flex gap-2.5 flex-wrap">
-            <button class="slot-btn selected px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-semibold transition-all" onclick="selectSlot(this, 22)">
+            <button class="slot-btn selected px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-semibold transition-all" onclick="selectSlotWithHold(this, 22, '1')">
               <div class="font-bold">07:00</div>
               <div class="text-xs opacity-70">22 spots left</div>
             </button>
-            <button class="slot-btn px-4 py-2.5 border-2 border-amber-300 bg-amber-50 rounded-xl text-sm font-semibold text-gray-700 transition-all relative" onclick="selectSlot(this, 2)">
+            <button class="slot-btn px-4 py-2.5 border-2 border-amber-300 bg-amber-50 rounded-xl text-sm font-semibold text-gray-700 transition-all relative" onclick="selectSlotWithHold(this, 2, '1')">
               <div class="absolute -top-2 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap">Last 2 seats!</div>
               <div class="font-bold mt-1">09:00</div>
               <div class="text-xs text-amber-600 font-semibold">2 spots left</div>
             </button>
-            <button class="slot-btn px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-semibold text-gray-700 transition-all" onclick="selectSlot(this, 15)">
+            <button class="slot-btn px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-semibold text-gray-700 transition-all" onclick="selectSlotWithHold(this, 15, '1')">
               <div class="font-bold">11:00</div>
               <div class="text-xs opacity-70">15 spots left</div>
             </button>
+          </div>
+          <!-- Hold button + countdown -->
+          <div id="hold-area-1" class="mt-3 hidden">
+            <button id="hold-btn-1" onclick="startHold('1')" class="flex items-center gap-2 bg-brand-light text-brand border border-brand/30 text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-brand hover:text-white transition-colors">
+              <i class="fa-solid fa-lock"></i>Hold for 10 min
+            </button>
+            <div id="hold-active-1" class="hidden mt-2 bg-brand/5 border border-brand/20 rounded-xl px-4 py-3 flex items-center gap-3">
+              <div class="w-8 h-8 bg-brand rounded-lg flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-lock text-white text-sm"></i>
+              </div>
+              <div class="flex-1">
+                <div class="text-xs font-bold text-dark">Slot held by your hotel</div>
+                <div class="text-xs text-gray-500 mt-0.5">Time remaining: <span id="hold-timer-1" class="font-bold text-brand">10:00</span></div>
+              </div>
+              <button onclick="cancelHold('1')" class="text-xs text-gray-400 hover:text-red-500 transition-colors">Cancel</button>
+            </div>
           </div>
         </div>
 
@@ -2813,6 +2829,58 @@ tailwind.config = {
       const summary = document.getElementById('booking-summary');
       if (summary) summary.innerHTML = '<strong>Transfer: ' + route + '</strong> · ' + vehicle + ' · ' + price + ' pln';
     }, 100);
+  }
+
+  // ---- Hold / temporary reservation ----
+  const holdTimers = {};
+
+  function selectSlotWithHold(btn, spots, holdId) {
+    selectSlot(btn, spots);
+    const area = document.getElementById('hold-area-' + holdId);
+    if (area) area.classList.remove('hidden');
+  }
+
+  function startHold(holdId) {
+    const btn      = document.getElementById('hold-btn-' + holdId);
+    const active   = document.getElementById('hold-active-' + holdId);
+    const timerEl  = document.getElementById('hold-timer-' + holdId);
+    if (!timerEl) return;
+
+    btn.classList.add('hidden');
+    active.classList.remove('hidden');
+
+    let seconds = 10 * 60; // 10 minutes
+    timerEl.textContent = formatHoldTime(seconds);
+
+    if (holdTimers[holdId]) clearInterval(holdTimers[holdId]);
+    holdTimers[holdId] = setInterval(() => {
+      seconds--;
+      timerEl.textContent = formatHoldTime(seconds);
+      if (seconds <= 60) timerEl.classList.add('text-red-500');
+      if (seconds <= 0) {
+        clearInterval(holdTimers[holdId]);
+        cancelHold(holdId);
+        // Show expired message
+        const area = document.getElementById('hold-area-' + holdId);
+        if (area) area.innerHTML = '<div class="mt-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-xs text-red-600 flex items-center gap-2"><i class="fa-solid fa-clock"></i>Hold expired — please select the slot again to rebook.</div>';
+      }
+    }, 1000);
+  }
+
+  function cancelHold(holdId) {
+    const btn    = document.getElementById('hold-btn-' + holdId);
+    const active = document.getElementById('hold-active-' + holdId);
+    const timer  = document.getElementById('hold-timer-' + holdId);
+    if (holdTimers[holdId]) clearInterval(holdTimers[holdId]);
+    if (btn)    { btn.classList.remove('hidden'); }
+    if (active) { active.classList.add('hidden'); }
+    if (timer)  { timer.classList.remove('text-red-500'); }
+  }
+
+  function formatHoldTime(s) {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return m + ':' + String(sec).padStart(2, '0');
   }
 
   // Commission table: search + category filter
