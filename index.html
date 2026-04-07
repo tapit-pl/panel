@@ -1467,41 +1467,7 @@ tailwind.config = {
         <!-- Step 1: Date -->
         <div>
           <h3 class="font-semibold text-dark text-sm mb-3"><span class="w-5 h-5 bg-brand text-white text-xs rounded-full inline-flex items-center justify-center mr-2">1</span>Select date</h3>
-          <div class="bg-gray-50 rounded-xl p-3">
-            <div class="flex items-center justify-between mb-3">
-              <button class="p-1.5 hover:bg-gray-200 rounded-lg"><i class="fa-solid fa-chevron-left text-xs text-gray-500"></i></button>
-              <span class="text-sm font-semibold text-dark">April 2025</span>
-              <button class="p-1.5 hover:bg-gray-200 rounded-lg"><i class="fa-solid fa-chevron-right text-xs text-gray-500"></i></button>
-            </div>
-            <div class="grid grid-cols-7 gap-1 text-center">
-              <div class="text-xs text-gray-400 py-1">Mo</div><div class="text-xs text-gray-400 py-1">Tu</div><div class="text-xs text-gray-400 py-1">We</div><div class="text-xs text-gray-400 py-1">Th</div><div class="text-xs text-gray-400 py-1">Fr</div><div class="text-xs text-gray-400 py-1">Sa</div><div class="text-xs text-gray-400 py-1">Su</div>
-              <div class="calendar-day unavailable text-xs py-2 rounded-lg text-gray-400">1</div>
-              <div class="calendar-day unavailable text-xs py-2 rounded-lg text-gray-400">2</div>
-              <div class="calendar-day unavailable text-xs py-2 rounded-lg text-gray-400">3</div>
-              <div class="calendar-day available text-xs py-2 rounded-lg text-gray-700 hover:bg-orange-100 font-medium" onclick="selectDay(this)">4</div>
-              <div class="calendar-day available text-xs py-2 rounded-lg text-gray-700 hover:bg-orange-100 font-medium" onclick="selectDay(this)">5</div>
-              <div class="calendar-day available text-xs py-2 rounded-lg text-gray-700 hover:bg-orange-100 font-medium" onclick="selectDay(this)">6</div>
-              <div class="calendar-day available text-xs py-2 rounded-lg text-gray-700 hover:bg-orange-100 font-medium" onclick="selectDay(this)">7</div>
-              <div class="calendar-day available text-xs py-2 rounded-lg text-gray-700 hover:bg-orange-100 font-medium selected" onclick="selectDay(this)">8</div>
-              <div class="calendar-day available text-xs py-2 rounded-lg text-gray-700 hover:bg-orange-100 font-medium" onclick="selectDay(this)">9</div>
-              <div class="calendar-day available text-xs py-2 rounded-lg text-gray-700 hover:bg-orange-100 font-medium" onclick="selectDay(this)">10</div>
-              <div class="calendar-day available text-xs py-2 rounded-lg text-gray-700 hover:bg-orange-100 font-medium" onclick="selectDay(this)">11</div>
-              <div class="calendar-day available text-xs py-2 rounded-lg text-gray-700 hover:bg-orange-100 font-medium" onclick="selectDay(this)">12</div>
-              <div class="calendar-day available text-xs py-2 rounded-lg text-gray-700 hover:bg-orange-100 font-medium" onclick="selectDay(this)">13</div>
-              <div class="calendar-day unavailable text-xs py-2 rounded-lg text-gray-400">14</div>
-              <div class="calendar-day available text-xs py-2 rounded-lg text-gray-700 hover:bg-orange-100 font-medium" onclick="selectDay(this)">15</div>
-              <div class="calendar-day available text-xs py-2 rounded-lg text-gray-700 hover:bg-orange-100 font-medium" onclick="selectDay(this)">16</div>
-              <div class="calendar-day available text-xs py-2 rounded-lg text-gray-700 hover:bg-orange-100 font-medium" onclick="selectDay(this)">17</div>
-              <div class="calendar-day available text-xs py-2 rounded-lg text-gray-700 hover:bg-orange-100 font-medium" onclick="selectDay(this)">18</div>
-              <div class="calendar-day available text-xs py-2 rounded-lg text-gray-700 hover:bg-orange-100 font-medium" onclick="selectDay(this)">19</div>
-              <div class="calendar-day available text-xs py-2 rounded-lg text-gray-700 hover:bg-orange-100 font-medium" onclick="selectDay(this)">20</div>
-              <div class="calendar-day available text-xs py-2 rounded-lg text-gray-700 hover:bg-orange-100 font-medium" onclick="selectDay(this)">21</div>
-            </div>
-            <div class="flex items-center gap-4 mt-3 text-xs text-gray-400">
-              <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-brand rounded-full inline-block"></span>Selected date</span>
-              <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-gray-200 rounded-full inline-block opacity-50"></span>Unavailable</span>
-            </div>
-          </div>
+          <div id="cal-1"></div>
         </div>
 
         <!-- Step 2: Time slot -->
@@ -1612,7 +1578,11 @@ tailwind.config = {
           </div>
         </div>
         <div>
-          <h3 class="font-semibold text-dark text-sm mb-3"><span class="w-5 h-5 bg-brand text-white text-xs rounded-full inline-flex items-center justify-center mr-2">1</span>Select departure time</h3>
+          <h3 class="font-semibold text-dark text-sm mb-3"><span class="w-5 h-5 bg-brand text-white text-xs rounded-full inline-flex items-center justify-center mr-2">1</span>Select date</h3>
+          <div id="cal-2"></div>
+        </div>
+        <div>
+          <h3 class="font-semibold text-dark text-sm mb-3"><span class="w-5 h-5 bg-brand text-white text-xs rounded-full inline-flex items-center justify-center mr-2">2</span>Select departure time</h3>
           <div class="flex gap-2.5 flex-wrap">
             <button class="slot-btn selected px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-semibold transition-all" onclick="selectSlot(this)">
               <div class="font-bold">07:30</div><div class="text-xs opacity-70">18 spots left</div>
@@ -1623,7 +1593,7 @@ tailwind.config = {
           </div>
         </div>
         <div>
-          <h3 class="font-semibold text-dark text-sm mb-3"><span class="w-5 h-5 bg-brand text-white text-xs rounded-full inline-flex items-center justify-center mr-2">2</span>Select package</h3>
+          <h3 class="font-semibold text-dark text-sm mb-3"><span class="w-5 h-5 bg-brand text-white text-xs rounded-full inline-flex items-center justify-center mr-2">3</span>Select package</h3>
           <div class="space-y-2.5">
             <div class="package-card selected border-2 border-gray-200 rounded-xl p-3.5 cursor-pointer transition-all relative" onclick="selectPackage(this)">
               <div class="pkg-check absolute top-3 right-3 w-5 h-5 bg-brand rounded-full items-center justify-center"><i class="fa-solid fa-check text-white text-xs"></i></div>
@@ -1688,7 +1658,11 @@ tailwind.config = {
           </div>
         </div>
         <div>
-          <h3 class="font-semibold text-dark text-sm mb-3"><span class="w-5 h-5 bg-brand text-white text-xs rounded-full inline-flex items-center justify-center mr-2">1</span>Select time</h3>
+          <h3 class="font-semibold text-dark text-sm mb-3"><span class="w-5 h-5 bg-brand text-white text-xs rounded-full inline-flex items-center justify-center mr-2">1</span>Select date</h3>
+          <div id="cal-3"></div>
+        </div>
+        <div>
+          <h3 class="font-semibold text-dark text-sm mb-3"><span class="w-5 h-5 bg-brand text-white text-xs rounded-full inline-flex items-center justify-center mr-2">2</span>Select time</h3>
           <div class="flex gap-2.5 flex-wrap">
             <button class="slot-btn selected px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-semibold transition-all" onclick="selectSlot(this)"><div class="font-bold">10:00</div><div class="text-xs opacity-70">8 spots left</div></button>
             <button class="slot-btn px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-semibold text-gray-700 transition-all" onclick="selectSlot(this)"><div class="font-bold">14:00</div><div class="text-xs opacity-70">4 spots left</div></button>
@@ -1696,7 +1670,7 @@ tailwind.config = {
           </div>
         </div>
         <div>
-          <h3 class="font-semibold text-dark text-sm mb-3"><span class="w-5 h-5 bg-brand text-white text-xs rounded-full inline-flex items-center justify-center mr-2">2</span>Select shooting package</h3>
+          <h3 class="font-semibold text-dark text-sm mb-3"><span class="w-5 h-5 bg-brand text-white text-xs rounded-full inline-flex items-center justify-center mr-2">3</span>Select shooting package</h3>
           <div class="space-y-2">
             <div class="package-card selected border-2 border-gray-200 rounded-xl p-3 cursor-pointer transition-all relative" onclick="selectPackage(this)">
               <div class="pkg-check absolute top-3 right-3 w-5 h-5 bg-brand rounded-full items-center justify-center"><i class="fa-solid fa-check text-white text-xs"></i></div>
@@ -1736,10 +1710,71 @@ tailwind.config = {
       </div>
     </div>
 
-    <!-- Tour 4: Wieliczka placeholder -->
-    <div id="tour-detail-4" class="hidden p-6 text-center text-gray-500 py-20">
-      <i class="fa-solid fa-hard-hat text-4xl text-brand mb-3"></i>
-      <p class="font-semibold">Details coming soon</p>
+    <!-- Tour 4: Wieliczka -->
+    <div id="tour-detail-4" class="hidden">
+      <div class="relative h-52 sm:h-64 shrink-0">
+        <img src="https://images.unsplash.com/photo-1565117082-7b5680e3c994?w=800&q=80" class="w-full h-full object-cover sm:rounded-t-2xl">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent sm:rounded-t-2xl"></div>
+        <button onclick="closeModal()" class="absolute top-4 right-4 w-9 h-9 bg-black/30 hover:bg-black/50 rounded-full flex items-center justify-center text-white transition-colors"><i class="fa-solid fa-xmark"></i></button>
+        <div class="absolute bottom-4 left-4 text-white">
+          <h2 class="text-xl font-bold">Wieliczka Salt Mine</h2>
+          <div class="flex items-center gap-3 text-sm text-white/80 mt-1">
+            <span><i class="fa-regular fa-clock mr-1"></i>5 hrs.</span>
+            <span><i class="fa-solid fa-star text-brand mr-1"></i>4.9 (1 240 reviews)</span>
+          </div>
+        </div>
+      </div>
+      <div class="p-5 space-y-5">
+        <div class="bg-gray-50 rounded-xl p-4 text-sm text-gray-600 leading-relaxed">
+          <p>One of Poland's most iconic attractions — a UNESCO-listed salt mine with stunning underground chambers, chapels and sculptures carved entirely from salt.</p>
+          <div class="grid grid-cols-2 gap-3 mt-3 text-xs">
+            <div class="flex items-center gap-2"><i class="fa-solid fa-van-shuttle text-brand"></i>Hotel pick-up</div>
+            <div class="flex items-center gap-2"><i class="fa-solid fa-microphone text-brand"></i>Licensed guide</div>
+            <div class="flex items-center gap-2"><i class="fa-solid fa-temperature-low text-brand"></i>14°C underground</div>
+            <div class="flex items-center gap-2"><i class="fa-solid fa-person-walking text-brand"></i>3 km walking route</div>
+          </div>
+        </div>
+        <div>
+          <h3 class="font-semibold text-dark text-sm mb-3"><span class="w-5 h-5 bg-brand text-white text-xs rounded-full inline-flex items-center justify-center mr-2">1</span>Select date</h3>
+          <div id="cal-4"></div>
+        </div>
+        <div>
+          <h3 class="font-semibold text-dark text-sm mb-3"><span class="w-5 h-5 bg-brand text-white text-xs rounded-full inline-flex items-center justify-center mr-2">2</span>Select departure time</h3>
+          <div class="flex gap-2.5 flex-wrap">
+            <button class="slot-btn selected px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-semibold transition-all" onclick="selectSlot(this, 12)"><div class="font-bold">09:30</div><div class="text-xs opacity-70">12 spots left</div></button>
+            <button class="slot-btn px-4 py-2.5 border-2 border-amber-300 bg-amber-50 rounded-xl text-sm font-semibold text-gray-700 transition-all relative" onclick="selectSlot(this, 3)">
+              <div class="absolute -top-2 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap">Last 3 seats!</div>
+              <div class="font-bold mt-1">13:00</div><div class="text-xs text-amber-600 font-semibold">3 spots left</div>
+            </button>
+          </div>
+        </div>
+        <div>
+          <h3 class="font-semibold text-dark text-sm mb-3"><span class="w-5 h-5 bg-brand text-white text-xs rounded-full inline-flex items-center justify-center mr-2">3</span>Select package</h3>
+          <div class="space-y-2.5">
+            <div class="package-card selected border-2 border-gray-200 rounded-xl p-3.5 cursor-pointer transition-all relative" onclick="selectPackage(this)">
+              <div class="pkg-check absolute top-3 right-3 w-5 h-5 bg-brand rounded-full items-center justify-center"><i class="fa-solid fa-check text-white text-xs"></i></div>
+              <div class="flex items-start justify-between pr-6"><div><div class="font-bold text-sm text-dark">Standard</div><div class="text-xs text-gray-500 mt-0.5">Transport + entry ticket + guide</div></div><div class="text-brand font-bold text-sm">90 zł/pax</div></div>
+            </div>
+            <div class="package-card border-2 border-gray-200 rounded-xl p-3.5 cursor-pointer hover:border-brand/40 transition-all relative" onclick="selectPackage(this)">
+              <div class="pkg-check absolute top-3 right-3 w-5 h-5 bg-brand rounded-full items-center justify-center"><i class="fa-solid fa-check text-white text-xs"></i></div>
+              <div class="flex items-start justify-between pr-6"><div><div class="font-bold text-sm text-dark">Premium <span class="text-xs bg-brand-light text-brand px-1.5 py-0.5 rounded ml-1">Popular</span></div><div class="text-xs text-gray-500 mt-0.5">Transport + ticket + guide + lunch</div></div><div class="text-brand font-bold text-sm">140 zł/pax</div></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <h3 class="font-semibold text-dark text-sm mb-3"><span class="w-5 h-5 bg-brand text-white text-xs rounded-full inline-flex items-center justify-center mr-2">4</span>Number of guests</h3>
+          <div class="flex items-center gap-4">
+            <button class="w-10 h-10 border-2 border-gray-200 rounded-xl flex items-center justify-center font-bold text-lg hover:border-brand hover:text-brand transition-colors" onclick="changeGuests(-1)">−</button>
+            <span class="text-2xl font-bold text-dark w-10 text-center">2</span>
+            <button class="w-10 h-10 border-2 border-gray-200 rounded-xl flex items-center justify-center font-bold text-lg hover:border-brand hover:text-brand transition-colors" onclick="changeGuests(1)">+</button>
+            <span class="text-sm text-gray-500 ml-2">guests</span>
+          </div>
+        </div>
+        <div class="flex gap-3 pt-2">
+          <button onclick="addToCart('Wieliczka Salt Mine', 90, '09:30', 'Standard', 2); closeModal()" class="flex-1 bg-brand hover:bg-brand-dark text-white font-bold py-3.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2"><i class="fa-solid fa-cart-plus"></i>Add to cart</button>
+          <button onclick="addToCart('Wieliczka Salt Mine', 90, '09:30', 'Standard', 2); closeModal(); setTimeout(openBookingForm, 100)" class="px-4 py-3.5 border-2 border-brand text-brand font-bold rounded-xl hover:bg-brand-light transition-colors text-sm">Book now</button>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -2260,6 +2295,67 @@ tailwind.config = {
     document.querySelectorAll('[id^="tour-detail-"]').forEach(d => d.classList.add('hidden'));
     const detail = document.getElementById('tour-detail-' + id);
     if (detail) detail.classList.remove('hidden');
+    const calEl = document.getElementById('cal-' + id);
+    if (calEl && !calEl.dataset.rendered) {
+      renderMiniCal(calEl);
+      calEl.dataset.rendered = '1';
+    }
+  }
+
+  function renderMiniCal(container) {
+    const today = new Date();
+    const year  = today.getFullYear();
+    const month = today.getMonth();
+    const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
+    const startOffset = (firstDay + 6) % 7; // Mon-first
+    let selectedDay = today.getDate();
+
+    function build() {
+      container.innerHTML = `
+        <div class="border border-gray-200 rounded-2xl overflow-hidden bg-white">
+          <div class="flex items-center justify-between px-4 py-2.5 bg-gray-50 border-b border-gray-100">
+            <span class="text-xs font-bold text-dark">${monthNames[month]} ${year}</span>
+            <span class="text-xs text-gray-400">All dates available</span>
+          </div>
+          <div class="p-3">
+            <div class="grid grid-cols-7 mb-1">
+              ${['Mo','Tu','We','Th','Fr','Sa','Su'].map(d => `<div class="text-center text-xs text-gray-400 font-semibold py-1">${d}</div>`).join('')}
+            </div>
+            <div class="grid grid-cols-7 gap-0.5" id="${container.id}-days"></div>
+          </div>
+        </div>`;
+      const grid = container.querySelector(`#${container.id}-days`);
+      // Empty cells before first day
+      for (let i = 0; i < startOffset; i++) {
+        grid.insertAdjacentHTML('beforeend', '<div></div>');
+      }
+      for (let d = 1; d <= daysInMonth; d++) {
+        const isPast = d < today.getDate();
+        const isSel  = d === selectedDay;
+        const cls = isPast
+          ? 'text-gray-300 cursor-not-allowed'
+          : isSel
+            ? 'bg-brand text-white font-bold rounded-lg cursor-pointer'
+            : 'hover:bg-brand-light text-dark rounded-lg cursor-pointer font-medium';
+        grid.insertAdjacentHTML('beforeend',
+          `<div class="text-center text-xs py-1.5 transition-colors ${cls}" onclick="${isPast ? '' : `pickCalDay(this, '${container.id}', ${d})`}">${d}</div>`);
+      }
+    }
+    build();
+
+    window.pickCalDay = function(el, calId, day) {
+      const c = document.getElementById(calId);
+      c.querySelectorAll('[onclick]').forEach(e => {
+        e.classList.remove('bg-brand','text-white','font-bold');
+        if (!e.classList.contains('text-gray-300')) {
+          e.classList.add('text-dark','font-medium');
+        }
+      });
+      el.classList.add('bg-brand','text-white','font-bold');
+      el.classList.remove('text-dark','font-medium');
+    };
   }
 
   function openContactModal() {
