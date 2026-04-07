@@ -1508,15 +1508,16 @@ tailwind.config = {
         <div>
           <h3 class="font-semibold text-dark text-sm mb-3"><span class="w-5 h-5 bg-brand text-white text-xs rounded-full inline-flex items-center justify-center mr-2">2</span>Select departure time</h3>
           <div class="flex gap-2.5 flex-wrap">
-            <button class="slot-btn selected px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-semibold transition-all" onclick="selectSlot(this)">
+            <button class="slot-btn selected px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-semibold transition-all" onclick="selectSlot(this, 22)">
               <div class="font-bold">07:00</div>
               <div class="text-xs opacity-70">22 spots left</div>
             </button>
-            <button class="slot-btn px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-semibold text-gray-700 transition-all" onclick="selectSlot(this)">
-              <div class="font-bold">09:00</div>
-              <div class="text-xs opacity-70">8 spots left</div>
+            <button class="slot-btn px-4 py-2.5 border-2 border-amber-300 bg-amber-50 rounded-xl text-sm font-semibold text-gray-700 transition-all relative" onclick="selectSlot(this, 2)">
+              <div class="absolute -top-2 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap">Last 2 seats!</div>
+              <div class="font-bold mt-1">09:00</div>
+              <div class="text-xs text-amber-600 font-semibold">2 spots left</div>
             </button>
-            <button class="slot-btn px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-semibold text-gray-700 transition-all" onclick="selectSlot(this)">
+            <button class="slot-btn px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-semibold text-gray-700 transition-all" onclick="selectSlot(this, 15)">
               <div class="font-bold">11:00</div>
               <div class="text-xs opacity-70">15 spots left</div>
             </button>
@@ -1996,6 +1997,15 @@ tailwind.config = {
       <!-- Summary -->
       <div id="booking-summary" class="bg-brand-light rounded-xl p-3.5 text-sm text-dark"></div>
 
+      <!-- Last seats warning -->
+      <div id="last-seats-warning" class="hidden bg-amber-50 border border-amber-300 rounded-xl px-4 py-3 flex items-center gap-3">
+        <i class="fa-solid fa-fire text-amber-500 shrink-0"></i>
+        <div>
+          <div class="text-xs font-bold text-amber-800">Almost sold out!</div>
+          <div class="text-xs text-amber-700 mt-0.5">Only <span id="last-seats-count">2</span> seats remaining for this time slot. Complete your booking to secure them.</div>
+        </div>
+      </div>
+
       <!-- 1+2. Name -->
       <div class="grid grid-cols-2 gap-3">
         <div>
@@ -2270,13 +2280,24 @@ tailwind.config = {
     modal.classList.remove('flex');
   }
 
-  function selectSlot(btn) {
+  function selectSlot(btn, spotsLeft) {
     btn.closest('.flex').querySelectorAll('.slot-btn').forEach(b => {
       b.classList.remove('selected');
       b.classList.add('text-gray-700');
     });
     btn.classList.add('selected');
     btn.classList.remove('text-gray-700');
+    // Last seats warning in booking form
+    const warning = document.getElementById('last-seats-warning');
+    const count   = document.getElementById('last-seats-count');
+    if (warning) {
+      if (spotsLeft !== undefined && spotsLeft <= 3) {
+        if (count) count.textContent = spotsLeft;
+        warning.classList.remove('hidden');
+      } else {
+        warning.classList.add('hidden');
+      }
+    }
   }
 
   function selectPackage(card) {
