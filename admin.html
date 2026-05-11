@@ -1664,7 +1664,8 @@ tailwind.config = {
     const { data, error } = await db.auth.signInWithPassword({ email, password });
 
     if (error) {
-      errEl.textContent = 'Invalid email or password.';
+      console.error('Auth error:', error);
+      errEl.textContent = error.message || 'Invalid email or password.';
       errEl.classList.remove('hidden');
       btn.innerHTML = '<span>Sign in</span>';
       btn.disabled = false;
