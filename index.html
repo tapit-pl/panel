@@ -2462,11 +2462,11 @@ tailwind.config = {
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-xs text-gray-500 mb-1">Participant ${p} — first name</label>
-              <input type="text" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30">
+              <input id="bk-p-first-${idx}-${p}" type="text" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30">
             </div>
             <div>
               <label class="block text-xs text-gray-500 mb-1">Participant ${p} — last name</label>
-              <input type="text" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30">
+              <input id="bk-p-last-${idx}-${p}" type="text" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30">
             </div>
           </div>`;
       }
@@ -2605,17 +2605,31 @@ tailwind.config = {
   }
 
   function useSameGuest() {
-    const first = document.getElementById('bk-first-0')?.value;
-    const last  = document.getElementById('bk-last-0')?.value;
-    const email = document.getElementById('bk-email-0')?.value;
     const items = cart.length > 0 ? cart : [{}];
+    const first = document.getElementById('bk-first-0')?.value || '';
+    const last  = document.getElementById('bk-last-0')?.value || '';
+    const email = document.getElementById('bk-email-0')?.value || '';
+    const srcGuests = items[0]?.guests || 1;
+
     for (let i = 1; i < items.length; i++) {
+      // Copy main guest
       const f = document.getElementById('bk-first-' + i);
       const l = document.getElementById('bk-last-' + i);
       const e = document.getElementById('bk-email-' + i);
       if (f) f.value = first;
       if (l) l.value = last;
       if (e) e.value = email;
+
+      // Copy additional participants from tour 0 to tour i
+      const destGuests = items[i]?.guests || 1;
+      for (let p = 2; p <= destGuests; p++) {
+        const srcF = document.getElementById('bk-p-first-0-' + p);
+        const srcL = document.getElementById('bk-p-last-0-' + p);
+        const dstF = document.getElementById('bk-p-first-' + i + '-' + p);
+        const dstL = document.getElementById('bk-p-last-' + i + '-' + p);
+        if (dstF) dstF.value = srcF?.value || '';
+        if (dstL) dstL.value = srcL?.value || '';
+      }
     }
   }
 
@@ -2658,6 +2672,45 @@ tailwind.config = {
   }
 
   function completeBooking() {
+    const items = cart.length > 0 ? cart : [{name:'Trip to Zakopane', guests:2}];
+    let errors = [];
+
+    items.forEach((item, idx) => {
+      const first = document.getElementById('bk-first-' + idx)?.value.trim();
+      const last  = document.getElementById('bk-last-' + idx)?.value.trim();
+      const email = document.getElementById('bk-email-' + idx)?.value.trim();
+      if (!first || !last) errors.push(`${item.name}: main guest name required`);
+      if (!email) errors.push(`${item.name}: e-mail required`);
+
+      for (let p = 2; p <= (item.guests || 1); p++) {
+        const pf = document.getElementById('bk-p-first-' + idx + '-' + p)?.value.trim();
+        const pl = document.getElementById('bk-p-last-'  + idx + '-' + p)?.value.trim();
+        if (!pf || !pl) errors.push(`${item.name}: Participant ${p} name required`);
+      }
+    });
+
+    if (errors.length > 0) {
+      // Highlight empty fields
+      items.forEach((item, idx) => {
+        ['bk-first-'+idx,'bk-last-'+idx,'bk-email-'+idx].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.style.borderColor = el.value.trim() ? '' : '#ef4444';
+        });
+        for (let p = 2; p <= (item.guests || 1); p++) {
+          ['bk-p-first-'+idx+'-'+p, 'bk-p-last-'+idx+'-'+p].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.borderColor = el.value.trim() ? '' : '#ef4444';
+          });
+        }
+      });
+      // Make sure first section with error is expanded
+      items.forEach((_, idx) => {
+        const sec = document.getElementById('bk-section-' + idx);
+        if (sec) sec.classList.remove('hidden');
+      });
+      return;
+    }
+
     closeBookingForm();
     cart = [];
     updateCartUI();
