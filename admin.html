@@ -58,8 +58,39 @@ tailwind.config = {
 </head>
 <body class="bg-gray-100 min-h-screen">
 
+<!-- ===================== SCREEN: LOGIN ===================== -->
+<div id="screen-login" class="screen active min-h-screen w-full items-center justify-center" style="background:linear-gradient(135deg,#1a2332 0%,#243047 100%)">
+  <div class="w-full max-w-sm px-4">
+    <div class="text-center mb-8">
+      <img src="assets/logo.png" alt="Thousand Miles" class="h-8 object-contain brightness-0 invert opacity-90 mx-auto mb-3">
+      <div class="text-slate-400 text-sm">Admin Panel</div>
+    </div>
+    <div class="bg-white rounded-2xl shadow-xl p-8">
+      <h2 class="text-lg font-bold text-gray-900 mb-6">Sign in</h2>
+      <div id="login-error" class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600"></div>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-1.5">Email</label>
+          <input id="login-email" type="email" placeholder="admin@thousandmiles.pl" autocomplete="username"
+            class="w-full text-sm border border-gray-200 rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-1.5">Password</label>
+          <input id="login-password" type="password" placeholder="••••••••" autocomplete="current-password"
+            class="w-full text-sm border border-gray-200 rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
+            onkeydown="if(event.key==='Enter') doLogin()">
+        </div>
+        <button onclick="doLogin()" id="login-btn"
+          class="w-full bg-brand hover:bg-brand-dark text-white font-semibold text-sm py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2">
+          <span>Sign in</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ===================== SCREEN: ADMIN DASHBOARD ===================== -->
-<div id="screen-admin" class="screen active min-h-screen w-full">
+<div id="screen-admin" class="screen min-h-screen w-full">
   <div class="flex h-screen overflow-hidden w-full">
 
     <!-- SIDEBAR -->
@@ -1615,14 +1646,56 @@ tailwind.config = {
     'sb_publishable_jTg5-5J24uo7BNBVBLTTLA_xAeB9iK4'
   );
 
-  // ===== Init =====
-  document.addEventListener('DOMContentLoaded', async function() {
+  // ===== Auth helpers =====
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  async function doLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const btn = document.getElementById('login-btn');
+    const errEl = document.getElementById('login-error');
+    errEl.classList.add('hidden');
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    btn.disabled = true;
+
+    const { data, error } = await db.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      errEl.textContent = 'Invalid email or password.';
+      errEl.classList.remove('hidden');
+      btn.innerHTML = '<span>Sign in</span>';
+      btn.disabled = false;
+      return;
+    }
+    await initDashboard();
+  }
+
+  async function goToLogin() {
+    await db.auth.signOut();
+    showScreen('screen-login');
+  }
+
+  async function initDashboard() {
+    showScreen('screen-admin');
     renderDashboardChart();
     await loadBookings();
     await loadPartners();
     await loadTickets();
     await loadPrintOrders();
     await loadNotifications();
+  }
+
+  // ===== Init =====
+  document.addEventListener('DOMContentLoaded', async function() {
+    const { data: { session } } = await db.auth.getSession();
+    if (session) {
+      await initDashboard();
+    } else {
+      showScreen('screen-login');
+    }
   });
 
   async function loadBookings() {
