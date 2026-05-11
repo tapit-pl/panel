@@ -2001,141 +2001,12 @@ tailwind.config = {
 
 <!-- ===================== BOOKING FORM MODAL ===================== -->
 <div id="modal-booking" class="fixed inset-0 z-50 hidden modal-bg bg-black/50 items-center justify-center p-4">
-  <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl fade-in overflow-y-auto max-h-[95vh] scrollbar-hide">
-    <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+  <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl fade-in overflow-y-auto max-h-[95vh] scrollbar-hide">
+    <div class="p-5 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
       <h3 class="font-bold text-dark">Guest details</h3>
       <button onclick="closeBookingForm()" class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-gray-200"><i class="fa-solid fa-xmark text-sm"></i></button>
     </div>
-    <div class="p-5 space-y-4">
-      <!-- Summary -->
-      <div id="booking-summary" class="bg-brand-light rounded-xl p-3.5 text-sm text-dark"></div>
-
-      <!-- Last seats warning -->
-      <div id="last-seats-warning" class="hidden bg-amber-50 border border-amber-300 rounded-xl px-4 py-3 flex items-center gap-3">
-        <i class="fa-solid fa-fire text-amber-500 shrink-0"></i>
-        <div>
-          <div class="text-xs font-bold text-amber-800">Almost sold out!</div>
-          <div class="text-xs text-amber-700 mt-0.5">Only <span id="last-seats-count">2</span> seats remaining for this time slot. Complete your booking to secure them.</div>
-        </div>
-      </div>
-
-      <!-- 1+2. Name -->
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Guest first name *</label>
-          <input type="text" placeholder="John" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Guest last name *</label>
-          <input type="text" placeholder="Smith" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-        </div>
-      </div>
-
-      <!-- 3. E-mail -->
-      <div>
-        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Guest e-mail *</label>
-        <div class="relative">
-          <i class="fa-solid fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-          <input type="email" placeholder="guest@email.com" class="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-        </div>
-        <p class="text-xs text-gray-400 mt-1">The voucher will be sent to this address</p>
-      </div>
-
-      <!-- 4. Phone -->
-      <div>
-        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Guest phone number *</label>
-        <div class="flex gap-2">
-          <div class="relative w-52 shrink-0">
-            <select id="phone-prefix-select" class="w-full pl-3 pr-7 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand bg-white appearance-none"></select>
-            <i class="fa-solid fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
-          </div>
-          <input type="tel" placeholder="600 123 456" class="flex-1 px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand" required>
-        </div>
-      </div>
-
-      <!-- 5. Extra info -->
-      <div>
-        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Extra info <span class="font-normal text-gray-400">(optional)</span></label>
-        <textarea rows="2" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand resize-none"></textarea>
-      </div>
-
-      <!-- 6. Pick-up point -->
-      <div>
-        <label class="block text-xs font-semibold text-gray-600 mb-2">Pick-up point *</label>
-        <div class="space-y-2" id="pickup-options">
-          <label class="flex items-start gap-3 p-3 border-2 border-brand rounded-xl cursor-pointer bg-brand/5 pickup-option selected-pickup">
-            <input type="radio" name="pickup" value="hotel" checked class="mt-0.5 accent-brand shrink-0" onchange="togglePickupDetail(this)">
-            <div>
-              <div class="text-sm font-semibold text-dark flex items-center gap-2"><i class="fa-solid fa-hotel text-brand text-xs"></i> Hotel Wawel Kraków <span class="text-xs font-normal text-brand">(your hotel)</span></div>
-              <div class="text-xs text-gray-500 mt-0.5">The driver will pick up the guest directly from the hotel reception.</div>
-            </div>
-          </label>
-          <label class="flex items-start gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-brand/40 pickup-option">
-            <input type="radio" name="pickup" value="meeting" class="mt-0.5 accent-brand shrink-0" onchange="togglePickupDetail(this)">
-            <div>
-              <div class="text-sm font-semibold text-dark flex items-center gap-2"><i class="fa-solid fa-location-dot text-brand text-xs"></i> Meeting point — Garbarska, Kraków</div>
-              <div class="text-xs text-gray-500 mt-0.5">ul. Garbarska 7a, 31-131 Kraków. Guest arrives independently.</div>
-            </div>
-          </label>
-          <label class="flex items-start gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-brand/40 pickup-option">
-            <input type="radio" name="pickup" value="other" class="mt-0.5 accent-brand shrink-0" onchange="togglePickupDetail(this)">
-            <div class="w-full">
-              <div class="text-sm font-semibold text-dark flex items-center gap-2"><i class="fa-solid fa-map-pin text-brand text-xs"></i> Other address</div>
-              <div class="text-xs text-gray-500 mt-0.5">Enter a specific pick-up address.</div>
-              <input type="text" id="pickup-other-input" placeholder="e.g. ul. Floriańska 12, Kraków" class="hidden mt-2 w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-            </div>
-          </label>
-        </div>
-      </div>
-
-      <!-- 7. Payment method -->
-      <div>
-        <label class="block text-xs font-semibold text-gray-600 mb-2">Payment method *</label>
-        <div class="space-y-2">
-          <label class="flex items-start gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-brand/40 payment-option" onclick="selectPayment(this,'online')">
-            <input type="radio" name="payment" value="online" class="mt-0.5 accent-brand shrink-0">
-            <div>
-              <div class="text-sm font-semibold text-dark flex items-center gap-2">
-                <i class="fa-solid fa-link text-brand text-xs"></i> Online payment link
-                <span class="text-xs font-normal bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full">Recommended</span>
-              </div>
-              <div class="text-xs text-gray-500 mt-0.5">A payment link will be sent to the guest's e-mail. Booking is confirmed automatically when payment is received.</div>
-            </div>
-          </label>
-          <label class="flex items-start gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-brand/40 payment-option" onclick="selectPayment(this,'hotel')">
-            <input type="radio" name="payment" value="hotel" class="mt-0.5 accent-brand shrink-0">
-            <div>
-              <div class="text-sm font-semibold text-dark flex items-center gap-2">
-                <i class="fa-solid fa-hand-holding-dollar text-brand text-xs"></i> Paid at hotel
-              </div>
-              <div class="text-xs text-gray-500 mt-0.5">The hotel collects payment from the guest. Commission will be settled monthly.</div>
-            </div>
-          </label>
-          <label class="flex items-start gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-brand/40 payment-option" onclick="selectPayment(this,'cash')">
-            <input type="radio" name="payment" value="cash" class="mt-0.5 accent-brand shrink-0">
-            <div>
-              <div class="text-sm font-semibold text-dark flex items-center gap-2">
-                <i class="fa-solid fa-money-bill text-brand text-xs"></i> Cash — paid to driver
-              </div>
-              <div class="text-xs text-gray-500 mt-0.5">The guest pays cash directly to the driver on the day of the tour.</div>
-            </div>
-          </label>
-        </div>
-        <div id="payment-link-note" class="hidden mt-2 bg-blue-50 border border-blue-100 rounded-xl p-3 flex gap-2 text-xs text-blue-700">
-          <i class="fa-solid fa-circle-info text-blue-400 shrink-0 mt-0.5"></i>
-          <span>A payment link will be sent to the guest's e-mail address immediately after confirming the booking. The booking status will update to <strong>Paid</strong> automatically.</span>
-        </div>
-      </div>
-
-      <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-3 flex gap-2.5 text-xs text-yellow-800">
-        <i class="fa-solid fa-circle-info text-yellow-500 mt-0.5 shrink-0"></i>
-        <span>This booking includes <strong>free cancellation up to 24h</strong> before the tour. The exact pick-up time will be confirmed the evening before the tour via WhatsApp/SMS.</span>
-      </div>
-
-      <button onclick="completeBooking()" class="w-full bg-brand hover:bg-brand-dark text-white font-bold py-3.5 rounded-xl transition-colors text-sm">
-        Confirm booking
-      </button>
-    </div>
+    <div id="booking-form-body" class="p-5 space-y-4"></div>
   </div>
 </div>
 
@@ -2535,24 +2406,255 @@ tailwind.config = {
   }
 
   function openBookingForm() {
-    toggleCart();
+    const panel = document.getElementById('cart-panel');
+    if (panel && !panel.classList.contains('hidden')) toggleCart();
     const modal = document.getElementById('modal-booking');
     modal.classList.remove('hidden');
     modal.classList.add('flex');
-
-    const summary = document.getElementById('booking-summary');
-    if (cart.length === 0) {
-      summary.innerHTML = '<div class="font-semibold">Trip to Zakopane</div><div class="text-xs text-gray-500 mt-0.5">Standard • 07:00 • 2 pax • 300 zł</div>';
-    } else {
-      summary.innerHTML = cart.map(item =>
-        `<div class="font-semibold text-sm">${item.name}</div><div class="text-xs text-gray-500 mb-1">${item.pkg} • ${item.time} • ${item.guests} pax • ${item.total} zł</div>`
-      ).join('') + `<div class="font-bold text-brand border-t border-brand/20 pt-2 mt-1">Total: ${cart.reduce((s,i) => s+i.total, 0)} zł</div>`;
-    }
+    renderBookingFormBody();
   }
 
   function closeBookingForm() {
     document.getElementById('modal-booking').classList.add('hidden');
     document.getElementById('modal-booking').classList.remove('flex');
+  }
+
+  function renderBookingFormBody() {
+    const items = cart.length > 0 ? cart : [{name:'Trip to Zakopane', price:150, time:'07:00', pkg:'Standard', guests:2, total:300}];
+    const total = items.reduce((s,i) => s + i.total, 0);
+    let html = '';
+
+    // "Use same guest" button — only if multiple items
+    if (items.length > 1) {
+      html += `<button onclick="useSameGuest()" class="w-full border-2 border-brand text-brand hover:bg-brand-light font-semibold py-2.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2">
+        <i class="fa-solid fa-copy text-xs"></i> Use same guest for all tours
+      </button>`;
+    }
+
+    // Per-tour sections
+    items.forEach((item, idx) => { html += buildTourSection(item, idx); });
+
+    // Total + disclaimer + confirm
+    html += `
+      <div class="bg-brand-light rounded-xl p-3.5 flex items-center justify-between">
+        <span class="text-sm font-semibold text-dark">Total</span>
+        <span class="font-bold text-brand text-lg">${total} zł</span>
+      </div>
+      <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-3 flex gap-2.5 text-xs text-yellow-800">
+        <i class="fa-solid fa-circle-info text-yellow-500 mt-0.5 shrink-0"></i>
+        <span>Free cancellation up to 24h before the tour. Pick-up time confirmed the evening before via WhatsApp/SMS.</span>
+      </div>
+      <button onclick="completeBooking()" class="w-full bg-brand hover:bg-brand-dark text-white font-bold py-3.5 rounded-xl transition-colors text-sm">Confirm booking</button>`;
+
+    document.getElementById('booking-form-body').innerHTML = html;
+
+    // Populate phone dropdowns
+    items.forEach((_, idx) => fillPhonePrefix('bk-phone-prefix-' + idx));
+  }
+
+  function buildTourSection(item, idx) {
+    // Additional participant fields (guests - 1)
+    let participantsHtml = '';
+    if (item.guests > 1) {
+      participantsHtml = `<div class="text-xs font-bold text-gray-400 uppercase tracking-wide pt-1">Other participants</div>`;
+      for (let p = 2; p <= item.guests; p++) {
+        participantsHtml += `
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Participant ${p} — first name</label>
+              <input type="text" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30">
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Participant ${p} — last name</label>
+              <input type="text" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30">
+            </div>
+          </div>`;
+      }
+    }
+
+    return `
+    <div class="border-2 border-gray-100 rounded-2xl overflow-hidden">
+      <!-- Tour header (accordion toggle) -->
+      <div class="bg-gray-50 px-4 py-3 flex items-center justify-between cursor-pointer select-none" onclick="toggleTourSection(${idx})">
+        <div>
+          <div class="font-semibold text-sm text-dark">${item.name}</div>
+          <div class="text-xs text-gray-500 mt-0.5">${item.pkg} · ${item.time} · ${item.guests} pax · <span class="text-brand font-semibold">${item.total} zł</span></div>
+        </div>
+        <i class="fa-solid fa-chevron-up text-gray-400 text-xs transition-transform" id="bk-chevron-${idx}"></i>
+      </div>
+      <!-- Form body -->
+      <div class="p-4 space-y-3" id="bk-section-${idx}">
+
+        <div class="text-xs font-bold text-gray-400 uppercase tracking-wide">Main guest</div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs text-gray-500 mb-1">First name *</label>
+            <input id="bk-first-${idx}" type="text" placeholder="John" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+          <div>
+            <label class="block text-xs text-gray-500 mb-1">Last name *</label>
+            <input id="bk-last-${idx}" type="text" placeholder="Smith" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">E-mail *</label>
+          <input id="bk-email-${idx}" type="email" placeholder="guest@email.com" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          <p class="text-xs text-gray-400 mt-1">The voucher will be sent to this address</p>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Phone *</label>
+          <div class="flex gap-2">
+            <select id="bk-phone-prefix-${idx}" class="w-44 shrink-0 px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none bg-white"></select>
+            <input type="tel" placeholder="600 123 456" class="flex-1 px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30">
+          </div>
+        </div>
+
+        ${participantsHtml}
+
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Extra info <span class="text-gray-400">(optional)</span></label>
+          <textarea rows="2" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 resize-none"></textarea>
+        </div>
+
+        <!-- Pick-up -->
+        <div class="text-xs font-bold text-gray-400 uppercase tracking-wide pt-1">Pick-up point</div>
+        <div class="space-y-2">
+          <label class="flex items-start gap-3 p-3 border-2 border-brand rounded-xl cursor-pointer bg-brand/5 bk-pickup" onclick="highlightPickup(this)">
+            <input type="radio" name="bk-pickup-${idx}" value="hotel" checked class="mt-0.5 accent-brand shrink-0">
+            <div>
+              <div class="text-sm font-semibold text-dark">Hotel Wawel Kraków <span class="text-xs font-normal text-brand">(your hotel)</span></div>
+              <div class="text-xs text-gray-500 mt-0.5">Driver picks up the guest from hotel reception.</div>
+            </div>
+          </label>
+          <label class="flex items-start gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-brand/40 bk-pickup" onclick="highlightPickup(this)">
+            <input type="radio" name="bk-pickup-${idx}" value="meeting" class="mt-0.5 accent-brand shrink-0">
+            <div>
+              <div class="text-sm font-semibold text-dark">Meeting point — Garbarska</div>
+              <div class="text-xs text-gray-500 mt-0.5">ul. Garbarska 7a, 31-131 Kraków.</div>
+            </div>
+          </label>
+          <label class="flex items-start gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-brand/40 bk-pickup" onclick="highlightPickup(this)">
+            <input type="radio" name="bk-pickup-${idx}" value="other" class="mt-0.5 accent-brand shrink-0" onchange="toggleOtherPickup(${idx},this)">
+            <div class="w-full">
+              <div class="text-sm font-semibold text-dark">Other address</div>
+              <input type="text" id="bk-pickup-other-${idx}" placeholder="e.g. ul. Floriańska 12, Kraków" class="hidden mt-2 w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand/30">
+            </div>
+          </label>
+        </div>
+
+        <!-- Payment -->
+        <div class="text-xs font-bold text-gray-400 uppercase tracking-wide pt-1">Payment method</div>
+        <div class="space-y-2">
+          <label class="flex items-start gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-brand/40 bk-payment" onclick="highlightPayment(this)">
+            <input type="radio" name="bk-payment-${idx}" value="online" class="mt-0.5 accent-brand shrink-0">
+            <div>
+              <div class="text-sm font-semibold text-dark flex items-center gap-2">Online payment link <span class="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-normal">Recommended</span></div>
+              <div class="text-xs text-gray-500 mt-0.5">A payment link will be sent to the guest's e-mail.</div>
+            </div>
+          </label>
+          <label class="flex items-start gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-brand/40 bk-payment" onclick="highlightPayment(this)">
+            <input type="radio" name="bk-payment-${idx}" value="hotel" class="mt-0.5 accent-brand shrink-0">
+            <div>
+              <div class="text-sm font-semibold text-dark">Paid at hotel</div>
+              <div class="text-xs text-gray-500 mt-0.5">Commission settled monthly.</div>
+            </div>
+          </label>
+          <label class="flex items-start gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-brand/40 bk-payment" onclick="highlightPayment(this)">
+            <input type="radio" name="bk-payment-${idx}" value="cash" class="mt-0.5 accent-brand shrink-0">
+            <div>
+              <div class="text-sm font-semibold text-dark">Cash — paid to driver</div>
+              <div class="text-xs text-gray-500 mt-0.5">The guest pays cash on the day of the tour.</div>
+            </div>
+          </label>
+        </div>
+
+      </div>
+    </div>`;
+  }
+
+  function toggleTourSection(idx) {
+    const body = document.getElementById('bk-section-' + idx);
+    const chevron = document.getElementById('bk-chevron-' + idx);
+    const hidden = body.classList.toggle('hidden');
+    chevron.style.transform = hidden ? 'rotate(180deg)' : '';
+  }
+
+  function highlightPickup(label) {
+    const group = label.closest('.space-y-2');
+    group.querySelectorAll('.bk-pickup').forEach(l => {
+      l.classList.remove('border-brand','bg-brand/5');
+      l.classList.add('border-gray-200');
+    });
+    label.classList.remove('border-gray-200');
+    label.classList.add('border-brand','bg-brand/5');
+  }
+
+  function highlightPayment(label) {
+    const group = label.closest('.space-y-2');
+    group.querySelectorAll('.bk-payment').forEach(l => {
+      l.classList.remove('border-brand','bg-brand/5');
+      l.classList.add('border-gray-200');
+    });
+    label.classList.remove('border-gray-200');
+    label.classList.add('border-brand','bg-brand/5');
+  }
+
+  function toggleOtherPickup(idx, radio) {
+    const input = document.getElementById('bk-pickup-other-' + idx);
+    if (input) input.classList.toggle('hidden', !radio.checked);
+  }
+
+  function useSameGuest() {
+    const first = document.getElementById('bk-first-0')?.value;
+    const last  = document.getElementById('bk-last-0')?.value;
+    const email = document.getElementById('bk-email-0')?.value;
+    const items = cart.length > 0 ? cart : [{}];
+    for (let i = 1; i < items.length; i++) {
+      const f = document.getElementById('bk-first-' + i);
+      const l = document.getElementById('bk-last-' + i);
+      const e = document.getElementById('bk-email-' + i);
+      if (f) f.value = first;
+      if (l) l.value = last;
+      if (e) e.value = email;
+    }
+  }
+
+  function fillPhonePrefix(selectId) {
+    const countries = [
+      ['AF','Afghanistan','+93'],['AL','Albania','+355'],['DZ','Algeria','+213'],['AD','Andorra','+376'],
+      ['AO','Angola','+244'],['AG','Antigua','+1-268'],['AR','Argentina','+54'],['AM','Armenia','+374'],
+      ['AU','Australia','+61'],['AT','Austria','+43'],['AZ','Azerbaijan','+994'],['BH','Bahrain','+973'],
+      ['BD','Bangladesh','+880'],['BY','Belarus','+375'],['BE','Belgium','+32'],['BO','Bolivia','+591'],
+      ['BA','Bosnia','+387'],['BR','Brazil','+55'],['BG','Bulgaria','+359'],['CA','Canada','+1'],
+      ['CL','Chile','+56'],['CN','China','+86'],['CO','Colombia','+57'],['HR','Croatia','+385'],
+      ['CU','Cuba','+53'],['CY','Cyprus','+357'],['CZ','Czech Republic','+420'],['DK','Denmark','+45'],
+      ['EG','Egypt','+20'],['EE','Estonia','+372'],['ET','Ethiopia','+251'],['FI','Finland','+358'],
+      ['FR','France','+33'],['DE','Germany','+49'],['GH','Ghana','+233'],['GR','Greece','+30'],
+      ['HU','Hungary','+36'],['IN','India','+91'],['ID','Indonesia','+62'],['IR','Iran','+98'],
+      ['IQ','Iraq','+964'],['IE','Ireland','+353'],['IL','Israel','+972'],['IT','Italy','+39'],
+      ['JP','Japan','+81'],['JO','Jordan','+962'],['KZ','Kazakhstan','+7'],['KE','Kenya','+254'],
+      ['KW','Kuwait','+965'],['LV','Latvia','+371'],['LB','Lebanon','+961'],['LT','Lithuania','+370'],
+      ['LU','Luxembourg','+352'],['MY','Malaysia','+60'],['MT','Malta','+356'],['MX','Mexico','+52'],
+      ['MD','Moldova','+373'],['MC','Monaco','+377'],['MA','Morocco','+212'],['NL','Netherlands','+31'],
+      ['NZ','New Zealand','+64'],['NG','Nigeria','+234'],['NO','Norway','+47'],['OM','Oman','+968'],
+      ['PK','Pakistan','+92'],['PA','Panama','+507'],['PY','Paraguay','+595'],['PE','Peru','+51'],
+      ['PH','Philippines','+63'],['PL','Poland','+48'],['PT','Portugal','+351'],['QA','Qatar','+974'],
+      ['RO','Romania','+40'],['RU','Russia','+7'],['SA','Saudi Arabia','+966'],['RS','Serbia','+381'],
+      ['SG','Singapore','+65'],['SK','Slovakia','+421'],['SI','Slovenia','+386'],['ZA','South Africa','+27'],
+      ['ES','Spain','+34'],['SE','Sweden','+46'],['CH','Switzerland','+41'],['TW','Taiwan','+886'],
+      ['TH','Thailand','+66'],['TN','Tunisia','+216'],['TR','Turkey','+90'],['UA','Ukraine','+380'],
+      ['AE','UAE','+971'],['GB','United Kingdom','+44'],['US','United States','+1'],['UY','Uruguay','+598'],
+      ['UZ','Uzbekistan','+998'],['VE','Venezuela','+58'],['VN','Vietnam','+84']
+    ];
+    const sel = document.getElementById(selectId);
+    if (!sel) return;
+    countries.forEach(([code, name, dial]) => {
+      const opt = document.createElement('option');
+      opt.value = dial;
+      opt.textContent = name + ' (' + dial + ')';
+      if (code === 'PL') opt.selected = true;
+      sel.appendChild(opt);
+    });
   }
 
   function completeBooking() {
@@ -3125,68 +3227,6 @@ tailwind.config = {
       if (summary) summary.innerHTML = '<strong>' + tourName + '</strong> — selected from commission table';
     }, 100);
   }
-</script>
-<script>
-  (function() {
-    const countries = [
-      ['AF','Afghanistan','+93'],['AL','Albania','+355'],['DZ','Algeria','+213'],['AD','Andorra','+376'],
-      ['AO','Angola','+244'],['AG','Antigua and Barbuda','+1-268'],['AR','Argentina','+54'],['AM','Armenia','+374'],
-      ['AU','Australia','+61'],['AT','Austria','+43'],['AZ','Azerbaijan','+994'],['BS','Bahamas','+1-242'],
-      ['BH','Bahrain','+973'],['BD','Bangladesh','+880'],['BB','Barbados','+1-246'],['BY','Belarus','+375'],
-      ['BE','Belgium','+32'],['BZ','Belize','+501'],['BJ','Benin','+229'],['BT','Bhutan','+975'],
-      ['BO','Bolivia','+591'],['BA','Bosnia and Herzegovina','+387'],['BW','Botswana','+267'],['BR','Brazil','+55'],
-      ['BN','Brunei','+673'],['BG','Bulgaria','+359'],['BF','Burkina Faso','+226'],['BI','Burundi','+257'],
-      ['CV','Cabo Verde','+238'],['KH','Cambodia','+855'],['CM','Cameroon','+237'],['CA','Canada','+1'],
-      ['CF','Central African Republic','+236'],['TD','Chad','+235'],['CL','Chile','+56'],['CN','China','+86'],
-      ['CO','Colombia','+57'],['KM','Comoros','+269'],['CD','Congo (DRC)','+243'],['CG','Congo','+242'],
-      ['CR','Costa Rica','+506'],['HR','Croatia','+385'],['CU','Cuba','+53'],['CY','Cyprus','+357'],
-      ['CZ','Czech Republic','+420'],['DK','Denmark','+45'],['DJ','Djibouti','+253'],['DM','Dominica','+1-767'],
-      ['DO','Dominican Republic','+1-809'],['EC','Ecuador','+593'],['EG','Egypt','+20'],['SV','El Salvador','+503'],
-      ['GQ','Equatorial Guinea','+240'],['ER','Eritrea','+291'],['EE','Estonia','+372'],['SZ','Eswatini','+268'],
-      ['ET','Ethiopia','+251'],['FJ','Fiji','+679'],['FI','Finland','+358'],['FR','France','+33'],
-      ['GA','Gabon','+241'],['GM','Gambia','+220'],['GE','Georgia','+995'],['DE','Germany','+49'],
-      ['GH','Ghana','+233'],['GR','Greece','+30'],['GD','Grenada','+1-473'],['GT','Guatemala','+502'],
-      ['GN','Guinea','+224'],['GW','Guinea-Bissau','+245'],['GY','Guyana','+592'],['HT','Haiti','+509'],
-      ['HN','Honduras','+504'],['HU','Hungary','+36'],['IS','Iceland','+354'],['IN','India','+91'],
-      ['ID','Indonesia','+62'],['IR','Iran','+98'],['IQ','Iraq','+964'],['IE','Ireland','+353'],
-      ['IL','Israel','+972'],['IT','Italy','+39'],['JM','Jamaica','+1-876'],['JP','Japan','+81'],
-      ['JO','Jordan','+962'],['KZ','Kazakhstan','+7'],['KE','Kenya','+254'],['KI','Kiribati','+686'],
-      ['KW','Kuwait','+965'],['KG','Kyrgyzstan','+996'],['LA','Laos','+856'],['LV','Latvia','+371'],
-      ['LB','Lebanon','+961'],['LS','Lesotho','+266'],['LR','Liberia','+231'],['LY','Libya','+218'],
-      ['LI','Liechtenstein','+423'],['LT','Lithuania','+370'],['LU','Luxembourg','+352'],['MG','Madagascar','+261'],
-      ['MW','Malawi','+265'],['MY','Malaysia','+60'],['MV','Maldives','+960'],['ML','Mali','+223'],
-      ['MT','Malta','+356'],['MH','Marshall Islands','+692'],['MR','Mauritania','+222'],['MU','Mauritius','+230'],
-      ['MX','Mexico','+52'],['FM','Micronesia','+691'],['MD','Moldova','+373'],['MC','Monaco','+377'],
-      ['MN','Mongolia','+976'],['ME','Montenegro','+382'],['MA','Morocco','+212'],['MZ','Mozambique','+258'],
-      ['MM','Myanmar','+95'],['NA','Namibia','+264'],['NR','Nauru','+674'],['NP','Nepal','+977'],
-      ['NL','Netherlands','+31'],['NZ','New Zealand','+64'],['NI','Nicaragua','+505'],['NE','Niger','+227'],
-      ['NG','Nigeria','+234'],['NO','Norway','+47'],['OM','Oman','+968'],['PK','Pakistan','+92'],
-      ['PW','Palau','+680'],['PA','Panama','+507'],['PG','Papua New Guinea','+675'],['PY','Paraguay','+595'],
-      ['PE','Peru','+51'],['PH','Philippines','+63'],['PL','Poland','+48'],['PT','Portugal','+351'],
-      ['QA','Qatar','+974'],['RO','Romania','+40'],['RU','Russia','+7'],['RW','Rwanda','+250'],
-      ['KN','Saint Kitts and Nevis','+1-869'],['LC','Saint Lucia','+1-758'],['VC','Saint Vincent','+1-784'],
-      ['WS','Samoa','+685'],['SM','San Marino','+378'],['ST','Sao Tome and Principe','+239'],['SA','Saudi Arabia','+966'],
-      ['SN','Senegal','+221'],['RS','Serbia','+381'],['SC','Seychelles','+248'],['SL','Sierra Leone','+232'],
-      ['SG','Singapore','+65'],['SK','Slovakia','+421'],['SI','Slovenia','+386'],['SB','Solomon Islands','+677'],
-      ['SO','Somalia','+252'],['ZA','South Africa','+27'],['SS','South Sudan','+211'],['ES','Spain','+34'],
-      ['LK','Sri Lanka','+94'],['SD','Sudan','+249'],['SR','Suriname','+597'],['SE','Sweden','+46'],
-      ['CH','Switzerland','+41'],['SY','Syria','+963'],['TW','Taiwan','+886'],['TJ','Tajikistan','+992'],
-      ['TZ','Tanzania','+255'],['TH','Thailand','+66'],['TL','Timor-Leste','+670'],['TG','Togo','+228'],
-      ['TO','Tonga','+676'],['TT','Trinidad and Tobago','+1-868'],['TN','Tunisia','+216'],['TR','Turkey','+90'],
-      ['TM','Turkmenistan','+993'],['TV','Tuvalu','+688'],['UG','Uganda','+256'],['UA','Ukraine','+380'],
-      ['AE','United Arab Emirates','+971'],['GB','United Kingdom','+44'],['US','United States','+1'],
-      ['UY','Uruguay','+598'],['UZ','Uzbekistan','+998'],['VU','Vanuatu','+678'],['VE','Venezuela','+58'],
-      ['VN','Vietnam','+84'],['YE','Yemen','+967'],['ZM','Zambia','+260'],['ZW','Zimbabwe','+263']
-    ];
-    const sel = document.getElementById('phone-prefix-select');
-    countries.forEach(([code, name, dial]) => {
-      const opt = document.createElement('option');
-      opt.value = dial;
-      opt.textContent = name + ' (' + dial + ')';
-      if (code === 'PL') opt.selected = true;
-      sel.appendChild(opt);
-    });
-  })();
 </script>
 </body>
 </html>
