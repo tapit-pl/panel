@@ -47,8 +47,8 @@ tailwind.config = {
   .section { display: none; }
   .section.active { display: block; }
   input[type=range]::-webkit-slider-thumb { background: #E8751A; }
-  #edit-booking-drawer, #partner-detail-drawer { transform: translateX(100%); transition: transform 0.28s cubic-bezier(.4,0,.2,1); }
-  #edit-booking-drawer.open, #partner-detail-drawer.open { transform: translateX(0); }
+  #edit-booking-drawer, #partner-detail-drawer, #ticket-detail-drawer { transform: translateX(100%); transition: transform 0.28s cubic-bezier(.4,0,.2,1); }
+  #edit-booking-drawer.open, #partner-detail-drawer.open, #ticket-detail-drawer.open { transform: translateX(0); }
   @media print {
     body > *:not(#voucher-print-wrap) { display: none !important; }
     #voucher-print-wrap { display: block !important; position: fixed; inset: 0; background: white; padding: 32px; }
@@ -77,6 +77,10 @@ tailwind.config = {
         <button onclick="showSection('settlement')" class="sidebar-link w-full flex items-center px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">Commission Settlement</button>
         <button onclick="showSection('tours')" class="sidebar-link w-full flex items-center px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">Tours & Pricing</button>
         <button onclick="showSection('staff')" class="sidebar-link w-full flex items-center px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">Staff</button>
+        <div class="my-2 border-t border-white/8"></div>
+        <button onclick="showSection('support')" class="sidebar-link w-full flex items-center px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">Support <span id="sidebar-support-badge" class="ml-auto bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">3</span></button>
+        <button onclick="showSection('printorders')" class="sidebar-link w-full flex items-center px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">Print Orders <span id="sidebar-print-badge" class="ml-auto bg-brand text-white text-xs font-bold px-1.5 py-0.5 rounded-full">2</span></button>
+        <button onclick="showSection('notifications')" class="sidebar-link w-full flex items-center px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">Notifications</button>
       </nav>
 
       <!-- Bottom user -->
@@ -844,6 +848,128 @@ tailwind.config = {
           </div>
         </div>
 
+        <!-- ===== SECTION: SUPPORT ===== -->
+        <div id="section-support" class="section fade-in">
+          <div class="flex items-center justify-between mb-5">
+            <div>
+              <h1 class="text-lg font-bold text-dark">Support</h1>
+              <p class="text-xs text-gray-400 mt-0.5">Help requests submitted by partners from their panel</p>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="flex gap-2 mb-4 flex-wrap">
+            <button onclick="filterTickets('all')" id="tfilter-all" class="ticket-filter-btn text-xs px-3 py-1.5 rounded-lg font-semibold border border-brand bg-brand text-white transition-colors">All</button>
+            <button onclick="filterTickets('Open')" id="tfilter-Open" class="ticket-filter-btn text-xs px-3 py-1.5 rounded-lg font-semibold border border-gray-200 bg-white text-gray-500 transition-colors">Open</button>
+            <button onclick="filterTickets('In Progress')" id="tfilter-In Progress" class="ticket-filter-btn text-xs px-3 py-1.5 rounded-lg font-semibold border border-gray-200 bg-white text-gray-500 transition-colors">In Progress</button>
+            <button onclick="filterTickets('Resolved')" id="tfilter-Resolved" class="ticket-filter-btn text-xs px-3 py-1.5 rounded-lg font-semibold border border-gray-200 bg-white text-gray-500 transition-colors">Resolved</button>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <table class="w-full text-xs">
+              <thead>
+                <tr class="border-b border-gray-100 bg-gray-50/60">
+                  <th class="text-left px-5 py-3 text-gray-400 font-semibold">#</th>
+                  <th class="text-left px-4 py-3 text-gray-400 font-semibold">Partner</th>
+                  <th class="text-left px-4 py-3 text-gray-400 font-semibold">Subject</th>
+                  <th class="text-left px-4 py-3 text-gray-400 font-semibold">Received</th>
+                  <th class="text-center px-4 py-3 text-gray-400 font-semibold">Priority</th>
+                  <th class="text-center px-4 py-3 text-gray-400 font-semibold">Status</th>
+                  <th class="px-4 py-3"></th>
+                </tr>
+              </thead>
+              <tbody id="tickets-tbody" class="divide-y divide-gray-50">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ===== SECTION: PRINT ORDERS ===== -->
+        <div id="section-printorders" class="section fade-in">
+          <div class="flex items-center justify-between mb-5">
+            <div>
+              <h1 class="text-lg font-bold text-dark">Print Orders</h1>
+              <p class="text-xs text-gray-400 mt-0.5">Brochure and flyer orders submitted by partners</p>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <table class="w-full text-xs">
+              <thead>
+                <tr class="border-b border-gray-100 bg-gray-50/60">
+                  <th class="text-left px-5 py-3 text-gray-400 font-semibold">#</th>
+                  <th class="text-left px-4 py-3 text-gray-400 font-semibold">Partner</th>
+                  <th class="text-left px-4 py-3 text-gray-400 font-semibold">Material</th>
+                  <th class="text-center px-4 py-3 text-gray-400 font-semibold">Qty</th>
+                  <th class="text-left px-4 py-3 text-gray-400 font-semibold">Ordered</th>
+                  <th class="text-left px-4 py-3 text-gray-400 font-semibold">Delivery note</th>
+                  <th class="text-center px-4 py-3 text-gray-400 font-semibold">Status</th>
+                  <th class="px-4 py-3"></th>
+                </tr>
+              </thead>
+              <tbody id="printorders-tbody" class="divide-y divide-gray-50">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ===== SECTION: NOTIFICATIONS ===== -->
+        <div id="section-notifications" class="section fade-in">
+          <div class="flex items-center justify-between mb-5">
+            <div>
+              <h1 class="text-lg font-bold text-dark">Notifications</h1>
+              <p class="text-xs text-gray-400 mt-0.5">Send bell notifications to partners' panels</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
+
+            <!-- Compose -->
+            <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-5">
+              <div class="font-semibold text-dark text-sm mb-4">New notification</div>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-xs font-semibold text-gray-600 mb-1.5">Send to</label>
+                  <select id="notif-target" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 text-dark">
+                    <option value="all">All partners</option>
+                    <option value="wawel">Hotel Wawel Kraków</option>
+                    <option value="stary">Hotel Stary</option>
+                    <option value="copernicus">Hotel Copernicus</option>
+                    <option value="roza">Hotel Pod Różą</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-600 mb-1.5">Type</label>
+                  <select id="notif-type" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 text-dark">
+                    <option value="info">ℹ️ Info</option>
+                    <option value="warning">⚠️ Warning</option>
+                    <option value="success">✅ Good news</option>
+                    <option value="urgent">🔴 Urgent</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-600 mb-1.5">Title</label>
+                  <input id="notif-title" type="text" placeholder="e.g. New tour available" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-600 mb-1.5">Message</label>
+                  <textarea id="notif-message" rows="3" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 resize-none" placeholder="Full notification text…"></textarea>
+                </div>
+                <button onclick="sendNotification()" class="w-full bg-brand hover:bg-brand-dark text-white text-sm font-semibold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2">
+                  <i class="fa-solid fa-bell"></i>Send notification
+                </button>
+              </div>
+            </div>
+
+            <!-- Sent history -->
+            <div class="lg:col-span-3 bg-white rounded-xl shadow-sm p-5">
+              <div class="font-semibold text-dark text-sm mb-4">Sent notifications</div>
+              <div id="notif-history" class="space-y-3"></div>
+            </div>
+
+          </div>
+        </div>
+
       </main>
     </div>
   </div>
@@ -959,6 +1085,49 @@ tailwind.config = {
       <button onclick="saveManualBooking()" class="flex-1 text-sm bg-brand hover:bg-brand-dark text-white font-semibold rounded-xl py-2.5 transition-colors">
         <i class="fa-solid fa-check mr-2"></i>Save booking
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== TICKET DETAIL PANEL ===================== -->
+<div id="ticket-detail-panel" class="fixed inset-0 z-50 hidden">
+  <div onclick="closeTicketDetail()" class="absolute inset-0 bg-black/40 modal-bg"></div>
+  <div id="ticket-detail-drawer" class="absolute right-0 top-0 bottom-0 w-full max-w-lg bg-white shadow-2xl flex flex-col">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <div>
+        <div class="font-bold text-dark text-base" id="td-ref">—</div>
+        <div class="text-xs text-gray-400 mt-0.5" id="td-meta">—</div>
+      </div>
+      <button onclick="closeTicketDetail()" class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-gray-100 text-gray-400"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+      <div class="bg-gray-50 rounded-xl p-4">
+        <div class="text-xs text-gray-400 mb-1">Subject</div>
+        <div class="text-sm font-semibold text-dark" id="td-subject">—</div>
+      </div>
+      <div class="bg-gray-50 rounded-xl p-4">
+        <div class="text-xs text-gray-400 mb-1.5">Message from partner</div>
+        <div class="text-sm text-dark leading-relaxed" id="td-message">—</div>
+      </div>
+      <div id="td-attachment-row" class="hidden bg-blue-50 rounded-xl px-4 py-3 flex items-center gap-2 text-xs text-blue-600 font-semibold">
+        <i class="fa-solid fa-paperclip"></i><span id="td-attachment">—</span>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Status</label>
+        <select id="td-status-select" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 text-dark">
+          <option value="Open">Open</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Resolved">Resolved</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Reply to partner <span class="text-gray-400 font-normal">(internal note after backend)</span></label>
+        <textarea id="td-reply" rows="4" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 resize-none" placeholder="Type your reply…"></textarea>
+      </div>
+    </div>
+    <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/60 flex gap-2">
+      <button onclick="saveTicket()" class="flex-1 bg-brand hover:bg-brand-dark text-white text-sm font-semibold py-2.5 rounded-xl transition-colors">Save & update status</button>
+      <button onclick="closeTicketDetail()" class="px-5 py-2.5 border border-gray-200 text-gray-500 text-sm font-semibold rounded-xl hover:bg-white transition-colors">Cancel</button>
     </div>
   </div>
 </div>
@@ -1443,6 +1612,9 @@ tailwind.config = {
     renderDashboardChart();
     renderBookingsTable();
     renderPartnersTable();
+    renderTicketsTable();
+    renderPrintOrders();
+    renderNotifHistory();
   });
 
   function goToLogin() {
@@ -1806,6 +1978,169 @@ tailwind.config = {
   function saveManualBooking() {
     closeManualBooking();
     showToast('Booking saved successfully!');
+  }
+
+  // ===== Support Tickets =====
+  const allTickets = [
+    { id:'TM-HELP-7', partner:'Hotel Wawel Kraków', subject:'Guest cannot find booking confirmation', message:'One of our guests (Room 204, Mr. Smith) says he did not receive a confirmation email for his Zakopane trip tomorrow at 8:30. Can you resend?', received:'Apr 7, 10:22', priority:'High',   status:'Open',        attachment:null, reply:'' },
+    { id:'TM-HELP-6', partner:'Hotel Stary',        subject:'Incorrect pickup time on voucher',       message:'The voucher shows 8:15 but we agreed the pickup would be at 8:00. Please correct this for future bookings.', received:'Apr 6, 15:44', priority:'Medium', status:'In Progress', attachment:'voucher_scan.jpg', reply:'We are checking with the guide.' },
+    { id:'TM-HELP-5', partner:'Hotel Copernicus',   subject:'Request to add extra tour option',        message:'Several guests have asked about a night city tour. Is this something you offer? We would like to add it to our recommendations.', received:'Apr 5, 09:11', priority:'Low',    status:'Open',        attachment:null, reply:'' },
+    { id:'TM-HELP-4', partner:'Hotel Wawel Kraków', subject:'Commission amount seems incorrect',       message:'For March we counted 7 bookings but the settlement shows only 6. Please verify booking #TM-00847.', received:'Apr 3, 14:05', priority:'High',   status:'Resolved',    attachment:null, reply:'Verified — booking was cancelled and excluded from settlement.' },
+    { id:'TM-HELP-3', partner:'Hotel Pod Różą',     subject:'Cannot log into panel',                  message:'We have been trying to log in since yesterday but keep getting "invalid password". Please reset our access.', received:'Apr 1, 08:30', priority:'High',   status:'Resolved',    attachment:null, reply:'Password has been reset and sent to your email.' },
+  ];
+
+  let currentTicketFilter = 'all';
+  let editingTicketId = null;
+
+  function renderTicketsTable(data) {
+    const tbody = document.getElementById('tickets-tbody');
+    if (!tbody) return;
+    const rows = data !== undefined ? data : (currentTicketFilter === 'all' ? allTickets : allTickets.filter(t => t.status === currentTicketFilter));
+    tbody.innerHTML = '';
+    rows.forEach(t => {
+      const statusClass = t.status === 'Open' ? 'bg-red-100 text-red-700' : t.status === 'In Progress' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700';
+      const prioClass   = t.priority === 'High' ? 'bg-red-50 text-red-600' : t.priority === 'Medium' ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-100 text-gray-500';
+      tbody.insertAdjacentHTML('beforeend', `
+        <tr class="hover:bg-gray-50 transition-colors cursor-pointer text-xs" onclick="openTicketDetail('${t.id}')">
+          <td class="px-5 py-3 font-mono text-gray-400">${t.id}</td>
+          <td class="px-4 py-3 font-medium text-dark">${t.partner}</td>
+          <td class="px-4 py-3 text-gray-600 max-w-xs truncate">${t.subject}</td>
+          <td class="px-4 py-3 text-gray-400 whitespace-nowrap">${t.received}</td>
+          <td class="px-4 py-3 text-center"><span class="text-xs font-semibold px-2 py-0.5 rounded-full ${prioClass}">${t.priority}</span></td>
+          <td class="px-4 py-3 text-center"><span class="text-xs font-semibold px-2 py-0.5 rounded-full ${statusClass}">${t.status}</span></td>
+          <td class="px-4 py-3 text-right"><button class="text-gray-300 hover:text-brand text-xs"><i class="fa-solid fa-arrow-right"></i></button></td>
+        </tr>`);
+    });
+    // Update sidebar badge
+    const openCount = allTickets.filter(t => t.status === 'Open').length;
+    const badge = document.getElementById('sidebar-support-badge');
+    if (badge) { badge.textContent = openCount; badge.classList.toggle('hidden', openCount === 0); }
+  }
+
+  function filterTickets(f) {
+    currentTicketFilter = f;
+    document.querySelectorAll('.ticket-filter-btn').forEach(b => {
+      const active = b.id === 'tfilter-' + f;
+      b.classList.toggle('bg-brand', active); b.classList.toggle('text-white', active); b.classList.toggle('border-brand', active);
+      b.classList.toggle('bg-white', !active); b.classList.toggle('text-gray-500', !active); b.classList.toggle('border-gray-200', !active);
+    });
+    renderTicketsTable();
+  }
+
+  function openTicketDetail(id) {
+    const t = allTickets.find(x => x.id === id);
+    if (!t) return;
+    editingTicketId = id;
+    document.getElementById('td-ref').textContent     = t.id;
+    document.getElementById('td-meta').textContent    = t.partner + ' · ' + t.received;
+    document.getElementById('td-subject').textContent = t.subject;
+    document.getElementById('td-message').textContent = t.message;
+    document.getElementById('td-status-select').value = t.status;
+    document.getElementById('td-reply').value         = t.reply || '';
+    const attRow = document.getElementById('td-attachment-row');
+    if (t.attachment) { attRow.classList.remove('hidden'); document.getElementById('td-attachment').textContent = t.attachment; }
+    else { attRow.classList.add('hidden'); }
+    const panel = document.getElementById('ticket-detail-panel');
+    panel.classList.remove('hidden');
+    requestAnimationFrame(() => document.getElementById('ticket-detail-drawer').classList.add('open'));
+  }
+  function closeTicketDetail() {
+    document.getElementById('ticket-detail-drawer').classList.remove('open');
+    setTimeout(() => document.getElementById('ticket-detail-panel').classList.add('hidden'), 280);
+  }
+  function saveTicket() {
+    const t = allTickets.find(x => x.id === editingTicketId);
+    if (!t) return;
+    t.status = document.getElementById('td-status-select').value;
+    t.reply  = document.getElementById('td-reply').value;
+    renderTicketsTable();
+    closeTicketDetail();
+    showToast('Ticket updated.');
+  }
+
+  // ===== Print Orders =====
+  const allPrintOrders = [
+    { id:'PO-012', partner:'Hotel Wawel Kraków', material:'Trifold brochure (PL)',  qty:200, ordered:'Apr 6', note:'',                    status:'New' },
+    { id:'PO-011', partner:'Hotel Stary',        material:'Desk flyer A5 (EN)',     qty:100, ordered:'Apr 4', note:'',                    status:'New' },
+    { id:'PO-010', partner:'Hotel Copernicus',   material:'Trifold brochure (EN)',  qty:150, ordered:'Mar 28', note:'Delivered Apr 2',    status:'Sent' },
+    { id:'PO-009', partner:'Hotel Wawel Kraków', material:'Poster A3',              qty:10,  ordered:'Mar 20', note:'Delivered Mar 25',   status:'Sent' },
+    { id:'PO-008', partner:'Hotel Pod Różą',     material:'Desk flyer A5 (PL/EN)', qty:50,  ordered:'Mar 10', note:'Delivered Mar 14',   status:'Sent' },
+  ];
+
+  function renderPrintOrders() {
+    const tbody = document.getElementById('printorders-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    allPrintOrders.forEach(o => {
+      const statusClass = o.status === 'New' ? 'bg-red-100 text-red-700' : o.status === 'Processing' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700';
+      tbody.insertAdjacentHTML('beforeend', `
+        <tr class="hover:bg-gray-50 text-xs transition-colors">
+          <td class="px-5 py-3 font-mono text-gray-400">${o.id}</td>
+          <td class="px-4 py-3 font-medium text-dark">${o.partner}</td>
+          <td class="px-4 py-3 text-gray-600">${o.material}</td>
+          <td class="px-4 py-3 text-center font-semibold text-dark">${o.qty}</td>
+          <td class="px-4 py-3 text-gray-400">${o.ordered}</td>
+          <td class="px-4 py-3 text-gray-500">${o.note || '<span class="text-gray-300 italic">—</span>'}</td>
+          <td class="px-4 py-3 text-center"><span class="text-xs font-semibold px-2 py-0.5 rounded-full ${statusClass}">${o.status}</span></td>
+          <td class="px-4 py-3 text-right">
+            <select onchange="changePrintStatus('${o.id}', this.value)" class="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-brand/30 text-gray-600">
+              <option ${o.status==='New'?'selected':''}>New</option>
+              <option ${o.status==='Processing'?'selected':''}>Processing</option>
+              <option ${o.status==='Sent'?'selected':''}>Sent</option>
+            </select>
+          </td>
+        </tr>`);
+    });
+    // Update sidebar badge
+    const newCount = allPrintOrders.filter(o => o.status === 'New').length;
+    const badge = document.getElementById('sidebar-print-badge');
+    if (badge) { badge.textContent = newCount; badge.classList.toggle('hidden', newCount === 0); }
+  }
+
+  function changePrintStatus(id, newStatus) {
+    const o = allPrintOrders.find(x => x.id === id);
+    if (!o) return;
+    o.status = newStatus;
+    if (newStatus === 'Sent' && !o.note) o.note = 'Delivered ' + new Date().toLocaleDateString('en', {month:'short', day:'numeric'});
+    renderPrintOrders();
+    showToast('Order ' + id + ' marked as ' + newStatus + '.');
+  }
+
+  // ===== Notifications =====
+  const sentNotifications = [
+    { id:1, target:'All partners',        type:'info',    title:'New tour: Bochnia Salt Mine evening',     message:'We have added a new evening departure for Bochnia Salt Mine every Friday at 17:00. Update your recommendations!', sent:'Apr 5, 09:00' },
+    { id:2, target:'Hotel Wawel Kraków',  type:'warning', title:'Pickup time change — Apr 10',              message:'Due to road works on ul. Sławkowska, the Auschwitz pickup on April 10 will be 15 minutes earlier (7:45 instead of 8:00).', sent:'Apr 4, 16:30' },
+    { id:3, target:'All partners',        type:'success', title:'Record month — thank you!',                message:'March 2026 was our best month ever with 89 bookings. Thank you for your partnership!', sent:'Apr 1, 10:00' },
+  ];
+
+  function renderNotifHistory() {
+    const el = document.getElementById('notif-history');
+    if (!el) return;
+    if (sentNotifications.length === 0) { el.innerHTML = '<div class="text-xs text-gray-400 italic">No notifications sent yet.</div>'; return; }
+    const typeIcon = { info:'ℹ️', warning:'⚠️', success:'✅', urgent:'🔴' };
+    el.innerHTML = sentNotifications.map(n => `
+      <div class="border border-gray-100 rounded-xl p-4">
+        <div class="flex items-start justify-between gap-2 mb-1">
+          <div class="text-sm font-semibold text-dark">${typeIcon[n.type] || 'ℹ️'} ${n.title}</div>
+          <div class="text-xs text-gray-400 whitespace-nowrap shrink-0">${n.sent}</div>
+        </div>
+        <div class="text-xs text-gray-500 mb-2 leading-relaxed">${n.message}</div>
+        <div class="text-xs text-brand font-semibold">→ ${n.target}</div>
+      </div>`).join('');
+  }
+
+  function sendNotification() {
+    const title   = document.getElementById('notif-title').value.trim();
+    const message = document.getElementById('notif-message').value.trim();
+    const targetVal = document.getElementById('notif-target').value;
+    const targetLabel = document.getElementById('notif-target').options[document.getElementById('notif-target').selectedIndex].text;
+    if (!title || !message) { showToast('Please fill in title and message.'); return; }
+    const type = document.getElementById('notif-type').value;
+    sentNotifications.unshift({ id: Date.now(), target: targetLabel, type, title, message, sent: new Date().toLocaleDateString('en', {month:'short', day:'numeric'}) + ', ' + new Date().toLocaleTimeString('en', {hour:'2-digit', minute:'2-digit'}) });
+    document.getElementById('notif-title').value   = '';
+    document.getElementById('notif-message').value = '';
+    renderNotifHistory();
+    showToast('Notification sent to ' + targetLabel + '!');
   }
 
   // ===== Partners =====
