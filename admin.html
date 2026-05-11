@@ -47,8 +47,8 @@ tailwind.config = {
   .section { display: none; }
   .section.active { display: block; }
   input[type=range]::-webkit-slider-thumb { background: #E8751A; }
-  #edit-booking-drawer { transform: translateX(100%); transition: transform 0.28s cubic-bezier(.4,0,.2,1); }
-  #edit-booking-drawer.open { transform: translateX(0); }
+  #edit-booking-drawer, #partner-detail-drawer { transform: translateX(100%); transition: transform 0.28s cubic-bezier(.4,0,.2,1); }
+  #edit-booking-drawer.open, #partner-detail-drawer.open { transform: translateX(0); }
   @media print {
     body > *:not(#voucher-print-wrap) { display: none !important; }
     #voucher-print-wrap { display: block !important; position: fixed; inset: 0; background: white; padding: 32px; }
@@ -430,117 +430,32 @@ tailwind.config = {
               <h1 class="text-xl font-bold text-dark">Partners</h1>
               <p class="text-xs text-gray-400 mt-0.5">4 active partners · Kraków</p>
             </div>
-            <button class="flex items-center gap-2 bg-brand hover:bg-brand-dark text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors">
+            <button onclick="openAddPartner()" class="flex items-center gap-2 bg-brand hover:bg-brand-dark text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors">
               <i class="fa-solid fa-plus"></i>Add partner
             </button>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4">
-
-            <!-- Hotel 1 -->
-            <div class="bg-white rounded-2xl shadow-sm p-5 hover:shadow-md transition-shadow">
-              <div class="flex items-start justify-between mb-4">
-                <div class="w-12 h-12 bg-brand rounded-xl flex items-center justify-center text-white font-bold text-sm">HW</div>
-                <span class="text-xs bg-green-100 text-green-700 font-semibold px-2 py-0.5 rounded-full">Active</span>
-              </div>
-              <div class="font-bold text-dark text-sm mb-0.5">Hotel Wawel Kraków</div>
-              <div class="text-xs text-gray-400 mb-3">ul. Sławkowska 12 · ⭐⭐⭐⭐</div>
-              <div class="space-y-1.5 text-xs text-gray-500 mb-4">
-                <div><i class="fa-solid fa-user w-4 text-gray-300"></i>Jan Makowski</div>
-                <div><i class="fa-solid fa-phone w-4 text-gray-300"></i>+48 12 422 36 00</div>
-                <div><i class="fa-solid fa-calendar w-4 text-gray-300"></i>Partner since Jan 2023</div>
-              </div>
-              <div class="flex items-center justify-between pt-3 border-t border-gray-100">
-                <div class="text-center">
-                  <div class="text-lg font-bold text-dark">6</div>
-                  <div class="text-xs text-gray-400">bookings/mo</div>
-                </div>
-                <div class="text-center">
-                  <div class="text-lg font-bold text-brand">1 460</div>
-                  <div class="text-xs text-gray-400">comm. pln</div>
-                </div>
-                <button onclick="showSection('settlement')" class="text-xs text-brand hover:underline font-medium">Settle →</button>
-              </div>
+          <!-- Partners list -->
+          <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs">
+                <thead>
+                  <tr class="border-b border-gray-100 bg-gray-50/60">
+                    <th class="text-left px-5 py-3 text-gray-400 font-semibold w-8"></th>
+                    <th class="text-left px-4 py-3 text-gray-400 font-semibold">Name</th>
+                    <th class="text-left px-4 py-3 text-gray-400 font-semibold">Type</th>
+                    <th class="text-left px-4 py-3 text-gray-400 font-semibold">Contact</th>
+                    <th class="text-center px-4 py-3 text-gray-400 font-semibold">Bookings/mo</th>
+                    <th class="text-right px-4 py-3 text-gray-400 font-semibold">Comm. this month</th>
+                    <th class="text-center px-4 py-3 text-gray-400 font-semibold">Status</th>
+                    <th class="px-4 py-3"></th>
+                  </tr>
+                </thead>
+                <tbody id="partners-tbody" class="divide-y divide-gray-50">
+                  <!-- injected by JS -->
+                </tbody>
+              </table>
             </div>
-
-            <!-- Hotel 2 -->
-            <div class="bg-white rounded-2xl shadow-sm p-5 hover:shadow-md transition-shadow">
-              <div class="flex items-start justify-between mb-4">
-                <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white font-bold text-sm">HS</div>
-                <span class="text-xs bg-green-100 text-green-700 font-semibold px-2 py-0.5 rounded-full">Active</span>
-              </div>
-              <div class="font-bold text-dark text-sm mb-0.5">Hotel Stary</div>
-              <div class="text-xs text-gray-400 mb-3">ul. Szczepańska 5 · ⭐⭐⭐⭐⭐</div>
-              <div class="space-y-1.5 text-xs text-gray-500 mb-4">
-                <div><i class="fa-solid fa-user w-4 text-gray-300"></i>Maria Wiśniewska</div>
-                <div><i class="fa-solid fa-phone w-4 text-gray-300"></i>+48 12 384 08 08</div>
-                <div><i class="fa-solid fa-calendar w-4 text-gray-300"></i>Partner since Feb 2022</div>
-              </div>
-              <div class="flex items-center justify-between pt-3 border-t border-gray-100">
-                <div class="text-center">
-                  <div class="text-lg font-bold text-dark">3</div>
-                  <div class="text-xs text-gray-400">bookings/mo</div>
-                </div>
-                <div class="text-center">
-                  <div class="text-lg font-bold text-brand">475</div>
-                  <div class="text-xs text-gray-400">comm. pln</div>
-                </div>
-                <button onclick="showSection('settlement')" class="text-xs text-brand hover:underline font-medium">Settle →</button>
-              </div>
-            </div>
-
-            <!-- Hotel 3 -->
-            <div class="bg-white rounded-2xl shadow-sm p-5 hover:shadow-md transition-shadow">
-              <div class="flex items-start justify-between mb-4">
-                <div class="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center text-white font-bold text-sm">HC</div>
-                <span class="text-xs bg-green-100 text-green-700 font-semibold px-2 py-0.5 rounded-full">Active</span>
-              </div>
-              <div class="font-bold text-dark text-sm mb-0.5">Hotel Copernicus</div>
-              <div class="text-xs text-gray-400 mb-3">ul. Kanonicza 16 · ⭐⭐⭐⭐⭐</div>
-              <div class="space-y-1.5 text-xs text-gray-500 mb-4">
-                <div><i class="fa-solid fa-user w-4 text-gray-300"></i>Robert Kaczmarek</div>
-                <div><i class="fa-solid fa-phone w-4 text-gray-300"></i>+48 12 424 34 00</div>
-                <div><i class="fa-solid fa-calendar w-4 text-gray-300"></i>Partner since May 2024</div>
-              </div>
-              <div class="flex items-center justify-between pt-3 border-t border-gray-100">
-                <div class="text-center">
-                  <div class="text-lg font-bold text-dark">2</div>
-                  <div class="text-xs text-gray-400">bookings/mo</div>
-                </div>
-                <div class="text-center">
-                  <div class="text-lg font-bold text-brand">280</div>
-                  <div class="text-xs text-gray-400">comm. pln</div>
-                </div>
-                <button onclick="showSection('settlement')" class="text-xs text-brand hover:underline font-medium">Settle →</button>
-              </div>
-            </div>
-
-            <!-- Hotel 4 -->
-            <div class="bg-white rounded-2xl shadow-sm p-5 hover:shadow-md transition-shadow">
-              <div class="flex items-start justify-between mb-4">
-                <div class="w-12 h-12 bg-rose-400 rounded-xl flex items-center justify-center text-white font-bold text-sm">HP</div>
-                <span class="text-xs bg-yellow-100 text-yellow-700 font-semibold px-2 py-0.5 rounded-full">Inactive</span>
-              </div>
-              <div class="font-bold text-dark text-sm mb-0.5">Hotel Pod Różą</div>
-              <div class="text-xs text-gray-400 mb-3">ul. Floriańska 14 · ⭐⭐⭐⭐</div>
-              <div class="space-y-1.5 text-xs text-gray-500 mb-4">
-                <div><i class="fa-solid fa-user w-4 text-gray-300"></i>Anna Zielińska</div>
-                <div><i class="fa-solid fa-phone w-4 text-gray-300"></i>+48 12 424 33 00</div>
-                <div><i class="fa-solid fa-calendar w-4 text-gray-300"></i>Partner since Mar 2021</div>
-              </div>
-              <div class="flex items-center justify-between pt-3 border-t border-gray-100">
-                <div class="text-center">
-                  <div class="text-lg font-bold text-gray-400">0</div>
-                  <div class="text-xs text-gray-400">bookings/mo</div>
-                </div>
-                <div class="text-center">
-                  <div class="text-lg font-bold text-gray-400">—</div>
-                  <div class="text-xs text-gray-400">comm. pln</div>
-                </div>
-                <button class="text-xs text-gray-400 hover:text-brand font-medium transition-colors">Contact</button>
-              </div>
-            </div>
-
           </div>
         </div>
 
@@ -1048,6 +963,217 @@ tailwind.config = {
   </div>
 </div>
 
+<!-- ===================== MODAL: ADD PARTNER ===================== -->
+<div id="modal-add-partner" class="fixed inset-0 z-50 hidden modal-bg bg-black/50 items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg fade-in overflow-hidden">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <div class="font-bold text-dark text-base">Add new partner</div>
+      <button onclick="closeAddPartner()" class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-gray-100 text-gray-400"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="col-span-2">
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Property name <span class="text-red-400">*</span></label>
+          <input id="ap-name" type="text" placeholder="e.g. Hotel Wawel Kraków" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Type <span class="text-red-400">*</span></label>
+          <select id="ap-type" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 text-dark">
+            <option value="Hotel">Hotel</option>
+            <option value="Apartment">Apartment</option>
+            <option value="Hostel">Hostel</option>
+            <option value="Guesthouse">Guesthouse</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Stars (optional)</label>
+          <select id="ap-stars" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 text-dark">
+            <option value="">—</option>
+            <option value="1">⭐ 1 star</option>
+            <option value="2">⭐⭐ 2 stars</option>
+            <option value="3">⭐⭐⭐ 3 stars</option>
+            <option value="4">⭐⭐⭐⭐ 4 stars</option>
+            <option value="5">⭐⭐⭐⭐⭐ 5 stars</option>
+          </select>
+        </div>
+        <div class="col-span-2">
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Address</label>
+          <input id="ap-address" type="text" placeholder="ul. Sławkowska 12, Kraków" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Contact person <span class="text-red-400">*</span></label>
+          <input id="ap-contact" type="text" placeholder="First and last name" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Phone</label>
+          <input id="ap-phone" type="text" placeholder="+48 12 000 00 00" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Email <span class="text-red-400">*</span></label>
+          <input id="ap-email" type="email" placeholder="partner@hotel.pl" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Commission rate (%)</label>
+          <input id="ap-comm" type="number" placeholder="10" min="0" max="50" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        </div>
+      </div>
+
+      <div class="border-t border-gray-100 pt-4">
+        <div class="text-xs font-semibold text-gray-600 mb-3">Login credentials</div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs text-gray-500 mb-1.5">Username <span class="text-red-400">*</span></label>
+            <input id="ap-username" type="text" placeholder="hotel_wawel" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand font-mono">
+          </div>
+          <div>
+            <label class="block text-xs text-gray-500 mb-1.5">Password <span class="text-red-400">*</span></label>
+            <div class="relative">
+              <input id="ap-password" type="text" placeholder="auto-generated" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand font-mono">
+              <button onclick="generatePassword('ap-password')" title="Generate password" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand transition-colors"><i class="fa-solid fa-arrows-rotate text-xs"></i></button>
+            </div>
+          </div>
+        </div>
+        <div class="text-xs text-gray-400 mt-2"><i class="fa-solid fa-circle-info mr-1"></i>After backend integration, credentials will be emailed to the partner automatically.</div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Internal notes</label>
+        <textarea id="ap-notes" rows="2" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 resize-none" placeholder="Any notes visible only to TM staff…"></textarea>
+      </div>
+    </div>
+    <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/60 flex gap-2">
+      <button onclick="saveAddPartner()" class="flex-1 bg-brand hover:bg-brand-dark text-white text-sm font-semibold py-2.5 rounded-xl transition-colors">Add partner</button>
+      <button onclick="closeAddPartner()" class="px-5 py-2.5 border border-gray-200 text-gray-500 text-sm font-semibold rounded-xl hover:bg-white transition-colors">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== PARTNER DETAIL PANEL ===================== -->
+<div id="partner-detail-panel" class="fixed inset-0 z-50 hidden">
+  <div onclick="closePartnerDetail()" class="absolute inset-0 bg-black/40 modal-bg"></div>
+  <div id="partner-detail-drawer" class="absolute right-0 top-0 bottom-0 w-full max-w-lg bg-white shadow-2xl flex flex-col">
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <div class="flex items-center gap-3">
+        <div id="pd-avatar" class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0">HW</div>
+        <div>
+          <div class="font-bold text-dark text-sm" id="pd-name">—</div>
+          <div class="text-xs text-gray-400" id="pd-type-since">—</div>
+        </div>
+      </div>
+      <button onclick="closePartnerDetail()" class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-gray-100 text-gray-400"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <!-- Body -->
+    <div class="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+
+      <!-- Status + stats -->
+      <div class="grid grid-cols-3 gap-3">
+        <div class="bg-gray-50 rounded-xl px-3 py-3 text-center">
+          <div class="text-xs text-gray-400 mb-1">Status</div>
+          <span id="pd-status-badge" class="text-xs font-semibold px-2.5 py-1 rounded-full">—</span>
+        </div>
+        <div class="bg-gray-50 rounded-xl px-3 py-3 text-center">
+          <div class="text-xs text-gray-400 mb-1">Bookings/mo</div>
+          <div class="text-base font-bold text-dark" id="pd-bookings">—</div>
+        </div>
+        <div class="bg-gray-50 rounded-xl px-3 py-3 text-center">
+          <div class="text-xs text-gray-400 mb-1">Commission</div>
+          <div class="text-base font-bold text-brand" id="pd-comm">—</div>
+        </div>
+      </div>
+
+      <!-- Contact details -->
+      <div>
+        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Contact details</div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Property name</label>
+            <input id="pd-edit-name" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Type</label>
+            <select id="pd-edit-type" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 text-dark">
+              <option value="Hotel">Hotel</option>
+              <option value="Apartment">Apartment</option>
+              <option value="Hostel">Hostel</option>
+              <option value="Guesthouse">Guesthouse</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Contact person</label>
+            <input id="pd-edit-contact" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Phone</label>
+            <input id="pd-edit-phone" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+          <div class="col-span-2">
+            <label class="block text-xs text-gray-400 mb-1">Email</label>
+            <input id="pd-edit-email" type="email" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Address</label>
+            <input id="pd-edit-address" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Commission rate (%)</label>
+            <input id="pd-edit-commrate" type="number" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div>
+        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Internal notes</label>
+        <textarea id="pd-edit-notes" rows="2" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 resize-none" placeholder="Visible only to TM staff…"></textarea>
+      </div>
+
+      <!-- Security -->
+      <div class="border-t border-gray-100 pt-4">
+        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Security & access</div>
+        <div class="bg-gray-50 rounded-xl p-4 mb-3">
+          <div class="flex items-center justify-between text-xs mb-1">
+            <span class="text-gray-400">Username</span>
+            <span class="font-mono font-semibold text-dark" id="pd-username">—</span>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-gray-400">Last login</span>
+            <span class="text-gray-600" id="pd-lastlogin">—</span>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-400 mb-1.5">New password</label>
+          <div class="flex gap-2">
+            <div class="relative flex-1">
+              <input id="pd-new-password" type="text" placeholder="Enter or generate…" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 pr-9 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand font-mono">
+              <button onclick="generatePassword('pd-new-password')" title="Generate" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand"><i class="fa-solid fa-arrows-rotate text-xs"></i></button>
+            </div>
+            <button onclick="copyPassword()" class="px-3 py-2 border border-gray-200 rounded-xl text-gray-500 hover:text-brand hover:border-brand text-xs font-semibold transition-colors whitespace-nowrap">
+              <i class="fa-solid fa-copy mr-1"></i>Copy
+            </button>
+          </div>
+          <div class="text-xs text-gray-400 mt-1.5"><i class="fa-solid fa-circle-info mr-1"></i>After backend: password reset link will be sent to partner's email automatically.</div>
+        </div>
+      </div>
+
+      <!-- Activate / Deactivate -->
+      <div class="border-t border-gray-100 pt-4">
+        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Account status</div>
+        <div id="pd-status-block"></div>
+      </div>
+
+    </div>
+    <!-- Footer -->
+    <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/60 flex gap-2">
+      <button onclick="savePartnerDetail()" class="flex-1 bg-brand hover:bg-brand-dark text-white text-sm font-semibold py-2.5 rounded-xl transition-colors">Save changes</button>
+      <button onclick="closePartnerDetail()" class="px-5 py-2.5 border border-gray-200 text-gray-500 text-sm font-semibold rounded-xl hover:bg-white transition-colors">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===================== VOUCHER PRINT WRAPPER (screen-hidden, print-visible) ===================== -->
 <div id="voucher-print-wrap" style="display:none"></div>
 
@@ -1258,6 +1384,7 @@ tailwind.config = {
   document.addEventListener('DOMContentLoaded', function() {
     renderDashboardChart();
     renderBookingsTable();
+    renderPartnersTable();
   });
 
   function goToLogin() {
@@ -1620,12 +1747,193 @@ tailwind.config = {
   }
   function saveManualBooking() {
     closeManualBooking();
-    // Show quick success toast
-    const toast = document.createElement('div');
-    toast.className = 'fixed bottom-6 right-6 z-50 bg-green-500 text-white text-sm font-semibold px-5 py-3.5 rounded-xl shadow-xl flex items-center gap-2 fade-in';
-    toast.innerHTML = '<i class="fa-solid fa-check"></i> Booking saved successfully!';
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3500);
+    showToast('Booking saved successfully!');
+  }
+
+  // ===== Partners =====
+  const allPartners = [
+    { id:'wawel',      name:'Hotel Wawel Kraków', initials:'HW', color:'#E8751A', type:'Hotel',     stars:4, address:'ul. Sławkowska 12', contact:'Jan Makowski',      phone:'+48 12 422 36 00', email:'recepcja@wawel.pl',       username:'wawel_krakow',     since:'Jan 2023', bookings:6, comm:1460, commRate:12, active:true,  notes:'Najdłuższy partner, priorytet.',       lastLogin:'2 hours ago' },
+    { id:'stary',      name:'Hotel Stary',         initials:'HS', color:'#3b82f6', type:'Hotel',     stars:5, address:'ul. Szczepańska 5',  contact:'Maria Wiśniewska', phone:'+48 12 384 08 08', email:'hotel@stary.pl',          username:'hotel_stary',      since:'Feb 2022', bookings:3, comm:475,  commRate:10, active:true,  notes:'',                                     lastLogin:'Yesterday' },
+    { id:'copernicus', name:'Hotel Copernicus',    initials:'HC', color:'#10b981', type:'Hotel',     stars:5, address:'ul. Kanonicza 16',   contact:'Robert Kaczmarek', phone:'+48 12 424 34 00', email:'contact@copernicus.pl',   username:'copernicus_krakow', since:'May 2024', bookings:2, comm:280,  commRate:8,  active:true,  notes:'Nowy partner, monitoring aktywności.', lastLogin:'3 days ago' },
+    { id:'roza',       name:'Hotel Pod Różą',      initials:'HP', color:'#f43f5e', type:'Hotel',     stars:4, address:'ul. Floriańska 14',  contact:'Anna Zielińska',   phone:'+48 12 424 33 00', email:'biuro@podroza.pl',        username:'pod_roza',         since:'Mar 2021', bookings:0, comm:0,    commRate:10, active:false, notes:'Nieaktywny — remont do końca maja.',   lastLogin:'42 days ago' },
+  ];
+
+  function renderPartnersTable(data) {
+    const tbody = document.getElementById('partners-tbody');
+    if (!tbody) return;
+    const rows = data || allPartners;
+    tbody.innerHTML = '';
+    rows.forEach(p => {
+      const statusBadge = p.active
+        ? `<span class="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-100 px-2.5 py-1 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>Active</span>`
+        : `<span class="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>Inactive</span>`;
+      const starsStr = p.stars ? '⭐'.repeat(p.stars) : '';
+      tbody.insertAdjacentHTML('beforeend', `
+        <tr class="hover:bg-gray-50 transition-colors cursor-pointer text-xs" onclick="openPartnerDetail('${p.id}')">
+          <td class="px-5 py-3">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs shrink-0" style="background:${p.color}">${p.initials}</div>
+          </td>
+          <td class="px-4 py-3">
+            <div class="font-semibold text-dark">${p.name}</div>
+            <div class="text-gray-400 mt-0.5">${p.address}</div>
+          </td>
+          <td class="px-4 py-3 text-gray-500">${p.type}${starsStr ? ' · ' + starsStr : ''}</td>
+          <td class="px-4 py-3 text-gray-500">${p.contact}</td>
+          <td class="px-4 py-3 text-center font-semibold text-dark">${p.bookings || '—'}</td>
+          <td class="px-4 py-3 text-right font-semibold ${p.comm > 0 ? 'text-brand' : 'text-gray-400'}">${p.comm > 0 ? p.comm + ' zł' : '—'}</td>
+          <td class="px-4 py-3 text-center">${statusBadge}</td>
+          <td class="px-4 py-3 text-right">
+            <button onclick="event.stopPropagation();openPartnerDetail('${p.id}')" class="text-gray-300 hover:text-brand transition-colors text-xs"><i class="fa-solid fa-pen"></i></button>
+          </td>
+        </tr>`);
+    });
+  }
+
+  // ===== Add Partner =====
+  function openAddPartner() {
+    ['ap-name','ap-address','ap-contact','ap-phone','ap-email','ap-username','ap-notes'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+    document.getElementById('ap-type').value = 'Hotel';
+    document.getElementById('ap-stars').value = '';
+    document.getElementById('ap-comm').value = '10';
+    generatePassword('ap-password');
+    const m = document.getElementById('modal-add-partner');
+    m.classList.remove('hidden'); m.classList.add('flex');
+  }
+  function closeAddPartner() {
+    const m = document.getElementById('modal-add-partner');
+    m.classList.add('hidden'); m.classList.remove('flex');
+  }
+  function saveAddPartner() {
+    const name = document.getElementById('ap-name').value.trim();
+    if (!name) { document.getElementById('ap-name').focus(); return; }
+    const initials = name.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
+    const colors = ['#E8751A','#3b82f6','#10b981','#8b5cf6','#f43f5e','#f59e0b'];
+    const color = colors[allPartners.length % colors.length];
+    allPartners.push({
+      id: 'p_' + Date.now(),
+      name, initials, color,
+      type:      document.getElementById('ap-type').value,
+      stars:     parseInt(document.getElementById('ap-stars').value) || 0,
+      address:   document.getElementById('ap-address').value,
+      contact:   document.getElementById('ap-contact').value,
+      phone:     document.getElementById('ap-phone').value,
+      email:     document.getElementById('ap-email').value,
+      username:  document.getElementById('ap-username').value,
+      since:     new Date().toLocaleDateString('en', {month:'short', year:'numeric'}),
+      bookings:  0, comm: 0,
+      commRate:  parseFloat(document.getElementById('ap-comm').value) || 10,
+      active:    true,
+      notes:     document.getElementById('ap-notes').value,
+      lastLogin: 'Never'
+    });
+    renderPartnersTable();
+    closeAddPartner();
+    showToast('Partner added successfully!');
+  }
+
+  // ===== Partner Detail =====
+  let editingPartnerId = null;
+  function openPartnerDetail(id) {
+    const p = allPartners.find(x => x.id === id);
+    if (!p) return;
+    editingPartnerId = id;
+    // Avatar
+    const av = document.getElementById('pd-avatar');
+    av.style.background = p.color;
+    av.textContent = p.initials;
+    document.getElementById('pd-name').textContent = p.name;
+    document.getElementById('pd-type-since').textContent = p.type + ' · Partner since ' + p.since;
+    // Stats
+    const sb = document.getElementById('pd-status-badge');
+    sb.textContent = p.active ? 'Active' : 'Inactive';
+    sb.className = p.active ? 'text-xs font-semibold px-2.5 py-1 rounded-full bg-green-100 text-green-700' : 'text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-500';
+    document.getElementById('pd-bookings').textContent = p.bookings || '0';
+    document.getElementById('pd-comm').textContent = p.comm > 0 ? p.comm + ' zł' : '—';
+    // Fields
+    document.getElementById('pd-edit-name').value     = p.name;
+    document.getElementById('pd-edit-type').value     = p.type;
+    document.getElementById('pd-edit-contact').value  = p.contact;
+    document.getElementById('pd-edit-phone').value    = p.phone;
+    document.getElementById('pd-edit-email').value    = p.email;
+    document.getElementById('pd-edit-address').value  = p.address;
+    document.getElementById('pd-edit-commrate').value = p.commRate;
+    document.getElementById('pd-edit-notes').value    = p.notes || '';
+    document.getElementById('pd-username').textContent  = p.username;
+    document.getElementById('pd-lastlogin').textContent = p.lastLogin;
+    document.getElementById('pd-new-password').value    = '';
+    // Activate / Deactivate block
+    const block = document.getElementById('pd-status-block');
+    if (p.active) {
+      block.innerHTML = `<div class="bg-red-50 rounded-xl p-4 flex items-start gap-3">
+        <i class="fa-solid fa-triangle-exclamation text-red-400 mt-0.5"></i>
+        <div>
+          <div class="text-xs font-semibold text-red-700 mb-1">Deactivate partner</div>
+          <div class="text-xs text-red-500 mb-3">Partner will lose access to their panel. Existing bookings are not affected.</div>
+          <button onclick="togglePartnerStatus('${id}')" class="text-xs font-semibold bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-xl transition-colors">Deactivate account</button>
+        </div>
+      </div>`;
+    } else {
+      block.innerHTML = `<div class="bg-green-50 rounded-xl p-4 flex items-start gap-3">
+        <i class="fa-solid fa-circle-check text-green-400 mt-0.5"></i>
+        <div>
+          <div class="text-xs font-semibold text-green-700 mb-1">Activate partner</div>
+          <div class="text-xs text-green-600 mb-3">Partner will regain access to their panel and can start receiving bookings again.</div>
+          <button onclick="togglePartnerStatus('${id}')" class="text-xs font-semibold bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-xl transition-colors">Activate account</button>
+        </div>
+      </div>`;
+    }
+    const panel = document.getElementById('partner-detail-panel');
+    panel.classList.remove('hidden');
+    requestAnimationFrame(() => document.getElementById('partner-detail-drawer').classList.add('open'));
+  }
+  function closePartnerDetail() {
+    document.getElementById('partner-detail-drawer').classList.remove('open');
+    setTimeout(() => document.getElementById('partner-detail-panel').classList.add('hidden'), 280);
+  }
+  function savePartnerDetail() {
+    const p = allPartners.find(x => x.id === editingPartnerId);
+    if (!p) return;
+    p.name     = document.getElementById('pd-edit-name').value;
+    p.type     = document.getElementById('pd-edit-type').value;
+    p.contact  = document.getElementById('pd-edit-contact').value;
+    p.phone    = document.getElementById('pd-edit-phone').value;
+    p.email    = document.getElementById('pd-edit-email').value;
+    p.address  = document.getElementById('pd-edit-address').value;
+    p.commRate = parseFloat(document.getElementById('pd-edit-commrate').value) || p.commRate;
+    p.notes    = document.getElementById('pd-edit-notes').value;
+    renderPartnersTable();
+    closePartnerDetail();
+    showToast('Partner updated successfully!');
+  }
+  function togglePartnerStatus(id) {
+    const p = allPartners.find(x => x.id === id);
+    if (!p) return;
+    p.active = !p.active;
+    renderPartnersTable();
+    closePartnerDetail();
+    showToast(p.active ? 'Partner activated.' : 'Partner deactivated.');
+  }
+
+  // ===== Password helpers =====
+  function generatePassword(inputId) {
+    const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789!@#';
+    let pw = '';
+    for (let i = 0; i < 12; i++) pw += chars[Math.floor(Math.random() * chars.length)];
+    document.getElementById(inputId).value = pw;
+  }
+  function copyPassword() {
+    const val = document.getElementById('pd-new-password').value;
+    if (!val) return;
+    navigator.clipboard.writeText(val).then(() => showToast('Password copied to clipboard!'));
+  }
+
+  // ===== Toast helper =====
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.className = 'fixed bottom-6 right-6 z-50 bg-green-500 text-white text-sm font-semibold px-5 py-3.5 rounded-xl shadow-xl flex items-center gap-2 fade-in';
+    t.innerHTML = '<i class="fa-solid fa-check"></i> ' + msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
   }
 
   // ===== Settlement =====
