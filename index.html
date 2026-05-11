@@ -1663,10 +1663,10 @@ tailwind.config = {
           </div>
         </div>
         <div>
-          <h3 class="font-semibold text-dark text-sm mb-3"><span class="w-5 h-5 bg-brand text-white text-xs rounded-full inline-flex items-center justify-center mr-2">3</span>Number of guests</h3>
+          <h3 class="font-semibold text-dark text-sm mb-3"><span class="w-5 h-5 bg-brand text-white text-xs rounded-full inline-flex items-center justify-center mr-2">4</span>Number of guests</h3>
           <div class="flex items-center gap-4">
             <button class="w-10 h-10 border-2 border-gray-200 rounded-xl flex items-center justify-center font-bold text-lg hover:border-brand hover:text-brand transition-colors" onclick="changeGuests(-1)">−</button>
-            <span class="text-2xl font-bold text-dark w-10 text-center">2</span>
+            <span id="guest-count-3" class="text-2xl font-bold text-dark w-10 text-center">2</span>
             <button class="w-10 h-10 border-2 border-gray-200 rounded-xl flex items-center justify-center font-bold text-lg hover:border-brand hover:text-brand transition-colors" onclick="changeGuests(1)">+</button>
             <span class="text-sm text-gray-500 ml-2">guests</span>
           </div>
@@ -1737,7 +1737,7 @@ tailwind.config = {
           <h3 class="font-semibold text-dark text-sm mb-3"><span class="w-5 h-5 bg-brand text-white text-xs rounded-full inline-flex items-center justify-center mr-2">4</span>Number of guests</h3>
           <div class="flex items-center gap-4">
             <button class="w-10 h-10 border-2 border-gray-200 rounded-xl flex items-center justify-center font-bold text-lg hover:border-brand hover:text-brand transition-colors" onclick="changeGuests(-1)">−</button>
-            <span class="text-2xl font-bold text-dark w-10 text-center">2</span>
+            <span id="guest-count-4" class="text-2xl font-bold text-dark w-10 text-center">2</span>
             <button class="w-10 h-10 border-2 border-gray-200 rounded-xl flex items-center justify-center font-bold text-lg hover:border-brand hover:text-brand transition-colors" onclick="changeGuests(1)">+</button>
             <span class="text-sm text-gray-500 ml-2">guests</span>
           </div>
@@ -2347,7 +2347,7 @@ tailwind.config = {
 
   function changeGuests(delta) {
     guestCount = Math.max(1, Math.min(20, guestCount + delta));
-    document.querySelectorAll('#guest-count, #guest-count-2').forEach(el => el.textContent = guestCount);
+    document.querySelectorAll('#guest-count, #guest-count-2, #guest-count-3, #guest-count-4').forEach(el => el.textContent = guestCount);
   }
 
   function addToCart(name, price, time, pkg, guests) {
