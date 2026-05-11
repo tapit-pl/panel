@@ -65,25 +65,12 @@ tailwind.config = {
 
       <!-- Nav -->
       <nav class="flex-1 px-3 py-4 space-y-0.5">
-        <button onclick="showSection('dashboard')" class="sidebar-link active w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">
-          <i class="fa-solid fa-gauge w-4 text-slate-400 text-sm"></i>Dashboard
-        </button>
-        <button onclick="showSection('bookings')" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">
-          <i class="fa-solid fa-list-check w-4 text-slate-400 text-sm"></i>All Bookings
-          <span class="ml-auto bg-brand text-white text-xs font-bold px-1.5 py-0.5 rounded-full">10</span>
-        </button>
-        <button onclick="showSection('hotels')" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">
-          <i class="fa-solid fa-hotel w-4 text-slate-400 text-sm"></i>Hotels
-        </button>
-        <button onclick="showSection('settlement')" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">
-          <i class="fa-solid fa-percent w-4 text-slate-400 text-sm"></i>Commission Settlement
-        </button>
-        <button onclick="showSection('tours')" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">
-          <i class="fa-solid fa-compass w-4 text-slate-400 text-sm"></i>Tours & Pricing
-        </button>
-        <button onclick="showSection('staff')" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">
-          <i class="fa-solid fa-users w-4 text-slate-400 text-sm"></i>Staff
-        </button>
+        <button onclick="showSection('dashboard')" class="sidebar-link active w-full flex items-center px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">Dashboard</button>
+        <button onclick="showSection('bookings')" class="sidebar-link w-full flex items-center px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">All Bookings <span class="ml-auto bg-brand text-white text-xs font-bold px-1.5 py-0.5 rounded-full">10</span></button>
+        <button onclick="showSection('hotels')" class="sidebar-link w-full flex items-center px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">Hotels</button>
+        <button onclick="showSection('settlement')" class="sidebar-link w-full flex items-center px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">Commission Settlement</button>
+        <button onclick="showSection('tours')" class="sidebar-link w-full flex items-center px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">Tours & Pricing</button>
+        <button onclick="showSection('staff')" class="sidebar-link w-full flex items-center px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">Staff</button>
       </nav>
 
       <!-- Bottom user -->
@@ -147,42 +134,22 @@ tailwind.config = {
           <!-- KPI cards -->
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div class="bg-white rounded-2xl p-5 shadow-sm">
-              <div class="flex items-center justify-between mb-3">
-                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Today's bookings</span>
-                <div class="w-8 h-8 bg-brand-light rounded-xl flex items-center justify-center">
-                  <i class="fa-solid fa-calendar-day text-brand text-sm"></i>
-                </div>
-              </div>
+              <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Today's bookings</div>
               <div class="text-3xl font-bold text-dark">4</div>
-              <div class="text-xs text-green-600 mt-1 font-medium"><i class="fa-solid fa-arrow-up text-xs mr-1"></i>+2 vs yesterday</div>
+              <div class="text-xs text-green-600 mt-1 font-medium">+2 vs yesterday</div>
             </div>
             <div class="bg-white rounded-2xl p-5 shadow-sm">
-              <div class="flex items-center justify-between mb-3">
-                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Today's revenue</span>
-                <div class="w-8 h-8 bg-green-50 rounded-xl flex items-center justify-center">
-                  <i class="fa-solid fa-coins text-green-500 text-sm"></i>
-                </div>
-              </div>
+              <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Today's revenue</div>
               <div class="text-3xl font-bold text-dark">2 180 <span class="text-base font-normal text-gray-400">zł</span></div>
-              <div class="text-xs text-green-600 mt-1 font-medium"><i class="fa-solid fa-arrow-up text-xs mr-1"></i>+14% vs yesterday</div>
+              <div class="text-xs text-green-600 mt-1 font-medium">+14% vs yesterday</div>
             </div>
             <div class="bg-white rounded-2xl p-5 shadow-sm">
-              <div class="flex items-center justify-between mb-3">
-                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Month bookings</span>
-                <div class="w-8 h-8 bg-blue-50 rounded-xl flex items-center justify-center">
-                  <i class="fa-solid fa-chart-line text-blue-500 text-sm"></i>
-                </div>
-              </div>
+              <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Month bookings</div>
               <div class="text-3xl font-bold text-dark">47</div>
               <div class="text-xs text-gray-400 mt-1">Goal: <span class="text-dark font-semibold">80</span> — 59% reached</div>
             </div>
             <div class="bg-white rounded-2xl p-5 shadow-sm">
-              <div class="flex items-center justify-between mb-3">
-                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Active hotels</span>
-                <div class="w-8 h-8 bg-purple-50 rounded-xl flex items-center justify-center">
-                  <i class="fa-solid fa-hotel text-purple-500 text-sm"></i>
-                </div>
-              </div>
+              <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Active hotels</div>
               <div class="text-3xl font-bold text-dark">4</div>
               <div class="text-xs text-gray-400 mt-1">2 new enquiries pending</div>
             </div>
@@ -949,15 +916,14 @@ tailwind.config = {
       <div class="grid grid-cols-2 gap-4">
         <div>
           <label class="block text-xs font-semibold text-gray-600 mb-1.5">Tour</label>
-          <select class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-            <option>Trip to Zakopane</option>
-            <option>Auschwitz-Birkenau</option>
-            <option>Shooting Range</option>
-            <option>Wieliczka Salt Mine</option>
-            <option>Night Tour of Kraków</option>
-            <option>Bochnia Salt Mine</option>
-            <option>Transfer – KRK Airport</option>
-          </select>
+          <div class="relative">
+            <input id="tour-search-input" type="text" placeholder="Search tour…" autocomplete="off"
+              oninput="filterTourSuggestions()"
+              onfocus="showTourSuggestions()"
+              class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+            <div id="tour-suggestions" class="hidden absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden max-h-52 overflow-y-auto"></div>
+          </div>
+          <input type="hidden" id="tour-search-value">
         </div>
         <div>
           <label class="block text-xs font-semibold text-gray-600 mb-1.5">Package</label>
@@ -1168,9 +1134,51 @@ tailwind.config = {
   }
 
   // ===== Manual booking modal =====
+  // ===== Tour search autocomplete =====
+  const TOURS_LIST = [
+    'Trip to Zakopane', 'Auschwitz-Birkenau Tour', 'Shooting Range – Starter',
+    'Shooting Range – Standard', 'Shooting Range – Commando', 'Shooting Range – VIP Elite',
+    'Wieliczka Salt Mine', 'Night Tour of Kraków', 'Bochnia Salt Mine',
+    'Wawel Castle & Old Town', 'Ojców National Park', 'Tatra Mountains Hike',
+    'Transfer – Kraków Airport', 'Transfer – Katowice Airport', 'Transfer – Airport to Zakopane',
+    'Krakow Pub Crawl', 'Jewish Quarter Walking Tour', 'Papal Kraków Tour',
+    'Rafting on Dunajec River', 'Hot Air Balloon – Kraków'
+  ];
+
+  function showTourSuggestions() {
+    filterTourSuggestions();
+  }
+
+  function filterTourSuggestions() {
+    const val = document.getElementById('tour-search-input').value.toLowerCase();
+    const box = document.getElementById('tour-suggestions');
+    const matches = TOURS_LIST.filter(t => t.toLowerCase().includes(val));
+    if (matches.length === 0) { box.classList.add('hidden'); return; }
+    box.innerHTML = matches.map(t =>
+      `<div onclick="selectTour('${t.replace(/'/g,"\\'")}')" class="px-3 py-2.5 text-sm hover:bg-brand-light cursor-pointer border-b border-gray-50 last:border-0">${
+        val ? t.replace(new RegExp(`(${val})`, 'gi'), '<strong>$1</strong>') : t
+      }</div>`
+    ).join('');
+    box.classList.remove('hidden');
+  }
+
+  function selectTour(name) {
+    document.getElementById('tour-search-input').value = name;
+    document.getElementById('tour-search-value').value = name;
+    document.getElementById('tour-suggestions').classList.add('hidden');
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('#tour-search-input') && !e.target.closest('#tour-suggestions')) {
+      document.getElementById('tour-suggestions')?.classList.add('hidden');
+    }
+  });
+
   function openManualBooking() {
     const m = document.getElementById('modal-manual');
     m.classList.remove('hidden'); m.classList.add('flex');
+    document.getElementById('tour-search-input').value = '';
+    document.getElementById('tour-search-value').value = '';
   }
   function closeManualBooking() {
     const m = document.getElementById('modal-manual');
