@@ -164,17 +164,16 @@ tailwind.config = {
               <div class="flex items-center justify-between mb-3">
                 <div>
                   <div class="font-semibold text-dark text-sm">Bookings & Revenue</div>
-                  <div class="text-xs text-gray-400 mt-0.5" id="chart-period-label">April 2026 · last 30 days</div>
+                  <div class="text-xs text-gray-400 mt-0.5" id="chart-period-label">Apr 1 – Apr 30, 2026</div>
                 </div>
-                <div class="flex items-center gap-1.5">
-                  <button onclick="setChartPeriod('24h')" id="chart-btn-24h" class="chart-period-btn text-xs px-2.5 py-1 rounded-lg font-medium border border-gray-200 bg-white text-gray-500 transition-colors hover:border-brand hover:text-brand">24h</button>
-                  <button onclick="setChartPeriod('7d')" id="chart-btn-7d" class="chart-period-btn text-xs px-2.5 py-1 rounded-lg font-medium border border-gray-200 bg-white text-gray-500 transition-colors hover:border-brand hover:text-brand">7d</button>
-                  <button onclick="setChartPeriod('30d')" id="chart-btn-30d" class="chart-period-btn text-xs px-2.5 py-1 rounded-lg font-medium border border-brand bg-brand text-white transition-colors">30d</button>
-                  <select id="chart-month-select" onchange="setChartPeriod('month')" class="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white text-gray-600 focus:outline-none focus:ring-2 focus:ring-brand/30">
-                    <option value="apr">Apr 2026</option>
-                    <option value="mar">Mar 2026</option>
-                    <option value="feb">Feb 2026</option>
-                  </select>
+                <div class="flex items-center gap-2">
+                  <input type="date" id="chart-date-from" value="2026-04-01"
+                    class="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white text-gray-600 focus:outline-none focus:ring-2 focus:ring-brand/30"
+                    onchange="renderDashboardChart()">
+                  <span class="text-xs text-gray-400">–</span>
+                  <input type="date" id="chart-date-to" value="2026-04-30"
+                    class="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white text-gray-600 focus:outline-none focus:ring-2 focus:ring-brand/30"
+                    onchange="renderDashboardChart()">
                 </div>
               </div>
               <!-- Mini stats row -->
@@ -1076,67 +1075,28 @@ tailwind.config = {
 
   // ===== Dashboard chart =====
   let dashChart = null;
-  let currentChartPeriod = '30d';
+  const MONTH_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-  const CHART_DATA = {
-    '24h': {
-      labels: Array.from({length:24}, (_,i) => i+':00'),
-      bookings:[0,0,1,0,0,1,0,1,0,2,1,2,1,2,0,1,2,1,0,1,0,0,0,0],
-      revenue: [0,0,80,0,0,120,0,90,0,280,150,260,160,310,0,180,330,190,0,140,0,0,0,0],
-      periodLabel: 'Today · hourly view'
-    },
-    '7d': {
-      labels: ['Apr 1','Apr 2','Apr 3','Apr 4','Apr 5','Apr 6','Apr 7'],
-      bookings:[3,5,4,6,2,5,4],
-      revenue: [220,390,280,460,150,410,260],
-      periodLabel: 'Last 7 days'
-    },
-    '30d': {
-      labels: Array.from({length:30}, (_,i) => 'Apr '+(i+1)),
-      bookings:[2,4,3,5,1,4,6,3,5,4,2,6,4,5,3,7,4,5,2,6,3,4,5,3,4,6,3,5,4,4],
-      revenue: [140,260,200,380,90,310,480,220,390,300,150,460,290,370,220,560,290,400,160,470,220,310,390,240,300,450,210,380,300,310],
-      periodLabel: 'Last 30 days'
-    },
-    'month-apr': {
-      labels: Array.from({length:30}, (_,i) => 'Apr '+(i+1)),
-      bookings:[2,4,3,5,1,4,6,3,5,4,2,6,4,5,3,7,4,5,2,6,3,4,5,3,4,6,3,5,4,4],
-      revenue: [140,260,200,380,90,310,480,220,390,300,150,460,290,370,220,560,290,400,160,470,220,310,390,240,300,450,210,380,300,310],
-      periodLabel: 'April 2026 · full month'
-    },
-    'month-mar': {
-      labels: Array.from({length:31}, (_,i) => 'Mar '+(i+1)),
-      bookings:[1,3,2,4,5,3,6,4,5,3,2,5,4,6,3,5,4,2,5,4,3,6,5,4,3,5,6,4,5,3,2],
-      revenue: [100,220,160,300,380,240,460,310,390,230,150,380,290,470,220,400,310,150,380,300,220,460,390,300,230,390,470,310,390,230,150],
-      periodLabel: 'March 2026 · full month'
-    },
-    'month-feb': {
-      labels: Array.from({length:28}, (_,i) => 'Feb '+(i+1)),
-      bookings:[2,3,1,4,3,5,4,2,3,5,4,3,5,4,6,3,4,5,3,4,5,3,4,3,5,4,3,4],
-      revenue: [150,230,80,310,220,390,300,150,230,380,290,230,390,290,460,220,300,380,220,300,390,230,300,230,380,290,220,290],
-      periodLabel: 'February 2026 · full month'
-    }
-  };
+  // Deterministic pseudo-random based on date string — same date always = same value
+  function dayHash(dateStr, salt) {
+    let h = salt || 0;
+    for (let i = 0; i < dateStr.length; i++) h = (Math.imul(31, h) + dateStr.charCodeAt(i)) | 0;
+    return Math.abs(h);
+  }
 
-  function setChartPeriod(period) {
-    if (period === 'month') {
-      const month = document.getElementById('chart-month-select').value;
-      currentChartPeriod = 'month-' + month;
-    } else {
-      currentChartPeriod = period;
-    }
-    // Update button active styles
-    ['24h','7d','30d'].forEach(p => {
-      const btn = document.getElementById('chart-btn-' + p);
-      if (!btn) return;
-      if (p === period) {
-        btn.classList.add('bg-brand','text-white','border-brand');
-        btn.classList.remove('bg-white','text-gray-500','border-gray-200');
-      } else {
-        btn.classList.remove('bg-brand','text-white','border-brand');
-        btn.classList.add('bg-white','text-gray-500','border-gray-200');
-      }
-    });
-    renderDashboardChart();
+  function generateDayData(dateStr) {
+    const b = (dayHash(dateStr, 7)  % 7) + 1;            // bookings 1–7
+    const r = b * ((dayHash(dateStr, 999) % 80) + 60);   // revenue correlated, 60–140 per booking
+    return { b, r };
+  }
+
+  function fmtDateLabel(d) {
+    return MONTH_SHORT[d.getMonth()] + ' ' + d.getDate();
+  }
+
+  function fmtDateShort(isoStr) {
+    const d = new Date(isoStr + 'T00:00:00');
+    return MONTH_SHORT[d.getMonth()] + ' ' + d.getDate();
   }
 
   function renderDashboardChart() {
@@ -1144,26 +1104,47 @@ tailwind.config = {
     if (!ctx) return;
     if (dashChart) dashChart.destroy();
 
-    const d = CHART_DATA[currentChartPeriod] || CHART_DATA['30d'];
-    const { labels, bookings, revenue, periodLabel } = d;
+    const fromVal = document.getElementById('chart-date-from').value;
+    const toVal   = document.getElementById('chart-date-to').value;
+    if (!fromVal || !toVal) return;
 
-    // Update period label
+    const fromDate = new Date(fromVal + 'T00:00:00');
+    const toDate   = new Date(toVal   + 'T00:00:00');
+    if (fromDate > toDate) return;
+
+    // Build daily series
+    const labels = [], bookings = [], revenue = [];
+    for (let d = new Date(fromDate); d <= toDate; d.setDate(d.getDate() + 1)) {
+      const iso = d.toISOString().slice(0,10);
+      const { b, r } = generateDayData(iso);
+      labels.push(fmtDateLabel(new Date(iso + 'T00:00:00')));
+      bookings.push(b);
+      revenue.push(r);
+    }
+
+    // Period label
+    const fromY = fromDate.getFullYear(), toY = toDate.getFullYear();
+    const sameYear = fromY === toY;
+    const periodLabel = fmtDateShort(fromVal) + (sameYear ? '' : ', ' + fromY) + ' – ' + fmtDateShort(toVal) + ', ' + toY;
     const pl = document.getElementById('chart-period-label');
     if (pl) pl.textContent = periodLabel;
 
-    // Compute stats
+    // Stats
     const totalB = bookings.reduce((a,b)=>a+b,0);
     const totalR = revenue.reduce((a,b)=>a+b,0);
     const avgB   = (totalB / labels.length).toFixed(1);
     const maxB   = Math.max(...bookings);
     const bestIdx = bookings.indexOf(maxB);
-    const bestLabel = labels[bestIdx];
 
-    const fmtR = v => v >= 1000 ? (Math.round(v/100)*100).toLocaleString('pl') : v;
+    const fmtR = v => v >= 1000 ? Math.round(v/10)*10 : v;
     document.getElementById('cstat-bookings').textContent = totalB;
-    document.getElementById('cstat-revenue').textContent  = fmtR(totalR) + ' zł';
+    document.getElementById('cstat-revenue').textContent  = fmtR(totalR).toLocaleString('pl') + ' zł';
     document.getElementById('cstat-avg').textContent      = avgB;
-    document.getElementById('cstat-best').textContent     = bestLabel + ' · ' + maxB;
+    document.getElementById('cstat-best').textContent     = labels[bestIdx] + ' · ' + maxB;
+
+    // Bar width: wider for fewer days
+    const days = labels.length;
+    const barThickness = days <= 14 ? 18 : days <= 31 ? undefined : undefined;
 
     dashChart = new Chart(ctx, {
       type: 'bar',
@@ -1174,16 +1155,17 @@ tailwind.config = {
             label: 'Bookings',
             data: bookings,
             backgroundColor: 'rgba(232,117,26,0.85)',
-            borderRadius: 4,
+            borderRadius: 3,
             order: 1,
-            yAxisID: 'yLeft'
+            yAxisID: 'yLeft',
+            ...(barThickness ? { barThickness } : {})
           },
           {
             label: 'Revenue (zł)',
             data: revenue,
             type: 'line',
             borderColor: 'rgba(99,153,233,0.85)',
-            backgroundColor: 'rgba(99,153,233,0.08)',
+            backgroundColor: 'rgba(99,153,233,0.07)',
             borderWidth: 2,
             pointRadius: 0,
             pointHoverRadius: 4,
@@ -1210,7 +1192,7 @@ tailwind.config = {
         scales: {
           x: {
             grid: { display: false },
-            ticks: { font: { size: 10 }, color: '#9ca3af', maxTicksLimit: 10, maxRotation: 0 }
+            ticks: { font: { size: 10 }, color: '#9ca3af', maxTicksLimit: days <= 31 ? 15 : 10, maxRotation: 0 }
           },
           yLeft: {
             position: 'left',
