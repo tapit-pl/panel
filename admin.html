@@ -1125,8 +1125,81 @@ tailwind.config = {
         </div>
       </div>
 
+      <!-- Logo upload -->
+      <div class="border-t border-gray-100 pt-4">
+        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Logo / photo</div>
+        <div class="flex items-center gap-4">
+          <div id="pd-logo-preview" class="w-16 h-16 rounded-xl bg-gray-100 border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden shrink-0">
+            <i class="fa-solid fa-image text-gray-300 text-xl"></i>
+          </div>
+          <div>
+            <label class="cursor-pointer inline-flex items-center gap-2 text-xs font-semibold text-brand border border-brand/30 bg-brand/5 hover:bg-brand/10 px-3 py-2 rounded-xl transition-colors">
+              <i class="fa-solid fa-upload"></i>Upload image
+              <input type="file" accept="image/*" class="hidden" onchange="previewPartnerLogo(this)">
+            </label>
+            <div class="text-xs text-gray-400 mt-1.5">PNG, JPG up to 2 MB. Will appear on hotel panel and vouchers.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contract -->
+      <div class="border-t border-gray-100 pt-4">
+        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Contract</div>
+        <div class="grid grid-cols-2 gap-3 mb-3">
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Date signed</label>
+            <input id="pd-contract-signed" type="date" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Expiry date</label>
+            <input id="pd-contract-expiry" type="date" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+        </div>
+        <div id="pd-contract-status" class="text-xs rounded-xl px-3 py-2 hidden"></div>
+      </div>
+
+      <!-- Notifications -->
+      <div class="border-t border-gray-100 pt-4">
+        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Notifications</div>
+        <label class="flex items-center justify-between cursor-pointer bg-gray-50 rounded-xl px-4 py-3">
+          <div>
+            <div class="text-sm font-medium text-dark">Email on new booking</div>
+            <div class="text-xs text-gray-400 mt-0.5">Partner receives an email when one of their guests books a tour</div>
+          </div>
+          <div class="relative ml-4 shrink-0">
+            <input type="checkbox" id="pd-notify-email" class="sr-only peer">
+            <div class="w-10 h-6 bg-gray-200 peer-checked:bg-brand rounded-full transition-colors"></div>
+            <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4"></div>
+          </div>
+        </label>
+      </div>
+
+      <!-- QR code -->
+      <div class="border-t border-gray-100 pt-4">
+        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">QR Code</div>
+        <div class="text-xs text-gray-400 mb-3">Guests scan this code and land directly on the booking panel with this partner pre-selected.</div>
+        <div class="flex items-center gap-4">
+          <img id="pd-qr-img" src="" alt="QR" class="w-20 h-20 rounded-xl border border-gray-100">
+          <div class="text-xs space-y-1.5">
+            <div class="font-mono text-gray-500 bg-gray-50 px-2 py-1 rounded-lg" id="pd-qr-url">—</div>
+            <button onclick="downloadQR()" class="flex items-center gap-1.5 text-brand hover:underline font-semibold">
+              <i class="fa-solid fa-download text-xs"></i>Download QR
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settlement history -->
+      <div class="border-t border-gray-100 pt-4">
+        <div class="flex items-center justify-between mb-3">
+          <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Settlement history</div>
+          <button onclick="addSettlementEntry()" class="text-xs text-brand font-semibold hover:underline">+ Add entry</button>
+        </div>
+        <div id="pd-settlement-history" class="space-y-2"></div>
+      </div>
+
       <!-- Notes -->
-      <div>
+      <div class="border-t border-gray-100 pt-4">
         <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Internal notes</label>
         <textarea id="pd-edit-notes" rows="2" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 resize-none" placeholder="Visible only to TM staff…"></textarea>
       </div>
@@ -1752,10 +1825,22 @@ tailwind.config = {
 
   // ===== Partners =====
   const allPartners = [
-    { id:'wawel',      name:'Hotel Wawel Kraków', initials:'HW', color:'#E8751A', type:'Hotel',     stars:4, address:'ul. Sławkowska 12', contact:'Jan Makowski',      phone:'+48 12 422 36 00', email:'recepcja@wawel.pl',       username:'wawel_krakow',     since:'Jan 2023', bookings:6, comm:1460, commRate:12, active:true,  notes:'Najdłuższy partner, priorytet.',       lastLogin:'2 hours ago' },
-    { id:'stary',      name:'Hotel Stary',         initials:'HS', color:'#3b82f6', type:'Hotel',     stars:5, address:'ul. Szczepańska 5',  contact:'Maria Wiśniewska', phone:'+48 12 384 08 08', email:'hotel@stary.pl',          username:'hotel_stary',      since:'Feb 2022', bookings:3, comm:475,  commRate:10, active:true,  notes:'',                                     lastLogin:'Yesterday' },
-    { id:'copernicus', name:'Hotel Copernicus',    initials:'HC', color:'#10b981', type:'Hotel',     stars:5, address:'ul. Kanonicza 16',   contact:'Robert Kaczmarek', phone:'+48 12 424 34 00', email:'contact@copernicus.pl',   username:'copernicus_krakow', since:'May 2024', bookings:2, comm:280,  commRate:8,  active:true,  notes:'Nowy partner, monitoring aktywności.', lastLogin:'3 days ago' },
-    { id:'roza',       name:'Hotel Pod Różą',      initials:'HP', color:'#f43f5e', type:'Hotel',     stars:4, address:'ul. Floriańska 14',  contact:'Anna Zielińska',   phone:'+48 12 424 33 00', email:'biuro@podroza.pl',        username:'pod_roza',         since:'Mar 2021', bookings:0, comm:0,    commRate:10, active:false, notes:'Nieaktywny — remont do końca maja.',   lastLogin:'42 days ago' },
+    { id:'wawel',      name:'Hotel Wawel Kraków', initials:'HW', color:'#E8751A', type:'Hotel', stars:4, address:'ul. Sławkowska 12', contact:'Jan Makowski',      phone:'+48 12 422 36 00', email:'recepcja@wawel.pl',     username:'wawel_krakow',      since:'Jan 2023', bookings:6, comm:1460, commRate:12, active:true,  notes:'Najdłuższy partner, priorytet.', lastLogin:'2 hours ago',
+      contractSigned:'2023-01-10', contractExpiry:'2026-01-10', notifyEmail:true,
+      logo: null,
+      settlements:[{period:'Mar 2026',amount:1230,date:'Apr 2, 2026'},{period:'Feb 2026',amount:980,date:'Mar 3, 2026'},{period:'Jan 2026',amount:1100,date:'Feb 1, 2026'}] },
+    { id:'stary',      name:'Hotel Stary',         initials:'HS', color:'#3b82f6', type:'Hotel', stars:5, address:'ul. Szczepańska 5',  contact:'Maria Wiśniewska', phone:'+48 12 384 08 08', email:'hotel@stary.pl',        username:'hotel_stary',       since:'Feb 2022', bookings:3, comm:475,  commRate:10, active:true,  notes:'', lastLogin:'Yesterday',
+      contractSigned:'2022-02-15', contractExpiry:'2025-08-15', notifyEmail:false,
+      logo: null,
+      settlements:[{period:'Mar 2026',amount:475,date:'Apr 2, 2026'},{period:'Feb 2026',amount:310,date:'Mar 3, 2026'}] },
+    { id:'copernicus', name:'Hotel Copernicus',    initials:'HC', color:'#10b981', type:'Hotel', stars:5, address:'ul. Kanonicza 16',   contact:'Robert Kaczmarek', phone:'+48 12 424 34 00', email:'contact@copernicus.pl', username:'copernicus_krakow',  since:'May 2024', bookings:2, comm:280,  commRate:8,  active:true,  notes:'Nowy partner, monitoring aktywności.', lastLogin:'3 days ago',
+      contractSigned:'2024-05-01', contractExpiry:'2026-05-01', notifyEmail:true,
+      logo: null,
+      settlements:[{period:'Mar 2026',amount:280,date:'Apr 2, 2026'}] },
+    { id:'roza',       name:'Hotel Pod Różą',      initials:'HP', color:'#f43f5e', type:'Hotel', stars:4, address:'ul. Floriańska 14',  contact:'Anna Zielińska',   phone:'+48 12 424 33 00', email:'biuro@podroza.pl',      username:'pod_roza',          since:'Mar 2021', bookings:0, comm:0,    commRate:10, active:false, notes:'Nieaktywny — remont do końca maja.', lastLogin:'42 days ago',
+      contractSigned:'2021-03-01', contractExpiry:'2025-03-01', notifyEmail:false,
+      logo: null,
+      settlements:[{period:'Jan 2026',amount:0,date:'Feb 1, 2026'}] },
   ];
 
   function renderPartnersTable(data) {
@@ -1861,6 +1946,30 @@ tailwind.config = {
     document.getElementById('pd-username').textContent  = p.username;
     document.getElementById('pd-lastlogin').textContent = p.lastLogin;
     document.getElementById('pd-new-password').value    = '';
+
+    // Logo
+    const logoEl = document.getElementById('pd-logo-preview');
+    if (p.logo) {
+      logoEl.innerHTML = `<img src="${p.logo}" class="w-full h-full object-cover">`;
+    } else {
+      logoEl.innerHTML = `<div class="w-full h-full flex items-center justify-center text-white font-bold text-lg rounded-xl" style="background:${p.color}">${p.initials}</div>`;
+    }
+
+    // Contract
+    document.getElementById('pd-contract-signed').value = p.contractSigned || '';
+    document.getElementById('pd-contract-expiry').value = p.contractExpiry || '';
+    renderContractStatus(p.contractExpiry);
+
+    // Notifications
+    document.getElementById('pd-notify-email').checked = !!p.notifyEmail;
+
+    // QR code
+    const partnerUrl = `https://tapit-pl.github.io/panel/index.html?partner=${p.id}`;
+    document.getElementById('pd-qr-url').textContent = partnerUrl;
+    document.getElementById('pd-qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(partnerUrl)}&bgcolor=ffffff&color=1e293b&margin=6`;
+
+    // Settlement history
+    renderSettlementHistory(p.settlements || []);
     // Activate / Deactivate block
     const block = document.getElementById('pd-status-block');
     if (p.active) {
@@ -1899,8 +2008,11 @@ tailwind.config = {
     p.phone    = document.getElementById('pd-edit-phone').value;
     p.email    = document.getElementById('pd-edit-email').value;
     p.address  = document.getElementById('pd-edit-address').value;
-    p.commRate = parseFloat(document.getElementById('pd-edit-commrate').value) || p.commRate;
-    p.notes    = document.getElementById('pd-edit-notes').value;
+    p.commRate        = parseFloat(document.getElementById('pd-edit-commrate').value) || p.commRate;
+    p.notes           = document.getElementById('pd-edit-notes').value;
+    p.contractSigned  = document.getElementById('pd-contract-signed').value;
+    p.contractExpiry  = document.getElementById('pd-contract-expiry').value;
+    p.notifyEmail     = document.getElementById('pd-notify-email').checked;
     renderPartnersTable();
     closePartnerDetail();
     showToast('Partner updated successfully!');
@@ -1912,6 +2024,86 @@ tailwind.config = {
     renderPartnersTable();
     closePartnerDetail();
     showToast(p.active ? 'Partner activated.' : 'Partner deactivated.');
+  }
+
+  // ===== Contract status =====
+  function renderContractStatus(expiryStr) {
+    const el = document.getElementById('pd-contract-status');
+    if (!expiryStr) { el.classList.add('hidden'); return; }
+    const expiry = new Date(expiryStr);
+    const today  = new Date('2026-05-11');
+    const days   = Math.round((expiry - today) / 86400000);
+    el.classList.remove('hidden');
+    if (days < 0) {
+      el.className = 'text-xs rounded-xl px-3 py-2 bg-red-50 text-red-600 font-medium';
+      el.textContent = '⚠️ Contract expired ' + Math.abs(days) + ' days ago';
+    } else if (days <= 60) {
+      el.className = 'text-xs rounded-xl px-3 py-2 bg-yellow-50 text-yellow-700 font-medium';
+      el.textContent = '⏳ Expires in ' + days + ' days — renewal needed';
+    } else {
+      el.className = 'text-xs rounded-xl px-3 py-2 bg-green-50 text-green-700 font-medium';
+      el.textContent = '✅ Valid for ' + days + ' more days';
+    }
+  }
+
+  // ===== Settlement history =====
+  function renderSettlementHistory(list) {
+    const el = document.getElementById('pd-settlement-history');
+    if (!list || list.length === 0) {
+      el.innerHTML = '<div class="text-xs text-gray-400 italic">No settlements recorded yet.</div>';
+      return;
+    }
+    el.innerHTML = list.map((s, i) => `
+      <div class="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-2.5 text-xs">
+        <div>
+          <span class="font-semibold text-dark">${s.period}</span>
+          <span class="text-gray-400 ml-2">settled ${s.date}</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="font-bold text-brand">${s.amount > 0 ? s.amount + ' zł' : '—'}</span>
+          <button onclick="removeSettlement(${i})" class="text-gray-300 hover:text-red-400 transition-colors"><i class="fa-solid fa-xmark text-xs"></i></button>
+        </div>
+      </div>`).join('');
+  }
+
+  function addSettlementEntry() {
+    const p = allPartners.find(x => x.id === editingPartnerId);
+    if (!p) return;
+    const period = prompt('Period (e.g. Apr 2026):');
+    if (!period) return;
+    const amount = parseFloat(prompt('Amount (zł):') || '0');
+    const date   = new Date().toLocaleDateString('en', {month:'short', day:'numeric', year:'numeric'});
+    if (!p.settlements) p.settlements = [];
+    p.settlements.unshift({ period, amount, date });
+    renderSettlementHistory(p.settlements);
+  }
+
+  function removeSettlement(idx) {
+    const p = allPartners.find(x => x.id === editingPartnerId);
+    if (!p) return;
+    p.settlements.splice(idx, 1);
+    renderSettlementHistory(p.settlements);
+  }
+
+  // ===== Logo preview =====
+  function previewPartnerLogo(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const p = allPartners.find(x => x.id === editingPartnerId);
+      if (p) p.logo = e.target.result;
+      document.getElementById('pd-logo-preview').innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover rounded-xl">`;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ===== QR download =====
+  function downloadQR() {
+    const src = document.getElementById('pd-qr-img').src;
+    const a = document.createElement('a');
+    a.href = src; a.download = 'partner-qr.png'; a.target = '_blank';
+    a.click();
   }
 
   // ===== Password helpers =====
