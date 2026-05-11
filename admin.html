@@ -114,14 +114,14 @@ tailwind.config = {
       </header>
 
       <!-- Section content -->
-      <main class="flex-1 p-6">
+      <main class="flex-1 p-5">
 
         <!-- ===== SECTION: DASHBOARD ===== -->
         <div id="section-dashboard" class="section active fade-in">
 
-          <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center justify-between mb-4">
             <div>
-              <h1 class="text-xl font-bold text-dark">Dashboard</h1>
+              <h1 class="text-lg font-bold text-dark">Dashboard</h1>
               <p class="text-xs text-gray-400 mt-0.5">Overview for today and this month</p>
             </div>
             <select class="text-xs border border-gray-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-brand/30 text-gray-600">
@@ -132,52 +132,83 @@ tailwind.config = {
           </div>
 
           <!-- KPI cards -->
-          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white rounded-2xl p-5 shadow-sm">
-              <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Today's bookings</div>
-              <div class="text-3xl font-bold text-dark">4</div>
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+            <div class="bg-white rounded-xl p-4 shadow-sm">
+              <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Today's bookings</div>
+              <div class="text-2xl font-bold text-dark">4</div>
               <div class="text-xs text-green-600 mt-1 font-medium">+2 vs yesterday</div>
             </div>
-            <div class="bg-white rounded-2xl p-5 shadow-sm">
-              <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Today's revenue</div>
-              <div class="text-3xl font-bold text-dark">2 180 <span class="text-base font-normal text-gray-400">zł</span></div>
+            <div class="bg-white rounded-xl p-4 shadow-sm">
+              <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Today's revenue</div>
+              <div class="text-2xl font-bold text-dark">2 180 <span class="text-sm font-normal text-gray-400">zł</span></div>
               <div class="text-xs text-green-600 mt-1 font-medium">+14% vs yesterday</div>
             </div>
-            <div class="bg-white rounded-2xl p-5 shadow-sm">
-              <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Month bookings</div>
-              <div class="text-3xl font-bold text-dark">47</div>
+            <div class="bg-white rounded-xl p-4 shadow-sm">
+              <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Month bookings</div>
+              <div class="text-2xl font-bold text-dark">47</div>
               <div class="text-xs text-gray-400 mt-1">Goal: <span class="text-dark font-semibold">80</span> — 59% reached</div>
             </div>
-            <div class="bg-white rounded-2xl p-5 shadow-sm">
-              <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Active hotels</div>
-              <div class="text-3xl font-bold text-dark">4</div>
+            <div class="bg-white rounded-xl p-4 shadow-sm">
+              <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Active hotels</div>
+              <div class="text-2xl font-bold text-dark">4</div>
               <div class="text-xs text-gray-400 mt-1">2 new enquiries pending</div>
             </div>
           </div>
 
           <!-- Chart + top hotels -->
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-4">
 
             <!-- Bookings chart -->
-            <div class="lg:col-span-2 bg-white rounded-2xl p-5 shadow-sm">
-              <div class="flex items-center justify-between mb-4">
+            <div class="lg:col-span-2 bg-white rounded-xl p-4 shadow-sm">
+              <!-- Header -->
+              <div class="flex items-center justify-between mb-3">
                 <div>
-                  <div class="font-semibold text-dark text-sm">Bookings this month</div>
-                  <div class="text-xs text-gray-400 mt-0.5">April 2026 · daily view</div>
+                  <div class="font-semibold text-dark text-sm">Bookings & Revenue</div>
+                  <div class="text-xs text-gray-400 mt-0.5" id="chart-period-label">April 2026 · last 30 days</div>
                 </div>
-                <div class="flex items-center gap-3 text-xs text-gray-400">
-                  <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-brand inline-block"></span>Bookings</span>
-                  <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-blue-300 inline-block"></span>Revenue (×10)</span>
+                <div class="flex items-center gap-1.5">
+                  <button onclick="setChartPeriod('24h')" id="chart-btn-24h" class="chart-period-btn text-xs px-2.5 py-1 rounded-lg font-medium border border-gray-200 bg-white text-gray-500 transition-colors hover:border-brand hover:text-brand">24h</button>
+                  <button onclick="setChartPeriod('7d')" id="chart-btn-7d" class="chart-period-btn text-xs px-2.5 py-1 rounded-lg font-medium border border-gray-200 bg-white text-gray-500 transition-colors hover:border-brand hover:text-brand">7d</button>
+                  <button onclick="setChartPeriod('30d')" id="chart-btn-30d" class="chart-period-btn text-xs px-2.5 py-1 rounded-lg font-medium border border-brand bg-brand text-white transition-colors">30d</button>
+                  <select id="chart-month-select" onchange="setChartPeriod('month')" class="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white text-gray-600 focus:outline-none focus:ring-2 focus:ring-brand/30">
+                    <option value="apr">Apr 2026</option>
+                    <option value="mar">Mar 2026</option>
+                    <option value="feb">Feb 2026</option>
+                  </select>
                 </div>
               </div>
-              <canvas id="dashboard-chart" height="120"></canvas>
+              <!-- Mini stats row -->
+              <div class="grid grid-cols-4 gap-2 mb-3">
+                <div class="bg-gray-50 rounded-lg px-3 py-2">
+                  <div class="text-xs text-gray-400 mb-0.5">Total bookings</div>
+                  <div class="text-sm font-bold text-dark" id="cstat-bookings">122</div>
+                </div>
+                <div class="bg-gray-50 rounded-lg px-3 py-2">
+                  <div class="text-xs text-gray-400 mb-0.5">Total revenue</div>
+                  <div class="text-sm font-bold text-dark" id="cstat-revenue">9 250 zł</div>
+                </div>
+                <div class="bg-gray-50 rounded-lg px-3 py-2">
+                  <div class="text-xs text-gray-400 mb-0.5">Avg / day</div>
+                  <div class="text-sm font-bold text-dark" id="cstat-avg">4.1</div>
+                </div>
+                <div class="bg-gray-50 rounded-lg px-3 py-2">
+                  <div class="text-xs text-gray-400 mb-0.5">Best day</div>
+                  <div class="text-sm font-bold text-dark" id="cstat-best">Apr 16 · 7</div>
+                </div>
+              </div>
+              <!-- Legend -->
+              <div class="flex items-center gap-3 text-xs text-gray-400 mb-2">
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-brand inline-block"></span>Bookings</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-blue-400 inline-block" style="opacity:0.7"></span>Revenue (zł)</span>
+              </div>
+              <canvas id="dashboard-chart" height="110"></canvas>
             </div>
 
             <!-- Top hotels -->
-            <div class="bg-white rounded-2xl p-5 shadow-sm">
-              <div class="font-semibold text-dark text-sm mb-1">Top hotels this month</div>
-              <div class="text-xs text-gray-400 mb-4">By number of bookings</div>
-              <div class="space-y-4">
+            <div class="bg-white rounded-xl p-4 shadow-sm">
+              <div class="font-semibold text-dark text-sm mb-0.5">Top hotels this month</div>
+              <div class="text-xs text-gray-400 mb-3">By number of bookings</div>
+              <div class="space-y-3">
                 <div>
                   <div class="flex items-center justify-between text-xs mb-1.5">
                     <span class="font-medium text-dark">Hotel Wawel Kraków</span>
@@ -238,8 +269,8 @@ tailwind.config = {
           </div>
 
           <!-- Recent bookings -->
-          <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-3 border-b border-gray-100">
               <div class="font-semibold text-dark text-sm">Recent bookings</div>
               <button onclick="showSection('bookings')" class="text-xs text-brand hover:underline font-medium">View all →</button>
             </div>
@@ -1045,28 +1076,152 @@ tailwind.config = {
 
   // ===== Dashboard chart =====
   let dashChart = null;
+  let currentChartPeriod = '30d';
+
+  const CHART_DATA = {
+    '24h': {
+      labels: Array.from({length:24}, (_,i) => i+':00'),
+      bookings:[0,0,1,0,0,1,0,1,0,2,1,2,1,2,0,1,2,1,0,1,0,0,0,0],
+      revenue: [0,0,80,0,0,120,0,90,0,280,150,260,160,310,0,180,330,190,0,140,0,0,0,0],
+      periodLabel: 'Today · hourly view'
+    },
+    '7d': {
+      labels: ['Apr 1','Apr 2','Apr 3','Apr 4','Apr 5','Apr 6','Apr 7'],
+      bookings:[3,5,4,6,2,5,4],
+      revenue: [220,390,280,460,150,410,260],
+      periodLabel: 'Last 7 days'
+    },
+    '30d': {
+      labels: Array.from({length:30}, (_,i) => 'Apr '+(i+1)),
+      bookings:[2,4,3,5,1,4,6,3,5,4,2,6,4,5,3,7,4,5,2,6,3,4,5,3,4,6,3,5,4,4],
+      revenue: [140,260,200,380,90,310,480,220,390,300,150,460,290,370,220,560,290,400,160,470,220,310,390,240,300,450,210,380,300,310],
+      periodLabel: 'Last 30 days'
+    },
+    'month-apr': {
+      labels: Array.from({length:30}, (_,i) => 'Apr '+(i+1)),
+      bookings:[2,4,3,5,1,4,6,3,5,4,2,6,4,5,3,7,4,5,2,6,3,4,5,3,4,6,3,5,4,4],
+      revenue: [140,260,200,380,90,310,480,220,390,300,150,460,290,370,220,560,290,400,160,470,220,310,390,240,300,450,210,380,300,310],
+      periodLabel: 'April 2026 · full month'
+    },
+    'month-mar': {
+      labels: Array.from({length:31}, (_,i) => 'Mar '+(i+1)),
+      bookings:[1,3,2,4,5,3,6,4,5,3,2,5,4,6,3,5,4,2,5,4,3,6,5,4,3,5,6,4,5,3,2],
+      revenue: [100,220,160,300,380,240,460,310,390,230,150,380,290,470,220,400,310,150,380,300,220,460,390,300,230,390,470,310,390,230,150],
+      periodLabel: 'March 2026 · full month'
+    },
+    'month-feb': {
+      labels: Array.from({length:28}, (_,i) => 'Feb '+(i+1)),
+      bookings:[2,3,1,4,3,5,4,2,3,5,4,3,5,4,6,3,4,5,3,4,5,3,4,3,5,4,3,4],
+      revenue: [150,230,80,310,220,390,300,150,230,380,290,230,390,290,460,220,300,380,220,300,390,230,300,230,380,290,220,290],
+      periodLabel: 'February 2026 · full month'
+    }
+  };
+
+  function setChartPeriod(period) {
+    if (period === 'month') {
+      const month = document.getElementById('chart-month-select').value;
+      currentChartPeriod = 'month-' + month;
+    } else {
+      currentChartPeriod = period;
+    }
+    // Update button active styles
+    ['24h','7d','30d'].forEach(p => {
+      const btn = document.getElementById('chart-btn-' + p);
+      if (!btn) return;
+      if (p === period) {
+        btn.classList.add('bg-brand','text-white','border-brand');
+        btn.classList.remove('bg-white','text-gray-500','border-gray-200');
+      } else {
+        btn.classList.remove('bg-brand','text-white','border-brand');
+        btn.classList.add('bg-white','text-gray-500','border-gray-200');
+      }
+    });
+    renderDashboardChart();
+  }
+
   function renderDashboardChart() {
     const ctx = document.getElementById('dashboard-chart');
     if (!ctx) return;
     if (dashChart) dashChart.destroy();
-    const labels = Array.from({length: 7}, (_,i) => 'Apr ' + (i+1));
-    const bookings = [3,5,4,6,2,5,4];
-    const revenue  = [180,320,250,480,140,390,218]; // divide by 10 for display parity
+
+    const d = CHART_DATA[currentChartPeriod] || CHART_DATA['30d'];
+    const { labels, bookings, revenue, periodLabel } = d;
+
+    // Update period label
+    const pl = document.getElementById('chart-period-label');
+    if (pl) pl.textContent = periodLabel;
+
+    // Compute stats
+    const totalB = bookings.reduce((a,b)=>a+b,0);
+    const totalR = revenue.reduce((a,b)=>a+b,0);
+    const avgB   = (totalB / labels.length).toFixed(1);
+    const maxB   = Math.max(...bookings);
+    const bestIdx = bookings.indexOf(maxB);
+    const bestLabel = labels[bestIdx];
+
+    const fmtR = v => v >= 1000 ? (Math.round(v/100)*100).toLocaleString('pl') : v;
+    document.getElementById('cstat-bookings').textContent = totalB;
+    document.getElementById('cstat-revenue').textContent  = fmtR(totalR) + ' zł';
+    document.getElementById('cstat-avg').textContent      = avgB;
+    document.getElementById('cstat-best').textContent     = bestLabel + ' · ' + maxB;
+
     dashChart = new Chart(ctx, {
       type: 'bar',
       data: {
         labels,
         datasets: [
-          { label: 'Bookings', data: bookings, backgroundColor: 'rgba(232,117,26,0.85)', borderRadius: 6, order: 1 },
-          { label: 'Revenue (×10 zł)', data: revenue.map(v => v/100), backgroundColor: 'rgba(147,197,253,0.5)', borderRadius: 6, order: 2 }
+          {
+            label: 'Bookings',
+            data: bookings,
+            backgroundColor: 'rgba(232,117,26,0.85)',
+            borderRadius: 4,
+            order: 1,
+            yAxisID: 'yLeft'
+          },
+          {
+            label: 'Revenue (zł)',
+            data: revenue,
+            type: 'line',
+            borderColor: 'rgba(99,153,233,0.85)',
+            backgroundColor: 'rgba(99,153,233,0.08)',
+            borderWidth: 2,
+            pointRadius: 0,
+            pointHoverRadius: 4,
+            fill: true,
+            tension: 0.4,
+            order: 0,
+            yAxisID: 'yRight'
+          }
         ]
       },
       options: {
         responsive: true,
-        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y } } },
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: item => item.dataset.label === 'Bookings'
+                ? 'Bookings: ' + item.parsed.y
+                : 'Revenue: ' + item.parsed.y + ' zł'
+            }
+          }
+        },
         scales: {
-          x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#9ca3af' } },
-          y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 11 }, color: '#9ca3af' } }
+          x: {
+            grid: { display: false },
+            ticks: { font: { size: 10 }, color: '#9ca3af', maxTicksLimit: 10, maxRotation: 0 }
+          },
+          yLeft: {
+            position: 'left',
+            grid: { color: 'rgba(0,0,0,0.04)' },
+            ticks: { font: { size: 10 }, color: '#9ca3af', stepSize: 1 }
+          },
+          yRight: {
+            position: 'right',
+            grid: { drawOnChartArea: false },
+            ticks: { font: { size: 10 }, color: '#9ca3af', callback: v => v + ' zł' }
+          }
         }
       }
     });
