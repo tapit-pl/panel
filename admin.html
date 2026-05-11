@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Thousand Miles – Admin Panel</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <script>
@@ -1607,15 +1608,87 @@ tailwind.config = {
 </div>
 
 <script>
+  // ===== Supabase =====
+  const { createClient } = supabase;
+  const db = createClient(
+    'https://jzsiuvcgpwukxpcjxcsg.supabase.co',
+    'sb_publishable_jTg5-5J24uo7BNBVBLTTLA_xAeB9iK4'
+  );
+
   // ===== Init =====
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', async function() {
     renderDashboardChart();
-    renderBookingsTable();
-    renderPartnersTable();
-    renderTicketsTable();
-    renderPrintOrders();
-    renderNotifHistory();
+    await loadBookings();
+    await loadPartners();
+    await loadTickets();
+    await loadPrintOrders();
+    await loadNotifications();
   });
+
+  async function loadBookings() {
+    const { data, error } = await db.from('bookings').select('*').order('created_at', { ascending: false });
+    if (error) { console.error('bookings:', error); return; }
+    // Map DB rows to format expected by renderBookingsTable
+    allBookings.length = 0;
+    data.forEach(b => allBookings.push({
+      id: b.id, tour: b.tour, guest: b.guest, email: b.email, phone: b.phone,
+      hotel: b.partner_id || '—', date: b.date, time: b.time, pickup: b.pickup,
+      pax: b.pax, total: b.total, comm: b.comm, source: b.source, status: b.status, notes: b.notes || ''
+    }));
+    renderBookingsTable();
+  }
+
+  async function loadPartners() {
+    const { data, error } = await db.from('partners').select('*, settlements(*)').order('name');
+    if (error) { console.error('partners:', error); return; }
+    allPartners.length = 0;
+    data.forEach(p => allPartners.push({
+      id: p.id, name: p.name, initials: p.initials, color: p.color, type: p.type,
+      stars: p.stars, address: p.address, contact: p.contact, phone: p.phone,
+      email: p.email, username: p.username, since: p.since,
+      bookings: p.bookings_count, comm: p.comm, commRate: p.comm_rate,
+      active: p.active, notes: p.notes || '', lastLogin: p.last_login || 'Never',
+      contractSigned: p.contract_signed, contractExpiry: p.contract_expiry,
+      notifyEmail: p.notify_email, logo: p.logo_url || null,
+      settlements: (p.settlements || []).map(s => ({ period: s.period, amount: s.amount, date: s.settled_date }))
+    }));
+    renderPartnersTable();
+  }
+
+  async function loadTickets() {
+    const { data, error } = await db.from('tickets').select('*, partners(name)').order('created_at', { ascending: false });
+    if (error) { console.error('tickets:', error); return; }
+    allTickets.length = 0;
+    data.forEach(t => allTickets.push({
+      id: t.id, partner: t.partners?.name || '—', subject: t.subject,
+      message: t.message, received: new Date(t.created_at).toLocaleDateString('en', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'}),
+      priority: t.priority, status: t.status, attachment: t.attachment || null, reply: t.reply || ''
+    }));
+    renderTicketsTable();
+  }
+
+  async function loadPrintOrders() {
+    const { data, error } = await db.from('print_orders').select('*, partners(name)').order('created_at', { ascending: false });
+    if (error) { console.error('print_orders:', error); return; }
+    allPrintOrders.length = 0;
+    data.forEach(o => allPrintOrders.push({
+      id: o.id, partner: o.partners?.name || '—', material: o.material,
+      qty: o.qty, ordered: new Date(o.created_at).toLocaleDateString('en', {month:'short', day:'numeric'}),
+      note: o.note || '', status: o.status
+    }));
+    renderPrintOrders();
+  }
+
+  async function loadNotifications() {
+    const { data, error } = await db.from('notifications').select('*').order('created_at', { ascending: false });
+    if (error) { console.error('notifications:', error); return; }
+    sentNotifications.length = 0;
+    data.forEach(n => sentNotifications.push({
+      id: n.id, target: n.target, type: n.type, title: n.title, message: n.message,
+      sent: new Date(n.created_at).toLocaleDateString('en', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'})
+    }));
+    renderNotifHistory();
+  }
 
   function goToLogin() {
     window.location.href = 'index.html';
@@ -2048,11 +2121,12 @@ tailwind.config = {
     document.getElementById('ticket-detail-drawer').classList.remove('open');
     setTimeout(() => document.getElementById('ticket-detail-panel').classList.add('hidden'), 280);
   }
-  function saveTicket() {
+  async function saveTicket() {
     const t = allTickets.find(x => x.id === editingTicketId);
     if (!t) return;
     t.status = document.getElementById('td-status-select').value;
     t.reply  = document.getElementById('td-reply').value;
+    await db.from('tickets').update({ status: t.status, reply: t.reply }).eq('id', editingTicketId);
     renderTicketsTable();
     closeTicketDetail();
     showToast('Ticket updated.');
@@ -2097,11 +2171,12 @@ tailwind.config = {
     if (badge) { badge.textContent = newCount; badge.classList.toggle('hidden', newCount === 0); }
   }
 
-  function changePrintStatus(id, newStatus) {
+  async function changePrintStatus(id, newStatus) {
     const o = allPrintOrders.find(x => x.id === id);
     if (!o) return;
     o.status = newStatus;
     if (newStatus === 'Sent' && !o.note) o.note = 'Delivered ' + new Date().toLocaleDateString('en', {month:'short', day:'numeric'});
+    await db.from('print_orders').update({ status: newStatus, note: o.note }).eq('id', id);
     renderPrintOrders();
     showToast('Order ' + id + ' marked as ' + newStatus + '.');
   }
@@ -2129,14 +2204,14 @@ tailwind.config = {
       </div>`).join('');
   }
 
-  function sendNotification() {
+  async function sendNotification() {
     const title   = document.getElementById('notif-title').value.trim();
     const message = document.getElementById('notif-message').value.trim();
-    const targetVal = document.getElementById('notif-target').value;
     const targetLabel = document.getElementById('notif-target').options[document.getElementById('notif-target').selectedIndex].text;
     if (!title || !message) { showToast('Please fill in title and message.'); return; }
     const type = document.getElementById('notif-type').value;
-    sentNotifications.unshift({ id: Date.now(), target: targetLabel, type, title, message, sent: new Date().toLocaleDateString('en', {month:'short', day:'numeric'}) + ', ' + new Date().toLocaleTimeString('en', {hour:'2-digit', minute:'2-digit'}) });
+    const { data } = await db.from('notifications').insert({ target: targetLabel, type, title, message }).select().single();
+    if (data) sentNotifications.unshift({ id: data.id, target: data.target, type: data.type, title: data.title, message: data.message, sent: new Date(data.created_at).toLocaleDateString('en', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'}) });
     document.getElementById('notif-title').value   = '';
     document.getElementById('notif-message').value = '';
     renderNotifHistory();
@@ -2314,20 +2389,26 @@ tailwind.config = {
     document.getElementById('partner-detail-drawer').classList.remove('open');
     setTimeout(() => document.getElementById('partner-detail-panel').classList.add('hidden'), 280);
   }
-  function savePartnerDetail() {
+  async function savePartnerDetail() {
     const p = allPartners.find(x => x.id === editingPartnerId);
     if (!p) return;
-    p.name     = document.getElementById('pd-edit-name').value;
-    p.type     = document.getElementById('pd-edit-type').value;
-    p.contact  = document.getElementById('pd-edit-contact').value;
-    p.phone    = document.getElementById('pd-edit-phone').value;
-    p.email    = document.getElementById('pd-edit-email').value;
-    p.address  = document.getElementById('pd-edit-address').value;
-    p.commRate        = parseFloat(document.getElementById('pd-edit-commrate').value) || p.commRate;
-    p.notes           = document.getElementById('pd-edit-notes').value;
-    p.contractSigned  = document.getElementById('pd-contract-signed').value;
-    p.contractExpiry  = document.getElementById('pd-contract-expiry').value;
-    p.notifyEmail     = document.getElementById('pd-notify-email').checked;
+    p.name           = document.getElementById('pd-edit-name').value;
+    p.type           = document.getElementById('pd-edit-type').value;
+    p.contact        = document.getElementById('pd-edit-contact').value;
+    p.phone          = document.getElementById('pd-edit-phone').value;
+    p.email          = document.getElementById('pd-edit-email').value;
+    p.address        = document.getElementById('pd-edit-address').value;
+    p.commRate       = parseFloat(document.getElementById('pd-edit-commrate').value) || p.commRate;
+    p.notes          = document.getElementById('pd-edit-notes').value;
+    p.contractSigned = document.getElementById('pd-contract-signed').value;
+    p.contractExpiry = document.getElementById('pd-contract-expiry').value;
+    p.notifyEmail    = document.getElementById('pd-notify-email').checked;
+    await db.from('partners').update({
+      name: p.name, type: p.type, contact: p.contact, phone: p.phone,
+      email: p.email, address: p.address, comm_rate: p.commRate, notes: p.notes,
+      contract_signed: p.contractSigned || null, contract_expiry: p.contractExpiry || null,
+      notify_email: p.notifyEmail
+    }).eq('id', editingPartnerId);
     renderPartnersTable();
     closePartnerDetail();
     showToast('Partner updated successfully!');
