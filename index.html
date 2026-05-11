@@ -407,7 +407,7 @@ tailwind.config = {
                 </div>
               </div>
             </div>
-            <div class="absolute top-3 right-3"><span class="bg-green-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1"><span class="w-1.5 h-1.5 bg-white rounded-full inline-block"></span>Available</span></div>
+            
           </div>
           <div class="p-4">
             <h3 class="font-bold text-dark text-sm leading-snug">Trip to Zakopane</h3>
@@ -429,7 +429,7 @@ tailwind.config = {
         <div class="tour-card bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer" data-name="auschwitz-birkenau tour" data-cat="day" onclick="openTour(2)">
           <div class="relative overflow-hidden h-44">
             <img src="https://images.unsplash.com/photo-1571501679680-de32f1e7aad4?w=400&q=80" alt="Auschwitz" class="tour-img w-full h-full object-cover">
-            <div class="absolute top-3 right-3"><span class="bg-green-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1"><span class="w-1.5 h-1.5 bg-white rounded-full inline-block"></span>Available</span></div>
+            
           </div>
           <div class="p-4">
             <h3 class="font-bold text-dark text-sm leading-snug">Auschwitz-Birkenau Tour</h3>
@@ -451,7 +451,7 @@ tailwind.config = {
         <div class="tour-card bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer" data-name="shooting range combat experience" data-cat="attraction" onclick="openTour(3)">
           <div class="relative overflow-hidden h-44">
             <img src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80" alt="Strzelnica" class="tour-img w-full h-full object-cover">
-            <div class="absolute top-3 right-3"><span class="bg-green-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1"><span class="w-1.5 h-1.5 bg-white rounded-full inline-block"></span>Available</span></div>
+            
           </div>
           <div class="p-4">
             <h3 class="font-bold text-dark text-sm leading-snug">Shooting Range – combat experience</h3>
@@ -473,7 +473,7 @@ tailwind.config = {
         <div class="tour-card bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer" data-name="wieliczka salt mine" data-cat="day" onclick="openTour(4)">
           <div class="relative overflow-hidden h-44">
             <img src="https://images.unsplash.com/photo-1565117082-7b5680e3c994?w=400&q=80" alt="Wieliczka" class="tour-img w-full h-full object-cover">
-            <div class="absolute top-3 right-3"><span class="bg-yellow-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1"><span class="w-1.5 h-1.5 bg-white rounded-full inline-block"></span>Last spots</span></div>
+            
           </div>
           <div class="p-4">
             <h3 class="font-bold text-dark text-sm leading-snug">Wieliczka Salt Mine</h3>
@@ -496,7 +496,7 @@ tailwind.config = {
           <div class="relative overflow-hidden h-44">
             <img src="https://images.unsplash.com/photo-1519817650390-64a93db51149?w=400&q=80" alt="Kraków" class="tour-img w-full h-full object-cover">
             <div class="absolute top-3 left-3"><span class="bg-gray-700 text-white text-xs font-bold px-2.5 py-1 rounded-full">New</span></div>
-            <div class="absolute top-3 right-3"><span class="bg-green-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1"><span class="w-1.5 h-1.5 bg-white rounded-full inline-block"></span>Available</span></div>
+            
           </div>
           <div class="p-4">
             <h3 class="font-bold text-dark text-sm leading-snug">Night Tour of Kraków</h3>
@@ -1430,19 +1430,9 @@ tailwind.config = {
         <div>
           <h3 class="font-semibold text-dark text-sm mb-3"><span class="w-5 h-5 bg-brand text-white text-xs rounded-full inline-flex items-center justify-center mr-2">2</span>Select departure time</h3>
           <div class="flex gap-2.5 flex-wrap">
-            <button class="slot-btn selected px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-semibold transition-all" onclick="selectSlotWithHold(this, 22, '1')">
-              <div class="font-bold">07:00</div>
-              <div class="text-xs opacity-70">22 spots left</div>
-            </button>
-            <button class="slot-btn px-4 py-2.5 border-2 border-amber-300 bg-amber-50 rounded-xl text-sm font-semibold text-gray-700 transition-all relative" onclick="selectSlotWithHold(this, 2, '1')">
-              <div class="absolute -top-2 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap">Last 2 seats!</div>
-              <div class="font-bold mt-1">09:00</div>
-              <div class="text-xs text-amber-600 font-semibold">2 spots left</div>
-            </button>
-            <button class="slot-btn px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-semibold text-gray-700 transition-all" onclick="selectSlotWithHold(this, 15, '1')">
-              <div class="font-bold">11:00</div>
-              <div class="text-xs opacity-70">15 spots left</div>
-            </button>
+            <button class="slot-btn selected px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-semibold transition-all" onclick="selectSlotWithHold(this, 22, '1')"><div class="font-bold">07:00</div><div class="text-xs opacity-70">22 spots left</div></button>
+            <button class="slot-btn px-4 py-2.5 border-2 border-amber-300 bg-amber-50 rounded-xl text-sm font-semibold text-gray-700 transition-all relative" onclick="selectSlotWithHold(this, 2, '1')"><div class="absolute -top-2 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap">Last 2 seats!</div><div class="font-bold mt-1">09:00</div><div class="text-xs text-amber-600 font-semibold">2 spots left</div></button>
+            <button class="slot-btn px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-semibold text-gray-700 transition-all" onclick="selectSlotWithHold(this, 15, '1')"><div class="font-bold">11:00</div><div class="text-xs opacity-70">15 spots left</div></button>
           </div>
           <!-- Hold button + countdown — TODO: enable after Bokun API integration -->
           <div id="hold-area-1" class="mt-3 hidden" data-bokun-feature="hold">
@@ -1556,12 +1546,8 @@ tailwind.config = {
         <div>
           <h3 class="font-semibold text-dark text-sm mb-3"><span class="w-5 h-5 bg-brand text-white text-xs rounded-full inline-flex items-center justify-center mr-2">2</span>Select departure time</h3>
           <div class="flex gap-2.5 flex-wrap">
-            <button class="slot-btn selected px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-semibold transition-all" onclick="selectSlot(this)">
-              <div class="font-bold">07:30</div><div class="text-xs opacity-70">18 spots left</div>
-            </button>
-            <button class="slot-btn px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-semibold text-gray-700 transition-all" onclick="selectSlot(this)">
-              <div class="font-bold">09:00</div><div class="text-xs opacity-70">5 spots left</div>
-            </button>
+            <button class="slot-btn selected px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-semibold transition-all" onclick="selectSlot(this)">07:30</button>
+            <button class="slot-btn px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-semibold text-gray-700 transition-all" onclick="selectSlot(this)">09:00</button>
           </div>
         </div>
         <div>
