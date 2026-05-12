@@ -1356,94 +1356,148 @@ tailwind.config = {
       <div class="font-bold text-dark text-base">Add new partner</div>
       <button onclick="closeAddPartner()" class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-gray-100 text-gray-400"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <div class="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
+    <div class="px-6 py-5 space-y-5 max-h-[78vh] overflow-y-auto">
 
-      <div class="grid grid-cols-2 gap-3">
-        <div class="col-span-2">
-          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Property name <span class="text-red-400">*</span></label>
-          <input id="ap-name" type="text" placeholder="e.g. Hotel Wawel Kraków" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-        </div>
-        <div class="col-span-2">
-          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Type <span class="text-red-400">*</span></label>
-          <select id="ap-type" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 text-dark">
-            <option value="Hotel">Hotel</option>
-            <option value="Apartment">Apartment</option>
-            <option value="Hostel">Hostel</option>
-            <option value="Guesthouse">Guesthouse</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-        <div class="col-span-2">
-          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Street</label>
-          <input id="ap-street" type="text" placeholder="ul. Sławkowska 12" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Postal code</label>
-          <input id="ap-postal" type="text" placeholder="30-001" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1.5">City</label>
-          <input id="ap-city" type="text" placeholder="Kraków" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1.5">First name <span class="text-red-400">*</span></label>
-          <input id="ap-contact-first" type="text" placeholder="Anna" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Last name <span class="text-red-400">*</span></label>
-          <input id="ap-contact-last" type="text" placeholder="Kowalska" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Phone</label>
-          <input id="ap-phone" type="text" placeholder="+48 12 000 00 00" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Email <span class="text-red-400">*</span></label>
-          <input id="ap-email" type="email" placeholder="partner@hotel.pl" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+      <!-- ── INVOICE DATA ─────────────────────────── -->
+      <div>
+        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Dane do faktury</div>
+        <div class="grid grid-cols-6 gap-3">
+          <!-- NIP + button -->
+          <div class="col-span-6">
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">NIP</label>
+            <div class="flex gap-2">
+              <input id="ap-nip" type="text" placeholder="000-000-00-00" class="flex-1 text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+              <button type="button" onclick="lookupNIP()" class="px-4 py-2.5 bg-brand/10 hover:bg-brand/20 text-brand text-xs font-semibold rounded-xl transition-colors whitespace-nowrap flex items-center gap-1.5">
+                <i class="fa-solid fa-magnifying-glass text-xs"></i> Pobierz dane
+              </button>
+            </div>
+            <div id="ap-nip-status" class="text-xs mt-1.5 hidden"></div>
+          </div>
+          <!-- Company name -->
+          <div class="col-span-5">
+            <label class="block text-xs text-gray-500 mb-1.5">Nazwa firmy</label>
+            <input id="ap-invoice-company" type="text" placeholder="Hotel Wawel Sp. z o.o." class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+            <p class="text-xs text-gray-400 mt-1">Sprawdź, czy nazwa jest poprawna.</p>
+          </div>
+          <!-- VAT badge -->
+          <div class="col-span-1 flex flex-col items-center justify-center pt-1">
+            <div id="ap-vat-badge" class="hidden text-center"></div>
+          </div>
+          <!-- Invoice address: street + house + apt -->
+          <div class="col-span-4">
+            <label class="block text-xs text-gray-500 mb-1.5">Ulica</label>
+            <input id="ap-inv-street" type="text" placeholder="ul. Sławkowska" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+          <div class="col-span-1">
+            <label class="block text-xs text-gray-500 mb-1.5">Nr domu</label>
+            <input id="ap-inv-house" type="text" placeholder="12" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+          <div class="col-span-1">
+            <label class="block text-xs text-gray-500 mb-1.5">Nr lok.</label>
+            <input id="ap-inv-apt" type="text" placeholder="—" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+          <div class="col-span-2">
+            <label class="block text-xs text-gray-500 mb-1.5">Kod pocztowy</label>
+            <input id="ap-inv-postal" type="text" placeholder="30-001" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+          <div class="col-span-3">
+            <label class="block text-xs text-gray-500 mb-1.5">Miasto</label>
+            <input id="ap-inv-city" type="text" placeholder="Kraków" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+          <!-- Invoice email -->
+          <div class="col-span-6">
+            <label class="block text-xs text-gray-500 mb-1.5">E-mail do faktur</label>
+            <input id="ap-invoice-email" type="email" placeholder="faktury@hotel.pl" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
         </div>
       </div>
 
-      <div class="border-t border-gray-100 pt-4">
-        <div class="text-xs font-semibold text-gray-600 mb-3">Invoice data</div>
+      <!-- ── PROPERTY ─────────────────────────────── -->
+      <div class="border-t border-gray-100 pt-5">
+        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Dane obiektu</div>
         <div class="grid grid-cols-2 gap-3">
           <div class="col-span-2">
-            <label class="block text-xs text-gray-500 mb-1.5">NIP <span class="text-gray-400 font-normal">(wpisz i kliknij Pobierz, aby auto-uzupełnić dane)</span></label>
-            <div class="flex gap-2">
-              <input id="ap-nip" type="text" placeholder="000-000-00-00" class="flex-1 text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-              <button type="button" onclick="lookupNIP()" class="px-3 py-2.5 bg-brand/10 hover:bg-brand/20 text-brand text-xs font-semibold rounded-xl transition-colors whitespace-nowrap flex items-center gap-1.5">
-                <i class="fa-solid fa-magnifying-glass text-xs"></i> Pobierz
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Nazwa obiektu <span class="text-red-400">*</span></label>
+            <input id="ap-name" type="text" placeholder="np. Hotel Wawel Kraków" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+          <div class="col-span-2">
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Typ</label>
+            <select id="ap-type" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 text-dark">
+              <option value="Hotel">Hotel</option>
+              <option value="Apartment">Apartment</option>
+              <option value="Hostel">Hostel</option>
+              <option value="Guesthouse">Guesthouse</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <!-- Copy address button -->
+          <div class="col-span-2">
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="text-xs font-semibold text-gray-600">Adres obiektu</label>
+              <button type="button" onclick="copyInvoiceAddressToProperty()" class="text-xs text-brand hover:underline flex items-center gap-1">
+                <i class="fa-solid fa-copy text-xs"></i> Użyj adresu z danych fakturowych
               </button>
             </div>
-            <div id="ap-nip-status" class="text-xs mt-1 hidden"></div>
-          </div>
-          <div>
-            <label class="block text-xs text-gray-500 mb-1.5">Invoice email</label>
-            <input id="ap-invoice-email" type="email" placeholder="faktury@hotel.pl" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-          </div>
-          <div>
           </div>
           <div class="col-span-2">
-            <label class="block text-xs text-gray-500 mb-1.5">Company name</label>
-            <input id="ap-invoice-company" type="text" placeholder="Hotel Wawel Sp. z o.o." class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+            <label class="block text-xs text-gray-500 mb-1.5">Ulica</label>
+            <input id="ap-street" type="text" placeholder="ul. Sławkowska" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           </div>
-          <div class="col-span-2">
-            <label class="block text-xs text-gray-500 mb-1.5">Invoice address</label>
-            <input id="ap-invoice-address" type="text" placeholder="ul. Przykładowa 1, 30-000 Kraków" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          <div>
+            <label class="block text-xs text-gray-500 mb-1.5">Nr domu</label>
+            <input id="ap-house" type="text" placeholder="12" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+          <div>
+            <label class="block text-xs text-gray-500 mb-1.5">Nr lokalu (opcja)</label>
+            <input id="ap-apt" type="text" placeholder="—" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+          <div>
+            <label class="block text-xs text-gray-500 mb-1.5">Kod pocztowy</label>
+            <input id="ap-postal" type="text" placeholder="30-001" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+          <div>
+            <label class="block text-xs text-gray-500 mb-1.5">Miasto</label>
+            <input id="ap-city" type="text" placeholder="Kraków" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           </div>
         </div>
+      </div>
+
+      <!-- ── CONTACT ──────────────────────────────── -->
+      <div class="border-t border-gray-100 pt-5">
+        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Osoba kontaktowa</div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Imię <span class="text-red-400">*</span></label>
+            <input id="ap-contact-first" type="text" placeholder="Anna" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Nazwisko <span class="text-red-400">*</span></label>
+            <input id="ap-contact-last" type="text" placeholder="Kowalska" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Telefon</label>
+            <input id="ap-phone" type="text" placeholder="+48 12 000 00 00" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">E-mail <span class="text-red-400">*</span></label>
+            <input id="ap-email" type="email" placeholder="partner@hotel.pl" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+        </div>
+      </div>
+
+      <!-- ── NOTES ───────────────────────────────── -->
+      <div class="border-t border-gray-100 pt-5">
+        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Notatki wewnętrzne</label>
+        <textarea id="ap-notes" rows="2" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 resize-none" placeholder="Widoczne tylko dla zespołu TM…"></textarea>
       </div>
 
       <div class="border-t border-gray-100 pt-4">
         <div class="flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3">
           <i class="fa-solid fa-envelope text-blue-400 mt-0.5 text-sm"></i>
-          <p class="text-xs text-blue-600">An invitation email will be sent automatically to the partner's email address. They will set their own password via the link.</p>
+          <p class="text-xs text-blue-600">Na podany e-mail zostanie wysłane zaproszenie. Partner ustawi hasło przez link.</p>
         </div>
       </div>
 
-      <div>
-        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Internal notes</label>
-        <textarea id="ap-notes" rows="2" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 resize-none" placeholder="Any notes visible only to TM staff…"></textarea>
-      </div>
     </div>
     <div class="px-6 py-4 border-t border-gray-100 bg-opacity-0 flex gap-2">
       <button id="btn-save-partner" onclick="saveAddPartner()" class="flex-1 bg-brand hover:bg-brand-dark text-white text-sm font-semibold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2">
@@ -3074,23 +3128,55 @@ tailwind.config = {
 
   // ===== Add Partner =====
   function openAddPartner() {
-    ['ap-name','ap-street','ap-postal','ap-city','ap-contact-first','ap-contact-last','ap-phone','ap-email','ap-notes','ap-nip','ap-invoice-email','ap-invoice-company','ap-invoice-address'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+    ['ap-name','ap-street','ap-house','ap-apt','ap-postal','ap-city',
+     'ap-contact-first','ap-contact-last','ap-phone','ap-email','ap-notes',
+     'ap-nip','ap-invoice-email','ap-invoice-company',
+     'ap-inv-street','ap-inv-house','ap-inv-apt','ap-inv-postal','ap-inv-city'
+    ].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
     document.getElementById('ap-type').value = 'Hotel';
-    const st = document.getElementById('ap-nip-status'); if(st){ st.textContent=''; st.className='text-xs mt-1 hidden'; }
+    const st = document.getElementById('ap-nip-status');
+    if (st) { st.textContent = ''; st.className = 'text-xs mt-1.5 hidden'; }
+    const vb = document.getElementById('ap-vat-badge');
+    if (vb) { vb.textContent = ''; vb.className = 'hidden text-center'; }
     const m = document.getElementById('modal-add-partner');
     m.classList.remove('hidden'); m.classList.add('flex');
+  }
+
+  function parsePolishAddress(addr) {
+    // Input: "UL. FLORIANSKA 12/4, 31-021 KRAKOW" or "ALEJA NIEPODLEGLOSCI 208, 00-925 WARSZAWA"
+    if (!addr) return {};
+    const commaIdx = addr.lastIndexOf(',');
+    if (commaIdx === -1) return { street: addr };
+    const streetRaw = addr.slice(0, commaIdx).trim();
+    const cityRaw   = addr.slice(commaIdx + 1).trim();
+    // Postal + city
+    const postalMatch = cityRaw.match(/^(\d{2}-\d{3})\s+(.+)$/);
+    const postal = postalMatch ? postalMatch[1] : '';
+    const city   = postalMatch ? postalMatch[2] : cityRaw;
+    // Street + house number [/ apt]
+    const numMatch = streetRaw.match(/^(.*?)\s+(\d+[A-Za-z]?)(?:\/(\d+[A-Za-z]?))?$/);
+    let street = streetRaw, house = '', apt = '';
+    if (numMatch) {
+      street = numMatch[1];
+      house  = numMatch[2];
+      apt    = numMatch[3] || '';
+    }
+    // Normalize case: "UL. FLORIANSKA" → "ul. Floriańska" — keep as-is (user can edit)
+    return { street, house, apt, postal, city };
   }
 
   async function lookupNIP() {
     const raw = (document.getElementById('ap-nip').value || '').replace(/[-\s]/g, '');
     const statusEl = document.getElementById('ap-nip-status');
+    const vatBadge = document.getElementById('ap-vat-badge');
     if (raw.length !== 10 || !/^\d+$/.test(raw)) {
       statusEl.textContent = 'Wpisz poprawny NIP (10 cyfr).';
-      statusEl.className = 'text-xs mt-1 text-red-400';
+      statusEl.className = 'text-xs mt-1.5 text-red-400';
       return;
     }
-    statusEl.textContent = 'Pobieranie danych...';
-    statusEl.className = 'text-xs mt-1 text-gray-400';
+    statusEl.textContent = 'Pobieranie...';
+    statusEl.className = 'text-xs mt-1.5 text-gray-400';
+    vatBadge.className = 'hidden text-center';
     try {
       const today = new Date().toISOString().slice(0, 10);
       const resp = await fetch(`https://wl-api.mf.gov.pl/api/search/nip/${raw}?date=${today}`);
@@ -3099,28 +3185,44 @@ tailwind.config = {
       if (data.code === 'WL-115') throw new Error('invalid nip');
       const subj = data?.result?.subject;
       if (!subj) throw new Error('no subject');
-      const filled = [];
-      if (subj.name) {
-        document.getElementById('ap-invoice-company').value = subj.name;
-        filled.push('nazwa');
+
+      // Company name
+      if (subj.name) document.getElementById('ap-invoice-company').value = subj.name;
+
+      // Address → split into fields
+      const addrRaw = subj.workingAddress || subj.residenceAddress || null;
+      if (addrRaw) {
+        const { street, house, apt, postal, city } = parsePolishAddress(addrRaw);
+        if (street) document.getElementById('ap-inv-street').value = street;
+        if (house)  document.getElementById('ap-inv-house').value  = house;
+        if (apt)    document.getElementById('ap-inv-apt').value    = apt;
+        if (postal) document.getElementById('ap-inv-postal').value = postal;
+        if (city)   document.getElementById('ap-inv-city').value   = city;
       }
-      const addr = subj.workingAddress || subj.residenceAddress || null;
-      if (addr) {
-        document.getElementById('ap-invoice-address').value = addr;
-        filled.push('adres');
-      }
-      if (filled.length > 0) {
-        statusEl.textContent = 'Pobrano: ' + filled.join(', ') + '.' + (!addr ? ' Adres niedostepny w rejestrze (JDG – wpisz recznie).' : '');
-        statusEl.className = 'text-xs mt-1 ' + (!addr ? 'text-amber-500' : 'text-green-500');
-      } else {
-        statusEl.textContent = 'NIP znaleziony, ale brak danych do uzupelnienia.';
-        statusEl.className = 'text-xs mt-1 text-amber-500';
-      }
+
+      // VAT status badge
+      const vatActive = subj.statusVat === 'Czynny';
+      vatBadge.innerHTML = vatActive
+        ? '<span class="inline-flex items-center gap-1 text-xs font-semibold text-green-700 bg-green-100 px-2 py-1 rounded-lg"><span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>VAT aktywny</span>'
+        : '<span class="inline-flex items-center gap-1 text-xs font-semibold text-red-600 bg-red-50 px-2 py-1 rounded-lg"><span class="w-1.5 h-1.5 rounded-full bg-red-400 inline-block"></span>VAT nieaktywny</span>';
+      vatBadge.className = 'text-center';
+
+      statusEl.textContent = addrRaw ? 'Dane pobrane pomyslnie.' : 'Pobrano nazwe. Adres niedostepny w rejestrze — wpisz recznie.';
+      statusEl.className = 'text-xs mt-1.5 ' + (addrRaw ? 'text-green-500' : 'text-amber-500');
     } catch(e) {
       const msg = e.message === 'invalid nip' ? 'Nieprawidlowy NIP.' : 'Nie znaleziono firmy dla tego NIP.';
       statusEl.textContent = msg;
-      statusEl.className = 'text-xs mt-1 text-red-400';
+      statusEl.className = 'text-xs mt-1.5 text-red-400';
+      vatBadge.className = 'hidden text-center';
     }
+  }
+
+  function copyInvoiceAddressToProperty() {
+    const map = [['ap-inv-street','ap-street'],['ap-inv-house','ap-house'],['ap-inv-apt','ap-apt'],['ap-inv-postal','ap-postal'],['ap-inv-city','ap-city']];
+    map.forEach(([src, dst]) => {
+      const s = document.getElementById(src), d = document.getElementById(dst);
+      if (s && d) d.value = s.value;
+    });
   }
   function closeAddPartner() {
     const m = document.getElementById('modal-add-partner');
@@ -3150,6 +3252,8 @@ tailwind.config = {
         name,
         type:     document.getElementById('ap-type').value,
         street:   document.getElementById('ap-street').value,
+        house:    document.getElementById('ap-house').value,
+        apt:      document.getElementById('ap-apt').value,
         postal:   document.getElementById('ap-postal').value,
         city:     document.getElementById('ap-city').value,
         contact_first: document.getElementById('ap-contact-first').value,
@@ -3160,7 +3264,11 @@ tailwind.config = {
         nip:             document.getElementById('ap-nip').value,
         invoice_email:   document.getElementById('ap-invoice-email').value,
         invoice_company: document.getElementById('ap-invoice-company').value,
-        invoice_address: document.getElementById('ap-invoice-address').value
+        inv_street:  document.getElementById('ap-inv-street').value,
+        inv_house:   document.getElementById('ap-inv-house').value,
+        inv_apt:     document.getElementById('ap-inv-apt').value,
+        inv_postal:  document.getElementById('ap-inv-postal').value,
+        inv_city:    document.getElementById('ap-inv-city').value
       })
     });
 
