@@ -30,10 +30,12 @@ tailwind.config = {
   .screen.active { display: flex !important; }
   .fade-in { animation: fadeIn 0.25s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-  .sidebar-link { transition: all 0.15s; }
-  .sidebar-link.active { background: rgba(232,117,26,0.12); color: #E8751A; }
-  .sidebar-link.active i { color: #E8751A; }
-  .sidebar-link:hover:not(.active) { background: rgba(255,255,255,0.06); }
+  .sidebar-link { transition: all 0.15s; border-left: 2px solid transparent; }
+  .sidebar-link.active { background: rgba(201,169,110,0.1); color: #c9a96e; border-left-color: #c9a96e; }
+  .sidebar-link.active i { color: #c9a96e; }
+  .sidebar-link:hover:not(.active) { background: rgba(255,255,255,0.05); color: #e2e8f0; }
+  .sidebar-link i { width: 16px; text-align: center; opacity: 0.6; }
+  .sidebar-link.active i { opacity: 1; }
   .modal-bg { backdrop-filter: blur(4px); }
   .status-paid    { background:#dcfce7; color:#16a34a; }
   .status-pending { background:#fef9c3; color:#ca8a04; }
@@ -167,29 +169,58 @@ tailwind.config = {
     <aside id="sidebar" class="w-60 shrink-0 flex flex-col h-screen sticky top-0 overflow-y-auto" style="background:#1a2332">
       <!-- Logo -->
       <div class="px-5 py-5 border-b border-white/8">
-        <img src="assets/logo.png" alt="Thousand Miles" class="h-7 object-contain brightness-0 invert opacity-90">
-        <div class="text-xs text-slate-500 mt-1.5 font-medium tracking-wide uppercase">Admin Panel</div>
+        <div class="flex items-center gap-3">
+          <img src="assets/logo.png" alt="Thousand Miles" class="h-8 object-contain brightness-0 invert opacity-90">
+        </div>
+        <div class="flex items-center gap-2 mt-2">
+          <div class="h-px flex-1" style="background:linear-gradient(to right,#c9a96e33,transparent)"></div>
+          <span class="text-xs tracking-[0.2em] uppercase" style="color:#c9a96e; opacity:0.7">Admin</span>
+          <div class="h-px flex-1" style="background:linear-gradient(to left,#c9a96e33,transparent)"></div>
+        </div>
       </div>
 
       <!-- Nav -->
       <nav class="flex-1 px-3 py-4 space-y-0.5">
-        <button onclick="showSection('dashboard')" class="sidebar-link active w-full flex items-center px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">Dashboard</button>
-        <button onclick="showSection('bookings')" class="sidebar-link w-full flex items-center px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">All Bookings <span class="ml-auto bg-brand text-white text-xs font-bold px-1.5 py-0.5 rounded-full">10</span></button>
-        <button onclick="showSection('hotels')" class="sidebar-link w-full flex items-center px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">Partners</button>
-        <button onclick="showSection('settlement')" class="sidebar-link w-full flex items-center px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">Commission Settlement</button>
-        <button onclick="showSection('tours')" class="sidebar-link w-full flex items-center px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">Tours & Pricing</button>
-        <button onclick="showSection('staff')" class="sidebar-link w-full flex items-center px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">Staff</button>
-        <div class="my-2 border-t border-white/8"></div>
-        <button onclick="showSection('support')" class="sidebar-link w-full flex items-center px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">Support <span id="sidebar-support-badge" class="ml-auto bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">3</span></button>
-        <button onclick="showSection('printorders')" class="sidebar-link w-full flex items-center px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">Print Orders <span id="sidebar-print-badge" class="ml-auto bg-brand text-white text-xs font-bold px-1.5 py-0.5 rounded-full">2</span></button>
-        <button onclick="showSection('notifications')" class="sidebar-link w-full flex items-center px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">Notifications</button>
-        <button onclick="showSection('activity')" class="sidebar-link w-full flex items-center px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">Activity Log</button>
+        <button onclick="showSection('dashboard')" class="sidebar-link active w-full flex items-center gap-3 px-3 py-2.5 rounded-r-xl text-left text-slate-300 text-sm font-medium">
+          <i class="fa-solid fa-gauge-high text-xs"></i>Dashboard
+        </button>
+        <button onclick="showSection('bookings')" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-r-xl text-left text-slate-400 text-sm font-medium">
+          <i class="fa-solid fa-calendar-check text-xs"></i>All Bookings
+          <span class="ml-auto text-xs font-bold px-1.5 py-0.5 rounded-full" style="background:rgba(201,169,110,0.15);color:#c9a96e">10</span>
+        </button>
+        <button onclick="showSection('hotels')" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-r-xl text-left text-slate-400 text-sm font-medium">
+          <i class="fa-solid fa-building text-xs"></i>Partners
+        </button>
+        <button onclick="showSection('settlement')" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-r-xl text-left text-slate-400 text-sm font-medium">
+          <i class="fa-solid fa-coins text-xs"></i>Commission
+        </button>
+        <button onclick="showSection('tours')" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-r-xl text-left text-slate-400 text-sm font-medium">
+          <i class="fa-solid fa-map-location-dot text-xs"></i>Tours & Pricing
+        </button>
+        <button onclick="showSection('staff')" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-r-xl text-left text-slate-400 text-sm font-medium">
+          <i class="fa-solid fa-users text-xs"></i>Staff
+        </button>
+        <div class="my-3 mx-3 border-t border-white/8"></div>
+        <button onclick="showSection('support')" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-r-xl text-left text-slate-400 text-sm font-medium">
+          <i class="fa-solid fa-headset text-xs"></i>Support
+          <span id="sidebar-support-badge" class="ml-auto bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">3</span>
+        </button>
+        <button onclick="showSection('printorders')" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-r-xl text-left text-slate-400 text-sm font-medium">
+          <i class="fa-solid fa-print text-xs"></i>Print Orders
+          <span id="sidebar-print-badge" class="ml-auto text-xs font-bold px-1.5 py-0.5 rounded-full" style="background:rgba(201,169,110,0.15);color:#c9a96e">2</span>
+        </button>
+        <button onclick="showSection('notifications')" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-r-xl text-left text-slate-400 text-sm font-medium">
+          <i class="fa-solid fa-bell text-xs"></i>Notifications
+        </button>
+        <button onclick="showSection('activity')" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-r-xl text-left text-slate-400 text-sm font-medium">
+          <i class="fa-solid fa-clock-rotate-left text-xs"></i>Activity Log
+        </button>
       </nav>
 
       <!-- Bottom user -->
       <div class="px-3 py-4 border-t border-white/8">
-        <div class="flex items-center gap-3 px-3 py-2.5 rounded-xl">
-          <div class="w-8 h-8 bg-brand rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0">TM</div>
+        <div class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-colors">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0" style="background:rgba(201,169,110,0.2);color:#c9a96e">TM</div>
           <div class="flex-1 min-w-0">
             <div class="text-xs font-semibold text-white truncate">Thousand Miles</div>
             <div class="text-xs text-slate-500">Owner</div>
@@ -205,22 +236,22 @@ tailwind.config = {
     <div class="flex-1 flex flex-col min-w-0 overflow-y-auto bg-gray-50">
 
       <!-- Top header -->
-      <header class="bg-white border-b border-gray-200 sticky top-0 z-30">
+      <header class="bg-white border-b border-gray-100 sticky top-0 z-30">
         <div class="h-14 px-6 flex items-center justify-between gap-4">
-          <div class="flex items-center gap-3 flex-1 max-w-md">
+          <div class="flex items-center gap-3 flex-1 max-w-sm">
             <div class="relative flex-1">
-              <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-              <input type="text" placeholder="Search bookings, guests, partners…" class="w-full pl-8 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 text-xs"></i>
+              <input type="text" placeholder="Search bookings, guests, partners…" class="w-full pl-8 pr-4 py-2 bg-gray-50 border border-gray-100 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-yellow-200 focus:border-yellow-300 text-gray-600 placeholder-gray-300">
             </div>
           </div>
           <div class="flex items-center gap-2">
-            <span class="text-xs text-gray-400 hidden sm:block">Monday, April 7, 2026</span>
-            <button class="relative p-2 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">
-              <i class="fa-solid fa-bell text-gray-500 text-sm"></i>
-              <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">3</span>
+            <span class="text-xs text-gray-300 hidden sm:block tracking-wide" id="header-date"></span>
+            <button class="relative p-2 rounded-xl hover:bg-gray-50 transition-colors">
+              <i class="fa-solid fa-bell text-gray-400 text-sm"></i>
+              <span class="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center" style="font-size:8px">3</span>
             </button>
-            <button onclick="openManualBooking()" class="flex items-center gap-2 bg-brand hover:bg-brand-dark text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors">
-              <i class="fa-solid fa-plus"></i>Add booking
+            <button onclick="openManualBooking()" class="flex items-center gap-2 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all hover:opacity-90" style="background:linear-gradient(135deg,#1a2332,#243047)">
+              <i class="fa-solid fa-plus text-xs"></i>Add booking
             </button>
           </div>
         </div>
@@ -246,24 +277,36 @@ tailwind.config = {
 
           <!-- KPI cards -->
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-            <div class="bg-white rounded-xl p-4 shadow-sm">
-              <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Today's bookings</div>
+            <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-l-yellow-400">
+              <div class="flex items-center gap-2 mb-2">
+                <i class="fa-solid fa-calendar-day text-yellow-400 text-xs"></i>
+                <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Today's bookings</div>
+              </div>
               <div class="text-2xl font-bold text-dark">4</div>
-              <div class="text-xs text-green-600 mt-1 font-medium">+2 vs yesterday</div>
+              <div class="text-xs text-green-600 mt-1 font-medium"><i class="fa-solid fa-arrow-up text-xs mr-1"></i>+2 vs yesterday</div>
             </div>
-            <div class="bg-white rounded-xl p-4 shadow-sm">
-              <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Today's revenue</div>
+            <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-l-green-400">
+              <div class="flex items-center gap-2 mb-2">
+                <i class="fa-solid fa-circle-dollar-to-slot text-green-400 text-xs"></i>
+                <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Today's revenue</div>
+              </div>
               <div class="text-2xl font-bold text-dark">2 180 <span class="text-sm font-normal text-gray-400">zł</span></div>
-              <div class="text-xs text-green-600 mt-1 font-medium">+14% vs yesterday</div>
+              <div class="text-xs text-green-600 mt-1 font-medium"><i class="fa-solid fa-arrow-up text-xs mr-1"></i>+14% vs yesterday</div>
             </div>
-            <div class="bg-white rounded-xl p-4 shadow-sm">
-              <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Month bookings</div>
+            <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-l-blue-400">
+              <div class="flex items-center gap-2 mb-2">
+                <i class="fa-solid fa-chart-line text-blue-400 text-xs"></i>
+                <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Month bookings</div>
+              </div>
               <div class="text-2xl font-bold text-dark">47</div>
-              <div class="text-xs text-green-600 mt-1 font-medium">+21% vs March (39)</div>
+              <div class="text-xs text-green-600 mt-1 font-medium"><i class="fa-solid fa-arrow-up text-xs mr-1"></i>+21% vs March</div>
             </div>
-            <div class="bg-white rounded-xl p-4 shadow-sm">
-              <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Active partners</div>
-              <div class="text-2xl font-bold text-dark">4</div>
+            <div class="bg-white rounded-xl p-4 shadow-sm border-l-4" style="border-left-color:#c9a96e">
+              <div class="flex items-center gap-2 mb-2">
+                <i class="fa-solid fa-building text-xs" style="color:#c9a96e"></i>
+                <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Active partners</div>
+              </div>
+              <div class="text-2xl font-bold text-dark" id="kpi-partners">—</div>
               <div class="text-xs text-gray-400 mt-1">Hotels, apartments & hostels</div>
             </div>
           </div>
@@ -1942,6 +1985,9 @@ tailwind.config = {
 
   async function initDashboard() {
     showScreen('screen-admin');
+    // Live date in header
+    const dateEl = document.getElementById('header-date');
+    if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
     renderDashboardChart();
     await loadBookings();
     await loadPartners();
@@ -2005,6 +2051,8 @@ tailwind.config = {
       settlements: (p.settlements || []).map(s => ({ period: s.period, amount: s.amount, date: s.settled_date }))
     }));
     renderPartnersTable();
+    const kpi = document.getElementById('kpi-partners');
+    if (kpi) kpi.textContent = allPartners.filter(p => p.active).length;
   }
 
   async function loadTickets() {
