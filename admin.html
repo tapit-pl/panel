@@ -109,12 +109,12 @@ tailwind.config = {
       <p class="text-xs text-gray-400 mb-5">Scan this QR code with Google Authenticator or Authy, then enter the 6-digit code to confirm.</p>
       <div id="mfa-enroll-error" class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600"></div>
       <div class="flex justify-center mb-5">
-        <div id="mfa-qr" class="w-48 h-48 bg-gray-100 rounded-xl flex items-center justify-center">
+        <div id="mfa-qr" class="w-48 h-48 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden">
           <div class="w-6 h-6 border-2 border-gray-300 border-t-brand rounded-full animate-spin"></div>
         </div>
       </div>
-      <p class="text-xs text-gray-400 text-center mb-4">Or enter this code manually:</p>
-      <div id="mfa-secret" class="text-center font-mono text-xs bg-gray-50 rounded-xl px-4 py-2.5 text-gray-600 tracking-widest mb-5 select-all"></div>
+      <p class="text-xs text-gray-400 text-center mb-2 mt-2">Or enter this code manually:</p>
+      <div id="mfa-secret" class="text-center font-mono text-xs bg-gray-50 rounded-xl px-4 py-2.5 text-gray-600 tracking-widest mb-5 select-all break-all"></div>
       <div class="space-y-3">
         <input id="mfa-enroll-code" type="text" inputmode="numeric" maxlength="6" placeholder="000000"
           class="w-full text-center text-2xl font-mono tracking-widest border border-gray-200 rounded-xl px-3.5 py-3 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
