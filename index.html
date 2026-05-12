@@ -2028,15 +2028,19 @@ tailwind.config = {
     if (bokunProducts.length > 0) { renderTourGrid(); return; } // cached
 
     try {
-      const { data: result } = await db.functions.invoke('bokun-sync', {
+      const { data: result, error: fnErr } = await db.functions.invoke('bokun-sync', {
         body: { path: '/product.json/list', method: 'GET' }
       });
-      const products = (result?.body || []).filter(p => !p.archived);
+      if (fnErr) throw new Error('Function error: ' + (fnErr.message || JSON.stringify(fnErr)));
+      const raw = result?.body;
+      if (!raw) throw new Error('Empty response. result=' + JSON.stringify(result)?.slice(0,200));
+      const products = (Array.isArray(raw) ? raw : []).filter(p => !p.archived);
       bokunProducts = products;
       renderTourGrid();
     } catch(e) {
+      console.error('[Tours]', e);
       const loading = document.getElementById('tours-loading');
-      if (loading) loading.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-2xl text-red-400 block mb-2"></i><div class="text-sm text-red-400">Could not load tours. Please refresh.</div>';
+      if (loading) loading.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-2xl text-red-400 block mb-2"></i><div class="text-sm text-red-400 font-semibold mb-1">Could not load tours.</div><div class="text-xs text-red-300 max-w-sm mx-auto break-all">${e.message}</div>`;
     }
   }
 
