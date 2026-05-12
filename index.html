@@ -2134,13 +2134,14 @@ tailwind.config = {
   }
 
   async function redirectByRole(user) {
-    const { data } = await db.from('partners').select('*').eq('email', user.email).maybeSingle();
-    if (data) {
-      currentPartner = data;
-      await initPartnerDashboard();
-    } else {
+    if (user.email === 'kontakt@tapit.com.pl') {
       window.location.href = 'admin.html';
+      return;
     }
+    // Everyone else → partner dashboard
+    const { data } = await db.from('partners').select('*').eq('email', user.email).maybeSingle();
+    currentPartner = data || { email: user.email, name: user.email, initials: user.email.substring(0,2).toUpperCase() };
+    await initPartnerDashboard();
   }
 
   async function initPartnerDashboard() {
