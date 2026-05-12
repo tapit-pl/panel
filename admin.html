@@ -2076,7 +2076,7 @@ tailwind.config = {
     const fromEl = el('chart-date-from');
     const toEl   = el('chart-date-to');
     if (fromEl) fromEl.value = `${y}-${String(m).padStart(2,'0')}-01`;
-    if (toEl)   toEl.value   = new Date(y, m, 0).toISOString().slice(0,10);
+    if (toEl)   toEl.value   = `${y}-${String(m).padStart(2,'0')}-${String(new Date(y, m, 0).getDate()).padStart(2,'0')}`;
     renderDashboardChart();
   }
 
@@ -2434,7 +2434,7 @@ tailwind.config = {
     // Build daily series
     const labels = [], bookings = [], revenue = [];
     for (let d = new Date(fromDate); d <= toDate; d.setDate(d.getDate() + 1)) {
-      const iso = d.toISOString().slice(0,10);
+      const iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
       const { b, r } = generateDayData(iso);
       labels.push(fmtDateLabel(new Date(iso + 'T00:00:00')));
       bookings.push(b);
