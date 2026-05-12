@@ -2729,24 +2729,7 @@ tailwind.config = {
   }
 
   // ===== Partners =====
-  const allPartners = [
-    { id:'wawel',      name:'Hotel Wawel Kraków', initials:'HW', color:'#E8751A', type:'Hotel', stars:4, address:'ul. Sławkowska 12', contact:'Jan Makowski',      phone:'+48 12 422 36 00', email:'recepcja@wawel.pl',     username:'wawel_krakow',      since:'Jan 2023', bookings:6, comm:1460, commRate:12, active:true,  notes:'Najdłuższy partner, priorytet.', lastLogin:'2 hours ago',
-      contractSigned:'2023-01-10', contractExpiry:'2026-01-10', notifyEmail:true,
-      logo: null,
-      settlements:[{period:'Mar 2026',amount:1230,date:'Apr 2, 2026'},{period:'Feb 2026',amount:980,date:'Mar 3, 2026'},{period:'Jan 2026',amount:1100,date:'Feb 1, 2026'}] },
-    { id:'stary',      name:'Hotel Stary',         initials:'HS', color:'#3b82f6', type:'Hotel', stars:5, address:'ul. Szczepańska 5',  contact:'Maria Wiśniewska', phone:'+48 12 384 08 08', email:'hotel@stary.pl',        username:'hotel_stary',       since:'Feb 2022', bookings:3, comm:475,  commRate:10, active:true,  notes:'', lastLogin:'Yesterday',
-      contractSigned:'2022-02-15', contractExpiry:'2025-08-15', notifyEmail:false,
-      logo: null,
-      settlements:[{period:'Mar 2026',amount:475,date:'Apr 2, 2026'},{period:'Feb 2026',amount:310,date:'Mar 3, 2026'}] },
-    { id:'copernicus', name:'Hotel Copernicus',    initials:'HC', color:'#10b981', type:'Hotel', stars:5, address:'ul. Kanonicza 16',   contact:'Robert Kaczmarek', phone:'+48 12 424 34 00', email:'contact@copernicus.pl', username:'copernicus_krakow',  since:'May 2024', bookings:2, comm:280,  commRate:8,  active:true,  notes:'Nowy partner, monitoring aktywności.', lastLogin:'3 days ago',
-      contractSigned:'2024-05-01', contractExpiry:'2026-05-01', notifyEmail:true,
-      logo: null,
-      settlements:[{period:'Mar 2026',amount:280,date:'Apr 2, 2026'}] },
-    { id:'roza',       name:'Hotel Pod Różą',      initials:'HP', color:'#f43f5e', type:'Hotel', stars:4, address:'ul. Floriańska 14',  contact:'Anna Zielińska',   phone:'+48 12 424 33 00', email:'biuro@podroza.pl',      username:'pod_roza',          since:'Mar 2021', bookings:0, comm:0,    commRate:10, active:false, notes:'Nieaktywny — remont do końca maja.', lastLogin:'42 days ago',
-      contractSigned:'2021-03-01', contractExpiry:'2025-03-01', notifyEmail:false,
-      logo: null,
-      settlements:[{period:'Jan 2026',amount:0,date:'Feb 1, 2026'}] },
-  ];
+  const allPartners = [];
 
   function renderPartnersTable(data) {
     const tbody = document.getElementById('partners-tbody');
