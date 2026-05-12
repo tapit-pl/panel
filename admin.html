@@ -84,6 +84,10 @@ tailwind.config = {
         <input id="mfa-verify-code" type="text" inputmode="numeric" maxlength="6" placeholder="000000"
           class="w-full text-center text-2xl font-mono tracking-widest border border-gray-200 rounded-xl px-3.5 py-3 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
           onkeydown="if(event.key==='Enter') doMfaVerify()">
+        <label class="flex items-center gap-2 cursor-pointer select-none">
+          <input id="mfa-remember" type="checkbox" class="w-4 h-4 accent-brand rounded">
+          <span class="text-xs text-gray-500">Remember this device for 30 days</span>
+        </label>
         <button onclick="doMfaVerify()" id="mfa-verify-btn"
           class="w-full bg-brand hover:bg-brand-dark text-white font-semibold text-sm py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2">
           <span>Verify</span>
@@ -1795,6 +1799,18 @@ tailwind.config = {
 
   let mfaFactorId = null;
   let mfaChallengeId = null;
+  const MFA_TRUST_KEY = 'tm_mfa_trusted';
+  const MFA_TRUST_DAYS = 30;
+
+  function isMfaTrusted() {
+    const val = localStorage.getItem(MFA_TRUST_KEY);
+    if (!val) return false;
+    return Date.now() < parseInt(val);
+  }
+
+  function setMfaTrusted() {
+    localStorage.setItem(MFA_TRUST_KEY, Date.now() + MFA_TRUST_DAYS * 86400000);
+  }
 
   async function doLogin() {
     const email = document.getElementById('login-email').value.trim();
@@ -1820,8 +1836,12 @@ tailwind.config = {
     const totpFactor = mfaData?.totp?.find(f => f.status === 'verified');
 
     if (totpFactor) {
-      // MFA enrolled — challenge
       mfaFactorId = totpFactor.id;
+      // Skip MFA if device is trusted
+      if (isMfaTrusted()) {
+        await initDashboard();
+        return;
+      }
       const { data: challenge, error: challengeErr } = await db.auth.mfa.challenge({ factorId: mfaFactorId });
       if (challengeErr) { errEl.textContent = challengeErr.message; errEl.classList.remove('hidden'); btn.innerHTML = '<span>Sign in</span>'; btn.disabled = false; return; }
       mfaChallengeId = challenge.id;
@@ -1870,6 +1890,7 @@ tailwind.config = {
 
     btn.innerHTML = '<span>Verify</span>'; btn.disabled = false;
     if (error) { errEl.textContent = 'Invalid code. Try again.'; errEl.classList.remove('hidden'); return; }
+    if (document.getElementById('mfa-remember').checked) setMfaTrusted();
     await initDashboard();
   }
 
