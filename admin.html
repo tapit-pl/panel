@@ -2647,17 +2647,10 @@ tailwind.config = {
 
     // Update subtitle
     const subtitle = document.getElementById('bookings-subtitle');
-    if (subtitle && rows.length > 0) {
-      const timestamps = rows.map(b => b._startTs).filter(Boolean);
-      if (timestamps.length) {
-        const minDate = new Date(Math.min(...timestamps)).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
-        const maxDate = new Date(Math.max(...timestamps)).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
-        subtitle.textContent = rows.length + ' booking' + (rows.length !== 1 ? 's' : '') + ' · ' + (minDate === maxDate ? minDate : minDate + ' – ' + maxDate);
-      } else {
-        subtitle.textContent = rows.length + ' booking' + (rows.length !== 1 ? 's' : '');
-      }
-    } else if (subtitle) {
-      subtitle.textContent = 'No bookings match filters';
+    if (subtitle) {
+      subtitle.textContent = rows.length > 0
+        ? rows.length + ' booking' + (rows.length !== 1 ? 's' : '')
+        : 'No bookings match filters';
     }
   }
 
