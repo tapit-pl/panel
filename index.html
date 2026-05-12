@@ -2173,8 +2173,7 @@ tailwind.config = {
       if (session.user.email !== 'kontakt@tapit.com.pl') {
         const { data } = await db.from('partners').select('*').eq('email', session.user.email).maybeSingle();
         currentPartner = data || { email: session.user.email, name: session.user.email, initials: session.user.email.substring(0,2).toUpperCase() };
-        const firstName = currentPartner.contact ? currentPartner.contact.split(' ')[0] : currentPartner.name;
-        document.getElementById('welcome-name').textContent = firstName;
+        document.getElementById('welcome-name').textContent = currentPartner.name;
         document.getElementById('welcome-type').textContent = currentPartner.type ? currentPartner.type.toUpperCase() : '';
         goTo('screen-welcome');
       } else {
