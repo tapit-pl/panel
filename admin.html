@@ -237,21 +237,21 @@ tailwind.config = {
     </aside>
 
     <!-- MAIN CONTENT -->
-    <div class="flex-1 flex flex-col min-w-0 overflow-y-auto bg-gray-50">
+    <div class="flex-1 flex flex-col min-w-0 overflow-y-auto" style="background:#0e1724">
 
       <!-- Top header -->
-      <header class="bg-white border-b border-gray-100 sticky top-0 z-30">
+      <header class="sticky top-0 z-30" style="background:#1a2332; border-bottom:1px solid rgba(255,255,255,0.08)">
         <div class="h-14 px-6 flex items-center justify-between gap-4">
           <div class="flex items-center gap-3 flex-1 max-w-sm">
             <div class="relative flex-1">
-              <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 text-xs"></i>
-              <input type="text" id="global-search" placeholder="Search bookings, guests, partners…" oninput="globalSearch(this.value)" class="w-full pl-8 pr-4 py-2 bg-gray-50 border border-gray-100 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-yellow-200 focus:border-yellow-300 text-gray-600 placeholder-gray-300">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+              <input type="text" id="global-search" placeholder="Search bookings, guests, partners…" oninput="globalSearch(this.value)" class="w-full pl-8 pr-4 py-2 rounded-xl text-xs focus:outline-none text-slate-200 placeholder-slate-500" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1)">
             </div>
           </div>
           <div class="flex items-center gap-2">
-            <span class="text-xs text-gray-300 hidden sm:block tracking-wide" id="header-date"></span>
-            <button class="relative p-2 rounded-xl hover:bg-gray-50 transition-colors">
-              <i class="fa-solid fa-bell text-gray-400 text-sm"></i>
+            <span class="text-xs text-slate-400 hidden sm:block tracking-wide" id="header-date"></span>
+            <button class="relative p-2 rounded-xl hover:bg-white/5 transition-colors">
+              <i class="fa-solid fa-bell text-slate-400 text-sm"></i>
               <span class="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center" style="font-size:8px">3</span>
             </button>
             <button onclick="openManualBooking()" class="flex items-center gap-2 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all hover:opacity-90" style="background:linear-gradient(135deg,#1a2332,#243047)">
@@ -269,46 +269,46 @@ tailwind.config = {
 
           <div class="flex items-center justify-between mb-4">
             <div>
-              <h1 class="text-lg font-bold text-dark">Dashboard</h1>
-              <p class="text-xs text-gray-400 mt-0.5" id="dash-subtitle">Overview for today and this month</p>
+              <h1 class="text-lg font-bold text-white">Dashboard</h1>
+              <p class="text-xs text-slate-400 mt-0.5" id="dash-subtitle">Overview for today and this month</p>
             </div>
-            <select id="dash-month-select" onchange="onDashMonthChange()" class="text-xs border border-gray-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-brand/30 text-gray-600">
+            <select id="dash-month-select" onchange="onDashMonthChange()" class="text-xs rounded-xl px-3 py-2 focus:outline-none text-slate-200" style="background:#1e2e42; border:1px solid rgba(255,255,255,0.12)">
             </select>
           </div>
 
           <!-- KPI cards -->
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-            <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-l-yellow-400">
+            <div class="rounded-xl p-5" style="background:#1a2332; border:1px solid rgba(255,255,255,0.07)">
               <div class="flex items-center gap-2 mb-2">
                 <i class="fa-solid fa-calendar-day text-yellow-400 text-xs"></i>
-                <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Today's bookings</div>
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Today's bookings</div>
               </div>
-              <div class="text-2xl font-bold text-dark" id="kpi-today-bookings">—</div>
-              <div class="text-xs text-gray-400 mt-1" id="kpi-today-vs-yesterday">Loading…</div>
+              <div class="text-3xl font-bold text-white mt-2" id="kpi-today-bookings">—</div>
+              <div class="text-xs text-slate-500 mt-1" id="kpi-today-vs-yesterday">Loading…</div>
             </div>
-            <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-l-blue-400">
+            <div class="rounded-xl p-5" style="background:#1a2332; border:1px solid rgba(255,255,255,0.07)">
               <div class="flex items-center gap-2 mb-2">
                 <i class="fa-solid fa-chart-line text-blue-400 text-xs"></i>
-                <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Month bookings</div>
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Month bookings</div>
               </div>
-              <div class="text-2xl font-bold text-dark" id="kpi-month-bookings">—</div>
-              <div class="text-xs text-gray-400 mt-1" id="kpi-month-vs-prev">Loading…</div>
+              <div class="text-3xl font-bold text-white mt-2" id="kpi-month-bookings">—</div>
+              <div class="text-xs text-slate-500 mt-1" id="kpi-month-vs-prev">Loading…</div>
             </div>
-            <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-l-green-400">
+            <div class="rounded-xl p-5" style="background:#1a2332; border:1px solid rgba(255,255,255,0.07)">
               <div class="flex items-center gap-2 mb-2">
                 <i class="fa-solid fa-circle-dollar-to-slot text-green-400 text-xs"></i>
-                <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Month revenue</div>
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Month revenue</div>
               </div>
-              <div class="text-2xl font-bold text-dark" id="kpi-month-revenue">— <span class="text-sm font-normal text-gray-400">zł</span></div>
-              <div class="text-xs text-gray-400 mt-1" id="kpi-revenue-vs-prev">Loading…</div>
+              <div class="text-3xl font-bold text-white mt-2" id="kpi-month-revenue">— <span class="text-base font-normal text-slate-400">zł</span></div>
+              <div class="text-xs text-slate-500 mt-1" id="kpi-revenue-vs-prev">Loading…</div>
             </div>
-            <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-l-purple-400">
+            <div class="rounded-xl p-5" style="background:#1a2332; border:1px solid rgba(255,255,255,0.07)">
               <div class="flex items-center gap-2 mb-2">
                 <i class="fa-solid fa-users text-purple-400 text-xs"></i>
-                <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Pax this month</div>
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Pax this month</div>
               </div>
-              <div class="text-2xl font-bold text-dark" id="kpi-pax">—</div>
-              <div class="text-xs text-gray-400 mt-1" id="kpi-pax-vs-prev">Loading…</div>
+              <div class="text-3xl font-bold text-white mt-2" id="kpi-pax">—</div>
+              <div class="text-xs text-slate-500 mt-1" id="kpi-pax-vs-prev">Loading…</div>
             </div>
           </div>
 
@@ -316,12 +316,12 @@ tailwind.config = {
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-4">
 
             <!-- Bookings chart -->
-            <div class="lg:col-span-2 bg-white rounded-xl p-4 shadow-sm">
+            <div class="lg:col-span-2 rounded-xl p-4" style="background:#1a2332; border:1px solid rgba(255,255,255,0.07)">
               <!-- Header -->
               <div class="flex items-center justify-between mb-3">
                 <div>
-                  <div class="font-semibold text-dark text-sm">Bookings & Revenue</div>
-                  <div class="text-xs text-gray-400 mt-0.5" id="chart-period-label">—</div>
+                  <div class="font-semibold text-white text-sm">Bookings & Revenue</div>
+                  <div class="text-xs text-slate-400 mt-0.5" id="chart-period-label">—</div>
                 </div>
               </div>
               <!-- Hidden inputs used by chart logic -->
@@ -329,25 +329,25 @@ tailwind.config = {
               <input type="hidden" id="chart-date-to">
               <!-- Mini stats row -->
               <div class="grid grid-cols-4 gap-2 mb-3">
-                <div class="bg-gray-50 rounded-lg px-3 py-2">
-                  <div class="text-xs text-gray-400 mb-0.5">Total bookings</div>
-                  <div class="text-sm font-bold text-dark" id="cstat-bookings">122</div>
+                <div class="rounded-lg px-3 py-2" style="background:rgba(255,255,255,0.05)">
+                  <div class="text-xs text-slate-400 mb-0.5">Total bookings</div>
+                  <div class="text-sm font-bold text-white" id="cstat-bookings">122</div>
                 </div>
-                <div class="bg-gray-50 rounded-lg px-3 py-2">
-                  <div class="text-xs text-gray-400 mb-0.5">Total revenue</div>
-                  <div class="text-sm font-bold text-dark" id="cstat-revenue">9 250 zł</div>
+                <div class="rounded-lg px-3 py-2" style="background:rgba(255,255,255,0.05)">
+                  <div class="text-xs text-slate-400 mb-0.5">Total revenue</div>
+                  <div class="text-sm font-bold text-white" id="cstat-revenue">9 250 zł</div>
                 </div>
-                <div class="bg-gray-50 rounded-lg px-3 py-2">
-                  <div class="text-xs text-gray-400 mb-0.5">Avg / day</div>
-                  <div class="text-sm font-bold text-dark" id="cstat-avg">4.1</div>
+                <div class="rounded-lg px-3 py-2" style="background:rgba(255,255,255,0.05)">
+                  <div class="text-xs text-slate-400 mb-0.5">Avg / day</div>
+                  <div class="text-sm font-bold text-white" id="cstat-avg">4.1</div>
                 </div>
-                <div class="bg-gray-50 rounded-lg px-3 py-2">
-                  <div class="text-xs text-gray-400 mb-0.5">Best day</div>
-                  <div class="text-sm font-bold text-dark" id="cstat-best">Apr 16 · 7</div>
+                <div class="rounded-lg px-3 py-2" style="background:rgba(255,255,255,0.05)">
+                  <div class="text-xs text-slate-400 mb-0.5">Best day</div>
+                  <div class="text-sm font-bold text-white" id="cstat-best">Apr 16 · 7</div>
                 </div>
               </div>
               <!-- Legend -->
-              <div class="flex items-center gap-3 text-xs text-gray-400 mb-2">
+              <div class="flex items-center gap-3 text-xs text-slate-400 mb-2">
                 <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-brand inline-block"></span>Bookings</span>
                 <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-blue-400 inline-block" style="opacity:0.7"></span>Revenue (zł)</span>
               </div>
@@ -355,16 +355,16 @@ tailwind.config = {
             </div>
 
             <!-- Top tours + source breakdown -->
-            <div class="bg-white rounded-xl p-4 shadow-sm">
-              <div class="font-semibold text-dark text-sm mb-0.5">Top tours this month</div>
-              <div class="text-xs text-gray-400 mb-3">By number of bookings</div>
+            <div class="rounded-xl p-4" style="background:#1a2332; border:1px solid rgba(255,255,255,0.07)">
+              <div class="font-semibold text-white text-sm mb-0.5">Top tours this month</div>
+              <div class="text-xs text-slate-400 mb-3">By number of bookings</div>
               <div id="dash-top-tours" class="space-y-3">
                 <div class="text-xs text-gray-400">Loading…</div>
               </div>
 
               <!-- Source breakdown -->
-              <div class="mt-5 pt-4 border-t border-gray-100">
-                <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Booking channel</div>
+              <div class="mt-5 pt-4" style="border-top:1px solid rgba(255,255,255,0.08)">
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Booking channel</div>
                 <div id="dash-channels" class="space-y-2">
                   <div class="text-xs text-gray-400">Loading…</div>
                 </div>
@@ -373,26 +373,26 @@ tailwind.config = {
           </div>
 
           <!-- Recent bookings -->
-          <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div class="flex items-center justify-between px-5 py-3 border-b border-gray-100">
-              <div class="font-semibold text-dark text-sm">Recent bookings</div>
+          <div class="rounded-xl overflow-hidden" style="background:#1a2332; border:1px solid rgba(255,255,255,0.07)">
+            <div class="flex items-center justify-between px-5 py-3" style="border-bottom:1px solid rgba(255,255,255,0.08)">
+              <div class="font-semibold text-white text-sm">Recent bookings</div>
               <button onclick="showSection('bookings')" class="text-xs text-brand hover:underline font-medium">View all →</button>
             </div>
             <div class="overflow-x-auto">
               <table class="w-full text-xs">
                 <thead>
-                  <tr class="border-b border-gray-100 bg-gray-50/60">
-                    <th class="text-left px-5 py-3 text-gray-400 font-semibold">#</th>
-                    <th class="text-left px-4 py-3 text-gray-400 font-semibold">Tour</th>
-                    <th class="text-left px-4 py-3 text-gray-400 font-semibold">Guest</th>
-                    <th class="text-left px-4 py-3 text-gray-400 font-semibold">Partner</th>
-                    <th class="text-left px-4 py-3 text-gray-400 font-semibold">Date</th>
-                    <th class="text-right px-4 py-3 text-gray-400 font-semibold">Total</th>
-                    <th class="text-center px-4 py-3 text-gray-400 font-semibold">Source</th>
-                    <th class="text-center px-4 py-3 text-gray-400 font-semibold">Status</th>
+                  <tr style="border-bottom:1px solid rgba(255,255,255,0.08); background:rgba(0,0,0,0.25)">
+                    <th class="text-left px-5 py-3 text-slate-500 font-semibold">#</th>
+                    <th class="text-left px-4 py-3 text-slate-500 font-semibold">Tour</th>
+                    <th class="text-left px-4 py-3 text-slate-500 font-semibold">Guest</th>
+                    <th class="text-left px-4 py-3 text-slate-500 font-semibold">Partner</th>
+                    <th class="text-left px-4 py-3 text-slate-500 font-semibold">Date</th>
+                    <th class="text-right px-4 py-3 text-slate-500 font-semibold">Total</th>
+                    <th class="text-center px-4 py-3 text-slate-500 font-semibold">Source</th>
+                    <th class="text-center px-4 py-3 text-slate-500 font-semibold">Status</th>
                   </tr>
                 </thead>
-                <tbody id="dash-recent-tbody" class="divide-y divide-gray-50">
+                <tbody id="dash-recent-tbody" class="divide-y divide-white/5">
                   <tr><td colspan="8" class="px-5 py-6 text-center text-xs text-gray-400">Loading…</td></tr>
                 </tbody>
               </table>
@@ -758,7 +758,7 @@ tailwind.config = {
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50 text-xs">
-                  <tr class="hover:bg-gray-50 transition-colors">
+                  <tr class="hover:bg-white/5 transition-colors" style="border-bottom:1px solid rgba(255,255,255,0.05)">
                     <td class="px-5 py-3.5 font-semibold text-dark">Trip to Zakopane</td>
                     <td class="px-4 py-3.5 text-gray-500">Day trip</td>
                     <td class="px-4 py-3.5 text-center text-gray-600">3</td>
@@ -1995,7 +1995,7 @@ tailwind.config = {
     const trend = (cur, prev, suffix='') => {
       const diff = cur - prev;
       const sign = diff >= 0 ? '+' : '';
-      const color = diff >= 0 ? 'text-green-600' : 'text-red-500';
+      const color = diff >= 0 ? 'text-green-400' : 'text-red-400';
       const arrow = diff >= 0 ? 'up' : 'down';
       return { html: `<i class="fa-solid fa-arrow-${arrow} text-xs mr-1"></i>${sign}${diff}${suffix} vs prev month`, color };
     };
@@ -2005,7 +2005,7 @@ tailwind.config = {
     const diffToday = todayB.length - yesterdayB.length;
     if (el('kpi-today-vs-yesterday')) {
       const sign = diffToday >= 0 ? '+' : '';
-      const color = diffToday >= 0 ? 'text-green-600' : 'text-red-500';
+      const color = diffToday >= 0 ? 'text-green-400' : 'text-red-400';
       el('kpi-today-vs-yesterday').innerHTML = `<i class="fa-solid fa-arrow-${diffToday>=0?'up':'down'} text-xs mr-1"></i>${sign}${diffToday} vs yesterday`;
       el('kpi-today-vs-yesterday').className = `text-xs mt-1 font-medium ${color}`;
     }
@@ -2034,13 +2034,13 @@ tailwind.config = {
     if (toursEl) toursEl.innerHTML = topTours.length ? topTours.map(([name,count]) => `
       <div>
         <div class="flex items-center justify-between text-xs mb-1.5">
-          <span class="font-medium text-dark truncate max-w-[140px]" title="${name}">${name}</span>
-          <span class="text-gray-500 shrink-0 ml-2">${count} booking${count!==1?'s':''}</span>
+          <span class="font-medium text-white truncate max-w-[140px]" title="${name}">${name}</span>
+          <span class="text-slate-400 shrink-0 ml-2">${count} booking${count!==1?'s':''}</span>
         </div>
-        <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div class="h-2 rounded-full overflow-hidden" style="background:rgba(255,255,255,0.1)">
           <div class="h-full bg-brand rounded-full" style="width:${Math.round(count/maxTour*100)}%"></div>
         </div>
-      </div>`).join('') : '<div class="text-xs text-gray-400">No bookings this month yet</div>';
+      </div>`).join('') : '<div class="text-xs text-slate-500">No bookings this month yet</div>';
 
     // Channels
     const channelCounts = {};
@@ -2060,12 +2060,12 @@ tailwind.config = {
       const sc = b.source==='Viator'?'source-viator':b.source==='GYG'?'source-gyg':b.source==='Klook'?'source-klook':b.source==='Website'?'source-website':b.source==='Bokun'?'source-bokun':'source-manual';
       const st = b.status==='Paid'?'status-paid':b.status==='Pending'?'status-pending':'status-cancelled';
       return `<tr class="hover:bg-gray-50 transition-colors">
-        <td class="px-5 py-3 text-gray-400 font-mono text-xs">#${b.id}</td>
-        <td class="px-4 py-3 font-medium text-dark text-xs max-w-[120px] truncate">${b.tour}</td>
-        <td class="px-4 py-3 text-gray-600 text-xs">${b.guest}</td>
-        <td class="px-4 py-3 text-gray-500 text-xs">${b.hotel}</td>
-        <td class="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">${b.date}</td>
-        <td class="px-4 py-3 text-right font-semibold text-dark text-xs whitespace-nowrap">${(b.total||0).toLocaleString('pl')} zł</td>
+        <td class="px-5 py-3 text-slate-500 font-mono text-xs">#${b.id}</td>
+        <td class="px-4 py-3 font-medium text-slate-100 text-xs max-w-[120px] truncate">${b.tour}</td>
+        <td class="px-4 py-3 text-slate-300 text-xs">${b.guest}</td>
+        <td class="px-4 py-3 text-slate-400 text-xs">${b.hotel}</td>
+        <td class="px-4 py-3 text-slate-400 text-xs whitespace-nowrap">${b.date}</td>
+        <td class="px-4 py-3 text-right font-semibold text-white text-xs whitespace-nowrap">${(b.total||0).toLocaleString('pl')} zł</td>
         <td class="px-4 py-3 text-center"><span class="${sc} text-xs font-semibold px-2 py-0.5 rounded-full">${b.source}</span></td>
         <td class="px-4 py-3 text-center"><span class="${st} text-xs font-semibold px-2 py-0.5 rounded-full">${b.status}</span></td>
       </tr>`;
@@ -2511,11 +2511,11 @@ tailwind.config = {
         scales: {
           x: {
             grid: { display: false },
-            ticks: { font: { size: 10 }, color: '#9ca3af', maxTicksLimit: days <= 31 ? 15 : 10, maxRotation: 0 }
+            ticks: { font: { size: 10 }, color: '#64748b', maxTicksLimit: days <= 31 ? 15 : 10, maxRotation: 0 }
           },
           yLeft: {
             position: 'left',
-            grid: { color: 'rgba(0,0,0,0.04)' },
+            grid: { color: 'rgba(255,255,255,0.05)' },
             ticks: { font: { size: 10 }, color: '#9ca3af', stepSize: 1 }
           },
           yRight: {
