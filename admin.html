@@ -509,7 +509,7 @@ tailwind.config = {
           <div class="flex items-center justify-between mb-6">
             <div>
               <h1 class="text-xl font-bold text-dark">All Bookings</h1>
-              <p class="text-xs text-gray-400 mt-0.5">10 bookings · April 2026</p>
+              <p id="bookings-subtitle" class="text-xs text-gray-400 mt-0.5">Loading…</p>
             </div>
             <button onclick="openManualBooking()" class="flex items-center gap-2 bg-brand hover:bg-brand-dark text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors">
               <i class="fa-solid fa-plus"></i>Add manual booking
@@ -545,7 +545,17 @@ tailwind.config = {
                 <option value="Pending">Pending</option>
                 <option value="Cancelled">Cancelled</option>
               </select>
-              <span id="booking-count-label" class="text-xs text-gray-400 ml-auto">10 results</span>
+              <select id="booking-filter-tour" onchange="filterAllBookings()" class="text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 text-gray-600">
+                <option value="">All tours</option>
+              </select>
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs text-gray-400">From</span>
+                <input type="date" id="booking-filter-from" onchange="filterAllBookings()" class="text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 text-gray-600">
+                <span class="text-xs text-gray-400">to</span>
+                <input type="date" id="booking-filter-to" onchange="filterAllBookings()" class="text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 text-gray-600">
+                <button onclick="clearBookingDates()" title="Clear dates" class="text-gray-300 hover:text-gray-500 text-xs ml-1"><i class="fa-solid fa-xmark"></i></button>
+              </div>
+              <span id="booking-count-label" class="text-xs text-gray-400 ml-auto">— results</span>
             </div>
           </div>
 
@@ -2059,6 +2069,7 @@ tailwind.config = {
       source: channelShort,
       status: statusMap[pb.status] || pb.status || 'Pending',
       notes: '',
+      _startTs: startMs || 0,
       _bokun: true
     };
   }
@@ -2102,13 +2113,21 @@ tailwind.config = {
       }
     } catch(e) { console.warn('Bokun load error:', e); }
 
-    // Sort: upcoming first, then recent past
-    allBookings.sort((a, b) => {
-      const da = new Date(a.date), db2 = new Date(b.date);
-      return db2 - da;
-    });
+    // Sort ascending by tour date (nearest first)
+    allBookings.sort((a, b) => (a._startTs || 0) - (b._startTs || 0));
 
-    renderBookingsTable();
+    // Default filter: from today
+    const fromEl = document.getElementById('booking-filter-from');
+    if (fromEl && !fromEl.value) fromEl.value = new Date().toISOString().slice(0, 10);
+
+    // Populate tour dropdown
+    const tourSel = document.getElementById('booking-filter-tour');
+    if (tourSel) {
+      const tours = [...new Set(allBookings.map(b => b.tour).filter(Boolean))].sort();
+      tourSel.innerHTML = '<option value="">All tours</option>' + tours.map(t => `<option value="${t}">${t}</option>`).join('');
+    }
+
+    filterAllBookings();
 
     // Update KPI
     const kpiBk = document.getElementById('kpi-bookings');
@@ -2463,6 +2482,21 @@ tailwind.config = {
     const label = document.getElementById('booking-count-label');
     if (label) label.textContent = rows.length + ' result' + (rows.length !== 1 ? 's' : '');
     document.getElementById('bookings-no-results').classList.toggle('hidden', rows.length > 0);
+
+    // Update subtitle
+    const subtitle = document.getElementById('bookings-subtitle');
+    if (subtitle && rows.length > 0) {
+      const timestamps = rows.map(b => b._startTs).filter(Boolean);
+      if (timestamps.length) {
+        const minDate = new Date(Math.min(...timestamps)).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+        const maxDate = new Date(Math.max(...timestamps)).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+        subtitle.textContent = rows.length + ' booking' + (rows.length !== 1 ? 's' : '') + ' · ' + (minDate === maxDate ? minDate : minDate + ' – ' + maxDate);
+      } else {
+        subtitle.textContent = rows.length + ' booking' + (rows.length !== 1 ? 's' : '');
+      }
+    } else if (subtitle) {
+      subtitle.textContent = 'No bookings match filters';
+    }
   }
 
   function filterAllBookings() {
@@ -2470,14 +2504,30 @@ tailwind.config = {
     const hotel  = document.getElementById('booking-filter-hotel')?.value || '';
     const source = document.getElementById('booking-filter-source')?.value || '';
     const status = document.getElementById('booking-filter-status')?.value || '';
+    const tour   = document.getElementById('booking-filter-tour')?.value || '';
+    const fromVal = document.getElementById('booking-filter-from')?.value || '';
+    const toVal   = document.getElementById('booking-filter-to')?.value || '';
+    const fromTs  = fromVal ? new Date(fromVal).setHours(0,0,0,0) : null;
+    const toTs    = toVal   ? new Date(toVal).setHours(23,59,59,999) : null;
+
     const filtered = allBookings.filter(b => {
-      const matchQ      = !q      || b.tour.toLowerCase().includes(q) || b.guest.toLowerCase().includes(q) || b.id.includes(q);
+      const matchQ      = !q      || b.tour.toLowerCase().includes(q) || b.guest.toLowerCase().includes(q) || String(b.id).toLowerCase().includes(q);
       const matchHotel  = !hotel  || (hotel === 'none' ? b.hotel === '—' : b.hotel.toLowerCase().includes(hotel.toLowerCase().split(' ')[1] || hotel.toLowerCase()));
       const matchSource = !source || b.source === source;
       const matchStatus = !status || b.status === status;
-      return matchQ && matchHotel && matchSource && matchStatus;
+      const matchTour   = !tour   || b.tour === tour;
+      const ts = b._startTs || 0;
+      const matchFrom   = !fromTs || ts >= fromTs;
+      const matchTo     = !toTs   || ts <= toTs;
+      return matchQ && matchHotel && matchSource && matchStatus && matchTour && matchFrom && matchTo;
     });
     renderBookingsTable(filtered);
+  }
+
+  function clearBookingDates() {
+    document.getElementById('booking-filter-from').value = '';
+    document.getElementById('booking-filter-to').value = '';
+    filterAllBookings();
   }
 
   // ===== Voucher =====
