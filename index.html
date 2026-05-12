@@ -108,6 +108,47 @@ tailwind.config = {
   </div>
 </div>
 
+<!-- ===================== SCREEN: WELCOME ===================== -->
+<div id="screen-welcome" class="screen fixed inset-0 z-50 items-center justify-center" style="background: linear-gradient(135deg, #0d1520 0%, #1a2d45 50%, #0d1520 100%);">
+  <!-- subtle pattern -->
+  <div class="absolute inset-0 opacity-5" style="background-image: repeating-linear-gradient(45deg, #c9a96e 0, #c9a96e 1px, transparent 0, transparent 50%); background-size: 20px 20px;"></div>
+
+  <div class="relative text-center px-8 fade-in">
+    <!-- top line -->
+    <div class="flex items-center justify-center gap-4 mb-10">
+      <div class="h-px w-16" style="background: linear-gradient(to right, transparent, #c9a96e)"></div>
+      <span class="text-xs tracking-[0.35em] uppercase" style="color:#c9a96e">Thousand Miles</span>
+      <div class="h-px w-16" style="background: linear-gradient(to left, transparent, #c9a96e)"></div>
+    </div>
+
+    <!-- logo -->
+    <img src="assets/logo.png" alt="Thousand Miles" class="h-16 object-contain mx-auto mb-10 opacity-90">
+
+    <!-- greeting -->
+    <p class="text-sm tracking-[0.2em] uppercase mb-3" style="color:#8a9bb0">Welcome to your partner panel</p>
+    <h1 id="welcome-name" class="text-4xl font-light text-white mb-2" style="letter-spacing:0.02em">—</h1>
+    <p id="welcome-type" class="text-sm mb-12" style="color:#c9a96e; letter-spacing:0.15em"></p>
+
+    <!-- divider -->
+    <div class="flex items-center justify-center gap-3 mb-12">
+      <div class="h-px w-12" style="background:#c9a96e; opacity:0.4"></div>
+      <div class="w-1.5 h-1.5 rounded-full" style="background:#c9a96e; opacity:0.6"></div>
+      <div class="h-px w-12" style="background:#c9a96e; opacity:0.4"></div>
+    </div>
+
+    <p class="text-sm mb-10 max-w-xs mx-auto leading-relaxed" style="color:#8a9bb0">
+      Your panel is ready. Here you will find bookings, notifications and direct contact with our team.
+    </p>
+
+    <button onclick="finishWelcome()" class="px-10 py-3.5 text-sm font-semibold tracking-widest uppercase transition-all duration-300 hover:opacity-80" style="background:#c9a96e; color:#0d1520; border-radius:4px; letter-spacing:0.15em">
+      Enter panel
+    </button>
+
+    <!-- bottom line -->
+    <p class="text-xs mt-12 tracking-widest uppercase" style="color:#2a3d55">Kraków · Poland</p>
+  </div>
+</div>
+
 <!-- ===================== SCREEN: SET PASSWORD (invite) ===================== -->
 <div id="screen-set-password" class="screen min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 fade-in">
@@ -2126,11 +2167,23 @@ tailwind.config = {
       return;
     }
 
-    // Password set — redirect by role
+    // Password set — show welcome screen for new partners
     const { data: { session } } = await db.auth.getSession();
     if (session) {
-      await redirectByRole(session.user);
+      if (session.user.email !== 'kontakt@tapit.com.pl') {
+        const { data } = await db.from('partners').select('*').eq('email', session.user.email).maybeSingle();
+        currentPartner = data || { email: session.user.email, name: session.user.email, initials: session.user.email.substring(0,2).toUpperCase() };
+        document.getElementById('welcome-name').textContent = currentPartner.name;
+        document.getElementById('welcome-type').textContent = currentPartner.type ? currentPartner.type.toUpperCase() : '';
+        goTo('screen-welcome');
+      } else {
+        window.location.href = 'admin.html';
+      }
     }
+  }
+
+  async function finishWelcome() {
+    await initPartnerDashboard();
   }
 
   async function redirectByRole(user) {
