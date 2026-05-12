@@ -61,7 +61,7 @@ tailwind.config = {
 <body class="bg-gray-100 min-h-screen">
 
 <!-- ===================== SCREEN 1: LOGIN ===================== -->
-<div id="screen-login" class="screen active min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-4">
+<div id="screen-login" class="screen min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 fade-in">
     <div class="text-center mb-8">
       <div class="flex justify-center mb-2">
@@ -97,6 +97,14 @@ tailwind.config = {
     <div class="mt-6 pt-6 border-t text-center">
       <p class="text-xs text-gray-400">Having trouble logging in? <span class="text-brand cursor-pointer hover:underline" onclick="openContactModal()">Contact the office</span></p>
     </div>
+  </div>
+</div>
+
+<!-- ===================== SCREEN: LOADING ===================== -->
+<div id="screen-loading" class="screen active fixed inset-0 z-50 items-center justify-center" style="background:#1a2332">
+  <div class="text-center">
+    <img src="assets/logo.png" alt="Thousand Miles" class="h-16 object-contain mx-auto mb-6 opacity-90">
+    <div class="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin mx-auto"></div>
   </div>
 </div>
 
@@ -2078,8 +2086,7 @@ tailwind.config = {
     // Handle invite / password reset token in URL hash
     const hash = window.location.hash;
     if (hash && hash.includes('type=invite')) {
-      // Supabase puts the session in the hash after invite click
-      const { data: { session }, error } = await db.auth.getSession();
+      const { data: { session } } = await db.auth.getSession();
       if (session) {
         goTo('screen-set-password');
         return;
@@ -2089,6 +2096,8 @@ tailwind.config = {
     const { data: { session } } = await db.auth.getSession();
     if (session) {
       await redirectByRole(session.user);
+    } else {
+      goTo('screen-login');
     }
   });
 
