@@ -92,6 +92,9 @@ tailwind.config = {
       <button onclick="doLogin()" class="w-full bg-brand hover:bg-brand-dark text-white font-semibold py-3.5 rounded-xl transition-colors text-sm mt-2">
         Log in
       </button>
+      <div class="text-center mt-3">
+        <span onclick="goTo('screen-forgot-password')" class="text-xs text-gray-400 hover:text-brand cursor-pointer transition-colors">Forgot password?</span>
+      </div>
     </div>
 
     <div class="mt-6 pt-6 border-t text-center">
@@ -146,6 +149,42 @@ tailwind.config = {
 
     <!-- bottom line -->
     <p class="text-xs mt-12 tracking-widest uppercase" style="color:#2a3d55">Kraków · Poland</p>
+  </div>
+</div>
+
+<!-- ===================== SCREEN: FORGOT PASSWORD ===================== -->
+<div id="screen-forgot-password" class="screen min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 fade-in">
+    <div class="text-center mb-8">
+      <div class="flex justify-center mb-2">
+        <img src="assets/logo.png" alt="Thousand Miles" class="h-20 object-contain">
+      </div>
+      <h2 class="text-xl font-bold text-dark mt-4">Reset password</h2>
+      <p class="text-gray-500 text-sm mt-2">Enter your email address and we'll send you a reset link.</p>
+    </div>
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+        <div class="relative">
+          <i class="fa-solid fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+          <input id="reset-email" type="email" placeholder="email@example.com" class="w-full pl-9 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-sm bg-gray-50" onkeydown="if(event.key==='Enter')doResetPassword()">
+        </div>
+      </div>
+      <div id="reset-success" class="hidden bg-green-50 border border-green-200 text-green-700 text-xs rounded-xl px-4 py-3 flex items-center gap-2">
+        <i class="fa-solid fa-circle-check"></i>
+        Reset link sent — check your inbox.
+      </div>
+      <div id="reset-error" class="hidden bg-red-50 border border-red-200 text-red-600 text-xs rounded-xl px-4 py-3 flex items-center gap-2">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span id="reset-error-msg">Something went wrong.</span>
+      </div>
+      <button onclick="doResetPassword()" class="w-full bg-brand hover:bg-brand-dark text-white font-semibold py-3.5 rounded-xl transition-colors text-sm">
+        Send reset link
+      </button>
+      <div class="text-center">
+        <span onclick="goTo('screen-login')" class="text-xs text-gray-400 hover:text-brand cursor-pointer transition-colors"><i class="fa-solid fa-arrow-left mr-1"></i>Back to login</span>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2126,7 +2165,7 @@ tailwind.config = {
   document.addEventListener('DOMContentLoaded', async function() {
     // Handle invite / password reset token in URL hash
     const hash = window.location.hash;
-    if (hash && hash.includes('type=invite')) {
+    if (hash && (hash.includes('type=invite') || hash.includes('type=recovery'))) {
       const { data: { session } } = await db.auth.getSession();
       if (session) {
         goTo('screen-set-password');
@@ -2180,6 +2219,29 @@ tailwind.config = {
         window.location.href = 'admin.html';
       }
     }
+  }
+
+  async function doResetPassword() {
+    const email = document.getElementById('reset-email').value.trim();
+    const errEl = document.getElementById('reset-error');
+    const errMsg = document.getElementById('reset-error-msg');
+    const successEl = document.getElementById('reset-success');
+
+    if (!email) { document.getElementById('reset-email').focus(); return; }
+
+    errEl.classList.add('hidden');
+    successEl.classList.add('hidden');
+
+    const { error } = await db.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://panel.thousandmiles.pl'
+    });
+
+    if (error) {
+      errMsg.textContent = error.message;
+      errEl.classList.remove('hidden');
+      return;
+    }
+    successEl.classList.remove('hidden');
   }
 
   async function finishWelcome() {
