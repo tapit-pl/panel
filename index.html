@@ -2085,9 +2085,9 @@ tailwind.config = {
 
   function updateBookingStats(bookings) {
     const total     = bookings.length;
-    const paid      = bookings.filter(b => b.status === 'paid').length;
-    const pending   = bookings.filter(b => b.status === 'pending').length;
-    const cancelled = bookings.filter(b => b.status === 'cancelled').length;
+    const paid      = bookings.filter(b => b.status?.toLowerCase() === 'paid').length;
+    const pending   = bookings.filter(b => b.status?.toLowerCase() === 'pending').length;
+    const cancelled = bookings.filter(b => b.status?.toLowerCase() === 'cancelled').length;
     document.getElementById('stat-total').textContent     = total;
     document.getElementById('stat-paid').textContent      = paid;
     document.getElementById('stat-pending').textContent   = pending;
