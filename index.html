@@ -117,12 +117,12 @@ tailwind.config = {
     <!-- top line -->
     <div class="flex items-center justify-center gap-4 mb-10">
       <div class="h-px w-16" style="background: linear-gradient(to right, transparent, #c9a96e)"></div>
-      <span class="text-xs tracking-[0.35em] uppercase" style="color:#c9a96e">Thousand Miles</span>
+      <div>
+        <span class="text-xs tracking-[0.35em] uppercase block" style="color:#c9a96e">Thousand Miles</span>
+        <span class="text-xs tracking-[0.2em] uppercase block mt-1" style="color:#4a6080">Booking System</span>
+      </div>
       <div class="h-px w-16" style="background: linear-gradient(to left, transparent, #c9a96e)"></div>
     </div>
-
-    <!-- logo -->
-    <img src="assets/logo.png" alt="Thousand Miles" class="h-16 object-contain mx-auto mb-10 opacity-90">
 
     <!-- greeting -->
     <p class="text-sm tracking-[0.2em] uppercase mb-3" style="color:#8a9bb0">Welcome to your partner panel</p>
@@ -2173,7 +2173,8 @@ tailwind.config = {
       if (session.user.email !== 'kontakt@tapit.com.pl') {
         const { data } = await db.from('partners').select('*').eq('email', session.user.email).maybeSingle();
         currentPartner = data || { email: session.user.email, name: session.user.email, initials: session.user.email.substring(0,2).toUpperCase() };
-        document.getElementById('welcome-name').textContent = currentPartner.name;
+        const firstName = currentPartner.contact ? currentPartner.contact.split(' ')[0] : currentPartner.name;
+        document.getElementById('welcome-name').textContent = firstName;
         document.getElementById('welcome-type').textContent = currentPartner.type ? currentPartner.type.toUpperCase() : '';
         goTo('screen-welcome');
       } else {
