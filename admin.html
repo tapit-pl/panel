@@ -121,6 +121,7 @@ tailwind.config = {
         <button onclick="showSection('support')" class="sidebar-link w-full flex items-center px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">Support <span id="sidebar-support-badge" class="ml-auto bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">3</span></button>
         <button onclick="showSection('printorders')" class="sidebar-link w-full flex items-center px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">Print Orders <span id="sidebar-print-badge" class="ml-auto bg-brand text-white text-xs font-bold px-1.5 py-0.5 rounded-full">2</span></button>
         <button onclick="showSection('notifications')" class="sidebar-link w-full flex items-center px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">Notifications</button>
+        <button onclick="showSection('activity')" class="sidebar-link w-full flex items-center px-3 py-2.5 rounded-xl text-left text-slate-300 text-sm font-medium">Activity Log</button>
       </nav>
 
       <!-- Bottom user -->
@@ -1010,6 +1011,46 @@ tailwind.config = {
           </div>
         </div>
 
+        <!-- ===================== SECTION: ACTIVITY LOG ===================== -->
+        <div id="section-activity" class="section fade-in">
+          <div class="flex items-center justify-between mb-5">
+            <div>
+              <h1 class="text-lg font-bold text-dark">Activity Log</h1>
+              <p class="text-xs text-gray-400 mt-0.5">All actions performed in the panel</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <select id="activity-filter-user" onchange="filterActivity()" class="text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 bg-white">
+                <option value="">All users</option>
+              </select>
+              <select id="activity-filter-type" onchange="filterActivity()" class="text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 bg-white">
+                <option value="">All actions</option>
+                <option value="booking">Bookings</option>
+                <option value="partner">Partners</option>
+                <option value="ticket">Support</option>
+                <option value="print">Print Orders</option>
+                <option value="notification">Notifications</option>
+                <option value="auth">Login / Logout</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Log table -->
+          <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+            <div class="grid grid-cols-12 px-5 py-2.5 border-b border-gray-100 bg-gray-50 text-xs font-semibold text-gray-400 uppercase tracking-wide">
+              <div class="col-span-3">Timestamp</div>
+              <div class="col-span-2">User</div>
+              <div class="col-span-2">Action</div>
+              <div class="col-span-5">Details</div>
+            </div>
+            <div id="activity-log-list" class="divide-y divide-gray-50 font-mono text-xs">
+              <div class="px-5 py-8 text-center text-gray-400">Loading...</div>
+            </div>
+            <div id="activity-load-more" class="hidden px-5 py-3 border-t border-gray-100 text-center">
+              <button onclick="loadMoreActivity()" class="text-xs text-brand hover:underline font-medium">Load more</button>
+            </div>
+          </div>
+        </div>
+
       </main>
     </div>
   </div>
@@ -1695,6 +1736,7 @@ tailwind.config = {
     await loadTickets();
     await loadPrintOrders();
     await loadNotifications();
+    await loadActivityLog();
   }
 
   // ===== Init =====
@@ -1774,6 +1816,90 @@ tailwind.config = {
 
   function goToLogin() {
     window.location.href = 'index.html';
+  }
+
+  // ===== Activity Log =====
+  let allActivityLogs = [];
+  let activityPage = 0;
+  const ACTIVITY_PAGE_SIZE = 50;
+
+  const ACTION_LABELS = {
+    booking_created:    { label: 'Booking created',    color: 'text-green-600',  icon: 'fa-plus' },
+    booking_edited:     { label: 'Booking edited',     color: 'text-blue-600',   icon: 'fa-pen' },
+    booking_cancelled:  { label: 'Booking cancelled',  color: 'text-red-500',    icon: 'fa-xmark' },
+    partner_created:    { label: 'Partner created',    color: 'text-green-600',  icon: 'fa-building-user' },
+    partner_edited:     { label: 'Partner edited',     color: 'text-blue-600',   icon: 'fa-pen' },
+    partner_deactivated:{ label: 'Partner deactivated',color: 'text-red-500',    icon: 'fa-ban' },
+    partner_activated:  { label: 'Partner activated',  color: 'text-green-600',  icon: 'fa-check' },
+    ticket_replied:     { label: 'Ticket replied',     color: 'text-purple-600', icon: 'fa-reply' },
+    ticket_resolved:    { label: 'Ticket resolved',    color: 'text-green-600',  icon: 'fa-circle-check' },
+    print_status:       { label: 'Print order updated',color: 'text-orange-500', icon: 'fa-print' },
+    notification_sent:  { label: 'Notification sent',  color: 'text-brand',      icon: 'fa-bell' },
+    login:              { label: 'Logged in',          color: 'text-gray-500',   icon: 'fa-right-to-bracket' },
+  };
+
+  async function logActivity(action, details, ref) {
+    const { data: { session } } = await db.auth.getSession();
+    const user = session?.user?.email || 'unknown';
+    await db.from('audit_log').insert({
+      action,
+      details: details || '',
+      ref: ref || '',
+      user_email: user
+    });
+  }
+
+  async function loadActivityLog() {
+    const { data, error } = await db.from('audit_log')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(500);
+    if (error) { console.error('audit_log:', error); return; }
+    allActivityLogs = data || [];
+
+    // Populate user filter
+    const users = [...new Set(allActivityLogs.map(l => l.user_email))].filter(Boolean);
+    const userSelect = document.getElementById('activity-filter-user');
+    userSelect.innerHTML = '<option value="">All users</option>' +
+      users.map(u => `<option value="${u}">${u}</option>`).join('');
+
+    renderActivityLog(allActivityLogs);
+  }
+
+  function filterActivity() {
+    const userFilter = document.getElementById('activity-filter-user').value;
+    const typeFilter = document.getElementById('activity-filter-type').value;
+    let filtered = allActivityLogs;
+    if (userFilter) filtered = filtered.filter(l => l.user_email === userFilter);
+    if (typeFilter) filtered = filtered.filter(l => l.action && l.action.startsWith(typeFilter === 'auth' ? 'login' : typeFilter));
+    renderActivityLog(filtered);
+  }
+
+  function renderActivityLog(logs) {
+    const list = document.getElementById('activity-log-list');
+    if (!logs.length) {
+      list.innerHTML = '<div class="px-5 py-8 text-center text-gray-400">No activity recorded yet.</div>';
+      return;
+    }
+    list.innerHTML = logs.map(l => {
+      const meta = ACTION_LABELS[l.action] || { label: l.action, color: 'text-gray-500', icon: 'fa-circle' };
+      const dt = new Date(l.created_at);
+      const date = dt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      const time = dt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const userShort = (l.user_email || '—').split('@')[0];
+      return `
+      <div class="grid grid-cols-12 px-5 py-3 hover:bg-gray-50 transition-colors items-start">
+        <div class="col-span-3 text-gray-400">
+          <span class="text-gray-600">${date}</span>
+          <span class="ml-2 text-gray-400">${time}</span>
+        </div>
+        <div class="col-span-2 text-gray-500 truncate" title="${l.user_email || '—'}">${userShort}</div>
+        <div class="col-span-2 ${meta.color} font-medium flex items-center gap-1.5">
+          <i class="fa-solid ${meta.icon} text-xs opacity-70"></i>${meta.label}
+        </div>
+        <div class="col-span-5 text-gray-500">${l.details || '—'}${l.ref ? `<span class="ml-2 text-gray-300 font-mono">${l.ref}</span>` : ''}</div>
+      </div>`;
+    }).join('');
   }
 
   function showSection(name) {
@@ -2209,6 +2335,8 @@ tailwind.config = {
     t.status = document.getElementById('td-status-select').value;
     t.reply  = document.getElementById('td-reply').value;
     await db.from('tickets').update({ status: t.status, reply: t.reply }).eq('id', editingTicketId);
+    const action = t.status === 'Resolved' ? 'ticket_resolved' : 'ticket_replied';
+    await logActivity(action, `Ticket "${t.subject}" → ${t.status}`, t.id);
     renderTicketsTable();
     closeTicketDetail();
     showToast('Ticket updated.');
@@ -2259,6 +2387,7 @@ tailwind.config = {
     o.status = newStatus;
     if (newStatus === 'Sent' && !o.note) o.note = 'Delivered ' + new Date().toLocaleDateString('en', {month:'short', day:'numeric'});
     await db.from('print_orders').update({ status: newStatus, note: o.note }).eq('id', id);
+    await logActivity('print_status', `Order ${id} (${o.material}) → ${newStatus}`, id);
     renderPrintOrders();
     showToast('Order ' + id + ' marked as ' + newStatus + '.');
   }
@@ -2296,6 +2425,7 @@ tailwind.config = {
     if (data) sentNotifications.unshift({ id: data.id, target: data.target, type: data.type, title: data.title, message: data.message, sent: new Date(data.created_at).toLocaleDateString('en', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'}) });
     document.getElementById('notif-title').value   = '';
     document.getElementById('notif-message').value = '';
+    await logActivity('notification_sent', `"${title}" → ${targetLabel}`);
     renderNotifHistory();
     showToast('Notification sent to ' + targetLabel + '!');
   }
@@ -2491,6 +2621,7 @@ tailwind.config = {
       contract_signed: p.contractSigned || null, contract_expiry: p.contractExpiry || null,
       notify_email: p.notifyEmail
     }).eq('id', editingPartnerId);
+    await logActivity('partner_edited', `Partner "${p.name}" details updated`, editingPartnerId);
     renderPartnersTable();
     closePartnerDetail();
     showToast('Partner updated successfully!');
@@ -2499,6 +2630,8 @@ tailwind.config = {
     const p = allPartners.find(x => x.id === id);
     if (!p) return;
     p.active = !p.active;
+    logActivity(p.active ? 'partner_activated' : 'partner_deactivated', `Partner "${p.name}"`, id);
+    db.from('partners').update({ active: p.active }).eq('id', id);
     renderPartnersTable();
     closePartnerDetail();
     showToast(p.active ? 'Partner activated.' : 'Partner deactivated.');
