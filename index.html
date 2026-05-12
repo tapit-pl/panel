@@ -156,13 +156,13 @@ tailwind.config = {
         <!-- User -->
         <div class="flex items-center gap-2 pl-3 border-l border-gray-200">
           <button onclick="openAccountPanel()" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div class="w-8 h-8 bg-brand rounded-lg flex items-center justify-center text-white text-xs font-bold">HW</div>
+            <div class="w-8 h-8 bg-brand rounded-lg flex items-center justify-center text-white text-xs font-bold partner-initials">TM</div>
             <div class="hidden sm:block text-left">
-              <div class="text-xs font-semibold text-dark">Hotel Wawel</div>
-              <div class="text-xs text-gray-400">Kraków</div>
+              <div class="text-xs font-semibold text-dark partner-name">Loading...</div>
+              <div class="text-xs text-gray-400 partner-type"></div>
             </div>
           </button>
-          <button onclick="goTo('screen-login')" class="ml-2 text-gray-400 hover:text-gray-600" title="Log out">
+          <button onclick="doPartnerLogout()" class="ml-2 text-gray-400 hover:text-gray-600" title="Log out">
             <i class="fa-solid fa-right-from-bracket text-sm"></i>
           </button>
         </div>
@@ -522,19 +522,19 @@ tailwind.config = {
       <!-- Stats row -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
         <div class="bg-white rounded-2xl shadow-sm p-4 text-center">
-          <div class="text-2xl font-bold text-dark">6</div>
+          <div id="stat-total" class="text-2xl font-bold text-dark">—</div>
           <div class="text-xs text-gray-400 mt-1">Total bookings</div>
         </div>
         <div class="bg-white rounded-2xl shadow-sm p-4 text-center">
-          <div class="text-2xl font-bold text-green-600">4</div>
+          <div id="stat-paid" class="text-2xl font-bold text-green-600">—</div>
           <div class="text-xs text-gray-400 mt-1">Paid</div>
         </div>
         <div class="bg-white rounded-2xl shadow-sm p-4 text-center">
-          <div class="text-2xl font-bold text-yellow-600">1</div>
+          <div id="stat-pending" class="text-2xl font-bold text-yellow-600">—</div>
           <div class="text-xs text-gray-400 mt-1">Pending</div>
         </div>
         <div class="bg-white rounded-2xl shadow-sm p-4 text-center">
-          <div class="text-2xl font-bold text-red-500">1</div>
+          <div id="stat-cancelled" class="text-2xl font-bold text-red-500">—</div>
           <div class="text-xs text-gray-400 mt-1">Cancelled</div>
         </div>
       </div>
@@ -2153,6 +2153,8 @@ tailwind.config = {
   let cart = [];
   let guestCount = 2;
   let helpTicketCounter = 1;
+  let currentPartner = null;
+  let partnerBookings = [];
 
   // ===== Supabase =====
   const { createClient } = supabase;
@@ -2170,16 +2172,120 @@ tailwind.config = {
   });
 
   async function redirectByRole(user) {
-    // Check if user is a partner (email exists in partners table)
-    const { data } = await db.from('partners').select('id').eq('email', user.email).maybeSingle();
+    const { data } = await db.from('partners').select('*').eq('email', user.email).maybeSingle();
     if (data) {
-      // Partner — show partner dashboard
       currentPartner = data;
-      goTo('screen-dashboard');
+      await initPartnerDashboard();
     } else {
-      // Admin
       window.location.href = 'admin.html';
     }
+  }
+
+  async function initPartnerDashboard() {
+    const p = currentPartner;
+
+    // Header: initials + name
+    document.querySelectorAll('.partner-initials').forEach(el => el.textContent = p.initials || p.name.substring(0,2).toUpperCase());
+    document.querySelectorAll('.partner-name').forEach(el => el.textContent = p.name);
+    document.querySelectorAll('.partner-type').forEach(el => el.textContent = p.type || '');
+
+    // Load bookings
+    await loadPartnerBookings();
+
+    // Load notifications
+    await loadPartnerNotifications();
+
+    goTo('screen-dashboard');
+  }
+
+  async function loadPartnerBookings() {
+    const { data, error } = await db.from('bookings')
+      .select('*')
+      .eq('partner_id', currentPartner.id)
+      .order('date', { ascending: false });
+    if (error) { console.error('bookings:', error); return; }
+    partnerBookings = data || [];
+    renderPartnerBookings(partnerBookings);
+    updateBookingStats(partnerBookings);
+  }
+
+  function updateBookingStats(bookings) {
+    const total     = bookings.length;
+    const paid      = bookings.filter(b => b.status === 'paid').length;
+    const pending   = bookings.filter(b => b.status === 'pending').length;
+    const cancelled = bookings.filter(b => b.status === 'cancelled').length;
+    document.getElementById('stat-total').textContent     = total;
+    document.getElementById('stat-paid').textContent      = paid;
+    document.getElementById('stat-pending').textContent   = pending;
+    document.getElementById('stat-cancelled').textContent = cancelled;
+  }
+
+  function renderPartnerBookings(bookings) {
+    const list = document.getElementById('booking-list');
+    if (!bookings.length) {
+      list.innerHTML = '<div class="p-8 text-center text-gray-400 text-sm">No bookings yet.</div>';
+      return;
+    }
+    list.innerHTML = bookings.map(b => {
+      const statusColors = {
+        paid:      'bg-green-100 text-green-700',
+        pending:   'bg-yellow-100 text-yellow-700',
+        cancelled: 'bg-red-100 text-red-700'
+      };
+      const badge = statusColors[b.status] || 'bg-gray-100 text-gray-600';
+      const statusLabel = b.status.charAt(0).toUpperCase() + b.status.slice(1);
+      return `
+      <div class="booking-row p-4 flex items-center gap-4 hover:bg-gray-50 transition-colors" data-status="${b.status}" data-search="${b.id} ${(b.guest||'').toLowerCase()} ${(b.tour||'').toLowerCase()}">
+        <div class="w-10 h-10 bg-brand-light rounded-xl flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-mountain-sun text-brand text-sm"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="text-xs text-gray-400 mb-0.5">#${b.id}</div>
+          <div class="font-semibold text-sm text-dark">${b.tour || '—'}</div>
+          <div class="text-xs text-gray-500 mt-0.5">${b.guest || '—'}${b.phone ? ' · ' + b.phone : ''}${b.email ? ' · ' + b.email : ''}</div>
+          <div class="text-xs text-gray-400 mt-0.5">${b.date || '—'}${b.time ? ' · ' + b.time : ''}${b.pax ? ' · ' + b.pax + ' pax' : ''}</div>
+        </div>
+        <div class="text-right shrink-0">
+          <div class="font-bold text-brand text-sm">${b.comm ? b.comm + ' zł' : '—'}</div>
+          <span class="text-xs ${badge} px-2 py-0.5 rounded-full font-medium">${statusLabel}</span>
+        </div>
+        <div class="flex gap-1.5 shrink-0">
+          <button onclick="printVoucher()" class="p-2 text-gray-400 hover:text-brand hover:bg-brand-light rounded-lg transition-colors" title="View voucher"><i class="fa-solid fa-file-pdf text-xs"></i></button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  async function loadPartnerNotifications() {
+    const { data } = await db.from('notifications')
+      .select('*')
+      .or(`target.eq.all,target.eq.${currentPartner.id}`)
+      .order('created_at', { ascending: false });
+    if (!data || !data.length) return;
+    const unread = data.length;
+    if (unread > 0) {
+      document.getElementById('notif-badge').textContent = unread;
+      document.getElementById('notif-badge').classList.remove('hidden');
+      document.getElementById('notif-badge-tab').textContent = unread;
+    }
+    const container = document.getElementById('tab-updates').querySelector('.space-y-4');
+    if (container) {
+      const dbNotifs = data.map(n => `
+        <div class="bg-white rounded-2xl shadow-sm p-5 border-l-4 border-brand">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="bg-brand/10 text-brand text-xs font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wide">${n.type || 'Info'}</span>
+            <span class="text-xs text-gray-400">${new Date(n.created_at).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'})}</span>
+          </div>
+          <h3 class="font-bold text-dark text-sm leading-snug mb-1">${n.title}</h3>
+          <p class="text-sm text-gray-500 leading-relaxed">${n.message}</p>
+        </div>`).join('');
+      container.innerHTML = dbNotifs + container.innerHTML;
+    }
+  }
+
+  async function doPartnerLogout() {
+    await db.auth.signOut();
+    window.location.href = 'index.html';
   }
 
   async function doLogin() {
