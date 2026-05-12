@@ -3096,14 +3096,29 @@ tailwind.config = {
       const resp = await fetch(`https://wl-api.mf.gov.pl/api/search/nip/${raw}?date=${today}`);
       if (!resp.ok) throw new Error('not found');
       const data = await resp.json();
+      if (data.code === 'WL-115') throw new Error('invalid nip');
       const subj = data?.result?.subject;
       if (!subj) throw new Error('no subject');
-      if (subj.name) document.getElementById('ap-invoice-company').value = subj.name;
-      if (subj.workingAddress) document.getElementById('ap-invoice-address').value = subj.workingAddress;
-      statusEl.textContent = 'Dane pobrane pomyslnie.';
-      statusEl.className = 'text-xs mt-1 text-green-500';
+      const filled = [];
+      if (subj.name) {
+        document.getElementById('ap-invoice-company').value = subj.name;
+        filled.push('nazwa');
+      }
+      const addr = subj.workingAddress || subj.residenceAddress || null;
+      if (addr) {
+        document.getElementById('ap-invoice-address').value = addr;
+        filled.push('adres');
+      }
+      if (filled.length > 0) {
+        statusEl.textContent = 'Pobrano: ' + filled.join(', ') + '.' + (!addr ? ' Adres niedostepny w rejestrze (JDG – wpisz recznie).' : '');
+        statusEl.className = 'text-xs mt-1 ' + (!addr ? 'text-amber-500' : 'text-green-500');
+      } else {
+        statusEl.textContent = 'NIP znaleziony, ale brak danych do uzupelnienia.';
+        statusEl.className = 'text-xs mt-1 text-amber-500';
+      }
     } catch(e) {
-      statusEl.textContent = 'Nie znaleziono firmy dla tego NIP lub blad polaczenia.';
+      const msg = e.message === 'invalid nip' ? 'Nieprawidlowy NIP.' : 'Nie znaleziono firmy dla tego NIP.';
+      statusEl.textContent = msg;
       statusEl.className = 'text-xs mt-1 text-red-400';
     }
   }
