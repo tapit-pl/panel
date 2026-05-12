@@ -2687,11 +2687,10 @@ tailwind.config = {
 
   // ===== Add Partner =====
   function openAddPartner() {
-    ['ap-name','ap-address','ap-contact','ap-phone','ap-email','ap-username','ap-notes'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+    ['ap-name','ap-address','ap-contact','ap-phone','ap-email','ap-notes'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
     document.getElementById('ap-type').value = 'Hotel';
     document.getElementById('ap-stars').value = '';
     document.getElementById('ap-comm').value = '10';
-    generatePassword('ap-password');
     const m = document.getElementById('modal-add-partner');
     m.classList.remove('hidden'); m.classList.add('flex');
   }
