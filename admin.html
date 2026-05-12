@@ -1676,7 +1676,7 @@ tailwind.config = {
 
   async function goToLogin() {
     await db.auth.signOut();
-    showScreen('screen-login');
+    window.location.href = 'index.html';
   }
 
   async function initDashboard() {
@@ -1695,7 +1695,7 @@ tailwind.config = {
     if (session) {
       await initDashboard();
     } else {
-      showScreen('screen-login');
+      window.location.href = 'index.html';
     }
   });
 

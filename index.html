@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script>window.location.replace('admin.html');</script>
 <title>Thousand Miles – Hotel Booking Panel</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -56,6 +55,7 @@ tailwind.config = {
     #modal-voucher > .hidden > div { box-shadow: none !important; }
   }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -72,10 +72,10 @@ tailwind.config = {
 
     <div class="space-y-4">
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1.5">Login</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
         <div class="relative">
-          <i class="fa-solid fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-          <input id="login-username" type="text" placeholder="Hotel name or admin" class="w-full pl-9 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-sm bg-gray-50" onkeydown="if(event.key==='Enter')doLogin()">
+          <i class="fa-solid fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+          <input id="login-email" type="email" placeholder="email@example.com" autocomplete="username" class="w-full pl-9 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-sm bg-gray-50" onkeydown="if(event.key==='Enter')doLogin()">
         </div>
       </div>
       <div>
@@ -2154,30 +2154,58 @@ tailwind.config = {
   let guestCount = 2;
   let helpTicketCounter = 1;
 
-  // Credentials (prototype only — replace with backend auth in production)
-  const USERS = [
-    { login: 'admin',             password: 'admin123',  role: 'admin' },
-    { login: 'Hotel Wawel Kraków',password: 'hotel123',  role: 'hotel' },
-    { login: 'Hotel Stary',       password: 'hotel123',  role: 'hotel' },
-    { login: 'Hotel Copernicus',  password: 'hotel123',  role: 'hotel' },
-  ];
+  // ===== Supabase =====
+  const { createClient } = supabase;
+  const db = createClient(
+    'https://jzsiuvcgpwukxpcjxcsg.supabase.co',
+    'sb_publishable_jTg5-5J24uo7BNBVBLTTLA_xAeB9iK4'
+  );
 
-  function doLogin() {
-    const username = document.getElementById('login-username').value.trim();
+  // Check session on load
+  document.addEventListener('DOMContentLoaded', async function() {
+    const { data: { session } } = await db.auth.getSession();
+    if (session) {
+      await redirectByRole(session.user);
+    }
+  });
+
+  async function redirectByRole(user) {
+    // Check if user is a partner (email exists in partners table)
+    const { data } = await db.from('partners').select('id').eq('email', user.email).maybeSingle();
+    if (data) {
+      // Partner — show partner dashboard
+      currentPartner = data;
+      goTo('screen-dashboard');
+    } else {
+      // Admin
+      window.location.href = 'admin.html';
+    }
+  }
+
+  async function doLogin() {
+    const email    = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
-    const error    = document.getElementById('login-error');
-    const user = USERS.find(u => u.login.toLowerCase() === username.toLowerCase() && u.password === password);
-    if (!user) {
-      error.classList.remove('hidden');
+    const errEl    = document.getElementById('login-error');
+    const btn      = document.querySelector('[onclick="doLogin()"]');
+    errEl.classList.add('hidden');
+    btn.textContent = '...';
+    btn.disabled = true;
+
+    const { data, error } = await db.auth.signInWithPassword({ email, password });
+
+    btn.textContent = 'Log in';
+    btn.disabled = false;
+
+    if (error) {
+      errEl.querySelector
+        ? errEl.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Incorrect login or password.'
+        : errEl.textContent = 'Incorrect login or password.';
+      errEl.classList.remove('hidden');
       document.getElementById('login-password').value = '';
       return;
     }
-    error.classList.add('hidden');
-    if (user.role === 'admin') {
-      window.location.href = 'admin.html';
-    } else {
-      goTo('screen-dashboard');
-    }
+
+    await redirectByRole(data.user);
   }
 
   function goTo(screen) {
