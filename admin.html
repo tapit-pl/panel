@@ -1013,40 +1013,74 @@ tailwind.config = {
 
         <!-- ===================== SECTION: ACTIVITY LOG ===================== -->
         <div id="section-activity" class="section fade-in">
-          <div class="flex items-center justify-between mb-5">
-            <div>
-              <h1 class="text-lg font-bold text-dark">Activity Log</h1>
-              <p class="text-xs text-gray-400 mt-0.5">All actions performed in the panel</p>
+          <div class="mb-5">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h1 class="text-lg font-bold text-dark">Activity Log</h1>
+                <p class="text-xs text-gray-400 mt-0.5">All actions performed in the panel</p>
+              </div>
+              <button onclick="loadActivityLog()" class="text-xs text-gray-400 hover:text-brand flex items-center gap-1.5 transition-colors">
+                <i class="fa-solid fa-rotate-right text-xs"></i> Refresh
+              </button>
             </div>
-            <div class="flex items-center gap-2">
-              <select id="activity-filter-user" onchange="filterActivity()" class="text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 bg-white">
-                <option value="">All users</option>
-              </select>
-              <select id="activity-filter-type" onchange="filterActivity()" class="text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 bg-white">
-                <option value="">All actions</option>
-                <option value="booking">Bookings</option>
-                <option value="partner">Partners</option>
-                <option value="ticket">Support</option>
-                <option value="print">Print Orders</option>
-                <option value="notification">Notifications</option>
-                <option value="auth">Login / Logout</option>
-              </select>
+
+            <!-- Filters -->
+            <div class="bg-white rounded-2xl shadow-sm p-4 flex flex-wrap gap-3 items-end">
+              <div class="flex-1 min-w-48">
+                <label class="block text-xs text-gray-400 mb-1.5">Search</label>
+                <div class="relative">
+                  <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                  <input id="activity-search" type="text" placeholder="Search details, user, ref…" oninput="filterActivity()"
+                    class="w-full pl-8 pr-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+                </div>
+              </div>
+              <div class="min-w-40">
+                <label class="block text-xs text-gray-400 mb-1.5">User</label>
+                <select id="activity-filter-user" onchange="filterActivity()" class="w-full text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 bg-white">
+                  <option value="">All users</option>
+                </select>
+              </div>
+              <div class="min-w-40">
+                <label class="block text-xs text-gray-400 mb-1.5">Action type</label>
+                <select id="activity-filter-type" onchange="filterActivity()" class="w-full text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 bg-white">
+                  <option value="">All actions</option>
+                  <option value="booking">Bookings</option>
+                  <option value="partner">Partners</option>
+                  <option value="ticket">Support</option>
+                  <option value="print">Print Orders</option>
+                  <option value="notification">Notifications</option>
+                  <option value="login">Login / Logout</option>
+                </select>
+              </div>
+              <div class="min-w-32">
+                <label class="block text-xs text-gray-400 mb-1.5">From</label>
+                <input id="activity-filter-from" type="date" onchange="filterActivity()"
+                  class="w-full text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 bg-white">
+              </div>
+              <div class="min-w-32">
+                <label class="block text-xs text-gray-400 mb-1.5">To</label>
+                <input id="activity-filter-to" type="date" onchange="filterActivity()"
+                  class="w-full text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 bg-white">
+              </div>
+              <button onclick="clearActivityFilters()" class="text-xs text-gray-400 hover:text-brand px-3 py-2 rounded-xl border border-gray-200 hover:border-brand transition-colors">
+                <i class="fa-solid fa-xmark mr-1"></i>Clear
+              </button>
             </div>
           </div>
+
+          <!-- Count -->
+          <div class="text-xs text-gray-400 mb-3 px-1" id="activity-count"></div>
 
           <!-- Log table -->
           <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
             <div class="grid grid-cols-12 px-5 py-2.5 border-b border-gray-100 bg-gray-50 text-xs font-semibold text-gray-400 uppercase tracking-wide">
               <div class="col-span-3">Timestamp</div>
-              <div class="col-span-2">User</div>
+              <div class="col-span-3">User</div>
               <div class="col-span-2">Action</div>
-              <div class="col-span-5">Details</div>
+              <div class="col-span-4">Details</div>
             </div>
             <div id="activity-log-list" class="divide-y divide-gray-50 font-mono text-xs">
               <div class="px-5 py-8 text-center text-gray-400">Loading...</div>
-            </div>
-            <div id="activity-load-more" class="hidden px-5 py-3 border-t border-gray-100 text-center">
-              <button onclick="loadMoreActivity()" class="text-xs text-brand hover:underline font-medium">Load more</button>
             </div>
           </div>
         </div>
@@ -1867,16 +1901,39 @@ tailwind.config = {
   }
 
   function filterActivity() {
+    const search     = (document.getElementById('activity-search')?.value || '').toLowerCase();
     const userFilter = document.getElementById('activity-filter-user').value;
     const typeFilter = document.getElementById('activity-filter-type').value;
+    const fromFilter = document.getElementById('activity-filter-from').value;
+    const toFilter   = document.getElementById('activity-filter-to').value;
+
     let filtered = allActivityLogs;
     if (userFilter) filtered = filtered.filter(l => l.user_email === userFilter);
-    if (typeFilter) filtered = filtered.filter(l => l.action && l.action.startsWith(typeFilter === 'auth' ? 'login' : typeFilter));
+    if (typeFilter) filtered = filtered.filter(l => l.action && l.action.startsWith(typeFilter));
+    if (fromFilter) filtered = filtered.filter(l => l.created_at >= fromFilter);
+    if (toFilter)   filtered = filtered.filter(l => l.created_at.slice(0,10) <= toFilter);
+    if (search)     filtered = filtered.filter(l =>
+      (l.details || '').toLowerCase().includes(search) ||
+      (l.user_email || '').toLowerCase().includes(search) ||
+      (l.ref || '').toLowerCase().includes(search) ||
+      (l.action || '').toLowerCase().includes(search)
+    );
     renderActivityLog(filtered);
+  }
+
+  function clearActivityFilters() {
+    document.getElementById('activity-search').value = '';
+    document.getElementById('activity-filter-user').value = '';
+    document.getElementById('activity-filter-type').value = '';
+    document.getElementById('activity-filter-from').value = '';
+    document.getElementById('activity-filter-to').value = '';
+    renderActivityLog(allActivityLogs);
   }
 
   function renderActivityLog(logs) {
     const list = document.getElementById('activity-log-list');
+    const countEl = document.getElementById('activity-count');
+    if (countEl) countEl.textContent = logs.length ? `${logs.length} event${logs.length !== 1 ? 's' : ''}` : '';
     if (!logs.length) {
       list.innerHTML = '<div class="px-5 py-8 text-center text-gray-400">No activity recorded yet.</div>';
       return;
@@ -1886,18 +1943,17 @@ tailwind.config = {
       const dt = new Date(l.created_at);
       const date = dt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
       const time = dt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      const userShort = l.user_email || '—';
       return `
       <div class="grid grid-cols-12 px-5 py-3 hover:bg-gray-50 transition-colors items-start">
         <div class="col-span-3 text-gray-400">
           <span class="text-gray-600">${date}</span>
-          <span class="ml-2 text-gray-400">${time}</span>
+          <span class="ml-2">${time}</span>
         </div>
-        <div class="col-span-2 text-gray-500 truncate" title="${l.user_email || '—'}">${userShort}</div>
+        <div class="col-span-3 text-gray-500 truncate" title="${l.user_email || '—'}">${l.user_email || '—'}</div>
         <div class="col-span-2 ${meta.color} font-medium flex items-center gap-1.5">
           <i class="fa-solid ${meta.icon} text-xs opacity-70"></i>${meta.label}
         </div>
-        <div class="col-span-5 text-gray-500">${l.details || '—'}${l.ref ? `<span class="ml-2 text-gray-300 font-mono">${l.ref}</span>` : ''}</div>
+        <div class="col-span-4 text-gray-500">${l.details || '—'}${l.ref ? `<span class="ml-2 text-gray-300">[${l.ref}]</span>` : ''}</div>
       </div>`;
     }).join('');
   }
