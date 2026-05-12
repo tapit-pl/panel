@@ -511,9 +511,15 @@ tailwind.config = {
               <h1 class="text-xl font-bold text-dark">All Bookings</h1>
               <p id="bookings-subtitle" class="text-xs text-gray-400 mt-0.5">Loading…</p>
             </div>
-            <button onclick="openManualBooking()" class="flex items-center gap-2 bg-brand hover:bg-brand-dark text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors">
-              <i class="fa-solid fa-plus"></i>Add manual booking
-            </button>
+            <div class="flex items-center gap-3">
+              <div class="flex bg-gray-100 rounded-xl p-0.5 text-xs font-medium">
+                <button id="view-recent-btn" onclick="setBookingView('recent')" class="px-3 py-1.5 rounded-lg bg-white shadow-sm text-dark transition-all">Recent</button>
+                <button id="view-upcoming-btn" onclick="setBookingView('upcoming')" class="px-3 py-1.5 rounded-lg text-gray-400 transition-all">Upcoming</button>
+              </div>
+              <button onclick="openManualBooking()" class="flex items-center gap-2 bg-brand hover:bg-brand-dark text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors">
+                <i class="fa-solid fa-plus"></i>Add manual booking
+              </button>
+            </div>
           </div>
 
           <!-- Filters -->
@@ -2070,6 +2076,7 @@ tailwind.config = {
       status: statusMap[pb.status] || pb.status || 'Pending',
       notes: '',
       _startTs: startMs || 0,
+      _creationTs: item.creationDate || 0,
       _bokun: true
     };
   }
@@ -2113,13 +2120,6 @@ tailwind.config = {
       }
     } catch(e) { console.warn('Bokun load error:', e); }
 
-    // Sort ascending by tour date (nearest first)
-    allBookings.sort((a, b) => (a._startTs || 0) - (b._startTs || 0));
-
-    // Default filter: from today
-    const fromEl = document.getElementById('booking-filter-from');
-    if (fromEl && !fromEl.value) fromEl.value = new Date().toISOString().slice(0, 10);
-
     // Populate tour dropdown
     const tourSel = document.getElementById('booking-filter-tour');
     if (tourSel) {
@@ -2127,7 +2127,8 @@ tailwind.config = {
       tourSel.innerHTML = '<option value="">All tours</option>' + tours.map(t => `<option value="${t}">${t}</option>`).join('');
     }
 
-    filterAllBookings();
+    // Default view: Recent
+    setBookingView('recent');
 
     // Update KPI
     const kpiBk = document.getElementById('kpi-bookings');
@@ -2497,6 +2498,28 @@ tailwind.config = {
     } else if (subtitle) {
       subtitle.textContent = 'No bookings match filters';
     }
+  }
+
+  let currentBookingView = 'recent';
+
+  function setBookingView(view) {
+    currentBookingView = view;
+    const recentBtn   = document.getElementById('view-recent-btn');
+    const upcomingBtn = document.getElementById('view-upcoming-btn');
+    if (recentBtn && upcomingBtn) {
+      recentBtn.className   = view === 'recent'   ? 'px-3 py-1.5 rounded-lg bg-white shadow-sm text-dark transition-all' : 'px-3 py-1.5 rounded-lg text-gray-400 transition-all';
+      upcomingBtn.className = view === 'upcoming' ? 'px-3 py-1.5 rounded-lg bg-white shadow-sm text-dark transition-all' : 'px-3 py-1.5 rounded-lg text-gray-400 transition-all';
+    }
+    const fromEl = document.getElementById('booking-filter-from');
+    if (fromEl) fromEl.value = view === 'upcoming' ? new Date().toISOString().slice(0, 10) : '';
+
+    // Sort
+    if (view === 'recent') {
+      allBookings.sort((a, b) => (b._creationTs || 0) - (a._creationTs || 0));
+    } else {
+      allBookings.sort((a, b) => (a._startTs || 0) - (b._startTs || 0));
+    }
+    filterAllBookings();
   }
 
   function filterAllBookings() {
