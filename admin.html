@@ -1917,8 +1917,8 @@ tailwind.config = {
     }
   }
 
-  function onDashMonthChange() {
-    updateDashboardKPIs();
+  async function onDashMonthChange() {
+    await updateDashboardKPIs();
   }
 
   function getSelectedMonthRange() {
@@ -1931,18 +1931,60 @@ tailwind.config = {
     return { start, end, prevStart, prevEnd: start, y, m };
   }
 
-  function updateDashboardKPIs() {
+  async function updateDashboardKPIs() {
     const { start: monthStart, end: monthEnd, prevStart, prevEnd } = getSelectedMonthRange();
     const now = new Date();
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
     const todayEnd   = todayStart + 86400000;
     const yesterdayStart = todayStart - 86400000;
 
+    // --- Load from Supabase bokun_bookings ---
+    const fromIso = new Date(Math.min(prevStart, yesterdayStart)).toISOString();
+    const toIso   = new Date(monthEnd).toISOString();
+    const { data: rows } = await db.from('bokun_bookings')
+      .select('id, tour, guest_first, guest_last, channel, status, tour_date, booked_at, pax, total_pln')
+      .gte('booked_at', fromIso)
+      .lt('booked_at', toIso)
+      .order('booked_at', { ascending: false })
+      .limit(5000);
+
+    supaDash = (rows || []).map(r => ({
+      id: r.id,
+      tour: r.tour || '—',
+      guest: [r.guest_first, r.guest_last].filter(Boolean).join(' ') || '—',
+      hotel: '—',
+      date: r.tour_date ? new Date(r.tour_date).toLocaleDateString('en-GB', {day:'numeric',month:'short'}) : '—',
+      total: Math.round(r.total_pln || 0),
+      source: r.channel || 'Bokun',
+      status: r.status === 'CONFIRMED' ? 'Paid' : r.status === 'CANCELLED' ? 'Cancelled' : 'Pending',
+      pax: r.pax || 1,
+      _creationTs: r.booked_at ? new Date(r.booked_at).getTime() : 0,
+      _startTs: r.tour_date ? new Date(r.tour_date).getTime() : 0,
+    }));
+
+    // Also fetch last 5 recent bookings overall for the Recent widget
+    const { data: recentRows } = await db.from('bokun_bookings')
+      .select('id, tour, guest_first, guest_last, channel, status, tour_date, booked_at, total_pln')
+      .order('booked_at', { ascending: false })
+      .limit(5);
+    const recentMapped = (recentRows || []).map(r => ({
+      id: r.id,
+      tour: r.tour || '—',
+      guest: [r.guest_first, r.guest_last].filter(Boolean).join(' ') || '—',
+      hotel: '—',
+      date: r.tour_date ? new Date(r.tour_date).toLocaleDateString('en-GB', {day:'numeric',month:'short'}) : '—',
+      total: Math.round(r.total_pln || 0),
+      source: r.channel || 'Bokun',
+      status: r.status === 'CONFIRMED' ? 'Paid' : r.status === 'CANCELLED' ? 'Cancelled' : 'Pending',
+      _creationTs: r.booked_at ? new Date(r.booked_at).getTime() : 0,
+    }));
+    // --- End Supabase load ---
+
     const active = b => b.status !== 'Cancelled';
-    const todayB    = allBookings.filter(b => active(b) && b._creationTs >= todayStart && b._creationTs < todayEnd);
-    const yesterdayB= allBookings.filter(b => active(b) && b._creationTs >= yesterdayStart && b._creationTs < todayStart);
-    const monthB    = allBookings.filter(b => active(b) && b._creationTs >= monthStart && b._creationTs < monthEnd);
-    const prevMonthB= allBookings.filter(b => active(b) && b._creationTs >= prevStart && b._creationTs < prevEnd);
+    const todayB    = supaDash.filter(b => active(b) && b._creationTs >= todayStart && b._creationTs < todayEnd);
+    const yesterdayB= supaDash.filter(b => active(b) && b._creationTs >= yesterdayStart && b._creationTs < todayStart);
+    const monthB    = supaDash.filter(b => active(b) && b._creationTs >= monthStart && b._creationTs < monthEnd);
+    const prevMonthB= supaDash.filter(b => active(b) && b._creationTs >= prevStart && b._creationTs < prevEnd);
 
     const monthRev  = monthB.reduce((s,b) => s+(b.total||0), 0);
     const prevRev   = prevMonthB.reduce((s,b) => s+(b.total||0), 0);
@@ -2012,10 +2054,9 @@ tailwind.config = {
         <span class="font-semibold">${Math.round(cnt/totalCh*100)}%</span>
       </div>`).join('') || '<div class="text-xs text-gray-400">No data</div>';
 
-    // Recent bookings
-    const recent = [...allBookings].sort((a,b)=>(b._creationTs||0)-(a._creationTs||0)).slice(0,5);
+    // Recent bookings (last 5 ever, from Supabase)
     const tbody = el('dash-recent-tbody');
-    if (tbody) tbody.innerHTML = recent.map(b => {
+    if (tbody) tbody.innerHTML = recentMapped.map(b => {
       const sc = b.source==='Viator'?'source-viator':b.source==='GYG'?'source-gyg':b.source==='Klook'?'source-klook':b.source==='Website'?'source-website':b.source==='Bokun'?'source-bokun':'source-manual';
       const st = b.status==='Paid'?'status-paid':b.status==='Pending'?'status-pending':'status-cancelled';
       return `<tr class="hover:bg-gray-50 transition-colors">
@@ -2053,7 +2094,7 @@ tailwind.config = {
     if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
     initDashMonthSelector();
     await loadBookings();
-    updateDashboardKPIs();
+    await updateDashboardKPIs();
     await loadPartners();
     await loadTickets();
     await loadPrintOrders();
@@ -2362,14 +2403,10 @@ tailwind.config = {
   }
 
   function generateDayData(dateStr) {
-    if (allBookings.length) {
-      const dayStart = new Date(dateStr + 'T00:00:00').getTime();
-      const dayEnd   = dayStart + 86400000;
-      const items = allBookings.filter(b => b._creationTs >= dayStart && b._creationTs < dayEnd && b.status !== 'Cancelled');
-      return { b: items.length, r: items.reduce((s, x) => s + (x.total || 0), 0) };
-    }
-    // fallback placeholder while data loads
-    return { b: 0, r: 0 };
+    const dayStart = new Date(dateStr + 'T00:00:00').getTime();
+    const dayEnd   = dayStart + 86400000;
+    const items = supaDash.filter(b => b._creationTs >= dayStart && b._creationTs < dayEnd && b.status !== 'Cancelled');
+    return { b: items.length, r: items.reduce((s, x) => s + (x.total || 0), 0) };
   }
 
   function fmtDateLabel(d) {
@@ -2493,6 +2530,7 @@ tailwind.config = {
 
   // ===== Bookings data — loaded dynamically from Bokun + Supabase =====
   const allBookings = [];
+  let supaDash = []; // Dashboard data loaded from Supabase bokun_bookings
 
   function renderBookingsTable(data) {
     const rows = data || allBookings;
