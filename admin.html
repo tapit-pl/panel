@@ -58,8 +58,16 @@ tailwind.config = {
 </head>
 <body class="bg-gray-100 min-h-screen">
 
+<!-- ===================== SCREEN: LOADING ===================== -->
+<div id="screen-loading" class="screen active fixed inset-0 z-50 items-center justify-center" style="background:#1a2332">
+  <div class="text-center">
+    <img src="assets/logo.png" alt="Thousand Miles" class="h-8 object-contain brightness-0 invert opacity-90 mx-auto mb-4">
+    <div class="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin mx-auto"></div>
+  </div>
+</div>
+
 <!-- ===================== SCREEN: LOGIN ===================== -->
-<div id="screen-login" class="screen active min-h-screen w-full items-center justify-center" style="background:linear-gradient(135deg,#1a2332 0%,#243047 100%)">
+<div id="screen-login" class="screen min-h-screen w-full items-center justify-center" style="background:linear-gradient(135deg,#1a2332 0%,#243047 100%)">
   <div class="w-full max-w-sm px-4">
     <div class="text-center mb-8">
       <img src="assets/logo.png" alt="Thousand Miles" class="h-8 object-contain brightness-0 invert opacity-90 mx-auto mb-3">
