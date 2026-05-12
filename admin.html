@@ -1886,7 +1886,7 @@ tailwind.config = {
       const dt = new Date(l.created_at);
       const date = dt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
       const time = dt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      const userShort = (l.user_email || '—').split('@')[0];
+      const userShort = l.user_email || '—';
       return `
       <div class="grid grid-cols-12 px-5 py-3 hover:bg-gray-50 transition-colors items-start">
         <div class="col-span-3 text-gray-400">
