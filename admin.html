@@ -1913,10 +1913,21 @@ tailwind.config = {
   // ===== Init =====
   document.addEventListener('DOMContentLoaded', async function() {
     const { data: { session } } = await db.auth.getSession();
-    if (session) {
-      await initDashboard();
+    if (!session) { window.location.href = 'index.html'; return; }
+
+    // Check MFA status
+    const { data: mfaData } = await db.auth.mfa.listFactors();
+    const totpFactor = mfaData?.totp?.find(f => f.status === 'verified');
+
+    if (totpFactor && !isMfaTrusted()) {
+      // Has MFA enrolled but device not trusted — require verification
+      mfaFactorId = totpFactor.id;
+      const { data: challenge } = await db.auth.mfa.challenge({ factorId: mfaFactorId });
+      mfaChallengeId = challenge.id;
+      showScreen('screen-mfa-verify');
+      document.getElementById('mfa-verify-code').focus();
     } else {
-      window.location.href = 'index.html';
+      await initDashboard();
     }
   });
 
