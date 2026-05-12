@@ -1870,6 +1870,9 @@ tailwind.config = {
     document.querySelectorAll('.partner-name').forEach(el => el.textContent = p.name);
     document.querySelectorAll('.partner-type').forEach(el => el.textContent = p.type || '');
 
+    // Prefetch tours in background (no await — doesn't block dashboard load)
+    loadToursFromBokun();
+
     // Load bookings
     await loadPartnerBookings();
 
