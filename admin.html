@@ -1363,7 +1363,7 @@ tailwind.config = {
           <label class="block text-xs font-semibold text-gray-600 mb-1.5">Property name <span class="text-red-400">*</span></label>
           <input id="ap-name" type="text" placeholder="e.g. Hotel Wawel Kraków" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
         </div>
-        <div>
+        <div class="col-span-2">
           <label class="block text-xs font-semibold text-gray-600 mb-1.5">Type <span class="text-red-400">*</span></label>
           <select id="ap-type" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 text-dark">
             <option value="Hotel">Hotel</option>
@@ -1373,24 +1373,25 @@ tailwind.config = {
             <option value="Other">Other</option>
           </select>
         </div>
-        <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Stars (optional)</label>
-          <select id="ap-stars" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 text-dark">
-            <option value="">—</option>
-            <option value="1">⭐ 1 star</option>
-            <option value="2">⭐⭐ 2 stars</option>
-            <option value="3">⭐⭐⭐ 3 stars</option>
-            <option value="4">⭐⭐⭐⭐ 4 stars</option>
-            <option value="5">⭐⭐⭐⭐⭐ 5 stars</option>
-          </select>
-        </div>
         <div class="col-span-2">
-          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Address</label>
-          <input id="ap-address" type="text" placeholder="ul. Sławkowska 12, Kraków" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Street</label>
+          <input id="ap-street" type="text" placeholder="ul. Sławkowska 12" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Contact person <span class="text-red-400">*</span></label>
-          <input id="ap-contact" type="text" placeholder="First and last name" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Postal code</label>
+          <input id="ap-postal" type="text" placeholder="30-001" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">City</label>
+          <input id="ap-city" type="text" placeholder="Kraków" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">First name <span class="text-red-400">*</span></label>
+          <input id="ap-contact-first" type="text" placeholder="Anna" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Last name <span class="text-red-400">*</span></label>
+          <input id="ap-contact-last" type="text" placeholder="Kowalska" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
         </div>
         <div>
           <label class="block text-xs font-semibold text-gray-600 mb-1.5">Phone</label>
@@ -1405,13 +1406,21 @@ tailwind.config = {
       <div class="border-t border-gray-100 pt-4">
         <div class="text-xs font-semibold text-gray-600 mb-3">Invoice data</div>
         <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs text-gray-500 mb-1.5">NIP</label>
-            <input id="ap-nip" type="text" placeholder="000-000-00-00" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          <div class="col-span-2">
+            <label class="block text-xs text-gray-500 mb-1.5">NIP <span class="text-gray-400 font-normal">(wpisz i kliknij Pobierz, aby auto-uzupełnić dane)</span></label>
+            <div class="flex gap-2">
+              <input id="ap-nip" type="text" placeholder="000-000-00-00" class="flex-1 text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+              <button type="button" onclick="lookupNIP()" class="px-3 py-2.5 bg-brand/10 hover:bg-brand/20 text-brand text-xs font-semibold rounded-xl transition-colors whitespace-nowrap flex items-center gap-1.5">
+                <i class="fa-solid fa-magnifying-glass text-xs"></i> Pobierz
+              </button>
+            </div>
+            <div id="ap-nip-status" class="text-xs mt-1 hidden"></div>
           </div>
           <div>
             <label class="block text-xs text-gray-500 mb-1.5">Invoice email</label>
             <input id="ap-invoice-email" type="email" placeholder="faktury@hotel.pl" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+          <div>
           </div>
           <div class="col-span-2">
             <label class="block text-xs text-gray-500 mb-1.5">Company name</label>
@@ -3065,11 +3074,38 @@ tailwind.config = {
 
   // ===== Add Partner =====
   function openAddPartner() {
-    ['ap-name','ap-address','ap-contact','ap-phone','ap-email','ap-notes','ap-nip','ap-invoice-email','ap-invoice-company','ap-invoice-address'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+    ['ap-name','ap-street','ap-postal','ap-city','ap-contact-first','ap-contact-last','ap-phone','ap-email','ap-notes','ap-nip','ap-invoice-email','ap-invoice-company','ap-invoice-address'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
     document.getElementById('ap-type').value = 'Hotel';
-    document.getElementById('ap-stars').value = '';
+    const st = document.getElementById('ap-nip-status'); if(st){ st.textContent=''; st.className='text-xs mt-1 hidden'; }
     const m = document.getElementById('modal-add-partner');
     m.classList.remove('hidden'); m.classList.add('flex');
+  }
+
+  async function lookupNIP() {
+    const raw = (document.getElementById('ap-nip').value || '').replace(/[-\s]/g, '');
+    const statusEl = document.getElementById('ap-nip-status');
+    if (raw.length !== 10 || !/^\d+$/.test(raw)) {
+      statusEl.textContent = 'Wpisz poprawny NIP (10 cyfr).';
+      statusEl.className = 'text-xs mt-1 text-red-400';
+      return;
+    }
+    statusEl.textContent = 'Pobieranie danych...';
+    statusEl.className = 'text-xs mt-1 text-gray-400';
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const resp = await fetch(`https://wl-api.mf.gov.pl/api/search/nip/${raw}?date=${today}`);
+      if (!resp.ok) throw new Error('not found');
+      const data = await resp.json();
+      const subj = data?.result?.subject;
+      if (!subj) throw new Error('no subject');
+      if (subj.name) document.getElementById('ap-invoice-company').value = subj.name;
+      if (subj.workingAddress) document.getElementById('ap-invoice-address').value = subj.workingAddress;
+      statusEl.textContent = 'Dane pobrane pomyslnie.';
+      statusEl.className = 'text-xs mt-1 text-green-500';
+    } catch(e) {
+      statusEl.textContent = 'Nie znaleziono firmy dla tego NIP lub blad polaczenia.';
+      statusEl.className = 'text-xs mt-1 text-red-400';
+    }
   }
   function closeAddPartner() {
     const m = document.getElementById('modal-add-partner');
@@ -3098,9 +3134,11 @@ tailwind.config = {
         email,
         name,
         type:     document.getElementById('ap-type').value,
-        stars:    parseInt(document.getElementById('ap-stars').value) || 0,
-        address:  document.getElementById('ap-address').value,
-        contact:  document.getElementById('ap-contact').value,
+        street:   document.getElementById('ap-street').value,
+        postal:   document.getElementById('ap-postal').value,
+        city:     document.getElementById('ap-city').value,
+        contact_first: document.getElementById('ap-contact-first').value,
+        contact_last:  document.getElementById('ap-contact-last').value,
         phone:    document.getElementById('ap-phone').value,
         commRate: 10,
         notes:           document.getElementById('ap-notes').value,
