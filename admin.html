@@ -1926,6 +1926,9 @@ tailwind.config = {
       mfaChallengeId = challenge.id;
       showScreen('screen-mfa-verify');
       document.getElementById('mfa-verify-code').focus();
+    } else if (!totpFactor) {
+      // No MFA enrolled yet — force enrollment
+      await startMfaEnroll();
     } else {
       await initDashboard();
     }
