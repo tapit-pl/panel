@@ -42,6 +42,10 @@ tailwind.config = {
   .status-cancelled { background:#fee2e2; color:#dc2626; }
   .status-settled { background:#dbeafe; color:#2563eb; }
   .source-bokun   { background:#ede9fe; color:#7c3aed; }
+  .source-viator  { background:#fce7f3; color:#be185d; }
+  .source-gyg     { background:#fef9c3; color:#a16207; }
+  .source-klook   { background:#fee2e2; color:#dc2626; }
+  .source-expedia { background:#dbeafe; color:#1d4ed8; }
   .source-website { background:#e0f2fe; color:#0284c7; }
   .source-manual  { background:#f1f5f9; color:#475569; }
   ::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -527,8 +531,11 @@ tailwind.config = {
                 <option value="none">No partner (direct)</option>
               </select>
               <select id="booking-filter-source" onchange="filterAllBookings()" class="text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 text-gray-600">
-                <option value="">All sources</option>
-                <option value="Bokun">Bokun</option>
+                <option value="">All channels</option>
+                <option value="Viator">Viator</option>
+                <option value="GYG">GetYourGuide</option>
+                <option value="Klook">Klook</option>
+                <option value="Expedia">Expedia</option>
                 <option value="Website">Website</option>
                 <option value="Manual">Manual</option>
               </select>
@@ -2021,17 +2028,91 @@ tailwind.config = {
     }
   });
 
+  function mapBokunBooking(item) {
+    const pb = item.productBookings?.[0];
+    if (!pb) return null;
+    const startMs = pb.startDate || pb.startDateTime;
+    const dateStr = startMs ? new Date(startMs).toLocaleDateString('en-GB', { day:'numeric', month:'short' }) : '—';
+    const channel = item.seller?.title || item.channel?.title || 'Bokun';
+    const channelShort = channel.includes('Viator') ? 'Viator'
+      : channel.includes('GetYourGuide') ? 'GYG'
+      : channel.includes('Klook') ? 'Klook'
+      : channel.includes('Expedia') ? 'Expedia'
+      : 'Bokun';
+    const statusMap = { CONFIRMED: 'Paid', CANCELLED: 'Cancelled', PENDING: 'Pending' };
+    const total = pb.customerInvoice?.total || pb.resellerInvoice?.total || 0;
+    const currency = pb.customerInvoice?.currency || 'PLN';
+    return {
+      id: item.confirmationCode || String(item.id),
+      tour: pb.product?.title?.trim() || '—',
+      guest: [item.customer?.firstName, item.customer?.lastName].filter(Boolean).join(' ') || '—',
+      email: item.customer?.email || '',
+      phone: item.customer?.phoneNumber || '',
+      hotel: '—',
+      date: dateStr,
+      time: pb.fields?.startTimeStr || '—',
+      pickup: pb.fields?.pickupPlaceDescription || '—',
+      pax: pb.totalParticipants || pb.fields?.totalParticipants || 1,
+      total: Math.round(total),
+      totalCurrency: currency,
+      comm: 0,
+      source: channelShort,
+      status: statusMap[pb.status] || pb.status || 'Pending',
+      notes: '',
+      _bokun: true
+    };
+  }
+
   async function loadBookings() {
-    const { data, error } = await db.from('bookings').select('*').order('created_at', { ascending: false });
-    if (error) { console.error('bookings:', error); return; }
-    // Map DB rows to format expected by renderBookingsTable
     allBookings.length = 0;
-    data.forEach(b => allBookings.push({
+
+    // Load manual/website bookings from Supabase
+    const { data: dbRows } = await db.from('bookings').select('*').order('created_at', { ascending: false });
+    (dbRows || []).forEach(b => allBookings.push({
       id: b.id, tour: b.tour, guest: b.guest, email: b.email, phone: b.phone,
       hotel: b.partner_id || '—', date: b.date, time: b.time, pickup: b.pickup,
       pax: b.pax, total: b.total, comm: b.comm, source: b.source, status: b.status, notes: b.notes || ''
     }));
+
+    // Load bookings from Bokun
+    try {
+      const today = new Date();
+      const past = new Date(today); past.setDate(past.getDate() - 30);
+      const future = new Date(today); future.setDate(future.getDate() + 90);
+      const fmt = d => d.toISOString().slice(0, 10);
+
+      const { data: bokunResp, error: bokunErr } = await db.functions.invoke('bokun-sync', {
+        body: {
+          path: '/booking.json/booking-search',
+          method: 'POST',
+          payload: {
+            startDate: fmt(past),
+            endDate: fmt(future),
+            pageSize: 100,
+            page: 0
+          }
+        }
+      });
+
+      if (!bokunErr && bokunResp?.body?.items) {
+        bokunResp.body.items.forEach(item => {
+          const mapped = mapBokunBooking(item);
+          if (mapped) allBookings.push(mapped);
+        });
+      }
+    } catch(e) { console.warn('Bokun load error:', e); }
+
+    // Sort: upcoming first, then recent past
+    allBookings.sort((a, b) => {
+      const da = new Date(a.date), db2 = new Date(b.date);
+      return db2 - da;
+    });
+
     renderBookingsTable();
+
+    // Update KPI
+    const kpiBk = document.getElementById('kpi-bookings');
+    if (kpiBk) kpiBk.textContent = allBookings.filter(b => b.status !== 'Cancelled').length;
   }
 
   async function loadPartners() {
@@ -2344,21 +2425,8 @@ tailwind.config = {
     });
   }
 
-  // ===== Bookings data =====
-  // IDs: Bokun source → numeric Bokun reference (7 digits), Manual/Website → TM-XXXXX
-  const allBookings = [
-    { id:'BK4521876', tour:'Bochnia Salt Mine',        guest:'Lisa Brown',        email:'lisa.brown@gmail.com',     phone:'+1 555 234 567',   hotel:'Copernicus', date:'Apr 15', time:'10:00', pickup:'Hotel Copernicus lobby, 9:45', pax:2,       total:160, comm:100, source:'Bokun',   status:'Paid',      notes:'' },
-    { id:'TM-00871',  tour:'Trip to Zakopane',          guest:'Piotr Nowak',       email:'p.nowak@gmail.com',        phone:'+48 601 234 567',  hotel:'—',          date:'Apr 14', time:'08:30', pickup:'Hotel Stary, 8:15',            pax:4,       total:600, comm:400, source:'Manual',  status:'Paid',      notes:'Group leader, requested window seats' },
-    { id:'BK4521643', tour:'Transfer – KRK Airport',    guest:'Chen Wei',          email:'chen.wei@qq.com',          phone:'+86 138 001 380',  hotel:'Wawel',      date:'Apr 19', time:'14:00', pickup:'Hotel Wawel lobby',            pax:'1 veh', total:139, comm:45,  source:'Bokun',   status:'Pending',   notes:'' },
-    { id:'TM-00865',  tour:'Auschwitz-Birkenau',         guest:'Sophie Mueller',    email:'s.mueller@web.de',         phone:'+49 151 234 567',  hotel:'Stary',      date:'Apr 11', time:'08:00', pickup:'Hotel Stary, 7:45',            pax:2,       total:260, comm:150, source:'Website', status:'Paid',      notes:'' },
-    { id:'BK4521512', tour:'Trip to Zakopane',          guest:'David Smith',        email:'d.smith@yahoo.com',        phone:'+44 7911 123456',  hotel:'Wawel',      date:'Apr 16', time:'08:30', pickup:'Hotel Wawel lobby',            pax:6,       total:900, comm:600, source:'Bokun',   status:'Paid',      notes:'VIP group, extra luggage space needed' },
-    { id:'BK4521488', tour:'Wieliczka Salt Mine',       guest:'Maria García',       email:'maria.g@hotmail.es',       phone:'+34 612 345 678',  hotel:'Wawel',      date:'Apr 15', time:'11:00', pickup:'Hotel Wawel lobby',            pax:2,       total:180, comm:0,   source:'Bokun',   status:'Cancelled', notes:'Cancelled by guest — full refund issued' },
-    { id:'TM-00860',  tour:'Wieliczka Salt Mine',       guest:'Carlos Mendez',      email:'cmendez@gmail.com',        phone:'+52 55 1234 5678', hotel:'Copernicus', date:'Apr 9',  time:'09:30', pickup:'Hotel Copernicus lobby',        pax:3,       total:270, comm:180, source:'Manual',  status:'Paid',      notes:'' },
-    { id:'TM-00855',  tour:'Trip to Zakopane',          guest:'Emma Johnson',       email:'emma.j@outlook.com',       phone:'+1 212 555 0100',  hotel:'Stary',      date:'Apr 8',  time:'08:30', pickup:'Hotel Stary lobby',            pax:5,       total:750, comm:500, source:'Website', status:'Paid',      notes:'' },
-    { id:'BK4521322', tour:'Shooting Range – Commando', guest:'Tomasz Wiśniewski', email:'t.wis@onet.pl',            phone:'+48 753 210 987',  hotel:'Wawel',      date:'Apr 12', time:'15:00', pickup:'Hotel Wawel lobby',            pax:3,       total:540, comm:360, source:'Bokun',   status:'Paid',      notes:'' },
-    { id:'BK4521199', tour:'Auschwitz-Birkenau',         guest:'Anna Nowak',         email:'a.nowak@gmail.com',        phone:'+48 501 987 654',  hotel:'Wawel',      date:'Apr 10', time:'08:00', pickup:'Hotel Wawel lobby',            pax:4,       total:520, comm:300, source:'Bokun',   status:'Pending',   notes:'Awaiting payment confirmation' },
-    { id:'TM-00847',  tour:'Trip to Zakopane',          guest:'Jan Kowalski',       email:'j.kowalski@wp.pl',         phone:'+48 600 123 456',  hotel:'Wawel',      date:'Apr 8',  time:'08:30', pickup:'Hotel Wawel lobby',            pax:2,       total:300, comm:200, source:'Bokun',   status:'Paid',      notes:'' },
-  ];
+  // ===== Bookings data — loaded dynamically from Bokun + Supabase =====
+  const allBookings = [];
 
   function renderBookingsTable(data) {
     const rows = data || allBookings;
@@ -2366,7 +2434,13 @@ tailwind.config = {
     if (!tbody) return;
     tbody.innerHTML = '';
     rows.forEach(b => {
-      const sourceClass = b.source === 'Bokun' ? 'source-bokun' : b.source === 'Website' ? 'source-website' : 'source-manual';
+      const sourceClass = b.source === 'Viator' ? 'source-viator'
+        : b.source === 'GYG' ? 'source-gyg'
+        : b.source === 'Klook' ? 'source-klook'
+        : b.source === 'Expedia' ? 'source-expedia'
+        : b.source === 'Website' ? 'source-website'
+        : b.source === 'Bokun' ? 'source-bokun'
+        : 'source-manual';
       const statusClass = b.status === 'Paid' ? 'status-paid' : b.status === 'Pending' ? 'status-pending' : 'status-cancelled';
       tbody.insertAdjacentHTML('beforeend', `
         <tr class="hover:bg-gray-50 transition-colors text-xs" data-id="${b.id}" data-hotel="${b.hotel}" data-source="${b.source}" data-status="${b.status}">
