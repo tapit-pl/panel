@@ -2248,14 +2248,27 @@ tailwind.config = {
     await initPartnerDashboard();
   }
 
+  async function logPartnerActivity(action, details) {
+    const { data: { session } } = await db.auth.getSession();
+    const email = session?.user?.email || 'unknown';
+    await db.from('audit_log').insert({ action, details: details || '', ref: '', user_email: email });
+  }
+
   async function redirectByRole(user) {
     if (user.email === 'kontakt@tapit.com.pl') {
       window.location.href = 'admin.html';
       return;
     }
-    // Everyone else → partner dashboard
     const { data } = await db.from('partners').select('*').eq('email', user.email).maybeSingle();
+    if (data && data.active === false) {
+      await db.auth.signOut();
+      goTo('screen-login');
+      document.getElementById('login-error').textContent = 'Your account has been deactivated. Please contact Thousand Miles.';
+      document.getElementById('login-error').classList.remove('hidden');
+      return;
+    }
     currentPartner = data || { email: user.email, name: user.email, initials: user.email.substring(0,2).toUpperCase() };
+    await logPartnerActivity('partner_login', `Partner logged in: ${currentPartner.name}`);
     await initPartnerDashboard();
   }
 
@@ -2362,6 +2375,7 @@ tailwind.config = {
   }
 
   async function doPartnerLogout() {
+    await logPartnerActivity('partner_logout', `Partner logged out: ${currentPartner?.name || ''}`);
     await db.auth.signOut();
     window.location.href = 'index.html';
   }

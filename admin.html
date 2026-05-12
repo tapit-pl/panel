@@ -1480,6 +1480,29 @@ tailwind.config = {
         </div>
       </div>
 
+      <!-- Invoice data -->
+      <div class="border-t border-gray-100 pt-4">
+        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Invoice data</div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">NIP</label>
+            <input id="pd-edit-nip" type="text" placeholder="000-000-00-00" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Invoice email</label>
+            <input id="pd-edit-invoice-email" type="email" placeholder="faktury@hotel.pl" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+          <div class="col-span-2">
+            <label class="block text-xs text-gray-400 mb-1">Company name</label>
+            <input id="pd-edit-invoice-company" type="text" placeholder="Hotel Sp. z o.o." class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+          <div class="col-span-2">
+            <label class="block text-xs text-gray-400 mb-1">Invoice address</label>
+            <input id="pd-edit-invoice-address" type="text" placeholder="ul. Przykładowa 1, 30-000 Kraków" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+        </div>
+      </div>
+
       <!-- Logo upload -->
       <div class="border-t border-gray-100 pt-4">
         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Logo / photo</div>
@@ -1582,6 +1605,9 @@ tailwind.config = {
     <!-- Footer -->
     <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/60 flex gap-2">
       <button onclick="savePartnerDetail()" class="flex-1 bg-brand hover:bg-brand-dark text-white text-sm font-semibold py-2.5 rounded-xl transition-colors">Save changes</button>
+      <button onclick="deletePartner()" class="px-4 py-2.5 border border-red-200 text-red-500 hover:bg-red-50 text-sm font-semibold rounded-xl transition-colors" title="Delete partner">
+        <i class="fa-solid fa-trash"></i>
+      </button>
       <button onclick="closePartnerDetail()" class="px-5 py-2.5 border border-gray-200 text-gray-500 text-sm font-semibold rounded-xl hover:bg-white transition-colors">Cancel</button>
     </div>
   </div>
@@ -1974,6 +2000,8 @@ tailwind.config = {
       active: p.active, notes: p.notes || '', lastLogin: p.last_login || 'Never',
       contractSigned: p.contract_signed, contractExpiry: p.contract_expiry,
       notifyEmail: p.notify_email, logo: p.logo_url || null,
+      nip: p.nip || '', invoiceEmail: p.invoice_email || '',
+      invoiceCompany: p.invoice_company || '', invoiceAddress: p.invoice_address || '',
       settlements: (p.settlements || []).map(s => ({ period: s.period, amount: s.amount, date: s.settled_date }))
     }));
     renderPartnersTable();
@@ -2793,6 +2821,10 @@ tailwind.config = {
     document.getElementById('pd-edit-address').value  = p.address;
     document.getElementById('pd-edit-commrate').value = p.commRate;
     document.getElementById('pd-edit-notes').value    = p.notes || '';
+    document.getElementById('pd-edit-nip').value             = p.nip || '';
+    document.getElementById('pd-edit-invoice-email').value   = p.invoiceEmail || '';
+    document.getElementById('pd-edit-invoice-company').value = p.invoiceCompany || '';
+    document.getElementById('pd-edit-invoice-address').value = p.invoiceAddress || '';
     document.getElementById('pd-username').textContent  = p.username;
     document.getElementById('pd-lastlogin').textContent = p.lastLogin;
     document.getElementById('pd-new-password').value    = '';
@@ -2858,11 +2890,17 @@ tailwind.config = {
     p.contractSigned = document.getElementById('pd-contract-signed').value;
     p.contractExpiry = document.getElementById('pd-contract-expiry').value;
     p.notifyEmail    = document.getElementById('pd-notify-email').checked;
+    p.nip            = document.getElementById('pd-edit-nip').value;
+    p.invoiceEmail   = document.getElementById('pd-edit-invoice-email').value;
+    p.invoiceCompany = document.getElementById('pd-edit-invoice-company').value;
+    p.invoiceAddress = document.getElementById('pd-edit-invoice-address').value;
     await db.from('partners').update({
       name: p.name, type: p.type, contact: p.contact, phone: p.phone,
       email: p.email, address: p.address, comm_rate: p.commRate, notes: p.notes,
       contract_signed: p.contractSigned || null, contract_expiry: p.contractExpiry || null,
-      notify_email: p.notifyEmail
+      notify_email: p.notifyEmail,
+      nip: p.nip, invoice_email: p.invoiceEmail,
+      invoice_company: p.invoiceCompany, invoice_address: p.invoiceAddress
     }).eq('id', editingPartnerId);
     await logActivity('partner_edited', `Partner "${p.name}" details updated`, editingPartnerId);
     renderPartnersTable();
@@ -2878,6 +2916,17 @@ tailwind.config = {
     renderPartnersTable();
     closePartnerDetail();
     showToast(p.active ? 'Partner activated.' : 'Partner deactivated.');
+  }
+
+  async function deletePartner() {
+    const p = allPartners.find(x => x.id === editingPartnerId);
+    if (!p) return;
+    if (!confirm(`Are you sure you want to permanently delete "${p.name}"? This cannot be undone.`)) return;
+    await db.from('partners').delete().eq('id', editingPartnerId);
+    await logActivity('partner_deleted', `Partner "${p.name}" (${p.email}) permanently deleted`, editingPartnerId);
+    await loadPartners();
+    closePartnerDetail();
+    showToast('Partner deleted.');
   }
 
   // ===== Contract status =====
