@@ -1360,7 +1360,7 @@ tailwind.config = {
 
       <!-- ── INVOICE DATA ─────────────────────────── -->
       <div>
-        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Dane do faktury</div>
+        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Invoice data</div>
         <div class="grid grid-cols-6 gap-3">
           <!-- NIP + button -->
           <div class="col-span-6">
@@ -1368,16 +1368,16 @@ tailwind.config = {
             <div class="flex gap-2">
               <input id="ap-nip" type="text" placeholder="000-000-00-00" class="flex-1 text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
               <button type="button" onclick="lookupNIP()" class="px-4 py-2.5 bg-brand/10 hover:bg-brand/20 text-brand text-xs font-semibold rounded-xl transition-colors whitespace-nowrap flex items-center gap-1.5">
-                <i class="fa-solid fa-magnifying-glass text-xs"></i> Pobierz dane
+                <i class="fa-solid fa-magnifying-glass text-xs"></i> Look up
               </button>
             </div>
             <div id="ap-nip-status" class="text-xs mt-1.5 hidden"></div>
           </div>
           <!-- Company name -->
           <div class="col-span-5">
-            <label class="block text-xs text-gray-500 mb-1.5">Nazwa firmy</label>
+            <label class="block text-xs text-gray-500 mb-1.5">Company name</label>
             <input id="ap-invoice-company" type="text" placeholder="Hotel Wawel Sp. z o.o." class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-            <p class="text-xs text-gray-400 mt-1">Sprawdź, czy nazwa jest poprawna.</p>
+            <p class="text-xs text-gray-400 mt-1">Please verify the company name is correct.</p>
           </div>
           <!-- VAT badge -->
           <div class="col-span-1 flex flex-col items-center justify-center pt-1">
@@ -1385,28 +1385,28 @@ tailwind.config = {
           </div>
           <!-- Invoice address: street + house + apt -->
           <div class="col-span-4">
-            <label class="block text-xs text-gray-500 mb-1.5">Ulica</label>
+            <label class="block text-xs text-gray-500 mb-1.5">Street</label>
             <input id="ap-inv-street" type="text" placeholder="ul. Sławkowska" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           </div>
           <div class="col-span-1">
-            <label class="block text-xs text-gray-500 mb-1.5">Nr domu</label>
+            <label class="block text-xs text-gray-500 mb-1.5">House no.</label>
             <input id="ap-inv-house" type="text" placeholder="12" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           </div>
           <div class="col-span-1">
-            <label class="block text-xs text-gray-500 mb-1.5">Nr lok.</label>
+            <label class="block text-xs text-gray-500 mb-1.5">Apt no.</label>
             <input id="ap-inv-apt" type="text" placeholder="—" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           </div>
           <div class="col-span-2">
-            <label class="block text-xs text-gray-500 mb-1.5">Kod pocztowy</label>
+            <label class="block text-xs text-gray-500 mb-1.5">Postal code</label>
             <input id="ap-inv-postal" type="text" placeholder="30-001" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           </div>
           <div class="col-span-3">
-            <label class="block text-xs text-gray-500 mb-1.5">Miasto</label>
+            <label class="block text-xs text-gray-500 mb-1.5">City</label>
             <input id="ap-inv-city" type="text" placeholder="Kraków" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           </div>
           <!-- Invoice email -->
           <div class="col-span-6">
-            <label class="block text-xs text-gray-500 mb-1.5">E-mail do faktur</label>
+            <label class="block text-xs text-gray-500 mb-1.5">Invoice email</label>
             <input id="ap-invoice-email" type="email" placeholder="faktury@hotel.pl" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           </div>
         </div>
@@ -1414,14 +1414,14 @@ tailwind.config = {
 
       <!-- ── PROPERTY ─────────────────────────────── -->
       <div class="border-t border-gray-100 pt-5">
-        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Dane obiektu</div>
+        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Property</div>
         <div class="grid grid-cols-2 gap-3">
           <div class="col-span-2">
-            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Nazwa obiektu <span class="text-red-400">*</span></label>
-            <input id="ap-name" type="text" placeholder="np. Hotel Wawel Kraków" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Property name <span class="text-red-400">*</span></label>
+            <input id="ap-name" type="text" placeholder="e.g. Hotel Wawel Kraków" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           </div>
           <div class="col-span-2">
-            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Typ</label>
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Type</label>
             <select id="ap-type" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 text-dark">
               <option value="Hotel">Hotel</option>
               <option value="Apartment">Apartment</option>
@@ -1433,30 +1433,30 @@ tailwind.config = {
           <!-- Copy address button -->
           <div class="col-span-2">
             <div class="flex items-center justify-between mb-1.5">
-              <label class="text-xs font-semibold text-gray-600">Adres obiektu</label>
+              <label class="text-xs font-semibold text-gray-600">Property address</label>
               <button type="button" onclick="copyInvoiceAddressToProperty()" class="text-xs text-brand hover:underline flex items-center gap-1">
-                <i class="fa-solid fa-copy text-xs"></i> Użyj adresu z danych fakturowych
+                <i class="fa-solid fa-copy text-xs"></i> Copy from invoice address
               </button>
             </div>
           </div>
           <div class="col-span-2">
-            <label class="block text-xs text-gray-500 mb-1.5">Ulica</label>
+            <label class="block text-xs text-gray-500 mb-1.5">Street</label>
             <input id="ap-street" type="text" placeholder="ul. Sławkowska" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           </div>
           <div>
-            <label class="block text-xs text-gray-500 mb-1.5">Nr domu</label>
+            <label class="block text-xs text-gray-500 mb-1.5">House no.</label>
             <input id="ap-house" type="text" placeholder="12" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           </div>
           <div>
-            <label class="block text-xs text-gray-500 mb-1.5">Nr lokalu (opcja)</label>
+            <label class="block text-xs text-gray-500 mb-1.5">Apt no. (optional)</label>
             <input id="ap-apt" type="text" placeholder="—" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           </div>
           <div>
-            <label class="block text-xs text-gray-500 mb-1.5">Kod pocztowy</label>
+            <label class="block text-xs text-gray-500 mb-1.5">Postal code</label>
             <input id="ap-postal" type="text" placeholder="30-001" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           </div>
           <div>
-            <label class="block text-xs text-gray-500 mb-1.5">Miasto</label>
+            <label class="block text-xs text-gray-500 mb-1.5">City</label>
             <input id="ap-city" type="text" placeholder="Kraków" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           </div>
         </div>
@@ -1464,22 +1464,22 @@ tailwind.config = {
 
       <!-- ── CONTACT ──────────────────────────────── -->
       <div class="border-t border-gray-100 pt-5">
-        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Osoba kontaktowa</div>
+        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Contact person</div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Imię <span class="text-red-400">*</span></label>
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">First name <span class="text-red-400">*</span></label>
             <input id="ap-contact-first" type="text" placeholder="Anna" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Nazwisko <span class="text-red-400">*</span></label>
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Last name <span class="text-red-400">*</span></label>
             <input id="ap-contact-last" type="text" placeholder="Kowalska" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Telefon</label>
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Phone</label>
             <input id="ap-phone" type="text" placeholder="+48 12 000 00 00" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1.5">E-mail <span class="text-red-400">*</span></label>
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Email <span class="text-red-400">*</span></label>
             <input id="ap-email" type="email" placeholder="partner@hotel.pl" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           </div>
         </div>
@@ -1487,14 +1487,14 @@ tailwind.config = {
 
       <!-- ── NOTES ───────────────────────────────── -->
       <div class="border-t border-gray-100 pt-5">
-        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Notatki wewnętrzne</label>
-        <textarea id="ap-notes" rows="2" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 resize-none" placeholder="Widoczne tylko dla zespołu TM…"></textarea>
+        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Internal notes</label>
+        <textarea id="ap-notes" rows="2" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 resize-none" placeholder="Visible to TM staff only…"></textarea>
       </div>
 
       <div class="border-t border-gray-100 pt-4">
         <div class="flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3">
           <i class="fa-solid fa-envelope text-blue-400 mt-0.5 text-sm"></i>
-          <p class="text-xs text-blue-600">Na podany e-mail zostanie wysłane zaproszenie. Partner ustawi hasło przez link.</p>
+          <p class="text-xs text-blue-600">An invitation email will be sent to the partner's address. They will set their password via the link.</p>
         </div>
       </div>
 
@@ -3170,11 +3170,11 @@ tailwind.config = {
     const statusEl = document.getElementById('ap-nip-status');
     const vatBadge = document.getElementById('ap-vat-badge');
     if (raw.length !== 10 || !/^\d+$/.test(raw)) {
-      statusEl.textContent = 'Wpisz poprawny NIP (10 cyfr).';
+      statusEl.textContent = 'Please enter a valid NIP (10 digits).';
       statusEl.className = 'text-xs mt-1.5 text-red-400';
       return;
     }
-    statusEl.textContent = 'Pobieranie...';
+    statusEl.textContent = 'Looking up...';
     statusEl.className = 'text-xs mt-1.5 text-gray-400';
     vatBadge.className = 'hidden text-center';
     try {
@@ -3203,14 +3203,14 @@ tailwind.config = {
       // VAT status badge
       const vatActive = subj.statusVat === 'Czynny';
       vatBadge.innerHTML = vatActive
-        ? '<span class="inline-flex items-center gap-1 text-xs font-semibold text-green-700 bg-green-100 px-2 py-1 rounded-lg"><span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>VAT aktywny</span>'
-        : '<span class="inline-flex items-center gap-1 text-xs font-semibold text-red-600 bg-red-50 px-2 py-1 rounded-lg"><span class="w-1.5 h-1.5 rounded-full bg-red-400 inline-block"></span>VAT nieaktywny</span>';
+        ? '<span class="inline-flex items-center gap-1 text-xs font-semibold text-green-700 bg-green-100 px-2 py-1 rounded-lg"><span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>VAT active</span>'
+        : '<span class="inline-flex items-center gap-1 text-xs font-semibold text-red-600 bg-red-50 px-2 py-1 rounded-lg"><span class="w-1.5 h-1.5 rounded-full bg-red-400 inline-block"></span>VAT inactive</span>';
       vatBadge.className = 'text-center';
 
-      statusEl.textContent = addrRaw ? 'Dane pobrane pomyslnie.' : 'Pobrano nazwe. Adres niedostepny w rejestrze — wpisz recznie.';
+      statusEl.textContent = addrRaw ? 'Data retrieved successfully.' : 'Name retrieved. Address not available in the register — please enter manually.';
       statusEl.className = 'text-xs mt-1.5 ' + (addrRaw ? 'text-green-500' : 'text-amber-500');
     } catch(e) {
-      const msg = e.message === 'invalid nip' ? 'Nieprawidlowy NIP.' : 'Nie znaleziono firmy dla tego NIP.';
+      const msg = e.message === 'invalid nip' ? 'Invalid NIP.' : 'No company found for this NIP.';
       statusEl.textContent = msg;
       statusEl.className = 'text-xs mt-1.5 text-red-400';
       vatBadge.className = 'hidden text-center';
