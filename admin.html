@@ -31,8 +31,8 @@ tailwind.config = {
   .fade-in { animation: fadeIn 0.25s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
   .sidebar-link { transition: all 0.15s; border-left: 2px solid transparent; }
-  .sidebar-link.active { background: rgba(201,169,110,0.1); color: #c9a96e; border-left-color: #c9a96e; }
-  .sidebar-link.active i { color: #c9a96e; }
+  .sidebar-link.active { background: rgba(232,117,26,0.15); color: #E8751A; border-left-color: #E8751A; }
+  .sidebar-link.active i { color: #E8751A; }
   .sidebar-link:hover:not(.active) { background: rgba(255,255,255,0.05); color: #e2e8f0; }
   .sidebar-link i { width: 16px; text-align: center; opacity: 0.6; }
   .sidebar-link.active i { opacity: 1; }
@@ -60,6 +60,93 @@ tailwind.config = {
     body > *:not(#voucher-print-wrap) { display: none !important; }
     #voucher-print-wrap { display: block !important; position: fixed; inset: 0; background: white; padding: 32px; }
   }
+
+  /* ===== GLOBAL DARK THEME ===== */
+  #screen-admin .bg-white { background: #1a2332 !important; }
+  #screen-admin main .bg-gray-50 { background: #162030 !important; }
+  #screen-admin main .bg-gray-100 { background: #1e2d40 !important; }
+  #screen-admin main .bg-gray-200 { background: #243047 !important; }
+  #screen-admin main .text-dark { color: #f1f5f9 !important; }
+  #screen-admin main .text-gray-900,
+  #screen-admin main .text-gray-800 { color: #e2e8f0 !important; }
+  #screen-admin main .text-gray-700,
+  #screen-admin main .text-gray-600 { color: #94a3b8 !important; }
+  #screen-admin main .text-gray-500 { color: #64748b !important; }
+  #screen-admin main .text-gray-400 { color: #4e6180 !important; }
+  #screen-admin main .text-gray-300 { color: #3d5166 !important; }
+  #screen-admin main .border-gray-50,
+  #screen-admin main .border-gray-100 { border-color: rgba(255,255,255,0.07) !important; }
+  #screen-admin main .border-gray-200 { border-color: rgba(255,255,255,0.12) !important; }
+  #screen-admin main .border-gray-300 { border-color: rgba(255,255,255,0.16) !important; }
+  #screen-admin main .divide-gray-50 > *,
+  #screen-admin main .divide-gray-100 > * { border-color: rgba(255,255,255,0.07) !important; }
+  #screen-admin main .hover\:bg-gray-50:hover { background: rgba(255,255,255,0.04) !important; }
+  #screen-admin main .hover\:bg-gray-100:hover { background: rgba(255,255,255,0.07) !important; }
+  #screen-admin main tr { border-color: rgba(255,255,255,0.07) !important; }
+  #screen-admin main thead tr { background: rgba(0,0,0,0.2) !important; }
+  #screen-admin main tbody tr:hover { background: rgba(255,255,255,0.04) !important; }
+  #screen-admin main input[type=text],
+  #screen-admin main input[type=search],
+  #screen-admin main input[type=date],
+  #screen-admin main input[type=number],
+  #screen-admin main input[type=tel],
+  #screen-admin main input[type=email],
+  #screen-admin main textarea {
+    background: rgba(255,255,255,0.06) !important;
+    border-color: rgba(255,255,255,0.12) !important;
+    color: #e2e8f0 !important;
+    color-scheme: dark;
+  }
+  #screen-admin main input::placeholder,
+  #screen-admin main textarea::placeholder { color: #3d5166 !important; }
+  #screen-admin main select {
+    background: #1e2d40 !important;
+    border-color: rgba(255,255,255,0.12) !important;
+    color: #e2e8f0 !important;
+  }
+  #screen-admin main .shadow-sm { box-shadow: 0 1px 6px rgba(0,0,0,0.4) !important; }
+  #screen-admin main .shadow { box-shadow: 0 2px 10px rgba(0,0,0,0.5) !important; }
+  /* Drawers */
+  #edit-booking-drawer,
+  #partner-detail-drawer,
+  #ticket-detail-drawer { background: #1a2332 !important; }
+  #edit-booking-drawer .bg-gray-50,
+  #partner-detail-drawer .bg-gray-50,
+  #ticket-detail-drawer .bg-gray-50 { background: #162030 !important; }
+  #edit-booking-drawer input,
+  #edit-booking-drawer select,
+  #edit-booking-drawer textarea,
+  #partner-detail-drawer input,
+  #partner-detail-drawer select,
+  #ticket-detail-drawer input,
+  #ticket-detail-drawer select,
+  #ticket-detail-drawer textarea {
+    background: rgba(255,255,255,0.06) !important;
+    border-color: rgba(255,255,255,0.12) !important;
+    color: #e2e8f0 !important;
+    color-scheme: dark;
+  }
+  #edit-booking-drawer label,
+  #partner-detail-drawer label,
+  #ticket-detail-drawer label { color: #94a3b8 !important; }
+  #edit-booking-drawer .text-dark,
+  #partner-detail-drawer .text-dark,
+  #ticket-detail-drawer .text-dark { color: #f1f5f9 !important; }
+  #edit-booking-drawer .text-gray-400,
+  #edit-booking-drawer .text-gray-500,
+  #edit-booking-drawer .text-gray-600,
+  #partner-detail-drawer .text-gray-400,
+  #partner-detail-drawer .text-gray-500,
+  #partner-detail-drawer .text-gray-600,
+  #ticket-detail-drawer .text-gray-400,
+  #ticket-detail-drawer .text-gray-500,
+  #ticket-detail-drawer .text-gray-600 { color: #64748b !important; }
+  #edit-booking-drawer .border-gray-100,
+  #edit-booking-drawer .border-gray-200,
+  #partner-detail-drawer .border-gray-100,
+  #partner-detail-drawer .border-gray-200,
+  #ticket-detail-drawer .border-gray-100,
+  #ticket-detail-drawer .border-gray-200 { border-color: rgba(255,255,255,0.08) !important; }
 </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -466,7 +553,7 @@ tailwind.config = {
             <div class="overflow-x-auto">
               <table class="w-full text-xs">
                 <thead>
-                  <tr class="border-b border-gray-100 bg-gray-50/60">
+                  <tr class="border-b border-gray-100 bg-opacity-0">
                     <th class="text-left px-5 py-3 text-gray-400 font-semibold">#</th>
                     <th class="text-left px-4 py-3 text-gray-400 font-semibold">Tour</th>
                     <th class="text-left px-4 py-3 text-gray-400 font-semibold">Guest</th>
@@ -510,7 +597,7 @@ tailwind.config = {
             <div class="overflow-x-auto">
               <table class="w-full text-xs">
                 <thead>
-                  <tr class="border-b border-gray-100 bg-gray-50/60">
+                  <tr class="border-b border-gray-100 bg-opacity-0">
                     <th class="text-left px-5 py-3 text-gray-400 font-semibold w-8"></th>
                     <th class="text-left px-4 py-3 text-gray-400 font-semibold">Name</th>
                     <th class="text-left px-4 py-3 text-gray-400 font-semibold">Type</th>
@@ -592,7 +679,7 @@ tailwind.config = {
                 <div class="overflow-x-auto">
                   <table class="w-full text-xs">
                     <thead>
-                      <tr class="border-b border-gray-100 bg-gray-50/60">
+                      <tr class="border-b border-gray-100 bg-opacity-0">
                         <th class="text-left px-5 py-3 text-gray-400 font-semibold">Booking #</th>
                         <th class="text-left px-4 py-3 text-gray-400 font-semibold">Tour / Package</th>
                         <th class="text-left px-4 py-3 text-gray-400 font-semibold">Guest</th>
@@ -746,7 +833,7 @@ tailwind.config = {
             <div class="overflow-x-auto">
               <table class="w-full text-xs">
                 <thead>
-                  <tr class="border-b border-gray-100 bg-gray-50/60">
+                  <tr class="border-b border-gray-100 bg-opacity-0">
                     <th class="text-left px-5 py-3 text-gray-400 font-semibold">Tour name</th>
                     <th class="text-left px-4 py-3 text-gray-400 font-semibold">Category</th>
                     <th class="text-center px-4 py-3 text-gray-400 font-semibold">Packages</th>
@@ -934,7 +1021,7 @@ tailwind.config = {
           <div class="bg-white rounded-xl shadow-sm overflow-hidden">
             <table class="w-full text-xs">
               <thead>
-                <tr class="border-b border-gray-100 bg-gray-50/60">
+                <tr class="border-b border-gray-100 bg-opacity-0">
                   <th class="text-left px-5 py-3 text-gray-400 font-semibold">#</th>
                   <th class="text-left px-4 py-3 text-gray-400 font-semibold">Partner</th>
                   <th class="text-left px-4 py-3 text-gray-400 font-semibold">Subject</th>
@@ -962,7 +1049,7 @@ tailwind.config = {
           <div class="bg-white rounded-xl shadow-sm overflow-hidden">
             <table class="w-full text-xs">
               <thead>
-                <tr class="border-b border-gray-100 bg-gray-50/60">
+                <tr class="border-b border-gray-100 bg-opacity-0">
                   <th class="text-left px-5 py-3 text-gray-400 font-semibold">#</th>
                   <th class="text-left px-4 py-3 text-gray-400 font-semibold">Partner</th>
                   <th class="text-left px-4 py-3 text-gray-400 font-semibold">Material</th>
@@ -1220,7 +1307,7 @@ tailwind.config = {
       </div>
 
     </div>
-    <div class="flex gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50/60">
+    <div class="flex gap-3 px-6 py-4 border-t border-gray-100 bg-opacity-0">
       <button onclick="closeManualBooking()" class="flex-1 text-sm text-gray-600 border border-gray-200 rounded-xl py-2.5 hover:bg-gray-100 transition-colors">Cancel</button>
       <button onclick="saveManualBooking()" class="flex-1 text-sm bg-brand hover:bg-brand-dark text-white font-semibold rounded-xl py-2.5 transition-colors">
         <i class="fa-solid fa-check mr-2"></i>Save booking
@@ -1265,7 +1352,7 @@ tailwind.config = {
         <textarea id="td-reply" rows="4" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 resize-none" placeholder="Type your reply…"></textarea>
       </div>
     </div>
-    <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/60 flex gap-2">
+    <div class="px-6 py-4 border-t border-gray-100 bg-opacity-0 flex gap-2">
       <button onclick="saveTicket()" class="flex-1 bg-brand hover:bg-brand-dark text-white text-sm font-semibold py-2.5 rounded-xl transition-colors">Save & update status</button>
       <button onclick="closeTicketDetail()" class="px-5 py-2.5 border border-gray-200 text-gray-500 text-sm font-semibold rounded-xl hover:bg-white transition-colors">Cancel</button>
     </div>
@@ -1359,7 +1446,7 @@ tailwind.config = {
         <textarea id="ap-notes" rows="2" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 resize-none" placeholder="Any notes visible only to TM staff…"></textarea>
       </div>
     </div>
-    <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/60 flex gap-2">
+    <div class="px-6 py-4 border-t border-gray-100 bg-opacity-0 flex gap-2">
       <button id="btn-save-partner" onclick="saveAddPartner()" class="flex-1 bg-brand hover:bg-brand-dark text-white text-sm font-semibold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2">
         <i class="fa-solid fa-paper-plane"></i> Add partner & send invite
       </button>
@@ -1566,7 +1653,7 @@ tailwind.config = {
 
     </div>
     <!-- Footer -->
-    <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/60 flex gap-2">
+    <div class="px-6 py-4 border-t border-gray-100 bg-opacity-0 flex gap-2">
       <button onclick="savePartnerDetail()" class="flex-1 bg-brand hover:bg-brand-dark text-white text-sm font-semibold py-2.5 rounded-xl transition-colors">Save changes</button>
       <button onclick="deletePartner()" class="px-4 py-2.5 border border-red-200 text-red-500 hover:bg-red-50 text-sm font-semibold rounded-xl transition-colors" title="Delete partner">
         <i class="fa-solid fa-trash"></i>
@@ -1756,7 +1843,7 @@ tailwind.config = {
 
     </div>
     <!-- Footer -->
-    <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/60">
+    <div class="px-6 py-4 border-t border-gray-100 bg-opacity-0">
       <label class="flex items-start gap-3 mb-4 cursor-pointer">
         <input type="checkbox" id="edit-confirm-check" class="mt-0.5 w-4 h-4 accent-brand rounded">
         <span class="text-xs text-gray-600 leading-relaxed">I confirm that the above changes are correct and I take responsibility for modifying this booking.</span>
