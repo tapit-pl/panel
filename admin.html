@@ -66,6 +66,64 @@ tailwind.config = {
   </div>
 </div>
 
+<!-- ===================== SCREEN: MFA VERIFY ===================== -->
+<div id="screen-mfa-verify" class="screen min-h-screen w-full items-center justify-center" style="background:linear-gradient(135deg,#1a2332 0%,#243047 100%)">
+  <div class="w-full max-w-sm px-4">
+    <div class="text-center mb-8">
+      <img src="assets/logo.png" alt="Thousand Miles" class="h-8 object-contain brightness-0 invert opacity-90 mx-auto mb-3">
+      <div class="text-slate-400 text-sm">Admin Panel</div>
+    </div>
+    <div class="bg-white rounded-2xl shadow-xl p-8">
+      <div class="w-12 h-12 bg-brand/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <i class="fa-solid fa-shield-halved text-brand text-xl"></i>
+      </div>
+      <h2 class="text-lg font-bold text-gray-900 mb-1 text-center">Two-factor authentication</h2>
+      <p class="text-xs text-gray-400 text-center mb-6">Enter the 6-digit code from your authenticator app</p>
+      <div id="mfa-verify-error" class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600"></div>
+      <div class="space-y-4">
+        <input id="mfa-verify-code" type="text" inputmode="numeric" maxlength="6" placeholder="000000"
+          class="w-full text-center text-2xl font-mono tracking-widest border border-gray-200 rounded-xl px-3.5 py-3 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
+          onkeydown="if(event.key==='Enter') doMfaVerify()">
+        <button onclick="doMfaVerify()" id="mfa-verify-btn"
+          class="w-full bg-brand hover:bg-brand-dark text-white font-semibold text-sm py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2">
+          <span>Verify</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SCREEN: MFA ENROLL ===================== -->
+<div id="screen-mfa-enroll" class="screen min-h-screen w-full items-center justify-center" style="background:linear-gradient(135deg,#1a2332 0%,#243047 100%)">
+  <div class="w-full max-w-sm px-4">
+    <div class="text-center mb-8">
+      <img src="assets/logo.png" alt="Thousand Miles" class="h-8 object-contain brightness-0 invert opacity-90 mx-auto mb-3">
+      <div class="text-slate-400 text-sm">Admin Panel</div>
+    </div>
+    <div class="bg-white rounded-2xl shadow-xl p-8">
+      <h2 class="text-lg font-bold text-gray-900 mb-1">Set up 2FA</h2>
+      <p class="text-xs text-gray-400 mb-5">Scan this QR code with Google Authenticator or Authy, then enter the 6-digit code to confirm.</p>
+      <div id="mfa-enroll-error" class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600"></div>
+      <div class="flex justify-center mb-5">
+        <div id="mfa-qr" class="w-48 h-48 bg-gray-100 rounded-xl flex items-center justify-center">
+          <div class="w-6 h-6 border-2 border-gray-300 border-t-brand rounded-full animate-spin"></div>
+        </div>
+      </div>
+      <p class="text-xs text-gray-400 text-center mb-4">Or enter this code manually:</p>
+      <div id="mfa-secret" class="text-center font-mono text-xs bg-gray-50 rounded-xl px-4 py-2.5 text-gray-600 tracking-widest mb-5 select-all"></div>
+      <div class="space-y-3">
+        <input id="mfa-enroll-code" type="text" inputmode="numeric" maxlength="6" placeholder="000000"
+          class="w-full text-center text-2xl font-mono tracking-widest border border-gray-200 rounded-xl px-3.5 py-3 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
+          onkeydown="if(event.key==='Enter') doMfaEnroll()">
+        <button onclick="doMfaEnroll()" id="mfa-enroll-btn"
+          class="w-full bg-brand hover:bg-brand-dark text-white font-semibold text-sm py-2.5 rounded-xl transition-colors">
+          Confirm & activate 2FA
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ===================== SCREEN: LOGIN ===================== -->
 <div id="screen-login" class="screen min-h-screen w-full items-center justify-center" style="background:linear-gradient(135deg,#1a2332 0%,#243047 100%)">
   <div class="w-full max-w-sm px-4">
@@ -1735,6 +1793,9 @@ tailwind.config = {
     document.getElementById(id).classList.add('active');
   }
 
+  let mfaFactorId = null;
+  let mfaChallengeId = null;
+
   async function doLogin() {
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
@@ -1747,13 +1808,68 @@ tailwind.config = {
     const { data, error } = await db.auth.signInWithPassword({ email, password });
 
     if (error) {
-      console.error('Auth error:', error);
       errEl.textContent = error.message || 'Invalid email or password.';
       errEl.classList.remove('hidden');
       btn.innerHTML = '<span>Sign in</span>';
       btn.disabled = false;
       return;
     }
+
+    // Check if MFA is required
+    const { data: mfaData } = await db.auth.mfa.listFactors();
+    const totpFactor = mfaData?.totp?.find(f => f.status === 'verified');
+
+    if (totpFactor) {
+      // MFA enrolled — challenge
+      mfaFactorId = totpFactor.id;
+      const { data: challenge, error: challengeErr } = await db.auth.mfa.challenge({ factorId: mfaFactorId });
+      if (challengeErr) { errEl.textContent = challengeErr.message; errEl.classList.remove('hidden'); btn.innerHTML = '<span>Sign in</span>'; btn.disabled = false; return; }
+      mfaChallengeId = challenge.id;
+      showScreen('screen-mfa-verify');
+      document.getElementById('mfa-verify-code').focus();
+    } else {
+      // No MFA yet — enroll
+      await startMfaEnroll();
+    }
+  }
+
+  async function startMfaEnroll() {
+    showScreen('screen-mfa-enroll');
+    const { data, error } = await db.auth.mfa.enroll({ factorType: 'totp', issuer: 'Thousand Miles Admin' });
+    if (error) { console.error(error); return; }
+    mfaFactorId = data.id;
+    // Show QR
+    const qrEl = document.getElementById('mfa-qr');
+    qrEl.innerHTML = `<img src="${data.totp.qr_code}" class="w-48 h-48 rounded-xl">`;
+    document.getElementById('mfa-secret').textContent = data.totp.secret;
+  }
+
+  async function doMfaEnroll() {
+    const code = document.getElementById('mfa-enroll-code').value.trim();
+    const errEl = document.getElementById('mfa-enroll-error');
+    const btn = document.getElementById('mfa-enroll-btn');
+    errEl.classList.add('hidden');
+    btn.textContent = '...'; btn.disabled = true;
+
+    const { data: challenge } = await db.auth.mfa.challenge({ factorId: mfaFactorId });
+    const { error } = await db.auth.mfa.verify({ factorId: mfaFactorId, challengeId: challenge.id, code });
+
+    btn.textContent = 'Confirm & activate 2FA'; btn.disabled = false;
+    if (error) { errEl.textContent = 'Invalid code. Try again.'; errEl.classList.remove('hidden'); return; }
+    await initDashboard();
+  }
+
+  async function doMfaVerify() {
+    const code = document.getElementById('mfa-verify-code').value.trim();
+    const errEl = document.getElementById('mfa-verify-error');
+    const btn = document.getElementById('mfa-verify-btn');
+    errEl.classList.add('hidden');
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; btn.disabled = true;
+
+    const { error } = await db.auth.mfa.verify({ factorId: mfaFactorId, challengeId: mfaChallengeId, code });
+
+    btn.innerHTML = '<span>Verify</span>'; btn.disabled = false;
+    if (error) { errEl.textContent = 'Invalid code. Try again.'; errEl.classList.remove('hidden'); return; }
     await initDashboard();
   }
 
