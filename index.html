@@ -2272,8 +2272,12 @@ tailwind.config = {
       const { data: tours, error } = await db.from('tour_config').select('*').eq('active', true).order('sort_order');
       if (error) throw error;
 
+      // Build set of tour_config IDs that have active commission entries
+      const { data: commLinks } = await db.from('tour_commissions')
+        .select('tour_config_id').eq('active', true).not('tour_config_id', 'is', null);
+      const commConfigIds = new Set((commLinks || []).map(c => c.tour_config_id));
+
       // Filter tours: prefer commission-based visibility (by tour_config_id), fallback to groups
-      const commConfigIds = new Set(Object.values(COMM_MAP).map(v => v.tourConfigId).filter(Boolean));
       const visible = (tours || []).filter(t => {
         if (commConfigIds.size > 0) {
           return commConfigIds.has(t.id);
