@@ -1307,7 +1307,15 @@ tailwind.config = {
         </div>
       </div>
 
-      <!-- Booking form — shown after date selection -->
+      <!-- Time slot picker — shown after date selection -->
+      <div id="td-timeslot-section" class="hidden border-t border-gray-100 pt-5">
+        <h3 class="font-semibold text-dark text-sm mb-3">
+          <i class="fa-regular fa-clock text-brand mr-2"></i>Select departure time — <span id="td-timeslot-date" class="text-brand"></span>
+        </h3>
+        <div id="td-timeslot-list" class="flex flex-wrap gap-2"></div>
+      </div>
+
+      <!-- Booking form — shown after date + time selection -->
       <div id="td-booking-form" class="hidden border-t border-gray-100 pt-5 space-y-4">
         <h3 class="font-semibold text-dark text-sm flex items-center gap-2">
           <i class="fa-solid fa-pen-to-square text-brand"></i>
@@ -2095,7 +2103,8 @@ tailwind.config = {
 
   // ===== Tours from Bokun =====
   let bokunProducts = [];
-  let currentTourAvailability = {}; // date → booked pax count
+  let currentTourAvailability = {}; // date → [{startTime, startTimeId, availabilityCount}, ...]
+  let tdSelectedTimeSlot = null;
 
   // Photo map: tour name keywords → Unsplash image
   const TOUR_PHOTOS = [
@@ -2293,18 +2302,18 @@ tailwind.config = {
               const d = i + 1;
               const isPast = (year === todayY && month === todayM && d < todayD) || (year < todayY) || (year === todayY && month < todayM);
               const dateStr = year + '-' + String(month+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
-              const paxBooked = currentTourAvailability[dateStr] || 0;
+              const slots = currentTourAvailability[dateStr];
+              const isAvailable = slots && slots.length > 0;
               let cls, tooltip = '';
               if (isPast) {
                 cls = 'text-gray-300 cursor-not-allowed';
-              } else if (paxBooked > 0) {
+              } else if (isAvailable) {
                 cls = 'bg-green-100 text-green-800 font-semibold rounded-lg cursor-pointer hover:bg-green-200 active:bg-brand active:text-white';
-                tooltip = paxBooked + ' pax booked — click to book';
+                tooltip = slots.length + ' departure time' + (slots.length > 1 ? 's' : '') + ' — click to book';
               } else {
                 cls = 'text-gray-400 cursor-default';
               }
-              const clickable = paxBooked > 0;
-              return `<div class="text-center text-xs py-1.5 transition-colors ${cls} cal-day" data-date="${dateStr}" ${clickable ? `onclick="selectBookingDate('${dateStr}')"` : ''} title="${tooltip}">${d}</div>`;
+              return `<div class="text-center text-xs py-1.5 transition-colors ${cls} cal-day" data-date="${dateStr}" ${isAvailable ? `onclick="selectBookingDate('${dateStr}')"` : ''} title="${tooltip}">${d}</div>`;
             }).join('')}
           </div>
         </div>
@@ -2331,23 +2340,29 @@ tailwind.config = {
           items.forEach(entry => {
             if (entry.unavailable || entry.soldOut) return;
             const d = new Date(entry.date).toISOString().slice(0, 10);
-            if (d) currentTourAvailability[d] = (currentTourAvailability[d] || 0) + (entry.availabilityCount || 1);
+            if (!d) return;
+            if (!currentTourAvailability[d]) currentTourAvailability[d] = [];
+            currentTourAvailability[d].push({
+              startTime: entry.startTime || '',
+              startTimeId: entry.startTimeId,
+              availabilityCount: entry.availabilityCount || 0,
+            });
           });
           return;
         }
       } catch(e) {}
     }
-    // fallback: Supabase bookings
+    // fallback: Supabase bookings (no time slots known)
     const { data: rows } = await db
       .from('bokun_bookings')
-      .select('tour_date, pax')
+      .select('tour_date')
       .eq('tour', tour.title)
       .eq('status', 'CONFIRMED')
       .gte('tour_date', firstDay)
       .lte('tour_date', lastDay);
     (rows || []).forEach(r => {
       const d = (r.tour_date || '').slice(0, 10);
-      if (d) currentTourAvailability[d] = (currentTourAvailability[d] || 0) + (r.pax || 0);
+      if (d && !currentTourAvailability[d]) currentTourAvailability[d] = [{ startTime: '', startTimeId: null, availabilityCount: 1 }];
     });
   }
 
@@ -2370,14 +2385,57 @@ tailwind.config = {
       el.classList.remove('!bg-brand', '!text-white', 'ring-2', 'ring-brand');
       if (el.dataset.date === dateStr) el.classList.add('!bg-brand', '!text-white', 'ring-2', 'ring-brand');
     });
-    // Show form
+    // Hide booking form, hide success
+    document.getElementById('td-booking-form').classList.add('hidden');
+    document.getElementById('td-booking-success').classList.add('hidden');
+    tdSelectedTimeSlot = null;
+
+    const slots = currentTourAvailability[dateStr] || [];
+
+    // If only one slot and no startTime label, skip picker and go straight to form
+    if (slots.length === 1 && !slots[0].startTime) {
+      tdSelectedTimeSlot = slots[0];
+      showBookingForm(dateStr);
+      return;
+    }
+
+    // Show time slot picker
+    const section = document.getElementById('td-timeslot-section');
+    document.getElementById('td-timeslot-date').textContent = formatDate(dateStr);
+    const list = document.getElementById('td-timeslot-list');
+    list.innerHTML = slots.map((s, i) => {
+      const low = s.availabilityCount > 0 && s.availabilityCount < 5;
+      return `<button onclick="selectTimeSlot('${dateStr}', ${i})"
+        class="px-4 py-2.5 rounded-xl border-2 border-gray-200 hover:border-brand hover:bg-brand/5 text-sm font-semibold text-dark transition-all flex flex-col items-center gap-0.5">
+        <span>${s.startTime || 'Departure'}</span>
+        ${low ? `<span class="text-xs font-normal text-orange-500">Only ${s.availabilityCount} left</span>` : ''}
+      </button>`;
+    }).join('');
+    section.classList.remove('hidden');
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    section.dataset.date = dateStr;
+  }
+
+  function selectTimeSlot(dateStr, slotIdx) {
+    tdSelectedTimeSlot = (currentTourAvailability[dateStr] || [])[slotIdx];
+    // Highlight selected time button
+    document.querySelectorAll('#td-timeslot-list button').forEach((btn, i) => {
+      if (i === slotIdx) {
+        btn.classList.add('border-brand', 'bg-brand/5', '!text-brand');
+      } else {
+        btn.classList.remove('border-brand', 'bg-brand/5', '!text-brand');
+      }
+    });
+    showBookingForm(dateStr);
+  }
+
+  function showBookingForm(dateStr) {
     const form = document.getElementById('td-booking-form');
-    const success = document.getElementById('td-booking-success');
     form.classList.remove('hidden');
-    success.classList.add('hidden');
-    document.getElementById('td-selected-date').textContent = formatDate(dateStr);
+    document.getElementById('td-booking-success').classList.add('hidden');
+    document.getElementById('td-selected-date').textContent =
+      formatDate(dateStr) + (tdSelectedTimeSlot?.startTime ? ' · ' + tdSelectedTimeSlot.startTime : '');
     document.getElementById('td-booking-error').classList.add('hidden');
-    // Reset fields
     tdGuestCount = 2;
     document.getElementById('td-guest-count').textContent = 2;
     document.getElementById('td-first').value = '';
@@ -2387,7 +2445,6 @@ tailwind.config = {
     document.getElementById('td-notes').value = '';
     document.querySelector('input[name="td-payment"][value="driver"]').checked = true;
     updatePayOptStyles();
-    // Scroll form into view
     form.scrollIntoView({ behavior: 'smooth', block: 'start' });
     form.dataset.date = dateStr;
   }
@@ -2456,42 +2513,29 @@ tailwind.config = {
 
     // Try to create the booking in Bokun first
     let bokunConfirmationCode = null;
-    if (tdCurrentTour?.bokunId) {
+    if (tdCurrentTour?.bokunId && tdSelectedTimeSlot?.startTimeId) {
       try {
-        // Get available time slots for the selected date
-        const { data: slotsRes } = await db.functions.invoke('bokun-sync', {
-          body: { path: `/activity.json/${tdCurrentTour.bokunId}/available-time-slots?date=${dateStr}`, method: 'GET' }
-        });
-        const slotList = Array.isArray(slotsRes?.body) ? slotsRes.body
-          : (slotsRes?.body?.slots || slotsRes?.body?.items || []);
+        const pricingCat = tdCurrentTour.pricing?.[0];
+        const participants = pricingCat
+          ? [{ pricingCategoryBooking: { pricingCategoryId: pricingCat.id, pricingCategoryTitle: pricingCat.title || 'Adult', count: tdGuestCount } }]
+          : [];
 
-        if (slotList.length > 0) {
-          const startTimeId = slotList[0].startTimeId || slotList[0].id;
-          const pricingCat = tdCurrentTour.pricing?.[0];
-          const participants = pricingCat
-            ? [{ pricingCategoryBooking: { pricingCategoryId: pricingCat.id, pricingCategoryTitle: pricingCat.title || 'Adult', count: tdGuestCount } }]
-            : [];
-
-          const { data: bookingRes } = await db.functions.invoke('bokun-sync', {
-            body: {
-              path: '/booking.json/reserve',
-              method: 'POST',
-              payload: {
-                startTimeId,
-                participants,
-                customer: { firstName, lastName, email: email || undefined, phoneNumber: phone || undefined },
-                internalComment: [payLabel, notes].filter(Boolean).join(' · ') || undefined,
-              }
+        const { data: bookingRes } = await db.functions.invoke('bokun-sync', {
+          body: {
+            path: '/booking.json/reserve',
+            method: 'POST',
+            payload: {
+              startTimeId: tdSelectedTimeSlot.startTimeId,
+              participants,
+              customer: { firstName, lastName, email: email || undefined, phoneNumber: phone || undefined },
+              internalComment: [payLabel, notes].filter(Boolean).join(' · ') || undefined,
             }
-          });
-          if (bookingRes?.body && ![400, 404, 422, 500].includes(bookingRes.body?.status)) {
-            bokunConfirmationCode = bookingRes.body.confirmationCode || bookingRes.body.id || String(bookingRes.body);
-            console.log('[Booking] Created in Bokun:', bokunConfirmationCode);
-          } else {
-            console.warn('[Booking] Bokun reserve returned:', bookingRes?.body?.status, bookingRes?.body?.message || '');
           }
+        });
+        if (bookingRes?.body && ![400, 404, 422, 500].includes(bookingRes.body?.status)) {
+          bokunConfirmationCode = bookingRes.body.confirmationCode || bookingRes.body.id || String(bookingRes.body);
         } else {
-          console.warn('[Booking] No time slots available for', dateStr, 'in Bokun');
+          console.warn('[Booking] Bokun reserve returned:', bookingRes?.body?.status, bookingRes?.body?.message || '');
         }
       } catch(e) { console.warn('[Booking] Bokun creation failed:', e.message); }
     }
