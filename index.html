@@ -2264,21 +2264,11 @@ tailwind.config = {
     let usedBokun = false;
     if (p.bokunId) {
       // Probe multiple candidate paths to find which one Bokun accepts
-      // Log full activity details to understand structure
-      const { data: actDet } = await db.functions.invoke('bokun-sync', { body: { path: `/activity.json/${p.bokunId}`, method: 'GET' } });
-      console.log('[Activity] Full response:', JSON.stringify(actDet?.body).slice(0, 800));
-
-      // Try /availabilities with different param names (endpoint exists, params are wrong)
-      const avProbes = [
-        `/activity.json/${p.bokunId}/availabilities?start=${startDate}&end=${endDate}`,
-        `/activity.json/${p.bokunId}/availabilities?dateFrom=${startDate}&dateTo=${endDate}`,
-        `/activity.json/${p.bokunId}/availabilities?from=${startDate}&to=${endDate}`,
-        `/activity.json/${p.bokunId}/availabilities`,
-      ];
-      for (const probePath of avProbes) {
-        const { data: pr } = await db.functions.invoke('bokun-sync', { body: { path: probePath, method: 'GET' } });
-        console.log(`[Probe] ${probePath.split('?')[1] ?? 'no-params'} → status:${pr?.body?.status ?? 'ok'} keys:`, pr?.body && typeof pr.body === 'object' ? Object.keys(pr.body).slice(0,6) : JSON.stringify(pr?.body)?.slice(0,100));
-      }
+      // Log full availabilities response with correct params
+      const { data: avFull } = await db.functions.invoke('bokun-sync', {
+        body: { path: `/activity.json/${p.bokunId}/availabilities?start=${startDate}&end=${endDate}`, method: 'GET' }
+      });
+      console.log('[Availabilities] Full response:', JSON.stringify(avFull?.body));
 
       try {
         const apiPath = `/activity.json/${p.bokunId}/available-dates?startDate=${startDate}&endDate=${endDate}`;
