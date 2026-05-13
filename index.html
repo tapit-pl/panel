@@ -2257,50 +2257,7 @@ tailwind.config = {
     currentTourAvailability = {};
 
     const today = new Date();
-    const fwd = new Date(today); fwd.setMonth(fwd.getMonth() + 3);
-    const startDate = today.toISOString().slice(0, 10);
-    const endDate   = fwd.toISOString().slice(0, 10);
-
-    let usedBokun = false;
-    if (p.bokunId) {
-      // Probe multiple candidate paths to find which one Bokun accepts
-      // Log full availabilities response with correct params
-      const { data: avFull } = await db.functions.invoke('bokun-sync', {
-        body: { path: `/activity.json/${p.bokunId}/availabilities?start=${startDate}&end=${endDate}`, method: 'GET' }
-      });
-      console.log('[Availabilities] Full response:', JSON.stringify(avFull?.body));
-
-      try {
-        const apiPath = `/activity.json/${p.bokunId}/available-dates?startDate=${startDate}&endDate=${endDate}`;
-        const { data: avail } = await db.functions.invoke('bokun-sync', {
-          body: { path: apiPath, method: 'GET' }
-        });
-        const body = avail?.body;
-        if (body && ![400, 401, 403, 404].includes(body?.status)) {
-          const dates = Array.isArray(body) ? body : (body.dates || body.items || []);
-          dates.forEach(entry => {
-            const d = typeof entry === 'string' ? entry : (entry.date || entry.startDate || '');
-            if (d) currentTourAvailability[d.slice(0, 10)] = entry.availableCount || entry.spotsAvailable || 1;
-          });
-          usedBokun = dates.length > 0;
-        }
-      } catch(e) { console.log('[Availability] Exception:', e.message); }
-    }
-
-    if (!usedBokun) {
-      const { data: rows } = await db
-        .from('bokun_bookings')
-        .select('tour_date, pax')
-        .eq('tour', p.title)
-        .eq('status', 'CONFIRMED')
-        .gte('tour_date', startDate)
-        .lte('tour_date', endDate);
-      (rows || []).forEach(r => {
-        const d = (r.tour_date || '').slice(0, 10);
-        if (!d) return;
-        currentTourAvailability[d] = (currentTourAvailability[d] || 0) + (r.pax || 0);
-      });
-    }
+    await fetchAvailabilityForMonth(p, today.getFullYear(), today.getMonth());
 
     calLoading.classList.add('hidden');
     renderAvailabilityCal(calContainer, today.getFullYear(), today.getMonth());
@@ -2361,11 +2318,46 @@ tailwind.config = {
     container.dataset.month = month;
   }
 
-  window.navAvCal = function(btn, year, month, delta) {
+  async function fetchAvailabilityForMonth(tour, year, month) {
+    const firstDay = new Date(year, month, 1).toISOString().slice(0, 10);
+    const lastDay  = new Date(year, month + 1, 0).toISOString().slice(0, 10);
+    if (tour.bokunId) {
+      try {
+        const { data: avail } = await db.functions.invoke('bokun-sync', {
+          body: { path: `/activity.json/${tour.bokunId}/availabilities?start=${firstDay}&end=${lastDay}`, method: 'GET' }
+        });
+        const items = avail?.body;
+        if (Array.isArray(items) && items.length > 0) {
+          items.forEach(entry => {
+            if (entry.unavailable || entry.soldOut) return;
+            const d = new Date(entry.date).toISOString().slice(0, 10);
+            if (d) currentTourAvailability[d] = (currentTourAvailability[d] || 0) + (entry.availabilityCount || 1);
+          });
+          return;
+        }
+      } catch(e) {}
+    }
+    // fallback: Supabase bookings
+    const { data: rows } = await db
+      .from('bokun_bookings')
+      .select('tour_date, pax')
+      .eq('tour', tour.title)
+      .eq('status', 'CONFIRMED')
+      .gte('tour_date', firstDay)
+      .lte('tour_date', lastDay);
+    (rows || []).forEach(r => {
+      const d = (r.tour_date || '').slice(0, 10);
+      if (d) currentTourAvailability[d] = (currentTourAvailability[d] || 0) + (r.pax || 0);
+    });
+  }
+
+  window.navAvCal = async function(btn, year, month, delta) {
     let m = month + delta, y = year;
     if (m > 11) { m = 0; y++; }
     if (m < 0)  { m = 11; y--; }
     const container = document.getElementById('td-cal');
+    container.innerHTML = '<div class="py-8 text-center text-gray-400 text-sm">Loading…</div>';
+    await fetchAvailabilityForMonth(tdCurrentTour, y, m);
     renderAvailabilityCal(container, y, m);
   };
 
