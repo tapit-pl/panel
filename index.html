@@ -2136,45 +2136,68 @@ tailwind.config = {
     if (!grid) return;
     if (bokunProducts.length > 0) { renderTourGrid(); return; }
 
-    // --- Try Bokun API first ---
-    const bokunCandidates = [
-      { path: '/product.json/list',                  method: 'POST', payload: {} },
-      { path: '/product.json/search',                method: 'POST', payload: { pageSize: 100, page: 0 } },
-      { path: '/activity.json/list',                 method: 'POST', payload: {} },
-      { path: '/vendor.json/self/product/list',      method: 'GET'  },
-      { path: '/product.json/vendor/self/list',      method: 'GET'  },
-    ];
-    for (const cand of bokunCandidates) {
-      try {
-        const { data: res } = await db.functions.invoke('bokun-sync', {
-          body: { path: cand.path, method: cand.method, payload: cand.payload }
-        });
-        const body = res?.body;
-        const isOk = body && body.status !== 404 && body.status !== 400 && body.status !== 401 && body.status !== 403 && body.status !== 405;
-        if (isOk) {
-          const list = Array.isArray(body) ? body : (body.items || body.results || body.products || body.data || []);
-          if (list.length > 0) {
-            console.log('[Tours] Bokun success via', cand.path, '— products:', list.length);
-            bokunProducts = list.filter(p => !p.archived).map((p, idx) => ({
-              id: idx, bokunId: p.id, title: p.title || p.name || '—',
-              photo: (p.photos||[]).find(x=>x.featured)?.originalUrl || p.photos?.[0]?.originalUrl || getTourPhoto(p.title||''),
-              cat: getTourCat(p.title || p.name || ''),
-              durationMins: p.durationInMinutes,
-              maxPax: p.maxParticipants,
-              description: p.shortDescription || p.description || '',
-              pricing: p.pricingCategories || [],
-            }));
-            renderTourGrid();
-            return;
-          }
-        }
-        console.log('[Tours] Bokun', cand.path, '→', body?.status || (Array.isArray(body) ? 'array['+body.length+']' : JSON.stringify(body)?.slice(0,80)));
-      } catch(e) { /* try next */ }
-    }
-    console.log('[Tours] Bokun API unavailable — falling back to Supabase');
+    const callBokun = (path, method, payload) =>
+      db.functions.invoke('bokun-sync', { body: { path, method, payload } });
+    const bokunOk = (res) => res?.body && ![400, 401, 403, 404, 405].includes(res.body?.status);
 
     try {
-      // Get distinct tour names from bookings in Supabase
+      // Step 1: booking-search is confirmed working — extract product IDs from it
+      const today = new Date();
+      const past = new Date(today); past.setMonth(past.getMonth() - 6);
+      const future = new Date(today); future.setDate(future.getDate() + 90);
+      const fmt = d => d.toISOString().slice(0, 10);
+
+      const { data: searchRes, error: searchErr } = await callBokun(
+        '/booking.json/booking-search', 'POST',
+        { startDate: fmt(past), endDate: fmt(future), pageSize: 500, page: 0 }
+      );
+      if (searchErr || !searchRes?.body?.items) throw new Error(searchErr?.message || 'booking-search failed');
+
+      // Step 2: Extract unique products with their Bokun IDs
+      const productMap = new Map();
+      searchRes.body.items.forEach(item => {
+        const pb = item.productBookings?.[0];
+        if (pb?.product?.id && !productMap.has(pb.product.id)) {
+          productMap.set(pb.product.id, { bokunId: pb.product.id, title: pb.product.title || pb.product.name || '—' });
+        }
+      });
+      if (productMap.size === 0) throw new Error('no products found in booking results');
+      console.log('[Tours] Found', productMap.size, 'unique products from booking-search');
+
+      // Step 3: Fetch full details for each product (photos, description, pricing)
+      const details = await Promise.all(
+        Array.from(productMap.values()).map(async (p, idx) => {
+          try {
+            const { data: det } = await callBokun(`/activity.json/${p.bokunId}`, 'GET');
+            if (bokunOk(det)) {
+              const d = det.body;
+              return {
+                id: idx, bokunId: p.bokunId,
+                title: d.title || p.title,
+                description: d.shortDescription || d.description || '',
+                photo: (d.photos||[]).find(x=>x.featured)?.originalUrl || d.photos?.[0]?.originalUrl || getTourPhoto(p.title),
+                cat: getTourCat(d.title || p.title),
+                durationMins: d.durationInMinutes || null,
+                maxPax: d.maxParticipants || null,
+                pricing: d.pricingCategories || [],
+              };
+            }
+          } catch(e) {}
+          return { id: idx, bokunId: p.bokunId, title: p.title, description: '', photo: getTourPhoto(p.title), cat: getTourCat(p.title), durationMins: null, maxPax: null, pricing: [] };
+        })
+      );
+
+      bokunProducts = details.filter(Boolean);
+      console.log('[Tours] Loaded', bokunProducts.length, 'products from Bokun');
+      renderTourGrid();
+      return;
+
+    } catch(e) {
+      console.log('[Tours] Bokun unavailable:', e.message, '— falling back to Supabase');
+    }
+
+    // Fallback: deduplicate tour names from local DB
+    try {
       const today = new Date();
       const fwd = new Date(today); fwd.setFullYear(fwd.getFullYear() + 1);
       const { data: rows, error } = await db
@@ -2186,13 +2209,12 @@ tailwind.config = {
         .not('tour', 'is', null);
       if (error) throw error;
 
-      // Deduplicate
       const seen = new Set();
       bokunProducts = (rows || [])
         .map(r => r.tour)
         .filter(t => t && !seen.has(t) && seen.add(t))
         .sort()
-        .map(name => ({ id: name, title: name, cat: getTourCat(name), photo: getTourPhoto(name) }));
+        .map((name, idx) => ({ id: idx, bokunId: null, title: name, cat: getTourCat(name), photo: getTourPhoto(name), description: '', durationMins: null, maxPax: null, pricing: [] }));
 
       renderTourGrid();
     } catch(e) {
@@ -2258,7 +2280,7 @@ tailwind.config = {
          <div class="font-bold text-brand text-sm">${c.defaultPrice.amount} zł</div>
        </div>`).join('');
 
-    // Load upcoming tour dates from Supabase
+    // Load availability
     const calContainer = document.getElementById('td-cal');
     const calLoading  = document.getElementById('td-cal-loading');
     calContainer.innerHTML = '';
@@ -2267,19 +2289,42 @@ tailwind.config = {
 
     const today = new Date();
     const fwd = new Date(today); fwd.setMonth(fwd.getMonth() + 3);
-    const { data: rows } = await db
-      .from('bokun_bookings')
-      .select('tour_date, pax')
-      .eq('tour', p.title)
-      .eq('status', 'CONFIRMED')
-      .gte('tour_date', today.toISOString().slice(0, 10))
-      .lte('tour_date', fwd.toISOString().slice(0, 10));
+    const startDate = today.toISOString().slice(0, 10);
+    const endDate   = fwd.toISOString().slice(0, 10);
 
-    (rows || []).forEach(r => {
-      const d = (r.tour_date || '').slice(0, 10);
-      if (!d) return;
-      currentTourAvailability[d] = (currentTourAvailability[d] || 0) + (r.pax || 0);
-    });
+    let usedBokun = false;
+    if (p.bokunId) {
+      try {
+        const { data: avail } = await db.functions.invoke('bokun-sync', {
+          body: { path: `/activity.json/${p.bokunId}/available-dates?startDate=${startDate}&endDate=${endDate}`, method: 'GET' }
+        });
+        const body = avail?.body;
+        if (body && ![400, 401, 403, 404].includes(body?.status)) {
+          const dates = Array.isArray(body) ? body : (body.dates || body.items || []);
+          dates.forEach(entry => {
+            const d = typeof entry === 'string' ? entry : (entry.date || entry.startDate || '');
+            if (d) currentTourAvailability[d.slice(0, 10)] = entry.availableCount || entry.spotsAvailable || 1;
+          });
+          usedBokun = dates.length > 0;
+          console.log('[Availability] Bokun:', dates.length, 'dates for', p.bokunId);
+        }
+      } catch(e) { console.log('[Availability] Bokun failed, using Supabase'); }
+    }
+
+    if (!usedBokun) {
+      const { data: rows } = await db
+        .from('bokun_bookings')
+        .select('tour_date, pax')
+        .eq('tour', p.title)
+        .eq('status', 'CONFIRMED')
+        .gte('tour_date', startDate)
+        .lte('tour_date', endDate);
+      (rows || []).forEach(r => {
+        const d = (r.tour_date || '').slice(0, 10);
+        if (!d) return;
+        currentTourAvailability[d] = (currentTourAvailability[d] || 0) + (r.pax || 0);
+      });
+    }
 
     calLoading.classList.add('hidden');
     renderAvailabilityCal(calContainer, today.getFullYear(), today.getMonth());
@@ -2439,11 +2484,51 @@ tailwind.config = {
 
     const tour = tdCurrentTour?.title || '';
     const guest = `${firstName} ${lastName}`;
-    const commRate = currentPartner?.comm_rate || 10;
-
     const payLabel = { driver: 'Pay at driver', hotel: 'Pay at hotel', link: 'Payment link' }[payment] || payment;
-    const notesField = [payLabel, notes].filter(Boolean).join(' · ');
 
+    // Try to create the booking in Bokun first
+    let bokunConfirmationCode = null;
+    if (tdCurrentTour?.bokunId) {
+      try {
+        // Get available time slots for the selected date
+        const { data: slotsRes } = await db.functions.invoke('bokun-sync', {
+          body: { path: `/activity.json/${tdCurrentTour.bokunId}/available-time-slots?date=${dateStr}`, method: 'GET' }
+        });
+        const slotList = Array.isArray(slotsRes?.body) ? slotsRes.body
+          : (slotsRes?.body?.slots || slotsRes?.body?.items || []);
+
+        if (slotList.length > 0) {
+          const startTimeId = slotList[0].startTimeId || slotList[0].id;
+          const pricingCat = tdCurrentTour.pricing?.[0];
+          const participants = pricingCat
+            ? [{ pricingCategoryBooking: { pricingCategoryId: pricingCat.id, pricingCategoryTitle: pricingCat.title || 'Adult', count: tdGuestCount } }]
+            : [];
+
+          const { data: bookingRes } = await db.functions.invoke('bokun-sync', {
+            body: {
+              path: '/booking.json/reserve',
+              method: 'POST',
+              payload: {
+                startTimeId,
+                participants,
+                customer: { firstName, lastName, email: email || undefined, phoneNumber: phone || undefined },
+                internalComment: [payLabel, notes].filter(Boolean).join(' · ') || undefined,
+              }
+            }
+          });
+          if (bookingRes?.body && ![400, 404, 422, 500].includes(bookingRes.body?.status)) {
+            bokunConfirmationCode = bookingRes.body.confirmationCode || bookingRes.body.id || String(bookingRes.body);
+            console.log('[Booking] Created in Bokun:', bokunConfirmationCode);
+          } else {
+            console.warn('[Booking] Bokun reserve returned:', bookingRes?.body?.status, bookingRes?.body?.message || '');
+          }
+        } else {
+          console.warn('[Booking] No time slots available for', dateStr, 'in Bokun');
+        }
+      } catch(e) { console.warn('[Booking] Bokun creation failed:', e.message); }
+    }
+
+    // Save to Supabase as local record
     const { data, error } = await db.from('bookings').insert({
       tour,
       date: dateStr,
@@ -2451,7 +2536,7 @@ tailwind.config = {
       email: email || null,
       phone: phone || null,
       pax: tdGuestCount,
-      status: 'pending',
+      status: bokunConfirmationCode ? 'confirmed' : 'pending',
       partner_id: currentPartner?.id,
     }).select().single();
 
@@ -2468,8 +2553,9 @@ tailwind.config = {
     form.classList.add('hidden');
     const success = document.getElementById('td-booking-success');
     success.classList.remove('hidden');
+    const statusLine = bokunConfirmationCode ? ` · Bokun #${bokunConfirmationCode}` : ' · Pending confirmation';
     document.getElementById('td-success-msg').textContent =
-      `${tour} · ${formatDate(dateStr)} · ${tdGuestCount} guest${tdGuestCount > 1 ? 's' : ''} · ${payLabel}`;
+      `${tour} · ${formatDate(dateStr)} · ${tdGuestCount} guest${tdGuestCount > 1 ? 's' : ''} · ${payLabel}${statusLine}`;
 
     // Refresh bookings list in background
     await loadPartnerBookings();
