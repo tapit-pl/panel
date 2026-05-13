@@ -2033,8 +2033,11 @@ tailwind.config = {
       });
       if (fnErr) throw new Error('Function error: ' + (fnErr.message || JSON.stringify(fnErr)));
       const raw = result?.body;
+      console.log('[Tours] raw response keys:', raw ? (Array.isArray(raw) ? 'array len='+raw.length : Object.keys(raw)) : raw);
+      console.log('[Tours] raw sample:', JSON.stringify(raw)?.slice(0, 500));
       if (!raw) throw new Error('Empty response. result=' + JSON.stringify(result)?.slice(0,200));
-      const products = (Array.isArray(raw) ? raw : []).filter(p => !p.archived);
+      const list = Array.isArray(raw) ? raw : (raw.items || raw.results || raw.products || raw.data || []);
+      const products = list.filter(p => !p.archived);
       bokunProducts = products;
       renderTourGrid();
     } catch(e) {
