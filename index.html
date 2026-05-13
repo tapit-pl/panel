@@ -2630,8 +2630,8 @@ tailwind.config = {
     const _tourPln = lookupCommPln(tdCurrentTour?.title || '');
     document.getElementById('td-category-list').innerHTML = tdCategorySelections.map((s, i) => {
       const ageRange = s.category.ageQualified ? ` (${s.category.minAge}–${s.category.maxAge})` : '';
-      // Use PLN for adult (index 0); keep EUR for child/infant
-      const pln = (i === 0 || tdCategorySelections.length === 1) ? _tourPln : null;
+      // Use PLN for all categories when available; EUR only if no PLN price configured
+      const pln = _tourPln || null;
       const priceStr = pln
         ? `<span class="text-brand font-semibold text-sm">${pln} pln</span><span class="text-gray-400 text-xs">/os.</span>`
         : s.price
