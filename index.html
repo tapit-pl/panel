@@ -1377,25 +1377,31 @@ tailwind.config = {
           <div id="td-packages-summary-list" class="flex flex-col gap-1.5 text-sm text-dark"></div>
         </div>
 
-        <!-- Guest details -->
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1.5">First name <span class="text-red-400">*</span></label>
-            <input id="td-first" type="text" placeholder="Anna" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Last name <span class="text-red-400">*</span></label>
-            <input id="td-last" type="text" placeholder="Kowalska" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Email</label>
-            <input id="td-email" type="email" placeholder="guest@email.com" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Phone</label>
-            <input id="td-phone" type="text" placeholder="+48 600 000 000" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        <!-- Guest details — lead contact -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Guest 1 (lead contact)</label>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1.5">First name <span class="text-red-400">*</span></label>
+              <input id="td-first" type="text" placeholder="Anna" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1.5">Last name <span class="text-red-400">*</span></label>
+              <input id="td-last" type="text" placeholder="Kowalska" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1.5">Email</label>
+              <input id="td-email" type="email" placeholder="guest@email.com" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1.5">Phone</label>
+              <input id="td-phone" type="text" placeholder="+48 600 000 000" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+            </div>
           </div>
         </div>
+
+        <!-- Additional guests — rendered dynamically -->
+        <div id="td-additional-guests"></div>
 
         <!-- Payment type -->
         <div>
@@ -2747,6 +2753,7 @@ tailwind.config = {
     document.getElementById('td-email').value = '';
     document.getElementById('td-phone').value = '';
     document.getElementById('td-notes').value = '';
+    renderAdditionalGuestFields(tdGuestCount);
     document.querySelector('input[name="td-payment"][value="driver"]').checked = true;
     updatePayOptStyles();
     scrollModalTo(form);
@@ -2758,10 +2765,33 @@ tailwind.config = {
     return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
   }
 
+  function renderAdditionalGuestFields(totalPax) {
+    const container = document.getElementById('td-additional-guests');
+    if (!container) return;
+    if (totalPax <= 1) { container.innerHTML = ''; return; }
+    container.innerHTML = Array.from({ length: totalPax - 1 }, (_, i) => `
+      <div class="pt-3 border-t border-gray-100">
+        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Guest ${i + 2}</label>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">First name</label>
+            <input id="td-extra-first-${i}" type="text" placeholder="Name"
+              class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Last name</label>
+            <input id="td-extra-last-${i}" type="text" placeholder="Surname"
+              class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
   function changeTdGuests(delta) {
     const maxGuests = tdSelectedTimeSlot?.availabilityCount || 50;
     tdGuestCount = Math.max(1, Math.min(maxGuests, tdGuestCount + delta));
     document.getElementById('td-guest-count').textContent = tdGuestCount;
+    renderAdditionalGuestFields(tdGuestCount);
   }
 
   function updatePayOptStyles() {
@@ -2814,6 +2844,11 @@ tailwind.config = {
 
     const tour = tdCurrentTour?.title || '';
     const guest = `${firstName} ${lastName}`;
+    const extraGuests = Array.from({ length: tdGuestCount - 1 }, (_, i) => {
+      const f = document.getElementById(`td-extra-first-${i}`)?.value.trim();
+      const l = document.getElementById(`td-extra-last-${i}`)?.value.trim();
+      return (f || l) ? `${f} ${l}`.trim() : null;
+    }).filter(Boolean);
 
     // Determine total pax and participants
     const hasPackages = tdRateSelections.some(x => x.count > 0);
@@ -2849,7 +2884,7 @@ tailwind.config = {
           startTimeId: tdSelectedTimeSlot.startTimeId,
           participants,
           customer: { firstName, lastName, email: email || undefined, phoneNumber: phone || undefined },
-          internalComment: [payLabel, packageLines || categoryLines, notes].filter(Boolean).join(' · ') || undefined,
+          internalComment: [payLabel, packageLines || categoryLines, extraGuests.length ? 'Guests: ' + [guest, ...extraGuests].join(', ') : null, notes].filter(Boolean).join(' · ') || undefined,
         };
 
         const { data: bookingRes } = await db.functions.invoke('bokun-sync', {
