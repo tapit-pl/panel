@@ -1315,7 +1315,15 @@ tailwind.config = {
         <div id="td-timeslot-list" class="flex flex-wrap gap-2"></div>
       </div>
 
-      <!-- Booking form — shown after date + time selection -->
+      <!-- Package picker — shown after time selection when multiple rates exist -->
+      <div id="td-rate-section" class="hidden border-t border-gray-100 pt-5">
+        <h3 class="font-semibold text-dark text-sm mb-3">
+          <i class="fa-solid fa-layer-group text-brand mr-2"></i>Select package — <span id="td-rate-subtitle" class="text-brand font-normal"></span>
+        </h3>
+        <div id="td-rate-list" class="flex flex-col gap-2"></div>
+      </div>
+
+      <!-- Booking form — shown after date + time + package selection -->
       <div id="td-booking-form" class="hidden border-t border-gray-100 pt-5 space-y-4">
         <h3 class="font-semibold text-dark text-sm flex items-center gap-2">
           <i class="fa-solid fa-pen-to-square text-brand"></i>
@@ -2103,8 +2111,9 @@ tailwind.config = {
 
   // ===== Tours from Bokun =====
   let bokunProducts = [];
-  let currentTourAvailability = {}; // date → [{startTime, startTimeId, availabilityCount}, ...]
+  let currentTourAvailability = {}; // date → [{startTime, startTimeId, availabilityCount, rates: [{id, title, price}]}, ...]
   let tdSelectedTimeSlot = null;
+  let tdSelectedRate = null;
 
   // Photo map: tour name keywords → Unsplash image
   const TOUR_PHOTOS = [
@@ -2342,10 +2351,16 @@ tailwind.config = {
             const d = new Date(entry.date).toISOString().slice(0, 10);
             if (!d) return;
             if (!currentTourAvailability[d]) currentTourAvailability[d] = [];
+            const rates = (entry.rates || []).map(r => {
+              const priceInfo = (entry.pricesByRate || []).find(p => p.activityRateId === r.id);
+              const price = priceInfo?.pricePerCategoryUnit?.[0]?.amount;
+              return { id: r.id, title: r.title.trim(), price };
+            });
             currentTourAvailability[d].push({
               startTime: entry.startTime || '',
               startTimeId: entry.startTimeId,
               availabilityCount: entry.availabilityCount || 0,
+              rates,
             });
           });
           return;
@@ -2385,10 +2400,13 @@ tailwind.config = {
       el.classList.remove('!bg-brand', '!text-white', 'ring-2', 'ring-brand');
       if (el.dataset.date === dateStr) el.classList.add('!bg-brand', '!text-white', 'ring-2', 'ring-brand');
     });
-    // Hide booking form, hide success
+    // Hide booking form, pickers, success
     document.getElementById('td-booking-form').classList.add('hidden');
     document.getElementById('td-booking-success').classList.add('hidden');
+    document.getElementById('td-rate-section').classList.add('hidden');
+    document.getElementById('td-timeslot-section').classList.add('hidden');
     tdSelectedTimeSlot = null;
+    tdSelectedRate = null;
 
     const slots = currentTourAvailability[dateStr] || [];
 
@@ -2418,13 +2436,51 @@ tailwind.config = {
 
   function selectTimeSlot(dateStr, slotIdx) {
     tdSelectedTimeSlot = (currentTourAvailability[dateStr] || [])[slotIdx];
+    tdSelectedRate = null;
+    document.getElementById('td-booking-form').classList.add('hidden');
+    document.getElementById('td-rate-section').classList.add('hidden');
     // Highlight selected time button
     document.querySelectorAll('#td-timeslot-list button').forEach((btn, i) => {
-      if (i === slotIdx) {
-        btn.classList.add('border-brand', 'bg-brand/5', '!text-brand');
-      } else {
-        btn.classList.remove('border-brand', 'bg-brand/5', '!text-brand');
-      }
+      btn.classList.toggle('border-brand', i === slotIdx);
+      btn.classList.toggle('bg-brand/5', i === slotIdx);
+    });
+    // Show package picker if multiple rates, else go to form
+    const rates = tdSelectedTimeSlot?.rates || [];
+    const uniqueRates = rates.filter((r, i, a) => a.findIndex(x => x.id === r.id) === i);
+    if (uniqueRates.length > 1) {
+      showRatePicker(dateStr, uniqueRates);
+    } else {
+      tdSelectedRate = uniqueRates[0] || null;
+      showBookingForm(dateStr);
+    }
+  }
+
+  function showRatePicker(dateStr, rates) {
+    const section = document.getElementById('td-rate-section');
+    const timeLabel = tdSelectedTimeSlot?.startTime ? ' · ' + tdSelectedTimeSlot.startTime : '';
+    document.getElementById('td-rate-subtitle').textContent = formatDate(dateStr) + timeLabel;
+    document.getElementById('td-rate-list').innerHTML = rates.map((r, i) => {
+      const priceStr = r.price ? `<span class="text-brand font-bold">${r.price.amount} ${r.price.currency}</span><span class="text-gray-400 text-xs"> / person</span>` : '';
+      return `<button onclick="selectRate('${dateStr}', ${i})"
+        data-rate-idx="${i}"
+        class="w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 border-gray-200 hover:border-brand hover:bg-brand/5 transition-all text-left">
+        <span class="text-sm font-semibold text-dark">${r.title}</span>
+        <span class="flex items-center gap-1 ml-3 shrink-0">${priceStr}</span>
+      </button>`;
+    }).join('');
+    section.classList.remove('hidden');
+    section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    section._rates = rates;
+    section._dateStr = dateStr;
+  }
+
+  function selectRate(dateStr, rateIdx) {
+    const section = document.getElementById('td-rate-section');
+    const rates = section._rates || [];
+    tdSelectedRate = rates[rateIdx];
+    document.querySelectorAll('#td-rate-list button').forEach((btn, i) => {
+      btn.classList.toggle('border-brand', i === rateIdx);
+      btn.classList.toggle('bg-brand/5', i === rateIdx);
     });
     showBookingForm(dateStr);
   }
@@ -2433,8 +2489,9 @@ tailwind.config = {
     const form = document.getElementById('td-booking-form');
     form.classList.remove('hidden');
     document.getElementById('td-booking-success').classList.add('hidden');
-    document.getElementById('td-selected-date').textContent =
-      formatDate(dateStr) + (tdSelectedTimeSlot?.startTime ? ' · ' + tdSelectedTimeSlot.startTime : '');
+    const timePart = tdSelectedTimeSlot?.startTime ? ' · ' + tdSelectedTimeSlot.startTime : '';
+    const ratePart = tdSelectedRate?.title ? ' · ' + tdSelectedRate.title : '';
+    document.getElementById('td-selected-date').textContent = formatDate(dateStr) + timePart + ratePart;
     document.getElementById('td-booking-error').classList.add('hidden');
     tdGuestCount = 2;
     document.getElementById('td-guest-count').textContent = 2;
@@ -2521,17 +2578,16 @@ tailwind.config = {
           ? [{ pricingCategoryBooking: { pricingCategoryId: pricingCat.id, pricingCategoryTitle: pricingCat.title || 'Adult', count: tdGuestCount } }]
           : [];
 
+        const payload = {
+          startTimeId: tdSelectedTimeSlot.startTimeId,
+          participants,
+          customer: { firstName, lastName, email: email || undefined, phoneNumber: phone || undefined },
+          internalComment: [payLabel, tdSelectedRate?.title, notes].filter(Boolean).join(' · ') || undefined,
+        };
+        if (tdSelectedRate?.id) payload.activityRateId = tdSelectedRate.id;
+
         const { data: bookingRes } = await db.functions.invoke('bokun-sync', {
-          body: {
-            path: '/booking.json/reserve',
-            method: 'POST',
-            payload: {
-              startTimeId: tdSelectedTimeSlot.startTimeId,
-              participants,
-              customer: { firstName, lastName, email: email || undefined, phoneNumber: phone || undefined },
-              internalComment: [payLabel, notes].filter(Boolean).join(' · ') || undefined,
-            }
-          }
+          body: { path: '/booking.json/reserve', method: 'POST', payload }
         });
         if (bookingRes?.body && ![400, 404, 422, 500].includes(bookingRes.body?.status)) {
           bokunConfirmationCode = bookingRes.body.confirmationCode || bookingRes.body.id || String(bookingRes.body);
