@@ -1273,7 +1273,7 @@ tailwind.config = {
 
 <!-- ===================== TOUR DETAIL MODAL ===================== -->
 <div id="modal-tour" class="fixed inset-0 z-50 hidden modal-bg bg-black/50 items-end sm:items-center justify-center p-0 sm:p-4" style="overflow:hidden">
-  <div class="bg-white w-full sm:max-w-3xl sm:rounded-2xl rounded-t-2xl max-h-[95vh] overflow-y-auto scrollbar-hide fade-in" style="overscroll-behavior:contain">
+  <div id="modal-tour-body" class="bg-white w-full sm:max-w-3xl sm:rounded-2xl rounded-t-2xl max-h-[95vh] overflow-y-auto scrollbar-hide fade-in" style="overscroll-behavior:contain">
     <!-- Photo header -->
     <div class="relative h-52 sm:h-64 shrink-0">
       <img id="td-photo" src="" class="w-full h-full object-cover sm:rounded-t-2xl">
@@ -2122,6 +2122,14 @@ tailwind.config = {
     if (tabId === 'tab-tours') loadToursFromBokun();
   }
 
+  function scrollModalTo(el) {
+    const body = document.getElementById('modal-tour-body');
+    if (!body) return;
+    const rect = el.getBoundingClientRect();
+    const bodyRect = body.getBoundingClientRect();
+    body.scrollBy({ top: rect.top - bodyRect.top - 80, behavior: 'smooth' });
+  }
+
   // ===== Tours from Bokun =====
   let bokunProducts = [];
   let currentTourAvailability = {}; // date → [{startTime, startTimeId, availabilityCount, rates: [{id, title, price}]}, ...]
@@ -2447,7 +2455,7 @@ tailwind.config = {
       </button>`;
     }).join('');
     section.classList.remove('hidden');
-    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    scrollModalTo(section);
     section.dataset.date = dateStr;
   }
 
@@ -2496,7 +2504,7 @@ tailwind.config = {
     }).join('');
     updateRateTotal();
     section.classList.remove('hidden');
-    section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    scrollModalTo(section);
   }
 
   function changeRateCount(rateIdx, delta) {
@@ -2574,7 +2582,7 @@ tailwind.config = {
     document.getElementById('td-notes').value = '';
     document.querySelector('input[name="td-payment"][value="driver"]').checked = true;
     updatePayOptStyles();
-    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    scrollModalTo(form);
     form.dataset.date = dateStr;
   }
 
