@@ -2264,9 +2264,12 @@ tailwind.config = {
     let usedBokun = false;
     if (p.bokunId) {
       try {
+        const apiPath = `/activity.json/${p.bokunId}/available-dates?startDate=${startDate}&endDate=${endDate}`;
+        console.log('[Availability] Calling Bokun:', apiPath);
         const { data: avail } = await db.functions.invoke('bokun-sync', {
-          body: { path: `/activity.json/${p.bokunId}/available-dates?startDate=${startDate}&endDate=${endDate}`, method: 'GET' }
+          body: { path: apiPath, method: 'GET' }
         });
+        console.log('[Availability] Raw response status:', avail?.body?.status, '| body type:', typeof avail?.body, '| keys:', avail?.body && typeof avail.body === 'object' ? Object.keys(avail.body) : avail?.body);
         const body = avail?.body;
         if (body && ![400, 401, 403, 404].includes(body?.status)) {
           const dates = Array.isArray(body) ? body : (body.dates || body.items || []);
@@ -2275,9 +2278,13 @@ tailwind.config = {
             if (d) currentTourAvailability[d.slice(0, 10)] = entry.availableCount || entry.spotsAvailable || 1;
           });
           usedBokun = dates.length > 0;
-          console.log('[Availability] Bokun:', dates.length, 'dates for', p.bokunId);
+          console.log('[Availability] Parsed', dates.length, 'dates. Sample:', dates.slice(0,3));
+        } else {
+          console.log('[Availability] Bokun returned error/404 — falling back to Supabase');
         }
-      } catch(e) { console.log('[Availability] Bokun failed, using Supabase'); }
+      } catch(e) { console.log('[Availability] Exception:', e.message); }
+    } else {
+      console.log('[Availability] No bokunId for tour:', p.title);
     }
 
     if (!usedBokun) {
