@@ -811,102 +811,50 @@ tailwind.config = {
         <div id="section-tours" class="section fade-in">
           <div class="flex items-center justify-between mb-6">
             <div>
-              <h1 class="text-xl font-bold text-dark">Tours & Pricing</h1>
-              <p class="text-xs text-gray-400 mt-0.5">Manage your tour catalogue and commission rates</p>
+              <h1 class="text-xl font-bold text-dark">Tours</h1>
+              <p class="text-xs text-gray-400 mt-0.5" id="tours-config-subtitle">Manage tour catalogue and partner visibility</p>
             </div>
-            <button class="flex items-center gap-2 bg-brand hover:bg-brand-dark text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors">
-              <i class="fa-solid fa-plus"></i>Add tour
-            </button>
+            <div class="flex items-center gap-2">
+              <button onclick="syncToursFromBokun()" id="btn-sync-tours"
+                class="flex items-center gap-2 border border-brand/30 bg-brand/5 hover:bg-brand/10 text-brand text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors">
+                <i class="fa-solid fa-rotate"></i>Sync from Bokun
+              </button>
+              <button onclick="openAddTourModal()"
+                class="flex items-center gap-2 bg-brand hover:bg-brand-dark text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors">
+                <i class="fa-solid fa-plus"></i>Add manually
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 rounded-2xl border border-gray-200 px-4 py-3 mb-4 text-xs text-gray-500 flex items-start gap-2">
+            <i class="fa-solid fa-circle-info text-brand mt-0.5"></i>
+            <div>Tours listed here appear in partner panels. <strong>Groups</strong> control visibility — partners see tours matching their assigned groups, or tours with no groups assigned (visible to all).
+            Assign Bokun ID so the system can fetch real photos, descriptions and create bookings in Bokun.</div>
           </div>
 
           <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
+            <div id="tour-config-loading" class="py-12 text-center text-gray-400 text-sm">
+              <i class="fa-solid fa-circle-notch animate-spin text-xl block mb-3 text-brand"></i>Loading tours...
+            </div>
+            <div id="tour-config-table" class="hidden overflow-x-auto">
               <table class="w-full text-xs">
                 <thead>
-                  <tr class="border-b border-gray-100 bg-opacity-0">
-                    <th class="text-left px-5 py-3 text-gray-400 font-semibold">Tour name</th>
-                    <th class="text-left px-4 py-3 text-gray-400 font-semibold">Category</th>
-                    <th class="text-center px-4 py-3 text-gray-400 font-semibold">Packages</th>
-                    <th class="text-right px-4 py-3 text-gray-400 font-semibold">Base price</th>
-                    <th class="text-right px-4 py-3 text-gray-400 font-semibold">Commission range</th>
-                    <th class="text-center px-4 py-3 text-gray-400 font-semibold">Bookings/mo</th>
-                    <th class="text-center px-4 py-3 text-gray-400 font-semibold">Status</th>
-                    <th class="px-4 py-3"></th>
+                  <tr class="border-b border-gray-100">
+                    <th class="text-left px-4 py-3 text-gray-400 font-semibold w-8">#</th>
+                    <th class="text-left px-4 py-3 text-gray-400 font-semibold">Tour name</th>
+                    <th class="text-left px-4 py-3 text-gray-400 font-semibold w-24">Bokun ID</th>
+                    <th class="text-left px-4 py-3 text-gray-400 font-semibold">Groups</th>
+                    <th class="text-center px-4 py-3 text-gray-400 font-semibold w-20">Active</th>
+                    <th class="text-right px-4 py-3 w-28"></th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-50 text-xs">
-                  <tr class="hover:bg-white/5 transition-colors" style="border-bottom:1px solid rgba(255,255,255,0.05)">
-                    <td class="px-5 py-3.5 font-semibold text-dark">Trip to Zakopane</td>
-                    <td class="px-4 py-3.5 text-gray-500">Day trip</td>
-                    <td class="px-4 py-3.5 text-center text-gray-600">3</td>
-                    <td class="px-4 py-3.5 text-right text-dark font-medium">150 zł/pax</td>
-                    <td class="px-4 py-3.5 text-right text-brand font-semibold">100–160 pln</td>
-                    <td class="px-4 py-3.5 text-center font-semibold text-dark">18</td>
-                    <td class="px-4 py-3.5 text-center"><span class="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">Active</span></td>
-                    <td class="px-4 py-3.5 text-right"><button class="text-gray-400 hover:text-brand transition-colors"><i class="fa-solid fa-pen-to-square"></i></button></td>
-                  </tr>
-                  <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-5 py-3.5 font-semibold text-dark">Auschwitz-Birkenau Tour</td>
-                    <td class="px-4 py-3.5 text-gray-500">Day trip</td>
-                    <td class="px-4 py-3.5 text-center text-gray-600">2</td>
-                    <td class="px-4 py-3.5 text-right text-dark font-medium">80 zł/pax</td>
-                    <td class="px-4 py-3.5 text-right text-brand font-semibold">50–75 pln</td>
-                    <td class="px-4 py-3.5 text-center font-semibold text-dark">12</td>
-                    <td class="px-4 py-3.5 text-center"><span class="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">Active</span></td>
-                    <td class="px-4 py-3.5 text-right"><button class="text-gray-400 hover:text-brand transition-colors"><i class="fa-solid fa-pen-to-square"></i></button></td>
-                  </tr>
-                  <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-5 py-3.5 font-semibold text-dark">Shooting Range – Combat Experience</td>
-                    <td class="px-4 py-3.5 text-gray-500">Attraction</td>
-                    <td class="px-4 py-3.5 text-center text-gray-600">4</td>
-                    <td class="px-4 py-3.5 text-right text-dark font-medium">120 zł/pax</td>
-                    <td class="px-4 py-3.5 text-right text-brand font-semibold">80–160 pln</td>
-                    <td class="px-4 py-3.5 text-center font-semibold text-dark">9</td>
-                    <td class="px-4 py-3.5 text-center"><span class="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">Active</span></td>
-                    <td class="px-4 py-3.5 text-right"><button class="text-gray-400 hover:text-brand transition-colors"><i class="fa-solid fa-pen-to-square"></i></button></td>
-                  </tr>
-                  <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-5 py-3.5 font-semibold text-dark">Wieliczka Salt Mine</td>
-                    <td class="px-4 py-3.5 text-gray-500">Day trip</td>
-                    <td class="px-4 py-3.5 text-center text-gray-600">2</td>
-                    <td class="px-4 py-3.5 text-right text-dark font-medium">90 zł/pax</td>
-                    <td class="px-4 py-3.5 text-right text-brand font-semibold">60–80 pln</td>
-                    <td class="px-4 py-3.5 text-center font-semibold text-dark">7</td>
-                    <td class="px-4 py-3.5 text-center"><span class="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">Active</span></td>
-                    <td class="px-4 py-3.5 text-right"><button class="text-gray-400 hover:text-brand transition-colors"><i class="fa-solid fa-pen-to-square"></i></button></td>
-                  </tr>
-                  <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-5 py-3.5 font-semibold text-dark">Night Tour of Kraków</td>
-                    <td class="px-4 py-3.5 text-gray-500">Attraction</td>
-                    <td class="px-4 py-3.5 text-center text-gray-600">1</td>
-                    <td class="px-4 py-3.5 text-right text-dark font-medium">70 zł/pax</td>
-                    <td class="px-4 py-3.5 text-right text-brand font-semibold">45 pln</td>
-                    <td class="px-4 py-3.5 text-center font-semibold text-dark">4</td>
-                    <td class="px-4 py-3.5 text-center"><span class="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">Active</span></td>
-                    <td class="px-4 py-3.5 text-right"><button class="text-gray-400 hover:text-brand transition-colors"><i class="fa-solid fa-pen-to-square"></i></button></td>
-                  </tr>
-                  <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-5 py-3.5 font-semibold text-dark">Bochnia Salt Mine</td>
-                    <td class="px-4 py-3.5 text-gray-500">Day trip</td>
-                    <td class="px-4 py-3.5 text-center text-gray-600">1</td>
-                    <td class="px-4 py-3.5 text-right text-dark font-medium">80 zł/pax</td>
-                    <td class="px-4 py-3.5 text-right text-brand font-semibold">50 pln</td>
-                    <td class="px-4 py-3.5 text-center font-semibold text-dark">2</td>
-                    <td class="px-4 py-3.5 text-center"><span class="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">Active</span></td>
-                    <td class="px-4 py-3.5 text-right"><button class="text-gray-400 hover:text-brand transition-colors"><i class="fa-solid fa-pen-to-square"></i></button></td>
-                  </tr>
-                  <tr class="hover:bg-gray-50 transition-colors opacity-60">
-                    <td class="px-5 py-3.5 font-semibold text-dark">Hot Air Balloon Flight</td>
-                    <td class="px-4 py-3.5 text-gray-500">Attraction</td>
-                    <td class="px-4 py-3.5 text-center text-gray-600">2</td>
-                    <td class="px-4 py-3.5 text-right text-dark font-medium">450 zł/pax</td>
-                    <td class="px-4 py-3.5 text-right text-gray-400 font-semibold">—</td>
-                    <td class="px-4 py-3.5 text-center font-semibold text-gray-400">0</td>
-                    <td class="px-4 py-3.5 text-center"><span class="bg-gray-100 text-gray-500 text-xs font-semibold px-2 py-0.5 rounded-full">Draft</span></td>
-                    <td class="px-4 py-3.5 text-right"><button class="text-gray-400 hover:text-brand transition-colors"><i class="fa-solid fa-pen-to-square"></i></button></td>
-                  </tr>
-                </tbody>
+                <tbody id="tour-config-tbody" class="divide-y divide-gray-50"></tbody>
               </table>
+            </div>
+            <div id="tour-config-empty" class="hidden py-12 text-center">
+              <div class="text-3xl mb-3">🗺️</div>
+              <div class="text-sm font-semibold text-dark mb-1">No tours yet</div>
+              <div class="text-xs text-gray-400 mb-4">Click "Sync from Bokun" to import tours automatically, or add one manually.</div>
             </div>
           </div>
         </div>
@@ -1655,6 +1603,13 @@ tailwind.config = {
         </label>
       </div>
 
+      <!-- Tour groups -->
+      <div class="border-t border-gray-100 pt-4">
+        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Tour groups</div>
+        <div class="text-xs text-gray-400 mb-3">Partner sees only tours assigned to these groups. Tours with no groups are visible to all partners.</div>
+        <div id="pd-tour-groups-wrap" class="flex flex-wrap gap-2 min-h-6"></div>
+      </div>
+
       <!-- Settlement history -->
       <div class="border-t border-gray-100 pt-4">
         <div class="flex items-center justify-between mb-3">
@@ -2371,6 +2326,7 @@ tailwind.config = {
       notifyEmail: p.notify_email, logo: p.logo_url || null,
       nip: p.nip || '', invoiceEmail: p.invoice_email || '',
       invoiceCompany: p.invoice_company || '', invoiceAddress: p.invoice_address || '',
+      tourGroups: p.tour_groups || [],
       settlements: (p.settlements || []).map(s => ({ period: s.period, amount: s.amount, date: s.settled_date }))
     }));
     renderPartnersTable();
@@ -2523,12 +2479,231 @@ tailwind.config = {
     }).join('');
   }
 
+  // ===== TOURS CONFIG =====
+  let allTourConfig = [];
+  let tourConfigLoaded = false;
+  let editingTourId = null;
+
+  const GROUP_PALETTE = ['bg-blue-100 text-blue-700','bg-green-100 text-green-700','bg-red-100 text-red-700','bg-yellow-100 text-yellow-700','bg-purple-100 text-purple-700','bg-pink-100 text-pink-700','bg-indigo-100 text-indigo-700','bg-orange-100 text-orange-700'];
+  const groupColor = (() => { const map = {}; let i = 0; return g => { if (!map[g]) map[g] = GROUP_PALETTE[i++ % GROUP_PALETTE.length]; return map[g]; }; })();
+  const groupChip = g => `<span class="px-2 py-0.5 rounded-full text-xs font-medium ${groupColor(g)}">${g}</span>`;
+
+  async function loadTourConfig() {
+    const { data, error } = await db.from('tour_config').select('*').order('sort_order');
+    if (error) { console.error('tour_config:', error); return; }
+    allTourConfig = data || [];
+    tourConfigLoaded = true;
+    renderTourConfigTable();
+  }
+
+  function renderTourConfigTable() {
+    const loading  = document.getElementById('tour-config-loading');
+    const table    = document.getElementById('tour-config-table');
+    const empty    = document.getElementById('tour-config-empty');
+    const subtitle = document.getElementById('tours-config-subtitle');
+    if (loading) loading.classList.add('hidden');
+    if (subtitle) subtitle.textContent = allTourConfig.length + ' tour' + (allTourConfig.length !== 1 ? 's' : '') + ' configured';
+    if (allTourConfig.length === 0) {
+      if (table)  table.classList.add('hidden');
+      if (empty)  empty.classList.remove('hidden');
+      return;
+    }
+    if (table)  table.classList.remove('hidden');
+    if (empty)  empty.classList.add('hidden');
+    const tbody = document.getElementById('tour-config-tbody');
+    tbody.innerHTML = '';
+    allTourConfig.forEach((t, idx) => {
+      const last    = idx === allTourConfig.length - 1;
+      const groups  = (t.groups || []).length > 0 ? t.groups.map(groupChip).join('') : '<span class="text-gray-300">— all partners</span>';
+      tbody.insertAdjacentHTML('beforeend', `
+        <tr class="hover:bg-gray-50 transition-colors ${t.active ? '' : 'opacity-50'}">
+          <td class="px-4 py-3 text-gray-400 font-mono text-xs">${idx + 1}</td>
+          <td class="px-4 py-3 font-semibold text-dark">${t.title}</td>
+          <td class="px-4 py-3 text-gray-400 font-mono text-xs">${t.bokun_id || '—'}</td>
+          <td class="px-4 py-3"><div class="flex flex-wrap gap-1">${groups}</div></td>
+          <td class="px-4 py-3 text-center">
+            <label class="relative inline-flex cursor-pointer">
+              <input type="checkbox" class="sr-only peer" ${t.active ? 'checked' : ''} onchange="toggleTourActive('${t.id}', this.checked)">
+              <div class="w-9 h-5 bg-gray-200 peer-checked:bg-brand rounded-full transition-colors"></div>
+              <div class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4"></div>
+            </label>
+          </td>
+          <td class="px-4 py-3 text-right">
+            <div class="flex items-center justify-end gap-0.5">
+              <button onclick="moveTour('${t.id}',-1)" ${idx===0?'disabled':''} title="Move up" class="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 ${idx===0?'opacity-30 cursor-not-allowed':''}"><i class="fa-solid fa-chevron-up text-xs"></i></button>
+              <button onclick="moveTour('${t.id}',1)"  ${last ?'disabled':''} title="Move down" class="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 ${last?'opacity-30 cursor-not-allowed':''}"><i class="fa-solid fa-chevron-down text-xs"></i></button>
+              <button onclick="openEditTour('${t.id}')" title="Edit" class="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 ml-1"><i class="fa-solid fa-pen text-xs"></i></button>
+              <button onclick="deleteTour('${t.id}')" title="Delete" class="w-6 h-6 flex items-center justify-center rounded hover:bg-red-50 text-gray-300 hover:text-red-400"><i class="fa-solid fa-trash text-xs"></i></button>
+            </div>
+          </td>
+        </tr>`);
+    });
+  }
+
+  function openAddTourModal() {
+    document.getElementById('add-tour-title').value = '';
+    document.getElementById('add-tour-bokun-id').value = '';
+    document.getElementById('modal-add-tour').classList.remove('hidden');
+    setTimeout(() => document.getElementById('add-tour-title').focus(), 50);
+  }
+
+  async function saveAddTour() {
+    const title   = document.getElementById('add-tour-title').value.trim();
+    const bokunId = parseInt(document.getElementById('add-tour-bokun-id').value) || null;
+    if (!title) { alert('Tour name is required.'); return; }
+    const maxOrder = allTourConfig.reduce((m, t) => Math.max(m, t.sort_order || 0), 0);
+    const { data, error } = await db.from('tour_config').insert({ title, bokun_id: bokunId, sort_order: maxOrder + 10, active: true, groups: [] }).select().single();
+    if (error) { alert('Error: ' + error.message); return; }
+    allTourConfig.push(data);
+    renderTourConfigTable();
+    document.getElementById('modal-add-tour').classList.add('hidden');
+    showToast('Tour added.');
+  }
+
+  function openEditTour(id) {
+    const t = allTourConfig.find(x => x.id === id);
+    if (!t) return;
+    editingTourId = id;
+    document.getElementById('edit-tour-title').value    = t.title;
+    document.getElementById('edit-tour-bokun-id').value = t.bokun_id || '';
+    document.getElementById('edit-tour-groups').value   = (t.groups || []).join(', ');
+    document.getElementById('modal-edit-tour').classList.remove('hidden');
+    setTimeout(() => document.getElementById('edit-tour-title').focus(), 50);
+  }
+
+  async function saveEditTour() {
+    const title   = document.getElementById('edit-tour-title').value.trim();
+    const bokunId = parseInt(document.getElementById('edit-tour-bokun-id').value) || null;
+    const groups  = document.getElementById('edit-tour-groups').value.split(',').map(g => g.trim().toLowerCase()).filter(Boolean);
+    if (!title) { alert('Tour name is required.'); return; }
+    const { error } = await db.from('tour_config').update({ title, bokun_id: bokunId, groups }).eq('id', editingTourId);
+    if (error) { alert('Error: ' + error.message); return; }
+    const t = allTourConfig.find(x => x.id === editingTourId);
+    if (t) { t.title = title; t.bokun_id = bokunId; t.groups = groups; }
+    renderTourConfigTable();
+    document.getElementById('modal-edit-tour').classList.add('hidden');
+    showToast('Tour updated.');
+  }
+
+  async function toggleTourActive(id, newActive) {
+    await db.from('tour_config').update({ active: newActive }).eq('id', id);
+    const t = allTourConfig.find(x => x.id === id);
+    if (t) t.active = newActive;
+    renderTourConfigTable();
+  }
+
+  async function moveTour(id, delta) {
+    const idx   = allTourConfig.findIndex(t => t.id === id);
+    const other = allTourConfig[idx + delta];
+    if (!other) return;
+    const a = allTourConfig[idx], b = other;
+    const tempOrder = a.sort_order;
+    a.sort_order = b.sort_order;
+    b.sort_order = tempOrder;
+    await Promise.all([
+      db.from('tour_config').update({ sort_order: a.sort_order }).eq('id', a.id),
+      db.from('tour_config').update({ sort_order: b.sort_order }).eq('id', b.id),
+    ]);
+    allTourConfig.sort((x, y) => (x.sort_order || 0) - (y.sort_order || 0));
+    renderTourConfigTable();
+  }
+
+  async function deleteTour(id) {
+    const t = allTourConfig.find(x => x.id === id);
+    if (!t || !confirm(`Delete "${t.title}" from tour catalogue?`)) return;
+    await db.from('tour_config').delete().eq('id', id);
+    allTourConfig = allTourConfig.filter(x => x.id !== id);
+    renderTourConfigTable();
+    showToast('Tour removed.');
+  }
+
+  async function syncToursFromBokun() {
+    const btn = document.getElementById('btn-sync-tours');
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch animate-spin"></i> Syncing…';
+    btn.disabled = true;
+    try {
+      const past   = new Date(); past.setFullYear(past.getFullYear() - 3);
+      const future = new Date(); future.setFullYear(future.getFullYear() + 2);
+      const fmt    = d => d.toISOString().slice(0, 10);
+      const existingIds    = new Set(allTourConfig.map(t => t.bokun_id).filter(Boolean));
+      const existingTitles = new Set(allTourConfig.map(t => t.title.toLowerCase().trim()));
+      let page = 0, newCount = 0;
+      while (true) {
+        const { data: res } = await db.functions.invoke('bokun-sync', {
+          body: { path: '/booking.json/booking-search', method: 'POST',
+            payload: { startDate: fmt(past), endDate: fmt(future), pageSize: 500, page } }
+        });
+        const items = res?.body?.items || [];
+        if (items.length === 0) break;
+        for (const item of items) {
+          const pb      = item.productBookings?.[0];
+          const bokunId = pb?.product?.id;
+          const title   = (pb?.product?.title || pb?.product?.name || '').trim();
+          if (!title) continue;
+          if (existingIds.has(bokunId) || existingTitles.has(title.toLowerCase())) continue;
+          const maxOrder = allTourConfig.reduce((m, t) => Math.max(m, t.sort_order || 0), 0);
+          const { data: newT } = await db.from('tour_config').insert({ title, bokun_id: bokunId || null, sort_order: maxOrder + 10, active: true, groups: [] }).select().single();
+          if (newT) {
+            allTourConfig.push(newT);
+            if (bokunId) existingIds.add(bokunId);
+            existingTitles.add(title.toLowerCase());
+            newCount++;
+          }
+        }
+        if (items.length < 500) break;
+        page++;
+      }
+      allTourConfig.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+      renderTourConfigTable();
+      showToast(newCount > 0 ? `Sync done — ${newCount} new tour${newCount !== 1 ? 's' : ''} added.` : 'Sync done — no new tours found.');
+    } catch(e) {
+      showToast('Sync failed: ' + e.message);
+    }
+    btn.innerHTML = '<i class="fa-solid fa-rotate"></i> Sync from Bokun';
+    btn.disabled = false;
+  }
+
+  function renderPartnerTourGroups(currentGroups) {
+    const allGroups = [...new Set(allTourConfig.flatMap(t => t.groups || []))].sort();
+    const wrap = document.getElementById('pd-tour-groups-wrap');
+    if (!wrap) return;
+    if (allGroups.length === 0) {
+      wrap.innerHTML = '<span class="text-xs text-gray-300 italic">No groups defined yet — edit tours to add group names first.</span>';
+      return;
+    }
+    wrap.innerHTML = allGroups.map(g => {
+      const checked = (currentGroups || []).includes(g);
+      const cls = groupColor(g);
+      return `<label class="flex items-center gap-1.5 cursor-pointer px-2.5 py-1 rounded-full border ${checked ? cls + ' border-transparent' : 'border-gray-200 text-gray-500'} transition-colors">
+        <input type="checkbox" value="${g}" ${checked ? 'checked' : ''} class="partner-tour-group-cb sr-only">
+        <span class="text-xs font-medium">${g}</span>
+      </label>`;
+    }).join('');
+    wrap.querySelectorAll('label').forEach(lbl => {
+      lbl.addEventListener('click', () => {
+        const cb  = lbl.querySelector('input');
+        cb.checked = !cb.checked;
+        const cls = groupColor(lbl.querySelector('span').textContent);
+        lbl.className = lbl.className.replace(/bg-\S+ text-\S+|border-gray-200 text-gray-500/, '');
+        if (cb.checked) {
+          lbl.classList.remove('border-gray-200','text-gray-500');
+          lbl.classList.add(...cls.split(' '), 'border-transparent');
+        } else {
+          cls.split(' ').forEach(c => lbl.classList.remove(c));
+          lbl.classList.remove('border-transparent');
+          lbl.classList.add('border-gray-200','text-gray-500');
+        }
+      });
+    });
+  }
+
   function showSection(name) {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     document.getElementById('section-' + name).classList.add('active');
     document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
     const btn = [...document.querySelectorAll('.sidebar-link')].find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes("'" + name + "'"));
     if (btn) btn.classList.add('active');
+    if (name === 'tours' && !tourConfigLoaded) loadTourConfig();
   }
 
   // ===== Dashboard chart =====
@@ -3338,6 +3513,13 @@ tailwind.config = {
     // Notifications
     document.getElementById('pd-notify-email').checked = !!p.notifyEmail;
 
+    // Tour groups — load tour_config first if needed
+    if (!tourConfigLoaded) {
+      loadTourConfig().then(() => renderPartnerTourGroups(p.tourGroups));
+    } else {
+      renderPartnerTourGroups(p.tourGroups);
+    }
+
     // Settlement history
     renderSettlementHistory(p.settlements || []);
     // Activate / Deactivate block
@@ -3387,13 +3569,15 @@ tailwind.config = {
     p.invoiceEmail   = document.getElementById('pd-edit-invoice-email').value;
     p.invoiceCompany = document.getElementById('pd-edit-invoice-company').value;
     p.invoiceAddress = document.getElementById('pd-edit-invoice-address').value;
+    p.tourGroups     = [...document.querySelectorAll('.partner-tour-group-cb:checked')].map(cb => cb.value);
     await db.from('partners').update({
       name: p.name, type: p.type, contact: p.contact, phone: p.phone,
       email: p.email, address: p.address, comm_rate: p.commRate, notes: p.notes,
       contract_signed: p.contractSigned || null, contract_expiry: p.contractExpiry || null,
       notify_email: p.notifyEmail,
       nip: p.nip, invoice_email: p.invoiceEmail,
-      invoice_company: p.invoiceCompany, invoice_address: p.invoiceAddress
+      invoice_company: p.invoiceCompany, invoice_address: p.invoiceAddress,
+      tour_groups: p.tourGroups
     }).eq('id', editingPartnerId);
     await logActivity('partner_edited', `Partner "${p.name}" details updated`, editingPartnerId);
     renderPartnersTable();
@@ -3526,5 +3710,54 @@ tailwind.config = {
     m.classList.remove('hidden'); m.classList.add('flex');
   }
 </script>
+
+<!-- Modal: Add tour -->
+<div id="modal-add-tour" class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+    <h3 class="font-bold text-dark text-base mb-4">Add tour manually</h3>
+    <div class="space-y-3">
+      <div>
+        <label class="block text-xs text-gray-400 mb-1">Tour name *</label>
+        <input id="add-tour-title" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="e.g. Trip to Zakopane">
+      </div>
+      <div>
+        <label class="block text-xs text-gray-400 mb-1">Bokun product ID <span class="text-gray-300">(optional)</span></label>
+        <input id="add-tour-bokun-id" type="number" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand font-mono" placeholder="e.g. 123456">
+        <div class="text-xs text-gray-400 mt-1">Find in Bokun: Products → Edit → URL: …/products/<strong>ID</strong>/edit</div>
+      </div>
+    </div>
+    <div class="flex gap-2 mt-5">
+      <button onclick="saveAddTour()" class="flex-1 bg-brand hover:bg-brand-dark text-white text-sm font-semibold py-2.5 rounded-xl transition-colors">Add tour</button>
+      <button onclick="document.getElementById('modal-add-tour').classList.add('hidden')" class="px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-500 hover:bg-gray-50 transition-colors">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Edit tour -->
+<div id="modal-edit-tour" class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+    <h3 class="font-bold text-dark text-base mb-4">Edit tour</h3>
+    <div class="space-y-3">
+      <div>
+        <label class="block text-xs text-gray-400 mb-1">Tour name *</label>
+        <input id="edit-tour-title" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+      </div>
+      <div>
+        <label class="block text-xs text-gray-400 mb-1">Bokun product ID</label>
+        <input id="edit-tour-bokun-id" type="number" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand font-mono">
+      </div>
+      <div>
+        <label class="block text-xs text-gray-400 mb-1">Groups <span class="text-gray-300">(comma-separated)</span></label>
+        <input id="edit-tour-groups" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="e.g. krakow, zakopane, shooting">
+        <div class="text-xs text-gray-400 mt-1">Partners with matching groups will see this tour. Leave empty = visible to all.</div>
+      </div>
+    </div>
+    <div class="flex gap-2 mt-5">
+      <button onclick="saveEditTour()" class="flex-1 bg-brand hover:bg-brand-dark text-white text-sm font-semibold py-2.5 rounded-xl transition-colors">Save changes</button>
+      <button onclick="document.getElementById('modal-edit-tour').classList.add('hidden')" class="px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-500 hover:bg-gray-50 transition-colors">Cancel</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

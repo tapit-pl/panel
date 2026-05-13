@@ -2136,86 +2136,55 @@ tailwind.config = {
     if (!grid) return;
     if (bokunProducts.length > 0) { renderTourGrid(); return; }
 
-    const callBokun = (path, method, payload) =>
-      db.functions.invoke('bokun-sync', { body: { path, method, payload } });
-    const bokunOk = (res) => res?.body && ![400, 401, 403, 404, 405].includes(res.body?.status);
+    const partnerGroups = currentPartner?.tour_groups || [];
 
     try {
-      // Step 1: booking-search is confirmed working — extract product IDs from it
-      const today = new Date();
-      const past = new Date(today); past.setMonth(past.getMonth() - 6);
-      const future = new Date(today); future.setDate(future.getDate() + 90);
-      const fmt = d => d.toISOString().slice(0, 10);
-
-      const { data: searchRes, error: searchErr } = await callBokun(
-        '/booking.json/booking-search', 'POST',
-        { startDate: fmt(past), endDate: fmt(future), pageSize: 500, page: 0 }
-      );
-      if (searchErr || !searchRes?.body?.items) throw new Error(searchErr?.message || 'booking-search failed');
-
-      // Step 2: Extract unique products with their Bokun IDs
-      const productMap = new Map();
-      searchRes.body.items.forEach(item => {
-        const pb = item.productBookings?.[0];
-        if (pb?.product?.id && !productMap.has(pb.product.id)) {
-          productMap.set(pb.product.id, { bokunId: pb.product.id, title: pb.product.title || pb.product.name || '—' });
-        }
-      });
-      if (productMap.size === 0) throw new Error('no products found in booking results');
-      console.log('[Tours] Found', productMap.size, 'unique products from booking-search');
-
-      // Step 3: Fetch full details for each product (photos, description, pricing)
-      const details = await Promise.all(
-        Array.from(productMap.values()).map(async (p, idx) => {
-          try {
-            const { data: det } = await callBokun(`/activity.json/${p.bokunId}`, 'GET');
-            if (bokunOk(det)) {
-              const d = det.body;
-              return {
-                id: idx, bokunId: p.bokunId,
-                title: d.title || p.title,
-                description: d.shortDescription || d.description || '',
-                photo: (d.photos||[]).find(x=>x.featured)?.originalUrl || d.photos?.[0]?.originalUrl || getTourPhoto(p.title),
-                cat: getTourCat(d.title || p.title),
-                durationMins: d.durationInMinutes || null,
-                maxPax: d.maxParticipants || null,
-                pricing: d.pricingCategories || [],
-              };
-            }
-          } catch(e) {}
-          return { id: idx, bokunId: p.bokunId, title: p.title, description: '', photo: getTourPhoto(p.title), cat: getTourCat(p.title), durationMins: null, maxPax: null, pricing: [] };
-        })
-      );
-
-      bokunProducts = details.filter(Boolean);
-      console.log('[Tours] Loaded', bokunProducts.length, 'products from Bokun');
-      renderTourGrid();
-      return;
-
-    } catch(e) {
-      console.log('[Tours] Bokun unavailable:', e.message, '— falling back to Supabase');
-    }
-
-    // Fallback: deduplicate tour names from local DB
-    try {
-      const today = new Date();
-      const fwd = new Date(today); fwd.setFullYear(fwd.getFullYear() + 1);
-      const { data: rows, error } = await db
-        .from('bokun_bookings')
-        .select('tour')
-        .gte('tour_date', today.toISOString().slice(0, 10))
-        .lte('tour_date', fwd.toISOString().slice(0, 10))
-        .eq('status', 'CONFIRMED')
-        .not('tour', 'is', null);
+      // Load from tour_config (admin-curated list with sort order and group visibility)
+      const { data: tours, error } = await db.from('tour_config').select('*').eq('active', true).order('sort_order');
       if (error) throw error;
 
-      const seen = new Set();
-      bokunProducts = (rows || [])
-        .map(r => r.tour)
-        .filter(t => t && !seen.has(t) && seen.add(t))
-        .sort()
-        .map((name, idx) => ({ id: idx, bokunId: null, title: name, cat: getTourCat(name), photo: getTourPhoto(name), description: '', durationMins: null, maxPax: null, pricing: [] }));
+      // Filter by partner's groups
+      const visible = (tours || []).filter(t => {
+        if (!t.groups || t.groups.length === 0) return true; // no group restriction → show to all
+        if (partnerGroups.length === 0) return false;        // partner has no groups → only unrestricted tours
+        return t.groups.some(g => partnerGroups.includes(g));
+      });
 
+      if (visible.length === 0) {
+        bokunProducts = [];
+        renderTourGrid();
+        return;
+      }
+
+      // For each tour, try to enrich with Bokun activity details
+      bokunProducts = await Promise.all(visible.map(async (t, idx) => {
+        const base = {
+          id: idx, bokunId: t.bokun_id || null, title: t.title,
+          description: '', photo: getTourPhoto(t.title), cat: getTourCat(t.title),
+          durationMins: null, maxPax: null, pricing: [],
+        };
+        if (!t.bokun_id) return base;
+        try {
+          const { data: det } = await db.functions.invoke('bokun-sync', {
+            body: { path: `/activity.json/${t.bokun_id}`, method: 'GET' }
+          });
+          if (det?.body && ![400, 401, 403, 404].includes(det.body?.status)) {
+            const d = det.body;
+            return {
+              ...base,
+              title: d.title || t.title,
+              description: d.shortDescription || d.description || '',
+              photo: (d.photos||[]).find(x=>x.featured)?.originalUrl || d.photos?.[0]?.originalUrl || getTourPhoto(t.title),
+              durationMins: d.durationInMinutes || null,
+              maxPax: d.maxParticipants || null,
+              pricing: d.pricingCategories || [],
+            };
+          }
+        } catch(e) {}
+        return base;
+      }));
+
+      console.log('[Tours] Loaded', bokunProducts.length, 'tours from tour_config');
       renderTourGrid();
     } catch(e) {
       console.error('[Tours]', e);
