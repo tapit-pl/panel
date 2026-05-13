@@ -1330,6 +1330,14 @@ tailwind.config = {
         </div>
       </div>
 
+      <!-- Language picker — shown when rates are language-based -->
+      <div id="td-language-section" class="hidden border-t border-gray-100 pt-5">
+        <h3 class="font-semibold text-dark text-sm mb-3">
+          <i class="fa-solid fa-language text-brand mr-2"></i>Select language — <span id="td-language-subtitle" class="text-brand font-normal"></span>
+        </h3>
+        <div id="td-language-list" class="flex flex-wrap gap-2"></div>
+      </div>
+
       <!-- Package picker — shown after time selection when multiple rates exist -->
       <div id="td-rate-section" class="hidden border-t border-gray-100 pt-5">
         <h3 class="font-semibold text-dark text-sm mb-3">
@@ -2455,6 +2463,7 @@ tailwind.config = {
     tdRateDateStr = null;
     tdCategorySelections = [];
     document.getElementById('td-category-section').classList.add('hidden');
+    document.getElementById('td-language-section').classList.add('hidden');
 
     const slots = currentTourAvailability[dateStr] || [];
 
@@ -2490,6 +2499,7 @@ tailwind.config = {
     document.getElementById('td-booking-form').classList.add('hidden');
     document.getElementById('td-rate-section').classList.add('hidden');
     document.getElementById('td-category-section').classList.add('hidden');
+    document.getElementById('td-language-section').classList.add('hidden');
     // Highlight selected time button
     document.querySelectorAll('#td-timeslot-list button').forEach((btn, i) => {
       btn.classList.toggle('border-brand', i === slotIdx);
@@ -2498,8 +2508,11 @@ tailwind.config = {
     const rates = tdSelectedTimeSlot?.rates || [];
     const uniqueRates = rates.filter((r, i, a) => a.findIndex(x => x.id === r.id) === i);
     if (uniqueRates.length > 1) {
-      // Multiple packages → show package cart
-      showRatePicker(dateStr, uniqueRates);
+      if (areLanguageRates(uniqueRates)) {
+        showLanguagePicker(dateStr, uniqueRates);
+      } else {
+        showRatePicker(dateStr, uniqueRates);
+      }
     } else {
       tdSelectedRate = uniqueRates[0] || null;
       // Check for per-category pricing (Adult/Child/Infant etc.)
@@ -2579,6 +2592,47 @@ tailwind.config = {
     tdGuestCount = totalPax;
     showBookingForm(document.getElementById('td-timeslot-section').dataset.date
       || document.getElementById('td-category-section').dataset.date);
+  }
+
+  const LANGUAGE_KEYWORDS = ['English','Polish','Polish','German','French','Spanish','Italian','Czech','Slovak','Hungarian','Russian','Ukrainian','Chinese','Japanese','Korean','Portuguese','Dutch','Swedish','Norwegian','Danish','Hebrew','Arabic','Romanian','Bulgarian','Croatian','Serbian','Turkish'];
+
+  function areLanguageRates(rates) {
+    return rates.length > 1 && rates.every(r => LANGUAGE_KEYWORDS.some(lang => r.title.includes(lang)));
+  }
+
+  function showLanguagePicker(dateStr, rates) {
+    const section = document.getElementById('td-language-section');
+    const timeLabel = tdSelectedTimeSlot?.startTime ? ' · ' + tdSelectedTimeSlot.startTime : '';
+    document.getElementById('td-language-subtitle').textContent = formatDate(dateStr) + timeLabel;
+    document.getElementById('td-language-list').innerHTML = rates.map((r, i) => {
+      const lang = LANGUAGE_KEYWORDS.find(l => r.title.includes(l)) || r.title.trim();
+      const flag = { English:'🇬🇧', Polish:'🇵🇱', German:'🇩🇪', French:'🇫🇷', Spanish:'🇪🇸', Italian:'🇮🇹', Czech:'🇨🇿', Slovak:'🇸🇰', Hungarian:'🇭🇺', Russian:'🇷🇺', Ukrainian:'🇺🇦', Chinese:'🇨🇳', Japanese:'🇯🇵', Korean:'🇰🇷', Portuguese:'🇵🇹', Dutch:'🇳🇱', Hebrew:'🇮🇱', Arabic:'🇸🇦', Turkish:'🇹🇷', Romanian:'🇷🇴' }[lang] || '';
+      return `<button onclick="selectLanguage('${dateStr}', ${i})"
+        class="td-lang-btn px-5 py-2.5 rounded-xl border-2 border-gray-200 hover:border-brand hover:bg-brand/5 text-sm font-semibold text-dark transition-all flex items-center gap-2">
+        ${flag ? `<span>${flag}</span>` : ''}<span>${lang}</span>
+      </button>`;
+    }).join('');
+    section.dataset.date = dateStr;
+    section.dataset.rates = JSON.stringify(rates);
+    section.classList.remove('hidden');
+    scrollModalTo(section);
+  }
+
+  function selectLanguage(dateStr, rateIdx) {
+    const rates = JSON.parse(document.getElementById('td-language-section').dataset.rates || '[]');
+    tdSelectedRate = rates[rateIdx];
+    document.querySelectorAll('.td-lang-btn').forEach((btn, i) => {
+      btn.classList.toggle('border-brand', i === rateIdx);
+      btn.classList.toggle('bg-brand/5', i === rateIdx);
+    });
+    // Proceed to category picker or form
+    const slotCatPrices = tdSelectedTimeSlot?.rates?.find(r => r.id === tdSelectedRate?.id)?.pricesByCategory || tdSelectedTimeSlot?.rates?.[0]?.pricesByCategory || [];
+    const categories = (tdCurrentTour?.pricing || []).filter(c => !c.internalUseOnly && slotCatPrices.some(p => p.id === c.id));
+    if (categories.length > 1) {
+      showCategoryPicker(dateStr, categories, slotCatPrices);
+    } else {
+      showBookingForm(dateStr);
+    }
   }
 
   function showRatePicker(dateStr, rates) {
