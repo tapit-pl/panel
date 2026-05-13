@@ -809,10 +809,10 @@ tailwind.config = {
 
         <!-- ===== SECTION: TOURS & PRICING ===== -->
         <div id="section-tours" class="section fade-in">
-          <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center justify-between mb-4">
             <div>
-              <h1 class="text-xl font-bold text-dark">Tours</h1>
-              <p class="text-xs text-gray-400 mt-0.5" id="tours-config-subtitle">Manage tour catalogue and partner visibility</p>
+              <h1 class="text-xl font-bold text-dark">Tours & Pricing</h1>
+              <p class="text-xs text-gray-400 mt-0.5" id="tours-config-subtitle">Tour catalogue with commissions and partner visibility</p>
             </div>
             <div class="flex items-center gap-2">
               <button onclick="syncToursFromBokun()" id="btn-sync-tours"
@@ -821,31 +821,56 @@ tailwind.config = {
               </button>
               <button onclick="openAddTourModal()"
                 class="flex items-center gap-2 bg-brand hover:bg-brand-dark text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors">
-                <i class="fa-solid fa-plus"></i>Add manually
+                <i class="fa-solid fa-plus"></i>Add tour
               </button>
             </div>
           </div>
 
-          <div class="bg-gray-50 rounded-2xl border border-gray-200 px-4 py-3 mb-4 text-xs text-gray-500 flex items-start gap-2">
-            <i class="fa-solid fa-circle-info text-brand mt-0.5"></i>
-            <div>Tours listed here appear in partner panels. <strong>Groups</strong> control visibility — partners see tours matching their assigned groups, or tours with no groups assigned (visible to all).
-            Assign Bokun ID so the system can fetch real photos, descriptions and create bookings in Bokun.</div>
+          <!-- PIN lock banner -->
+          <div id="tours-locked-banner" class="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2 text-sm text-amber-700">
+              <i class="fa-solid fa-lock text-amber-500"></i>
+              <span>Changes are locked — enter PIN to edit</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <input id="tours-pin-input" type="password" maxlength="20" placeholder="PIN"
+                class="w-24 text-center border border-amber-300 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 bg-white"
+                onkeydown="if(event.key==='Enter')tryUnlockEditing()">
+              <button onclick="tryUnlockEditing()"
+                class="px-4 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold rounded-xl transition-colors">
+                Unlock
+              </button>
+            </div>
+          </div>
+          <div id="tours-unlocked-banner" class="hidden bg-green-50 border border-green-200 rounded-2xl px-4 py-3 mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2 text-sm text-green-700">
+              <i class="fa-solid fa-lock-open text-green-500"></i>
+              <span>Editing unlocked — auto-locks in <span id="tours-lock-countdown" class="font-semibold">10:00</span></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="openChangePinModal()" class="text-xs text-gray-500 hover:text-brand px-3 py-1.5 border border-gray-200 rounded-xl bg-white">Change PIN</button>
+              <button onclick="lockEditing()" class="px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-xl transition-colors">
+                <i class="fa-solid fa-lock mr-1"></i>Lock now
+              </button>
+            </div>
           </div>
 
           <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
             <div id="tour-config-loading" class="py-12 text-center text-gray-400 text-sm">
-              <i class="fa-solid fa-circle-notch animate-spin text-xl block mb-3 text-brand"></i>Loading tours...
+              <i class="fa-solid fa-circle-notch animate-spin text-xl block mb-3 text-brand"></i>Loading...
             </div>
             <div id="tour-config-table" class="hidden overflow-x-auto">
               <table class="w-full text-xs">
                 <thead>
-                  <tr class="border-b border-gray-100">
-                    <th class="text-left px-4 py-3 text-gray-400 font-semibold w-8">#</th>
-                    <th class="text-left px-4 py-3 text-gray-400 font-semibold">Tour name</th>
-                    <th class="text-left px-4 py-3 text-gray-400 font-semibold w-24">Bokun ID</th>
-                    <th class="text-left px-4 py-3 text-gray-400 font-semibold">Groups</th>
-                    <th class="text-center px-4 py-3 text-gray-400 font-semibold w-20">Active</th>
-                    <th class="text-right px-4 py-3 w-28"></th>
+                  <tr class="border-b border-gray-100 bg-gray-50/80">
+                    <th class="text-left px-3 py-3 text-gray-400 font-semibold w-8">#</th>
+                    <th class="text-left px-3 py-3 text-gray-400 font-semibold">Tour / Package</th>
+                    <th class="text-left px-3 py-3 text-gray-400 font-semibold w-24">Bokun ID</th>
+                    <th class="text-left px-3 py-3 text-gray-400 font-semibold">Groups</th>
+                    <th class="text-center px-3 py-3 text-gray-400 font-semibold w-28">Price PLN</th>
+                    <th class="text-center px-3 py-3 text-gray-400 font-semibold w-32 text-brand">Commission</th>
+                    <th class="text-center px-3 py-3 text-gray-400 font-semibold w-20">Active</th>
+                    <th class="text-right px-3 py-3 w-36"></th>
                   </tr>
                 </thead>
                 <tbody id="tour-config-tbody" class="divide-y divide-gray-50"></tbody>
@@ -854,53 +879,7 @@ tailwind.config = {
             <div id="tour-config-empty" class="hidden py-12 text-center">
               <div class="text-3xl mb-3">🗺️</div>
               <div class="text-sm font-semibold text-dark mb-1">No tours yet</div>
-              <div class="text-xs text-gray-400 mb-4">Click "Sync from Bokun" to import tours automatically, or add one manually.</div>
-            </div>
-          </div>
-
-          <!-- Commission Rates sub-section -->
-          <div class="mt-6">
-            <div class="flex items-center justify-between mb-3">
-              <div>
-                <h2 class="text-sm font-bold text-dark">Commission Rates</h2>
-                <p class="text-xs text-gray-400 mt-0.5" id="comm-rates-subtitle">Partner commission per tour / package</p>
-              </div>
-              <div class="flex gap-2">
-                <button onclick="loadDefaultCommissions()" id="btn-load-defaults"
-                  class="hidden flex items-center gap-1.5 border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 text-xs font-semibold px-3 py-2 rounded-xl transition-colors">
-                  <i class="fa-solid fa-database"></i>Load defaults
-                </button>
-                <button onclick="openAddCommissionModal()"
-                  class="flex items-center gap-1.5 bg-brand hover:bg-brand-dark text-white text-xs font-semibold px-3 py-2 rounded-xl transition-colors">
-                  <i class="fa-solid fa-plus"></i>Add rate
-                </button>
-              </div>
-            </div>
-            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-              <div id="comm-rates-loading" class="py-8 text-center text-gray-400 text-sm">
-                <i class="fa-solid fa-circle-notch animate-spin text-lg block mb-2 text-brand"></i>Loading...
-              </div>
-              <div id="comm-rates-table" class="hidden overflow-x-auto">
-                <table class="w-full text-xs">
-                  <thead>
-                    <tr class="border-b border-gray-100 bg-gray-50">
-                      <th class="text-left px-4 py-2.5 text-gray-400 font-semibold">Tour / Package name</th>
-                      <th class="text-left px-4 py-2.5 text-gray-400 font-semibold w-24">Category</th>
-                      <th class="text-center px-4 py-2.5 text-gray-400 font-semibold w-28">Price PLN</th>
-                      <th class="text-center px-4 py-2.5 text-gray-400 font-semibold w-32">Commission PLN</th>
-                      <th class="text-center px-4 py-2.5 text-gray-400 font-semibold w-20">Visible</th>
-                      <th class="w-16"></th>
-                    </tr>
-                  </thead>
-                  <tbody id="comm-rates-tbody" class="divide-y divide-gray-50"></tbody>
-                </table>
-              </div>
-              <div id="comm-rates-empty" class="hidden py-10 text-center">
-                <div class="text-2xl mb-2">📋</div>
-                <div class="text-sm font-semibold text-dark mb-1">No commission rates yet</div>
-                <div class="text-xs text-gray-400 mb-3">Click "Load defaults" to populate with the standard rate table.</div>
-                <button onclick="loadDefaultCommissions()" class="text-xs px-4 py-2 bg-brand text-white rounded-xl hover:bg-brand-dark transition-colors font-semibold">Load defaults</button>
-              </div>
+              <div class="text-xs text-gray-400 mb-4">Click "Sync from Bokun" to import tours, or add manually. Then click the pencil to set Bokun ID, groups and commission rates.</div>
             </div>
           </div>
         </div>
@@ -2535,9 +2514,13 @@ tailwind.config = {
   const groupChip = g => `<span class="px-2 py-0.5 rounded-full text-xs font-medium ${groupColor(g)}">${g}</span>`;
 
   async function loadTourConfig() {
-    const { data, error } = await db.from('tour_config').select('*').order('sort_order');
-    if (error) { console.error('tour_config:', error); return; }
-    allTourConfig = data || [];
+    const [tourRes, commRes] = await Promise.all([
+      db.from('tour_config').select('*').order('sort_order'),
+      db.from('tour_commissions').select('*').order('sort_order'),
+    ]);
+    if (tourRes.error) { console.error('tour_config:', tourRes.error); }
+    allTourConfig   = tourRes.data || [];
+    allCommissions  = commRes.data || [];
     tourConfigLoaded = true;
     renderTourConfigTable();
   }
@@ -2548,41 +2531,90 @@ tailwind.config = {
     const empty    = document.getElementById('tour-config-empty');
     const subtitle = document.getElementById('tours-config-subtitle');
     if (loading) loading.classList.add('hidden');
-    if (subtitle) subtitle.textContent = allTourConfig.length + ' tour' + (allTourConfig.length !== 1 ? 's' : '') + ' configured';
+    const totalPkgs = allCommissions.filter(c => c.active).length;
+    if (subtitle) subtitle.textContent = `${allTourConfig.length} tour${allTourConfig.length !== 1 ? 's' : ''} · ${totalPkgs} active package${totalPkgs !== 1 ? 's' : ''}`;
     if (allTourConfig.length === 0) {
-      if (table)  table.classList.add('hidden');
-      if (empty)  empty.classList.remove('hidden');
+      if (table) table.classList.add('hidden');
+      if (empty) empty.classList.remove('hidden');
       return;
     }
-    if (table)  table.classList.remove('hidden');
-    if (empty)  empty.classList.add('hidden');
+    if (table) table.classList.remove('hidden');
+    if (empty) empty.classList.add('hidden');
     const tbody = document.getElementById('tour-config-tbody');
     tbody.innerHTML = '';
+    const locked = !editingUnlocked;
+    const lockCls = locked ? 'opacity-40 pointer-events-none select-none' : '';
     allTourConfig.forEach((t, idx) => {
-      const last    = idx === allTourConfig.length - 1;
-      const groups  = (t.groups || []).length > 0 ? t.groups.map(groupChip).join('') : '<span class="text-gray-300">— all partners</span>';
+      const last     = idx === allTourConfig.length - 1;
+      const groups   = (t.groups || []).length > 0 ? t.groups.map(groupChip).join('') : '<span class="text-gray-300 text-xs">all partners</span>';
+      const packages = allCommissions.filter(c => c.tour_config_id === t.id).sort((a,b) => (a.sort_order||0)-(b.sort_order||0));
+      // Tour row
       tbody.insertAdjacentHTML('beforeend', `
-        <tr class="hover:bg-gray-50 transition-colors ${t.active ? '' : 'opacity-50'}">
-          <td class="px-4 py-3 text-gray-400 font-mono text-xs">${idx + 1}</td>
-          <td class="px-4 py-3 font-semibold text-dark">${t.title}</td>
-          <td class="px-4 py-3 text-gray-400 font-mono text-xs">${t.bokun_id || '—'}</td>
-          <td class="px-4 py-3"><div class="flex flex-wrap gap-1">${groups}</div></td>
-          <td class="px-4 py-3 text-center">
-            <label class="relative inline-flex cursor-pointer">
-              <input type="checkbox" class="sr-only peer" ${t.active ? 'checked' : ''} onchange="toggleTourActive('${t.id}', this.checked)">
+        <tr class="hover:bg-gray-50/60 transition-colors border-t border-gray-100 ${t.active ? '' : 'opacity-50'}">
+          <td class="px-3 py-2.5 text-gray-300 font-mono text-xs">${idx + 1}</td>
+          <td class="px-3 py-2.5 font-semibold text-dark text-xs">${t.title}</td>
+          <td class="px-3 py-2.5 font-mono text-xs text-gray-400">${t.bokun_id || '<span class="text-red-300">no id</span>'}</td>
+          <td class="px-3 py-2.5"><div class="flex flex-wrap gap-1">${groups}</div></td>
+          <td class="px-3 py-2.5 text-center text-gray-300 text-xs">—</td>
+          <td class="px-3 py-2.5 text-center text-gray-300 text-xs">—</td>
+          <td class="px-3 py-2.5 text-center">
+            <label class="relative inline-flex ${lockCls} cursor-pointer">
+              <input type="checkbox" class="sr-only peer" ${t.active ? 'checked' : ''} ${locked ? 'disabled' : ''} onchange="toggleTourActive('${t.id}', this.checked)">
               <div class="w-9 h-5 bg-gray-300 peer-checked:bg-green-500 rounded-full transition-colors"></div>
               <div class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4"></div>
             </label>
           </td>
-          <td class="px-4 py-3 text-right">
+          <td class="px-3 py-2.5 text-right">
             <div class="flex items-center justify-end gap-0.5">
-              <button onclick="moveTour('${t.id}',-1)" ${idx===0?'disabled':''} title="Move up" class="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 ${idx===0?'opacity-30 cursor-not-allowed':''}"><i class="fa-solid fa-chevron-up text-xs"></i></button>
-              <button onclick="moveTour('${t.id}',1)"  ${last ?'disabled':''} title="Move down" class="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 ${last?'opacity-30 cursor-not-allowed':''}"><i class="fa-solid fa-chevron-down text-xs"></i></button>
-              <button onclick="openEditTour('${t.id}')" title="Edit" class="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 ml-1"><i class="fa-solid fa-pen text-xs"></i></button>
-              <button onclick="deleteTour('${t.id}')" title="Delete" class="w-6 h-6 flex items-center justify-center rounded hover:bg-red-50 text-gray-300 hover:text-red-400"><i class="fa-solid fa-trash text-xs"></i></button>
+              <button onclick="openAddPackageModal('${t.id}')" title="Add package" class="text-xs px-2 py-1 rounded-lg border border-dashed border-brand/40 text-brand hover:bg-brand/5 transition-colors ${lockCls}">+ pkg</button>
+              <button onclick="moveTour('${t.id}',-1)" ${idx===0||locked?'disabled':''} title="Move up" class="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 ${idx===0?'opacity-20 cursor-not-allowed':''} ${lockCls}"><i class="fa-solid fa-chevron-up text-xs"></i></button>
+              <button onclick="moveTour('${t.id}',1)" ${last||locked?'disabled':''} title="Move down" class="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 ${last?'opacity-20 cursor-not-allowed':''} ${lockCls}"><i class="fa-solid fa-chevron-down text-xs"></i></button>
+              <button onclick="openEditTour('${t.id}')" title="Edit tour" class="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 ${lockCls}"><i class="fa-solid fa-pen text-xs"></i></button>
+              <button onclick="deleteTour('${t.id}')" title="Delete" class="w-6 h-6 flex items-center justify-center rounded hover:bg-red-50 text-gray-300 hover:text-red-400 ${lockCls}"><i class="fa-solid fa-trash text-xs"></i></button>
             </div>
           </td>
         </tr>`);
+      // Package sub-rows
+      packages.forEach(pkg => {
+        tbody.insertAdjacentHTML('beforeend', `
+          <tr class="bg-gray-50/40 ${pkg.active ? '' : 'opacity-40'}">
+            <td class="pl-5 py-2 text-gray-300 text-sm">└</td>
+            <td class="pl-2 pr-3 py-2 text-xs text-gray-600">${pkg.title}</td>
+            <td class="px-3 py-2 text-gray-300 text-xs">—</td>
+            <td class="px-3 py-2 text-gray-300 text-xs">—</td>
+            <td class="px-3 py-2 text-center">
+              <input type="number" value="${pkg.price_pln || 0}" min="0" ${locked ? 'disabled' : ''}
+                class="w-20 text-center text-xs border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 ${locked ? 'bg-gray-100' : 'bg-white'}"
+                onchange="quickSavePkg('${pkg.id}', 'price_pln', parseInt(this.value)||0)">
+            </td>
+            <td class="px-3 py-2 text-center">
+              <input type="number" value="${pkg.commission_pln || 0}" min="0" ${locked ? 'disabled' : ''}
+                class="w-20 text-center text-xs border border-brand/30 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 font-semibold text-brand ${locked ? 'bg-gray-100' : 'bg-brand/5'}"
+                onchange="quickSavePkg('${pkg.id}', 'commission_pln', parseInt(this.value)||0)">
+            </td>
+            <td class="px-3 py-2 text-center">
+              <label class="relative inline-flex ${lockCls} cursor-pointer">
+                <input type="checkbox" class="sr-only peer" ${pkg.active ? 'checked' : ''} ${locked ? 'disabled' : ''} onchange="togglePkgActive('${pkg.id}', this.checked)">
+                <div class="w-8 h-4 bg-gray-300 peer-checked:bg-green-500 rounded-full transition-colors"></div>
+                <div class="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4"></div>
+              </label>
+            </td>
+            <td class="px-3 py-2 text-right">
+              <div class="flex items-center justify-end gap-0.5 ${lockCls}">
+                <button onclick="openEditPackageModal('${pkg.id}')" title="Edit package" class="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400"><i class="fa-solid fa-pen text-xs"></i></button>
+                <button onclick="deletePackage('${pkg.id}')" title="Delete package" class="w-6 h-6 flex items-center justify-center rounded hover:bg-red-50 text-gray-300 hover:text-red-400"><i class="fa-solid fa-trash text-xs"></i></button>
+              </div>
+            </td>
+          </tr>`);
+      });
+      // "no packages" hint row
+      if (packages.length === 0) {
+        tbody.insertAdjacentHTML('beforeend', `
+          <tr class="bg-gray-50/20">
+            <td class="pl-5 py-1.5 text-gray-200 text-sm">└</td>
+            <td colspan="7" class="pl-2 pr-3 py-1.5 text-xs text-gray-300 italic">No packages — click "+ pkg" to add price &amp; commission</td>
+          </tr>`);
+      }
     });
   }
 
@@ -2663,11 +2695,16 @@ tailwind.config = {
     showToast('Tour removed.');
   }
 
-  // ===== COMMISSION RATES =====
-  let allCommissions = [];
-  let editingCommId = null;
+  // ===== PIN LOCK + PACKAGE MANAGEMENT =====
+  let allCommissions  = [];
+  let editingCommId   = null;
+  let editingPkgId    = null;
+  let addPkgTourId    = null;
+  let editingUnlocked = false;
+  let unlockTimer     = null;
+  let unlockSecondsLeft = 0;
 
-  // Default seed data matching the static HTML table in partner panel
+  // Default seed (used when "Load defaults" is triggered from "no packages" hint)
   const COMMISSION_DEFAULTS = [
     { title: 'Shooting 15 boll Band of Brothers', category: 'shooting', price_pln: 299, commission_pln: 60, sort_order: 10 },
     { title: 'Shooting 25 boll Soldier', category: 'shooting', price_pln: 359, commission_pln: 70, sort_order: 20 },
@@ -2701,158 +2738,153 @@ tailwind.config = {
     { title: 'Airport transfer', category: 'other', price_pln: 159, commission_pln: 30, sort_order: 300 },
   ];
 
-  const CAT_LABEL = { shooting: 'Shooting', zakopane: 'Zakopane', krakow: 'Kraków', auschwitz: 'Auschwitz', active: 'Active', other: 'Other' };
-
-  async function loadCommissionRates() {
-    const { data, error } = await db.from('tour_commissions').select('*').order('sort_order');
-    const loading = document.getElementById('comm-rates-loading');
-    const table   = document.getElementById('comm-rates-table');
-    const empty   = document.getElementById('comm-rates-empty');
-    const sub     = document.getElementById('comm-rates-subtitle');
-    if (loading) loading.classList.add('hidden');
-    if (error) {
-      // Table might not exist yet
-      if (empty) { empty.classList.remove('hidden'); document.getElementById('btn-load-defaults')?.classList.remove('hidden'); }
+  // ===== PIN LOCK =====
+  async function tryUnlockEditing() {
+    const pin = document.getElementById('tours-pin-input').value;
+    if (!pin) return;
+    const { data: valid, error } = await db.rpc('verify_admin_pin', { input_pin: pin });
+    document.getElementById('tours-pin-input').value = '';
+    if (error || !valid) {
+      showToast('Incorrect PIN.', true);
+      document.getElementById('tours-pin-input').classList.add('border-red-400');
+      setTimeout(() => document.getElementById('tours-pin-input').classList.remove('border-red-400'), 1500);
       return;
     }
-    allCommissions = data || [];
-    if (sub) sub.textContent = allCommissions.filter(x => x.active).length + ' active rates';
-    if (allCommissions.length === 0) {
-      if (empty) empty.classList.remove('hidden');
-      document.getElementById('btn-load-defaults')?.classList.remove('hidden');
-      return;
-    }
-    if (table) table.classList.remove('hidden');
-    renderCommissionRatesTable();
+    editingUnlocked = true;
+    unlockSecondsLeft = 600; // 10 minutes
+    document.getElementById('tours-locked-banner').classList.add('hidden');
+    document.getElementById('tours-unlocked-banner').classList.remove('hidden');
+    renderTourConfigTable();
+    if (unlockTimer) clearInterval(unlockTimer);
+    unlockTimer = setInterval(() => {
+      unlockSecondsLeft--;
+      const m = Math.floor(unlockSecondsLeft / 60).toString().padStart(2, '0');
+      const s = (unlockSecondsLeft % 60).toString().padStart(2, '0');
+      const el = document.getElementById('tours-lock-countdown');
+      if (el) el.textContent = `${m}:${s}`;
+      if (unlockSecondsLeft <= 0) lockEditing();
+    }, 1000);
   }
 
-  function renderCommissionRatesTable() {
-    const tbody = document.getElementById('comm-rates-tbody');
-    if (!tbody) return;
-    // Group by category
-    const cats = [...new Set(allCommissions.map(c => c.category || ''))];
-    tbody.innerHTML = '';
-    cats.forEach(cat => {
-      const rows = allCommissions.filter(c => c.category === cat);
-      if (rows.length === 0) return;
-      tbody.insertAdjacentHTML('beforeend',
-        `<tr class="bg-orange-50/60"><td colspan="6" class="px-4 py-1.5 text-xs font-bold text-brand uppercase tracking-wide">${CAT_LABEL[cat] || cat}</td></tr>`);
-      rows.forEach(c => {
-        tbody.insertAdjacentHTML('beforeend', `
-          <tr class="hover:bg-gray-50 transition-colors ${c.active ? '' : 'opacity-40'}">
-            <td class="px-4 py-2.5 font-medium text-dark">${c.title}</td>
-            <td class="px-4 py-2.5 text-gray-400 text-xs">${CAT_LABEL[c.category] || c.category}</td>
-            <td class="px-4 py-2.5 text-center">
-              <input type="number" value="${c.price_pln || 0}" min="0"
-                class="w-20 text-center text-xs border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
-                onchange="quickSaveCommField('${c.id}', 'price_pln', parseInt(this.value)||0)">
-            </td>
-            <td class="px-4 py-2.5 text-center">
-              <input type="number" value="${c.commission_pln || 0}" min="0"
-                class="w-20 text-center text-xs border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-brand font-semibold"
-                onchange="quickSaveCommField('${c.id}', 'commission_pln', parseInt(this.value)||0)">
-            </td>
-            <td class="px-4 py-2.5 text-center">
-              <label class="relative inline-flex cursor-pointer">
-                <input type="checkbox" class="sr-only peer" ${c.active ? 'checked' : ''} onchange="toggleCommActive('${c.id}', this.checked)">
-                <div class="w-8 h-4 bg-gray-300 peer-checked:bg-green-500 rounded-full transition-colors"></div>
-                <div class="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4"></div>
-              </label>
-            </td>
-            <td class="px-4 py-2.5 text-right">
-              <div class="flex items-center justify-end gap-0.5">
-                <button onclick="openEditCommModal('${c.id}')" title="Edit" class="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400"><i class="fa-solid fa-pen text-xs"></i></button>
-                <button onclick="deleteCommRate('${c.id}')" title="Delete" class="w-6 h-6 flex items-center justify-center rounded hover:bg-red-50 text-gray-300 hover:text-red-400"><i class="fa-solid fa-trash text-xs"></i></button>
-              </div>
-            </td>
-          </tr>`);
-      });
-    });
+  function lockEditing() {
+    editingUnlocked = false;
+    if (unlockTimer) { clearInterval(unlockTimer); unlockTimer = null; }
+    document.getElementById('tours-locked-banner').classList.remove('hidden');
+    document.getElementById('tours-unlocked-banner').classList.add('hidden');
+    renderTourConfigTable();
   }
 
-  async function quickSaveCommField(id, field, value) {
-    await db.from('tour_commissions').update({ [field]: value }).eq('id', id);
+  function openChangePinModal() {
+    document.getElementById('change-pin-current').value = '';
+    document.getElementById('change-pin-new').value     = '';
+    document.getElementById('change-pin-confirm').value = '';
+    document.getElementById('change-pin-error').classList.add('hidden');
+    document.getElementById('modal-change-pin').classList.remove('hidden');
+    setTimeout(() => document.getElementById('change-pin-current').focus(), 50);
+  }
+
+  async function saveChangePin() {
+    const current  = document.getElementById('change-pin-current').value;
+    const newPin   = document.getElementById('change-pin-new').value;
+    const confirm  = document.getElementById('change-pin-confirm').value;
+    const errEl    = document.getElementById('change-pin-error');
+    errEl.classList.add('hidden');
+    if (!newPin || newPin.length < 4) { errEl.textContent = 'New PIN must be at least 4 characters.'; errEl.classList.remove('hidden'); return; }
+    if (newPin !== confirm)           { errEl.textContent = 'PINs do not match.'; errEl.classList.remove('hidden'); return; }
+    const { data: ok, error } = await db.rpc('change_admin_pin', { current_pin: current, new_pin: newPin });
+    if (error || !ok) { errEl.textContent = 'Current PIN is incorrect.'; errEl.classList.remove('hidden'); return; }
+    document.getElementById('modal-change-pin').classList.add('hidden');
+    showToast('PIN changed successfully.');
+  }
+
+  // ===== PACKAGE (COMMISSION) MANAGEMENT =====
+  async function quickSavePkg(id, field, value) {
+    const { error } = await db.from('tour_commissions').update({ [field]: value }).eq('id', id);
+    if (error) { showToast('Save error: ' + error.message, true); return; }
     const c = allCommissions.find(x => x.id === id);
     if (c) c[field] = value;
   }
 
-  async function toggleCommActive(id, active) {
+  async function togglePkgActive(id, active) {
     await db.from('tour_commissions').update({ active }).eq('id', id);
     const c = allCommissions.find(x => x.id === id);
     if (c) c.active = active;
-    renderCommissionRatesTable();
+    renderTourConfigTable();
   }
 
-  function openAddCommissionModal() {
-    document.getElementById('add-comm-title').value = '';
-    document.getElementById('add-comm-cat').value   = '';
-    document.getElementById('add-comm-price').value = '';
-    document.getElementById('add-comm-comm').value  = '';
-    document.getElementById('modal-add-comm').classList.remove('hidden');
-    setTimeout(() => document.getElementById('add-comm-title').focus(), 50);
+  function openAddPackageModal(tourId) {
+    addPkgTourId = tourId;
+    const t = allTourConfig.find(x => x.id === tourId);
+    document.getElementById('add-pkg-tour-label').textContent = t ? t.title : '';
+    document.getElementById('add-pkg-title').value    = '';
+    document.getElementById('add-pkg-category').value = '';
+    document.getElementById('add-pkg-price').value    = '';
+    document.getElementById('add-pkg-comm').value     = '';
+    document.getElementById('modal-add-pkg').classList.remove('hidden');
+    setTimeout(() => document.getElementById('add-pkg-title').focus(), 50);
   }
 
-  async function saveAddCommission() {
-    const title  = document.getElementById('add-comm-title').value.trim();
-    const cat    = document.getElementById('add-comm-cat').value.trim().toLowerCase();
-    const price  = parseInt(document.getElementById('add-comm-price').value) || 0;
-    const comm   = parseInt(document.getElementById('add-comm-comm').value) || 0;
-    if (!title) { alert('Name is required.'); return; }
+  async function saveAddPackage() {
+    const title = document.getElementById('add-pkg-title').value.trim();
+    const cat   = document.getElementById('add-pkg-category').value.trim().toLowerCase();
+    const price = parseInt(document.getElementById('add-pkg-price').value) || 0;
+    const comm  = parseInt(document.getElementById('add-pkg-comm').value) || 0;
+    if (!title) { alert('Package name is required.'); return; }
     const maxOrder = allCommissions.reduce((m, c) => Math.max(m, c.sort_order || 0), 0);
     const { data, error } = await db.from('tour_commissions')
-      .insert({ title, category: cat, price_pln: price, commission_pln: comm, sort_order: maxOrder + 10, active: true })
+      .insert({ title, category: cat, price_pln: price, commission_pln: comm, tour_config_id: addPkgTourId, sort_order: maxOrder + 10, active: true })
       .select().single();
     if (error) { alert('Error: ' + error.message); return; }
     allCommissions.push(data);
-    document.getElementById('comm-rates-empty')?.classList.add('hidden');
-    document.getElementById('comm-rates-table')?.classList.remove('hidden');
-    renderCommissionRatesTable();
-    document.getElementById('modal-add-comm').classList.add('hidden');
-    showToast('Commission rate added.');
+    renderTourConfigTable();
+    document.getElementById('modal-add-pkg').classList.add('hidden');
+    showToast('Package added.');
   }
 
-  function openEditCommModal(id) {
+  function openEditPackageModal(id) {
     const c = allCommissions.find(x => x.id === id);
     if (!c) return;
-    editingCommId = id;
-    document.getElementById('edit-comm-title').value = c.title;
-    document.getElementById('edit-comm-cat').value   = c.category || '';
-    document.getElementById('edit-comm-price').value = c.price_pln || '';
-    document.getElementById('edit-comm-comm').value  = c.commission_pln || '';
-    document.getElementById('modal-edit-comm').classList.remove('hidden');
+    editingPkgId = id;
+    document.getElementById('edit-pkg-title').value    = c.title;
+    document.getElementById('edit-pkg-category').value = c.category || '';
+    document.getElementById('edit-pkg-price').value    = c.price_pln || '';
+    document.getElementById('edit-pkg-comm').value     = c.commission_pln || '';
+    document.getElementById('modal-edit-pkg').classList.remove('hidden');
+    setTimeout(() => document.getElementById('edit-pkg-title').focus(), 50);
   }
 
-  async function saveEditCommission() {
-    const title = document.getElementById('edit-comm-title').value.trim();
-    const cat   = document.getElementById('edit-comm-cat').value.trim().toLowerCase();
-    const price = parseInt(document.getElementById('edit-comm-price').value) || 0;
-    const comm  = parseInt(document.getElementById('edit-comm-comm').value) || 0;
+  async function saveEditPackage() {
+    const title = document.getElementById('edit-pkg-title').value.trim();
+    const cat   = document.getElementById('edit-pkg-category').value.trim().toLowerCase();
+    const price = parseInt(document.getElementById('edit-pkg-price').value) || 0;
+    const comm  = parseInt(document.getElementById('edit-pkg-comm').value) || 0;
     if (!title) { alert('Name is required.'); return; }
     const { error } = await db.from('tour_commissions')
       .update({ title, category: cat, price_pln: price, commission_pln: comm })
-      .eq('id', editingCommId);
+      .eq('id', editingPkgId);
     if (error) { alert('Error: ' + error.message); return; }
-    const c = allCommissions.find(x => x.id === editingCommId);
+    const c = allCommissions.find(x => x.id === editingPkgId);
     if (c) { c.title = title; c.category = cat; c.price_pln = price; c.commission_pln = comm; }
-    renderCommissionRatesTable();
-    document.getElementById('modal-edit-comm').classList.add('hidden');
-    showToast('Commission rate updated.');
+    renderTourConfigTable();
+    document.getElementById('modal-edit-pkg').classList.add('hidden');
+    showToast('Package updated.');
   }
 
-  async function deleteCommRate(id) {
+  async function deletePackage(id) {
     const c = allCommissions.find(x => x.id === id);
-    if (!c || !confirm(`Delete "${c.title}"?`)) return;
+    if (!c || !confirm(`Delete package "${c.title}"?`)) return;
     await db.from('tour_commissions').delete().eq('id', id);
     allCommissions = allCommissions.filter(x => x.id !== id);
-    renderCommissionRatesTable();
-    showToast('Rate deleted.');
+    renderTourConfigTable();
+    showToast('Package deleted.');
   }
 
+  // Keep loadDefaultCommissions for seeding (can be called from console if needed)
   async function loadDefaultCommissions() {
     if (!confirm(`This will add ${COMMISSION_DEFAULTS.length} default commission rates. Continue?`)) return;
     const { error } = await db.from('tour_commissions').insert(COMMISSION_DEFAULTS);
     if (error) { alert('Error: ' + error.message); return; }
-    await loadCommissionRates();
+    await loadTourConfig();
     showToast('Default commission rates loaded!');
   }
 
@@ -2943,7 +2975,6 @@ tailwind.config = {
     const btn = [...document.querySelectorAll('.sidebar-link')].find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes("'" + name + "'"));
     if (btn) btn.classList.add('active');
     if (name === 'tours' && !tourConfigLoaded) loadTourConfig();
-    if (name === 'tours' && !allCommissions.length) loadCommissionRates();
   }
 
   // ===== Dashboard chart =====
@@ -3999,64 +4030,92 @@ tailwind.config = {
   </div>
 </div>
 
-<!-- Add Commission Rate Modal -->
-<div id="modal-add-comm" class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+<!-- Add Package Modal -->
+<div id="modal-add-pkg" class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-    <h3 class="text-sm font-bold text-dark mb-4">Add Commission Rate</h3>
+    <h3 class="text-sm font-bold text-dark mb-1">Add Package</h3>
+    <p id="add-pkg-tour-label" class="text-xs text-gray-400 mb-4"></p>
     <div class="space-y-3">
       <div>
-        <label class="block text-xs font-semibold text-gray-600 mb-1">Tour / package name</label>
-        <input id="add-comm-title" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="e.g. Shooting 15 boll Band of Brothers">
+        <label class="block text-xs font-semibold text-gray-600 mb-1">Package name</label>
+        <input id="add-pkg-title" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="e.g. Shooting 15 boll Band of Brothers">
       </div>
       <div>
         <label class="block text-xs font-semibold text-gray-600 mb-1">Category</label>
-        <input id="add-comm-cat" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="shooting / zakopane / krakow / auschwitz / active / other">
+        <input id="add-pkg-cat" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="shooting / zakopane / krakow / auschwitz / active / other">
       </div>
       <div class="grid grid-cols-2 gap-3">
         <div>
           <label class="block text-xs font-semibold text-gray-600 mb-1">Price PLN (guest pays)</label>
-          <input id="add-comm-price" type="number" min="0" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="299">
+          <input id="add-pkg-price" type="number" min="0" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="299">
         </div>
         <div>
           <label class="block text-xs font-semibold text-gray-600 mb-1">Commission PLN (hotel earns)</label>
-          <input id="add-comm-comm" type="number" min="0" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="60">
+          <input id="add-pkg-comm" type="number" min="0" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="60">
         </div>
       </div>
     </div>
     <div class="flex gap-2 mt-5">
-      <button onclick="document.getElementById('modal-add-comm').classList.add('hidden')" class="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-500 hover:bg-gray-50 transition-colors">Cancel</button>
-      <button onclick="saveAddCommission()" class="flex-1 px-4 py-2.5 bg-brand hover:bg-brand-dark text-white rounded-xl text-sm font-semibold transition-colors">Add</button>
+      <button onclick="document.getElementById('modal-add-pkg').classList.add('hidden')" class="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-500 hover:bg-gray-50 transition-colors">Cancel</button>
+      <button onclick="saveAddPackage()" class="flex-1 px-4 py-2.5 bg-brand hover:bg-brand-dark text-white rounded-xl text-sm font-semibold transition-colors">Add</button>
     </div>
   </div>
 </div>
 
-<!-- Edit Commission Rate Modal -->
-<div id="modal-edit-comm" class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+<!-- Edit Package Modal -->
+<div id="modal-edit-pkg" class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-    <h3 class="text-sm font-bold text-dark mb-4">Edit Commission Rate</h3>
+    <h3 class="text-sm font-bold text-dark mb-4">Edit Package</h3>
+    <input type="hidden" id="edit-pkg-id">
     <div class="space-y-3">
       <div>
-        <label class="block text-xs font-semibold text-gray-600 mb-1">Tour / package name</label>
-        <input id="edit-comm-title" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        <label class="block text-xs font-semibold text-gray-600 mb-1">Package name</label>
+        <input id="edit-pkg-title" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
       </div>
       <div>
         <label class="block text-xs font-semibold text-gray-600 mb-1">Category</label>
-        <input id="edit-comm-cat" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        <input id="edit-pkg-cat" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
       </div>
       <div class="grid grid-cols-2 gap-3">
         <div>
           <label class="block text-xs font-semibold text-gray-600 mb-1">Price PLN</label>
-          <input id="edit-comm-price" type="number" min="0" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          <input id="edit-pkg-price" type="number" min="0" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
         </div>
         <div>
           <label class="block text-xs font-semibold text-gray-600 mb-1">Commission PLN</label>
-          <input id="edit-comm-comm" type="number" min="0" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          <input id="edit-pkg-comm" type="number" min="0" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
         </div>
       </div>
     </div>
     <div class="flex gap-2 mt-5">
-      <button onclick="document.getElementById('modal-edit-comm').classList.add('hidden')" class="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-500 hover:bg-gray-50 transition-colors">Cancel</button>
-      <button onclick="saveEditCommission()" class="flex-1 px-4 py-2.5 bg-brand hover:bg-brand-dark text-white rounded-xl text-sm font-semibold transition-colors">Save</button>
+      <button onclick="document.getElementById('modal-edit-pkg').classList.add('hidden')" class="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-500 hover:bg-gray-50 transition-colors">Cancel</button>
+      <button onclick="saveEditPackage()" class="flex-1 px-4 py-2.5 bg-brand hover:bg-brand-dark text-white rounded-xl text-sm font-semibold transition-colors">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Change PIN Modal -->
+<div id="modal-change-pin" class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+    <h3 class="text-sm font-bold text-dark mb-4">Change Admin PIN</h3>
+    <div class="space-y-3">
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">Current PIN</label>
+        <input id="change-pin-current" type="password" inputmode="numeric" maxlength="8" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="••••">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">New PIN</label>
+        <input id="change-pin-new" type="password" inputmode="numeric" maxlength="8" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="••••">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">Confirm new PIN</label>
+        <input id="change-pin-confirm" type="password" inputmode="numeric" maxlength="8" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="••••">
+      </div>
+      <p id="change-pin-error" class="hidden text-xs text-red-500 font-medium"></p>
+    </div>
+    <div class="flex gap-2 mt-5">
+      <button onclick="document.getElementById('modal-change-pin').classList.add('hidden')" class="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-500 hover:bg-gray-50 transition-colors">Cancel</button>
+      <button onclick="saveChangePin()" class="flex-1 px-4 py-2.5 bg-brand hover:bg-brand-dark text-white rounded-xl text-sm font-semibold transition-colors">Change PIN</button>
     </div>
   </div>
 </div>
