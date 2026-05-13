@@ -2441,6 +2441,9 @@ tailwind.config = {
     const guest = `${firstName} ${lastName}`;
     const commRate = currentPartner?.comm_rate || 10;
 
+    const payLabel = { driver: 'Pay at driver', hotel: 'Pay at hotel', link: 'Payment link' }[payment] || payment;
+    const notesField = [payLabel, notes].filter(Boolean).join(' · ');
+
     const { data, error } = await db.from('bookings').insert({
       tour,
       date: dateStr,
@@ -2449,10 +2452,7 @@ tailwind.config = {
       phone: phone || null,
       pax: tdGuestCount,
       status: 'pending',
-      payment_type: payment,
-      notes: notes || null,
       partner_id: currentPartner?.id,
-      source: 'partner_panel',
     }).select().single();
 
     btn.disabled = false;
@@ -2468,7 +2468,6 @@ tailwind.config = {
     form.classList.add('hidden');
     const success = document.getElementById('td-booking-success');
     success.classList.remove('hidden');
-    const payLabel = { driver: 'Pay at driver', hotel: 'Pay at hotel', link: 'Payment link will be sent' }[payment] || payment;
     document.getElementById('td-success-msg').textContent =
       `${tour} · ${formatDate(dateStr)} · ${tdGuestCount} guest${tdGuestCount > 1 ? 's' : ''} · ${payLabel}`;
 
