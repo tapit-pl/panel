@@ -2817,7 +2817,7 @@ tailwind.config = {
     const t = allTourConfig.find(x => x.id === tourId);
     document.getElementById('add-pkg-tour-label').textContent = t ? t.title : '';
     document.getElementById('add-pkg-title').value    = '';
-    document.getElementById('add-pkg-category').value = '';
+    document.getElementById('add-pkg-cat').value = '';
     document.getElementById('add-pkg-price').value    = '';
     document.getElementById('add-pkg-comm').value     = '';
     document.getElementById('modal-add-pkg').classList.remove('hidden');
@@ -2826,7 +2826,7 @@ tailwind.config = {
 
   async function saveAddPackage() {
     const title = document.getElementById('add-pkg-title').value.trim();
-    const cat   = document.getElementById('add-pkg-category').value.trim().toLowerCase();
+    const cat   = document.getElementById('add-pkg-cat').value.trim().toLowerCase();
     const price = parseInt(document.getElementById('add-pkg-price').value) || 0;
     const comm  = parseInt(document.getElementById('add-pkg-comm').value) || 0;
     if (!title) { alert('Package name is required.'); return; }
