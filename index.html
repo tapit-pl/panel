@@ -2020,45 +2020,67 @@ tailwind.config = {
 
   // ===== Tours from Bokun =====
   let bokunProducts = [];
-  let currentTourAvailability = {}; // date → [{time, count}]
+  let currentTourAvailability = {}; // date → booked pax count
+
+  // Photo map: tour name keywords → Unsplash image
+  const TOUR_PHOTOS = [
+    { kw: ['zakopane','tatry','tatra'],      url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80' },
+    { kw: ['auschwitz','birkenau','oświęcim'],url: 'https://images.unsplash.com/photo-1571501679680-de32f1e7aad4?w=800&q=80' },
+    { kw: ['shooting','strzelni','combat'],   url: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&q=80' },
+    { kw: ['wieliczka','salt','mine'],        url: 'https://images.unsplash.com/photo-1565117082-7b5680e3c994?w=800&q=80' },
+    { kw: ['night','evening','nocna'],        url: 'https://images.unsplash.com/photo-1519817650390-64a93db51149?w=800&q=80' },
+    { kw: ['rafting','kayak','dunajec'],      url: 'https://images.unsplash.com/photo-1530866495561-507c9faab2ed?w=800&q=80' },
+    { kw: ['quad','atv','off-road'],          url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80' },
+    { kw: ['food','cuisine','cooking','pierogi'], url: 'https://images.unsplash.com/photo-1476224203421-9ac39bcb3df1?w=800&q=80' },
+    { kw: ['krakow','kraków','old town','rynek'], url: 'https://images.unsplash.com/photo-1519817650390-64a93db51149?w=800&q=80' },
+  ];
+
+  function getTourPhoto(name) {
+    const n = (name || '').toLowerCase();
+    for (const entry of TOUR_PHOTOS) {
+      if (entry.kw.some(k => n.includes(k))) return entry.url;
+    }
+    return 'https://images.unsplash.com/photo-1476224203421-9ac39bcb3df1?w=800&q=80';
+  }
+
+  function getTourCat(name) {
+    const n = (name || '').toLowerCase();
+    if (n.includes('transfer')) return 'transfer';
+    if (n.includes('shooting') || n.includes('strzelni') || n.includes('paintball') || n.includes('escape') || n.includes('axe')) return 'attraction';
+    return 'day';
+  }
 
   async function loadToursFromBokun() {
     const grid = document.getElementById('tour-grid');
     if (!grid) return;
-    if (bokunProducts.length > 0) { renderTourGrid(); return; } // cached
-
-    // Probe multiple candidate paths to find the correct Bokun product endpoint
-    const candidates = [
-      { path: '/product.json/list',           method: 'GET'  },
-      { path: '/activity.json/list',          method: 'GET'  },
-      { path: '/product.json/search',         method: 'POST', payload: {} },
-      { path: '/product.json/vendor-products',method: 'GET'  },
-    ];
+    if (bokunProducts.length > 0) { renderTourGrid(); return; }
 
     try {
-      let raw = null;
-      for (const cand of candidates) {
-        const { data: result, error: fnErr } = await db.functions.invoke('bokun-sync', {
-          body: { path: cand.path, method: cand.method, payload: cand.payload }
-        });
-        const r = result?.body;
-        const status = r?.status;
-        console.log(`[Tours] ${cand.path} →`, status || (Array.isArray(r) ? 'array['+r.length+']' : Object.keys(r||{})));
-        if (!fnErr && r && status !== 404 && status !== 400 && status !== 401 && status !== 403) {
-          raw = r;
-          console.log('[Tours] Using path:', cand.path, 'sample:', JSON.stringify(r)?.slice(0,300));
-          break;
-        }
-      }
-      if (!raw) throw new Error('All Bokun product endpoints returned 404/error. Check console.');
-      const list = Array.isArray(raw) ? raw : (raw.items || raw.results || raw.products || raw.data || []);
-      const products = list.filter(p => !p.archived);
-      bokunProducts = products;
+      // Get distinct tour names from bookings in Supabase
+      const today = new Date();
+      const fwd = new Date(today); fwd.setFullYear(fwd.getFullYear() + 1);
+      const { data: rows, error } = await db
+        .from('bokun_bookings')
+        .select('tour')
+        .gte('tour_date', today.toISOString().slice(0, 10))
+        .lte('tour_date', fwd.toISOString().slice(0, 10))
+        .eq('status', 'CONFIRMED')
+        .not('tour', 'is', null);
+      if (error) throw error;
+
+      // Deduplicate
+      const seen = new Set();
+      bokunProducts = (rows || [])
+        .map(r => r.tour)
+        .filter(t => t && !seen.has(t) && seen.add(t))
+        .sort()
+        .map(name => ({ id: name, title: name, cat: getTourCat(name), photo: getTourPhoto(name) }));
+
       renderTourGrid();
     } catch(e) {
       console.error('[Tours]', e);
       const loading = document.getElementById('tours-loading');
-      if (loading) loading.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-2xl text-red-400 block mb-2"></i><div class="text-sm text-red-400 font-semibold mb-1">Could not load tours.</div><div class="text-xs text-red-300 max-w-sm mx-auto break-all">${e.message}</div>`;
+      if (loading) loading.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-2xl text-red-400 block mb-2"></i><div class="text-sm text-red-400">Could not load tours. Please refresh.</div>`;
     }
   }
 
@@ -2066,130 +2088,67 @@ tailwind.config = {
     const grid = document.getElementById('tour-grid');
     const loading = document.getElementById('tours-loading');
     if (loading) loading.remove();
-
     grid.innerHTML = '';
-    const visible = bokunProducts;
 
-    visible.forEach(p => {
-      const photo = (p.photos || []).find(x => x.featured)?.originalUrl || (p.photos?.[0]?.originalUrl) || '';
-      const minPrice = getMinPrice(p);
-      const duration = p.durationInMinutes ? formatDuration(p.durationInMinutes) : '';
-      const pax = p.maxParticipants ? `max. ${p.maxParticipants} pax` : '';
-      const cat = getTourCat(p);
-
+    bokunProducts.forEach(p => {
       grid.insertAdjacentHTML('beforeend', `
         <div class="tour-card bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-             data-name="${(p.title || '').toLowerCase()}" data-cat="${cat}"
-             onclick="openTour(${p.id})">
+             data-name="${(p.title || '').toLowerCase()}" data-cat="${p.cat || 'day'}"
+             onclick="openTour(${JSON.stringify(p.id)})">
           <div class="relative overflow-hidden h-44">
-            ${photo ? `<img src="${photo}" alt="${p.title}" class="tour-img w-full h-full object-cover">` : `<div class="w-full h-full bg-gray-200 flex items-center justify-center"><i class="fa-solid fa-mountain-sun text-gray-400 text-3xl"></i></div>`}
+            <img src="${p.photo}" alt="${p.title}" class="tour-img w-full h-full object-cover">
           </div>
           <div class="p-4">
-            <h3 class="font-bold text-dark text-sm leading-snug">${p.title || '—'}</h3>
-            <div class="flex items-center gap-3 mt-2 text-xs text-gray-500">
-              ${duration ? `<span><i class="fa-regular fa-clock mr-1"></i>${duration}</span>` : ''}
-              ${pax ? `<span><i class="fa-solid fa-users mr-1"></i>${pax}</span>` : ''}
-            </div>
-            <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
-              <div>
-                ${minPrice ? `<div class="text-xs text-gray-400">from</div><div class="text-base font-bold text-brand">${minPrice} zł<span class="text-xs text-gray-400 font-normal">/pax</span></div>` : ''}
-              </div>
-              <button class="text-xs bg-brand-light text-brand px-3 py-1.5 rounded-lg font-semibold hover:bg-brand hover:text-white transition-colors">View</button>
+            <h3 class="font-bold text-dark text-sm leading-snug">${p.title}</h3>
+            <div class="flex items-center justify-end mt-3 pt-3 border-t border-gray-100">
+              <button class="text-xs bg-brand-light text-brand px-3 py-1.5 rounded-lg font-semibold hover:bg-brand hover:text-white transition-colors">View availability</button>
             </div>
           </div>
         </div>`);
     });
 
     const count = document.getElementById('tour-count');
-    if (count) count.textContent = visible.length + ' tour' + (visible.length !== 1 ? 's' : '');
-    filterTours(); // apply any active search
+    if (count) count.textContent = bokunProducts.length + ' tour' + (bokunProducts.length !== 1 ? 's' : '');
+    filterTours();
   }
 
-  function getMinPrice(p) {
-    const cats = p.pricingCategories || [];
-    const prices = cats.map(c => c.defaultPrice?.amount).filter(Boolean);
-    return prices.length ? Math.min(...prices) : null;
-  }
-
-  function formatDuration(mins) {
-    if (mins < 60) return mins + ' min.';
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
-    return m > 0 ? `${h} hr ${m} min.` : `${h} hr${h > 1 ? 's.' : '.'}`;
-  }
-
-  function getTourCat(p) {
-    const kw = ((p.keywords || []).join(' ') + ' ' + (p.title || '')).toLowerCase();
-    if (kw.includes('transfer')) return 'transfer';
-    if (kw.includes('shooting') || kw.includes('strzelni') || kw.includes('attraction')) return 'attraction';
-    return 'day';
-  }
-
-  async function openTour(productId) {
-    const p = bokunProducts.find(x => x.id === productId);
+  async function openTour(tourName) {
+    const p = bokunProducts.find(x => x.id === tourName);
     if (!p) return;
 
     const modal = document.getElementById('modal-tour');
     modal.classList.remove('hidden');
     modal.classList.add('flex');
 
-    // Photo
-    const photo = (p.photos || []).find(x => x.featured)?.originalUrl || p.photos?.[0]?.originalUrl || '';
-    document.getElementById('td-photo').src = photo;
+    document.getElementById('td-photo').src = p.photo;
+    document.getElementById('td-title').textContent = p.title;
+    document.getElementById('td-duration').innerHTML = '';
+    document.getElementById('td-pax').innerHTML = '';
+    document.getElementById('td-description').innerHTML = '<span class="text-gray-400 italic">See upcoming confirmed dates below.</span>';
+    document.getElementById('td-pricing').innerHTML = '';
 
-    // Title + meta
-    document.getElementById('td-title').textContent = p.title || '—';
-    const dur = p.durationInMinutes ? `<i class="fa-regular fa-clock mr-1"></i>${formatDuration(p.durationInMinutes)}` : '';
-    const pax = p.maxParticipants ? `<i class="fa-solid fa-users mr-1"></i>max. ${p.maxParticipants} pax` : '';
-    document.getElementById('td-duration').innerHTML = dur;
-    document.getElementById('td-pax').innerHTML = pax;
-
-    // Description
-    const desc = p.shortDescription || p.description || '';
-    document.getElementById('td-description').innerHTML = desc || '<span class="text-gray-400 italic">No description available.</span>';
-
-    // Pricing
-    const pricingEl = document.getElementById('td-pricing');
-    const cats = (p.pricingCategories || []).filter(c => c.defaultPrice?.amount);
-    pricingEl.innerHTML = cats.map(c =>
-      `<div class="bg-gray-50 rounded-xl px-3 py-2.5 text-center">
-         <div class="text-xs text-gray-400 mb-0.5">${c.title || 'Guest'}</div>
-         <div class="font-bold text-brand text-sm">${c.defaultPrice.amount} zł</div>
-       </div>`
-    ).join('');
-
-    // Availability calendar
+    // Load upcoming tour dates from Supabase
     const calContainer = document.getElementById('td-cal');
-    const calLoading = document.getElementById('td-cal-loading');
+    const calLoading  = document.getElementById('td-cal-loading');
     calContainer.innerHTML = '';
     calLoading.classList.remove('hidden');
     currentTourAvailability = {};
 
-    // Load availability for current + next month
     const today = new Date();
-    const startDate = today.toISOString().slice(0, 10);
-    const end = new Date(today.getFullYear(), today.getMonth() + 2, 0);
-    const endDate = end.toISOString().slice(0, 10);
+    const fwd = new Date(today); fwd.setMonth(fwd.getMonth() + 3);
+    const { data: rows } = await db
+      .from('bokun_bookings')
+      .select('tour_date, pax')
+      .eq('tour', tourName)
+      .eq('status', 'CONFIRMED')
+      .gte('tour_date', today.toISOString().slice(0, 10))
+      .lte('tour_date', fwd.toISOString().slice(0, 10));
 
-    try {
-      const { data: result } = await db.functions.invoke('bokun-sync', {
-        body: {
-          path: `/product.json/${productId}/availabilities`,
-          method: 'POST',
-          payload: { startDate, endDate, includeSoldOut: false }
-        }
-      });
-      const items = result?.body?.items || result?.body || [];
-      // Group by date
-      items.forEach(item => {
-        const dateStr = (item.startTime || '').slice(0, 10);
-        if (!dateStr) return;
-        if (!currentTourAvailability[dateStr]) currentTourAvailability[dateStr] = [];
-        currentTourAvailability[dateStr].push({ time: (item.startTime || '').slice(11, 16), count: item.availabilityCount || 0 });
-      });
-    } catch(e) {
-      // availability fetch failed — calendar will show as generic (all future = available)
-    }
+    (rows || []).forEach(r => {
+      const d = (r.tour_date || '').slice(0, 10);
+      if (!d) return;
+      currentTourAvailability[d] = (currentTourAvailability[d] || 0) + (r.pax || 0);
+    });
 
     calLoading.classList.add('hidden');
     renderAvailabilityCal(calContainer, today.getFullYear(), today.getMonth());
@@ -2225,26 +2184,23 @@ tailwind.config = {
               const d = i + 1;
               const isPast = (year === todayY && month === todayM && d < todayD) || (year < todayY) || (year === todayY && month < todayM);
               const dateStr = year + '-' + String(month+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
-              const avail = currentTourAvailability[dateStr];
+              const paxBooked = currentTourAvailability[dateStr] || 0;
               let cls, tooltip = '';
               if (isPast) {
                 cls = 'text-gray-300 cursor-not-allowed';
-              } else if (avail && avail.length > 0) {
-                const totalSpots = avail.reduce((s,x) => s + x.count, 0);
+              } else if (paxBooked > 0) {
                 cls = 'bg-green-100 text-green-800 font-semibold rounded-lg cursor-default hover:bg-green-200';
-                tooltip = avail.map(a => a.time + (a.count ? ' · ' + a.count + ' spots' : '')).join(', ');
-              } else if (Object.keys(currentTourAvailability).length === 0) {
-                cls = 'text-gray-500 hover:bg-gray-100 rounded-lg cursor-default';
+                tooltip = paxBooked + ' pax booked';
               } else {
-                cls = 'text-gray-300 cursor-not-allowed line-through';
+                cls = 'text-gray-400 cursor-default';
               }
               return `<div class="text-center text-xs py-1.5 transition-colors ${cls}" title="${tooltip}">${d}</div>`;
             }).join('')}
           </div>
         </div>
         <div class="px-4 pb-3 flex items-center gap-4 text-xs text-gray-400">
-          <span><span class="inline-block w-3 h-3 bg-green-100 rounded mr-1"></span>Available</span>
-          <span><span class="inline-block w-3 h-3 bg-gray-100 rounded mr-1"></span>Unavailable</span>
+          <span><span class="inline-block w-3 h-3 bg-green-100 rounded mr-1"></span>Tour running</span>
+          <span><span class="inline-block w-3 h-3 bg-gray-100 rounded mr-1"></span>No tours</span>
         </div>
       </div>`;
 
