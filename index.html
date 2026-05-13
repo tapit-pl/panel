@@ -2027,15 +2027,30 @@ tailwind.config = {
     if (!grid) return;
     if (bokunProducts.length > 0) { renderTourGrid(); return; } // cached
 
+    // Probe multiple candidate paths to find the correct Bokun product endpoint
+    const candidates = [
+      { path: '/product.json/list',           method: 'GET'  },
+      { path: '/activity.json/list',          method: 'GET'  },
+      { path: '/product.json/search',         method: 'POST', payload: {} },
+      { path: '/product.json/vendor-products',method: 'GET'  },
+    ];
+
     try {
-      const { data: result, error: fnErr } = await db.functions.invoke('bokun-sync', {
-        body: { path: '/product.json/list', method: 'GET' }
-      });
-      if (fnErr) throw new Error('Function error: ' + (fnErr.message || JSON.stringify(fnErr)));
-      const raw = result?.body;
-      console.log('[Tours] raw response keys:', raw ? (Array.isArray(raw) ? 'array len='+raw.length : Object.keys(raw)) : raw);
-      console.log('[Tours] raw sample:', JSON.stringify(raw)?.slice(0, 500));
-      if (!raw) throw new Error('Empty response. result=' + JSON.stringify(result)?.slice(0,200));
+      let raw = null;
+      for (const cand of candidates) {
+        const { data: result, error: fnErr } = await db.functions.invoke('bokun-sync', {
+          body: { path: cand.path, method: cand.method, payload: cand.payload }
+        });
+        const r = result?.body;
+        const status = r?.status;
+        console.log(`[Tours] ${cand.path} →`, status || (Array.isArray(r) ? 'array['+r.length+']' : Object.keys(r||{})));
+        if (!fnErr && r && status !== 404 && status !== 400 && status !== 401 && status !== 403) {
+          raw = r;
+          console.log('[Tours] Using path:', cand.path, 'sample:', JSON.stringify(r)?.slice(0,300));
+          break;
+        }
+      }
+      if (!raw) throw new Error('All Bokun product endpoints returned 404/error. Check console.');
       const list = Array.isArray(raw) ? raw : (raw.items || raw.results || raw.products || raw.data || []);
       const products = list.filter(p => !p.archived);
       bokunProducts = products;
