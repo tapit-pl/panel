@@ -2502,7 +2502,9 @@ tailwind.config = {
   function changeRateCount(rateIdx, delta) {
     const sel = tdRateSelections[rateIdx];
     if (!sel) return;
-    sel.count = Math.max(0, sel.count + delta);
+    const maxSlot = tdSelectedTimeSlot?.availabilityCount || 999;
+    const totalOthers = tdRateSelections.reduce((s, x, i) => i === rateIdx ? s : s + x.count, 0);
+    sel.count = Math.max(0, Math.min(maxSlot - totalOthers, sel.count + delta));
     document.getElementById('rate-count-' + rateIdx).textContent = sel.count;
     updateRateTotal();
   }
