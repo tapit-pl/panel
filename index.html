@@ -2043,6 +2043,12 @@ tailwind.config = {
     return 'https://images.unsplash.com/photo-1476224203421-9ac39bcb3df1?w=800&q=80';
   }
 
+  function formatDuration(mins) {
+    if (!mins) return '';
+    const h = Math.floor(mins / 60), m = mins % 60;
+    return m > 0 ? `${h} hr ${m} min.` : `${h} hr${h > 1 ? 's.' : '.'}`;
+  }
+
   function getTourCat(name) {
     const n = (name || '').toLowerCase();
     if (n.includes('transfer')) return 'transfer';
@@ -2054,6 +2060,43 @@ tailwind.config = {
     const grid = document.getElementById('tour-grid');
     if (!grid) return;
     if (bokunProducts.length > 0) { renderTourGrid(); return; }
+
+    // --- Try Bokun API first ---
+    const bokunCandidates = [
+      { path: '/product.json/list',                  method: 'POST', payload: {} },
+      { path: '/product.json/search',                method: 'POST', payload: { pageSize: 100, page: 0 } },
+      { path: '/activity.json/list',                 method: 'POST', payload: {} },
+      { path: '/vendor.json/self/product/list',      method: 'GET'  },
+      { path: '/product.json/vendor/self/list',      method: 'GET'  },
+    ];
+    for (const cand of bokunCandidates) {
+      try {
+        const { data: res } = await db.functions.invoke('bokun-sync', {
+          body: { path: cand.path, method: cand.method, payload: cand.payload }
+        });
+        const body = res?.body;
+        const isOk = body && body.status !== 404 && body.status !== 400 && body.status !== 401 && body.status !== 403 && body.status !== 405;
+        if (isOk) {
+          const list = Array.isArray(body) ? body : (body.items || body.results || body.products || body.data || []);
+          if (list.length > 0) {
+            console.log('[Tours] Bokun success via', cand.path, '— products:', list.length);
+            bokunProducts = list.filter(p => !p.archived).map((p, idx) => ({
+              id: idx, bokunId: p.id, title: p.title || p.name || '—',
+              photo: (p.photos||[]).find(x=>x.featured)?.originalUrl || p.photos?.[0]?.originalUrl || getTourPhoto(p.title||''),
+              cat: getTourCat(p.title || p.name || ''),
+              durationMins: p.durationInMinutes,
+              maxPax: p.maxParticipants,
+              description: p.shortDescription || p.description || '',
+              pricing: p.pricingCategories || [],
+            }));
+            renderTourGrid();
+            return;
+          }
+        }
+        console.log('[Tours] Bokun', cand.path, '→', body?.status || (Array.isArray(body) ? 'array['+body.length+']' : JSON.stringify(body)?.slice(0,80)));
+      } catch(e) { /* try next */ }
+    }
+    console.log('[Tours] Bokun API unavailable — falling back to Supabase');
 
     try {
       // Get distinct tour names from bookings in Supabase
@@ -2090,11 +2133,11 @@ tailwind.config = {
     if (loading) loading.remove();
     grid.innerHTML = '';
 
-    bokunProducts.forEach(p => {
+    bokunProducts.forEach((p, idx) => {
       grid.insertAdjacentHTML('beforeend', `
         <div class="tour-card bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-             data-name="${(p.title || '').toLowerCase()}" data-cat="${p.cat || 'day'}"
-             onclick="openTour(${JSON.stringify(p.id)})">
+             data-name="${(p.title || '').toLowerCase().replace(/"/g,'')}" data-cat="${p.cat || 'day'}"
+             onclick="openTour(${idx})">
           <div class="relative overflow-hidden h-44">
             <img src="${p.photo}" alt="${p.title}" class="tour-img w-full h-full object-cover">
           </div>
@@ -2112,8 +2155,8 @@ tailwind.config = {
     filterTours();
   }
 
-  async function openTour(tourName) {
-    const p = bokunProducts.find(x => x.id === tourName);
+  async function openTour(idx) {
+    const p = bokunProducts[idx];
     if (!p) return;
 
     const modal = document.getElementById('modal-tour');
@@ -2122,10 +2165,18 @@ tailwind.config = {
 
     document.getElementById('td-photo').src = p.photo;
     document.getElementById('td-title').textContent = p.title;
-    document.getElementById('td-duration').innerHTML = '';
-    document.getElementById('td-pax').innerHTML = '';
-    document.getElementById('td-description').innerHTML = '<span class="text-gray-400 italic">See upcoming confirmed dates below.</span>';
-    document.getElementById('td-pricing').innerHTML = '';
+    document.getElementById('td-duration').innerHTML = p.durationMins
+      ? `<i class="fa-regular fa-clock mr-1"></i>${formatDuration(p.durationMins)}` : '';
+    document.getElementById('td-pax').innerHTML = p.maxPax
+      ? `<i class="fa-solid fa-users mr-1"></i>max. ${p.maxPax} pax` : '';
+    document.getElementById('td-description').innerHTML = p.description
+      || '<span class="text-gray-400 italic">Upcoming confirmed dates shown below.</span>';
+    const pricingEl = document.getElementById('td-pricing');
+    pricingEl.innerHTML = (p.pricing || []).filter(c => c.defaultPrice?.amount).map(c =>
+      `<div class="bg-gray-50 rounded-xl px-3 py-2.5 text-center">
+         <div class="text-xs text-gray-400 mb-0.5">${c.title || 'Guest'}</div>
+         <div class="font-bold text-brand text-sm">${c.defaultPrice.amount} zł</div>
+       </div>`).join('');
 
     // Load upcoming tour dates from Supabase
     const calContainer = document.getElementById('td-cal');
@@ -2139,7 +2190,7 @@ tailwind.config = {
     const { data: rows } = await db
       .from('bokun_bookings')
       .select('tour_date, pax')
-      .eq('tour', tourName)
+      .eq('tour', p.title)
       .eq('status', 'CONFIRMED')
       .gte('tour_date', today.toISOString().slice(0, 10))
       .lte('tour_date', fwd.toISOString().slice(0, 10));
