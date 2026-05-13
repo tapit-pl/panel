@@ -2455,7 +2455,8 @@ tailwind.config = {
   }
 
   function changeTdGuests(delta) {
-    tdGuestCount = Math.max(1, Math.min(50, tdGuestCount + delta));
+    const maxGuests = tdSelectedTimeSlot?.availabilityCount || 50;
+    tdGuestCount = Math.max(1, Math.min(maxGuests, tdGuestCount + delta));
     document.getElementById('td-guest-count').textContent = tdGuestCount;
   }
 
