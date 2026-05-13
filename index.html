@@ -1424,8 +1424,9 @@ tailwind.config = {
             <label class="pay-opt cursor-pointer">
               <input type="radio" name="td-payment" value="link" class="sr-only">
               <div class="pay-opt-box border-2 border-gray-200 rounded-xl p-3 text-center transition-all hover:border-brand/40">
-                <i class="fa-solid fa-link text-gray-400 text-lg block mb-1"></i>
+                <i class="fa-solid fa-envelope text-gray-400 text-lg block mb-1"></i>
                 <div class="text-xs font-semibold text-gray-600">Payment link</div>
+                <div class="text-xs text-gray-400 mt-0.5">sent by email</div>
               </div>
             </label>
           </div>
@@ -1884,7 +1885,50 @@ tailwind.config = {
   );
 
   // Check session on load
+  // ===== Commission price map (PLN) from Commissions table DOM =====
+  let COMM_MAP = {}; // normalized name → { pricePln, commPln, cat }
+
+  function buildCommMap() {
+    COMM_MAP = {};
+    document.querySelectorAll('#comm-tbody .comm-row').forEach(row => {
+      const nameEl = row.querySelector('td:first-child');
+      const priceEl = row.querySelector('[data-price]');
+      if (!nameEl || !priceEl) return;
+      const name = nameEl.textContent.trim();
+      const pricePln = parseInt(priceEl.dataset.price || '0') || 0;
+      const commPln  = parseInt(row.dataset.comm || '0') || 0;
+      const cat      = row.dataset.cat || '';
+      if (!name || !pricePln) return;
+      COMM_MAP[_normComm(name)] = { pricePln, commPln, cat, originalName: name };
+    });
+  }
+
+  function _normComm(name) {
+    return (name || '').toLowerCase().replace(/[^a-z0-9]/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
+  function lookupCommPln(name) {
+    if (!name || !Object.keys(COMM_MAP).length) return null;
+    const key = _normComm(name);
+    if (COMM_MAP[key]) return COMM_MAP[key].pricePln;
+    const words = key.split(' ').filter(w => w.length > 2);
+    if (!words.length) return null;
+    // all search words appear in a map entry
+    for (const [k, v] of Object.entries(COMM_MAP)) {
+      if (words.every(w => k.includes(w))) return v.pricePln;
+    }
+    // all map-entry words appear in search key
+    for (const [k, v] of Object.entries(COMM_MAP)) {
+      const kw = k.split(' ').filter(w => w.length > 2);
+      if (kw.length && kw.every(w => key.includes(w))) return v.pricePln;
+    }
+    return null;
+  }
+
+  function fmtPln(pln) { return pln ? `${pln} pln` : null; }
+
   document.addEventListener('DOMContentLoaded', async function() {
+    buildCommMap();
     // Handle invite / password reset token in URL hash
     const hash = window.location.hash;
     if (hash && (hash.includes('type=invite') || hash.includes('type=recovery'))) {
@@ -2271,6 +2315,8 @@ tailwind.config = {
     grid.innerHTML = '';
 
     bokunProducts.forEach((p, idx) => {
+      const pricePln = lookupCommPln(p.title);
+      const priceTag = pricePln ? `<span class="text-xs text-brand font-semibold">from ${pricePln} pln</span>` : '';
       grid.insertAdjacentHTML('beforeend', `
         <div class="tour-card bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
              data-name="${(p.title || '').toLowerCase().replace(/"/g,'')}" data-cat="${p.cat || 'day'}"
@@ -2280,7 +2326,8 @@ tailwind.config = {
           </div>
           <div class="p-4">
             <h3 class="font-bold text-dark text-sm leading-snug">${p.title}</h3>
-            <div class="flex items-center justify-end mt-3 pt-3 border-t border-gray-100">
+            <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+              ${priceTag}
               <button class="text-xs bg-brand-light text-brand px-3 py-1.5 rounded-lg font-semibold hover:bg-brand hover:text-white transition-colors">View availability</button>
             </div>
           </div>
@@ -2314,11 +2361,26 @@ tailwind.config = {
     document.getElementById('td-description').innerHTML = p.description
       || '<span class="text-gray-400 italic">Upcoming confirmed dates shown below.</span>';
     const pricingEl = document.getElementById('td-pricing');
-    pricingEl.innerHTML = (p.pricing || []).filter(c => c.defaultPrice?.amount).map(c =>
-      `<div class="bg-gray-50 rounded-xl px-3 py-2.5 text-center">
-         <div class="text-xs text-gray-400 mb-0.5">${c.title || 'Guest'}</div>
-         <div class="font-bold text-brand text-sm">${c.defaultPrice.amount} zł</div>
-       </div>`).join('');
+    const tourPlnPrice = lookupCommPln(p.title);
+    const catList = (p.pricing || []).filter(c => c.defaultPrice?.amount);
+    if (catList.length > 0) {
+      pricingEl.innerHTML = catList.map((c, ci) => {
+        // Use PLN for adult (first) category; keep EUR for child/infant
+        const pln = ci === 0 || catList.length === 1 ? tourPlnPrice : null;
+        const display = pln ? `${pln} pln` : `${c.defaultPrice.amount} zł`;
+        return `<div class="bg-gray-50 rounded-xl px-3 py-2.5 text-center">
+          <div class="text-xs text-gray-400 mb-0.5">${c.title || 'Guest'}</div>
+          <div class="font-bold text-brand text-sm">${display}</div>
+        </div>`;
+      }).join('');
+    } else if (tourPlnPrice) {
+      pricingEl.innerHTML = `<div class="bg-gray-50 rounded-xl px-3 py-2.5 text-center">
+        <div class="text-xs text-gray-400 mb-0.5">per person</div>
+        <div class="font-bold text-brand text-sm">${tourPlnPrice} pln</div>
+      </div>`;
+    } else {
+      pricingEl.innerHTML = '';
+    }
 
     // Load availability
     const calContainer = document.getElementById('td-cal');
@@ -2542,11 +2604,16 @@ tailwind.config = {
     const section = document.getElementById('td-category-section');
     const timeLabel = tdSelectedTimeSlot?.startTime ? ' · ' + tdSelectedTimeSlot.startTime : '';
     document.getElementById('td-category-subtitle').textContent = formatDate(dateStr) + timeLabel;
+    const _tourPln = lookupCommPln(tdCurrentTour?.title || '');
     document.getElementById('td-category-list').innerHTML = tdCategorySelections.map((s, i) => {
       const ageRange = s.category.ageQualified ? ` (${s.category.minAge}–${s.category.maxAge})` : '';
-      const priceStr = s.price
-        ? `<span class="text-brand font-semibold text-sm">${s.price.amount} ${s.price.currency}</span><span class="text-gray-400 text-xs">/os.</span>`
-        : '';
+      // Use PLN for adult (index 0); keep EUR for child/infant
+      const pln = (i === 0 || tdCategorySelections.length === 1) ? _tourPln : null;
+      const priceStr = pln
+        ? `<span class="text-brand font-semibold text-sm">${pln} pln</span><span class="text-gray-400 text-xs">/os.</span>`
+        : s.price
+          ? `<span class="text-brand font-semibold text-sm">${s.price.amount} ${s.price.currency}</span><span class="text-gray-400 text-xs">/os.</span>`
+          : '';
       return `<div class="flex items-center justify-between px-4 py-3 bg-white">
         <div class="flex-1 min-w-0 mr-3">
           <div class="text-sm font-semibold text-dark">${s.category.title}${ageRange}</div>
@@ -2578,7 +2645,6 @@ tailwind.config = {
 
   function updateCategoryTotal() {
     const totalPax = tdCategorySelections.reduce((s, x) => s + x.count, 0);
-    const totalEur = tdCategorySelections.reduce((s, x) => s + x.count * (x.price?.amount || 0), 0);
     const totalEl = document.getElementById('td-category-total');
     const btn = document.getElementById('td-category-proceed');
     if (totalPax === 0) {
@@ -2586,8 +2652,10 @@ tailwind.config = {
       btn.disabled = true;
       btn.className = 'px-5 py-2.5 rounded-xl text-sm font-semibold transition-all bg-gray-100 text-gray-400 cursor-not-allowed';
     } else {
-      const eurStr = totalEur > 0 ? ` · ~${totalEur} EUR` : '';
-      totalEl.textContent = `${totalPax} ${totalPax === 1 ? 'person' : 'people'}${eurStr}`;
+      // Show PLN estimate using adult price from commissions table
+      const tourPln = lookupCommPln(tdCurrentTour?.title || '');
+      const priceStr = tourPln ? ` · ~${totalPax * tourPln} pln` : '';
+      totalEl.textContent = `${totalPax} ${totalPax === 1 ? 'person' : 'people'}${priceStr}`;
       btn.disabled = false;
       btn.className = 'px-5 py-2.5 rounded-xl text-sm font-semibold transition-all bg-brand text-white hover:bg-brand/90 cursor-pointer';
     }
@@ -2649,9 +2717,12 @@ tailwind.config = {
     const timeLabel = tdSelectedTimeSlot?.startTime ? ' · ' + tdSelectedTimeSlot.startTime : '';
     document.getElementById('td-rate-subtitle').textContent = formatDate(dateStr) + timeLabel;
     document.getElementById('td-rate-list').innerHTML = rates.map((r, i) => {
-      const priceStr = r.price
-        ? `<span class="text-brand font-semibold text-sm">${r.price.amount} ${r.price.currency}</span><span class="text-gray-400 text-xs">/os.</span>`
-        : '';
+      const pln = lookupCommPln(r.title);
+      const priceStr = pln
+        ? `<span class="text-brand font-semibold text-sm">${pln} pln</span><span class="text-gray-400 text-xs">/os.</span>`
+        : r.price
+          ? `<span class="text-brand font-semibold text-sm">${r.price.amount} ${r.price.currency}</span><span class="text-gray-400 text-xs">/os.</span>`
+          : '';
       return `<div class="flex items-center justify-between px-4 py-3 bg-white">
         <div class="flex-1 min-w-0 mr-3">
           <div class="text-sm font-semibold text-dark leading-tight">${r.title}</div>
@@ -2682,7 +2753,7 @@ tailwind.config = {
 
   function updateRateTotal() {
     const totalPax = tdRateSelections.reduce((s, x) => s + x.count, 0);
-    const totalEur = tdRateSelections.reduce((s, x) => s + x.count * (x.rate.price?.amount || 0), 0);
+    const totalPln = tdRateSelections.reduce((s, x) => s + x.count * (lookupCommPln(x.rate.title) || x.rate.price?.amount || 0), 0);
     const totalEl = document.getElementById('td-rate-total');
     const btn = document.getElementById('td-rate-proceed');
     if (totalPax === 0) {
@@ -2690,8 +2761,8 @@ tailwind.config = {
       btn.disabled = true;
       btn.className = 'px-5 py-2.5 rounded-xl text-sm font-semibold transition-all bg-gray-100 text-gray-400 cursor-not-allowed';
     } else {
-      const eurStr = totalEur > 0 ? ` · ~${totalEur} EUR` : '';
-      totalEl.textContent = `${totalPax} ${totalPax === 1 ? 'person' : 'people'}${eurStr}`;
+      const priceStr = totalPln > 0 ? ` · ${totalPln} pln` : '';
+      totalEl.textContent = `${totalPax} ${totalPax === 1 ? 'person' : 'people'}${priceStr}`;
       btn.disabled = false;
       btn.className = 'px-5 py-2.5 rounded-xl text-sm font-semibold transition-all bg-brand text-white hover:bg-brand/90 cursor-pointer';
     }
@@ -2757,15 +2828,16 @@ tailwind.config = {
 
   function renderStaticSummary(items) {
     const totalPax = items.reduce((s, x) => s + x.count, 0);
-    const totalEur = items.reduce((s, x) => s + x.count * (x.price?.amount || 0), 0);
-    const eurStr = totalEur > 0 ? ` · ~${totalEur} EUR` : '';
+    const totalPln = items.reduce((s, x) => s + x.count * (lookupCommPln(x.label) || 0), 0);
+    const priceStr = totalPln > 0 ? ` · ${totalPln} pln` : '';
     document.getElementById('td-packages-summary-list').innerHTML = items.map(x => {
-      const priceStr = x.price ? ` — ${x.price.amount * x.count} ${x.price.currency}` : '';
+      const pln = lookupCommPln(x.label);
+      const itemPrice = pln ? ` — ${pln * x.count} pln` : x.price ? ` — ${x.price.amount * x.count} ${x.price.currency}` : '';
       return `<div class="flex items-center justify-between py-1 border-b border-gray-100 last:border-0">
         <span class="text-gray-700">${x.label}</span>
-        <span class="font-semibold text-dark ml-2 shrink-0">${x.count} ×${priceStr}</span>
+        <span class="font-semibold text-dark ml-2 shrink-0">${x.count} ×${itemPrice}</span>
       </div>`;
-    }).join('') + (totalPax > 0 ? `<div class="pt-1 text-xs text-gray-400">${totalPax} ${totalPax === 1 ? 'person' : 'people'}${eurStr}</div>` : '');
+    }).join('') + (totalPax > 0 ? `<div class="pt-1 text-xs text-gray-400">${totalPax} ${totalPax === 1 ? 'person' : 'people'}${priceStr}</div>` : '');
     tdGuestCount = totalPax;
     renderAdditionalGuestFields(totalPax);
   }
@@ -2924,12 +2996,13 @@ tailwind.config = {
       pax: tdGuestCount,
       status: bokunConfirmationCode ? 'confirmed' : 'pending',
       partner_id: currentPartner?.id,
+      payment_type: payment,
     }).select().single();
 
     btn.disabled = false;
     btn.innerHTML = '<i class="fa-solid fa-check"></i> Confirm booking';
 
-    if (error) {
+    if (error && error.code !== 'PGRST204' && !error.message?.includes('payment_type')) {
       errEl.textContent = 'Error saving booking: ' + error.message;
       errEl.classList.remove('hidden');
       return;
@@ -2939,7 +3012,14 @@ tailwind.config = {
     form.classList.add('hidden');
     const success = document.getElementById('td-booking-success');
     success.classList.remove('hidden');
-    const statusLine = bokunConfirmationCode ? ` · Bokun #${bokunConfirmationCode}` : ' · Pending confirmation';
+    let statusLine;
+    if (payment === 'link') {
+      statusLine = bokunConfirmationCode
+        ? ` · Bokun #${bokunConfirmationCode} · Payment link sent to ${email || 'guest'}`
+        : ' · Payment link pending';
+    } else {
+      statusLine = bokunConfirmationCode ? ` · Bokun #${bokunConfirmationCode}` : ' · Pending confirmation';
+    }
     document.getElementById('td-success-msg').textContent =
       `${tour} · ${formatDate(dateStr)} · ${tdGuestCount} guest${tdGuestCount > 1 ? 's' : ''} · ${payLabel}${statusLine}`;
 
