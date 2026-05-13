@@ -1853,7 +1853,7 @@ tailwind.config = {
       const { data, error } = await db.from('tour_commissions').select('*').eq('active', true).order('sort_order');
       if (!error && data && data.length > 0) {
         data.forEach(c => {
-          COMM_MAP[_normComm(c.title)] = { pricePln: c.price_pln || 0, commPln: c.commission_pln || 0, cat: c.category || '', originalName: c.title };
+          COMM_MAP[_normComm(c.title)] = { pricePln: c.price_pln || 0, commPln: c.commission_pln || 0, cat: c.category || '', originalName: c.title, tourConfigId: c.tour_config_id || null };
         });
         _commDataSource = 'supabase';
         return;
@@ -2272,13 +2272,11 @@ tailwind.config = {
       const { data: tours, error } = await db.from('tour_config').select('*').eq('active', true).order('sort_order');
       if (error) throw error;
 
-      // Filter tours: prefer commission-based visibility, fallback to groups
-      const commTitles = Object.values(COMM_MAP).map(v => _normComm(v.originalName || '')).filter(Boolean);
+      // Filter tours: prefer commission-based visibility (by tour_config_id), fallback to groups
+      const commConfigIds = new Set(Object.values(COMM_MAP).map(v => v.tourConfigId).filter(Boolean));
       const visible = (tours || []).filter(t => {
-        if (commTitles.length > 0) {
-          // Only show tours that have commission entries
-          const key = _normComm(t.title);
-          return commTitles.some(ct => ct.includes(key) || key.includes(ct) || key.split(' ').filter(w=>w.length>3).every(w=>ct.includes(w)));
+        if (commConfigIds.size > 0) {
+          return commConfigIds.has(t.id);
         }
         // Fallback: group-based visibility
         if (!t.groups || t.groups.length === 0) return true;
