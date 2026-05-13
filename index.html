@@ -1371,10 +1371,10 @@ tailwind.config = {
           </div>
         </div>
 
-        <!-- Packages summary (shown when packages were selected) -->
+        <!-- Packages/categories summary — interactive counters -->
         <div id="td-packages-summary" class="hidden">
-          <label class="block text-xs font-semibold text-gray-600 mb-2">Selected packages</label>
-          <div id="td-packages-summary-list" class="flex flex-col gap-1.5 text-sm text-dark"></div>
+          <div id="td-packages-summary-list" class="flex flex-col divide-y divide-gray-100 border border-gray-200 rounded-2xl overflow-hidden"></div>
+          <div id="td-packages-summary-total" class="mt-2 text-sm text-gray-500 text-right"></div>
         </div>
 
         <!-- Guest details — lead contact -->
@@ -2724,26 +2724,8 @@ tailwind.config = {
     const hasSummary = hasPackages || hasCategories;
     document.getElementById('td-guest-section').classList.toggle('hidden', hasSummary);
     document.getElementById('td-packages-summary').classList.toggle('hidden', !hasSummary);
-    if (hasPackages) {
-      document.getElementById('td-packages-summary-list').innerHTML = tdRateSelections
-        .filter(x => x.count > 0)
-        .map(x => {
-          const priceStr = x.rate.price ? ` — ${x.rate.price.amount * x.count} ${x.rate.price.currency}` : '';
-          return `<div class="flex items-center justify-between py-1 border-b border-gray-100 last:border-0">
-            <span class="text-gray-700">${x.rate.title}</span>
-            <span class="font-semibold text-dark ml-2 shrink-0">${x.count} ×${priceStr}</span>
-          </div>`;
-        }).join('');
-    } else if (hasCategories) {
-      document.getElementById('td-packages-summary-list').innerHTML = tdCategorySelections
-        .filter(x => x.count > 0)
-        .map(x => {
-          const priceStr = x.price ? ` — ${x.price.amount * x.count} ${x.price.currency}` : '';
-          return `<div class="flex items-center justify-between py-1 border-b border-gray-100 last:border-0">
-            <span class="text-gray-700">${x.category.title}</span>
-            <span class="font-semibold text-dark ml-2 shrink-0">${x.count} ×${priceStr}</span>
-          </div>`;
-        }).join('');
+    if (hasPackages || hasCategories) {
+      renderFormSummary();
     } else {
       tdGuestCount = 2;
       document.getElementById('td-guest-count').textContent = 2;
@@ -2763,6 +2745,53 @@ tailwind.config = {
   function formatDate(dateStr) {
     const d = new Date(dateStr + 'T12:00:00');
     return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
+  }
+
+  function renderFormSummary() {
+    const isPackages = tdRateSelections.some(x => x.count > 0);
+    const items = isPackages
+      ? tdRateSelections.map((x, i) => ({ label: x.rate.title, price: x.rate.price, count: x.count, idx: i, type: 'rate' }))
+      : tdCategorySelections.map((x, i) => ({ label: x.category.title, price: x.price, count: x.count, idx: i, type: 'cat' }));
+
+    const maxSlot = tdSelectedTimeSlot?.availabilityCount || 999;
+
+    document.getElementById('td-packages-summary-list').innerHTML = items.map(item => {
+      const priceStr = item.price
+        ? `<span class="text-brand font-semibold text-sm">${item.price.amount} ${item.price.currency}</span><span class="text-gray-400 text-xs">/os.</span>`
+        : '';
+      return `<div class="flex items-center justify-between px-4 py-3 bg-white">
+        <div class="flex-1 min-w-0 mr-3">
+          <div class="text-sm font-semibold text-dark leading-tight">${item.label}</div>
+          <div class="flex items-center gap-1 mt-0.5">${priceStr}</div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button onclick="changeFormSummaryCount('${item.type}', ${item.idx}, -1)" class="w-8 h-8 rounded-lg border-2 border-gray-200 flex items-center justify-center text-gray-500 hover:border-brand hover:text-brand transition-colors font-bold text-lg leading-none">−</button>
+          <span id="form-count-${item.type}-${item.idx}" class="w-6 text-center text-sm font-bold text-dark">${item.count}</span>
+          <button onclick="changeFormSummaryCount('${item.type}', ${item.idx}, 1)" class="w-8 h-8 rounded-lg border-2 border-gray-200 flex items-center justify-center text-gray-500 hover:border-brand hover:text-brand transition-colors font-bold text-lg leading-none">+</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    const totalPax = items.reduce((s, x) => s + x.count, 0);
+    const totalEur = items.reduce((s, x) => s + x.count * (x.price?.amount || 0), 0);
+    const eurStr = totalEur > 0 ? ` · ~${totalEur} EUR` : '';
+    document.getElementById('td-packages-summary-total').textContent = totalPax > 0
+      ? `${totalPax} ${totalPax === 1 ? 'person' : 'people'}${eurStr}` : '';
+
+    tdGuestCount = totalPax;
+    renderAdditionalGuestFields(totalPax);
+  }
+
+  function changeFormSummaryCount(type, idx, delta) {
+    const maxSlot = tdSelectedTimeSlot?.availabilityCount || 999;
+    if (type === 'rate') {
+      const totalOthers = tdRateSelections.reduce((s, x, i) => i === idx ? s : s + x.count, 0);
+      tdRateSelections[idx].count = Math.max(0, Math.min(maxSlot - totalOthers, tdRateSelections[idx].count + delta));
+    } else {
+      const totalOthers = tdCategorySelections.reduce((s, x, i) => i === idx ? s : s + x.count, 0);
+      tdCategorySelections[idx].count = Math.max(0, Math.min(maxSlot - totalOthers, tdCategorySelections[idx].count + delta));
+    }
+    renderFormSummary();
   }
 
   function renderAdditionalGuestFields(totalPax) {
