@@ -2968,66 +2968,47 @@ tailwind.config = {
             : [];
         };
 
-        const optionsRequest = {
-          activityId: parseInt(tdCurrentTour.bokunId),
-          startTimeId: tdSelectedTimeSlot.startTimeId,
-          date: dateStr,
-          passengers: buildPassengerGroups(),
+        const mainContactDetails = [
+          { questionId: 'firstName', values: [firstName] },
+          { questionId: 'lastName',  values: [lastName] },
+          email && { questionId: 'email', values: [email] },
+          phone && { questionId: 'phoneNumber', values: [phone] },
+        ].filter(Boolean);
+
+        const bookingNote = [payLabel, packageLines || categoryLines,
+          extraGuests.length ? 'Guests: ' + [guest, ...extraGuests].join(', ') : null, notes
+        ].filter(Boolean).join(' | ');
+
+        const pickupDesc = currentPartner?.address || currentPartner?.name;
+        const submitPayload = {
+          source: 'DIRECT_REQUEST',
+          checkoutOption: 'CUSTOMER_FULL_PAYMENT',
+          paymentMethod: payment === 'link' ? 'RESERVE_FOR_EXTERNAL_PAYMENT' : 'CASH',
+          sendNotificationToMainContact: false,
+          directBooking: {
+            mainContactDetails,
+            activityBookings: [{
+              activityId: parseInt(tdCurrentTour.bokunId),
+              startTimeId: tdSelectedTimeSlot.startTimeId,
+              date: dateStr,
+              passengers: buildPassengerGroups(),
+              note: bookingNote || undefined,
+              answers: [],
+              pickupAnswers: pickupDesc ? [{ questionId: 'pickupPlaceDescription', values: [pickupDesc] }] : [],
+              dropoffAnswers: [],
+            }],
+          },
         };
-
-        const { data: optionsRes } = await db.functions.invoke('bokun-sync', {
-          body: { path: '/checkout.json/options/booking-request', method: 'POST', payload: optionsRequest }
+        console.log('[Booking] submit payload:', JSON.stringify(submitPayload));
+        const { data: submitRes } = await db.functions.invoke('bokun-sync', {
+          body: { path: '/checkout.json/submit', method: 'POST', payload: submitPayload }
         });
-        const optionsBody = optionsRes?.body;
-        const selectedOptionType = (optionsBody?.options || [])[0]?.type;
-        console.log('[Booking] options type:', selectedOptionType);
-
-        if (selectedOptionType) {
-          const mainContactDetails = [
-            { questionId: 'firstName', values: [firstName] },
-            { questionId: 'lastName',  values: [lastName] },
-            email && { questionId: 'email', values: [email] },
-            phone && { questionId: 'phoneNumber', values: [phone] },
-          ].filter(Boolean);
-
-          const bookingNote = [payLabel, packageLines || categoryLines,
-            extraGuests.length ? 'Guests: ' + [guest, ...extraGuests].join(', ') : null, notes
-          ].filter(Boolean).join(' | ');
-
-          const submitPayload = {
-            source: 'DIRECT_REQUEST',
-            checkoutOption: selectedOptionType,
-            paymentMethod: payment === 'link' ? 'RESERVE_FOR_EXTERNAL_PAYMENT' : 'CASH',
-            sendNotificationToMainContact: false,
-            directBooking: {
-              mainContactDetails,
-              activityBookings: [{
-                activityId: parseInt(tdCurrentTour.bokunId),
-                startTimeId: tdSelectedTimeSlot.startTimeId,
-                date: dateStr,
-                passengers: buildPassengerGroups(),
-                note: bookingNote || undefined,
-                answers: [],
-                pickupAnswers: currentPartner?.address || currentPartner?.name
-                  ? [{ questionId: 'pickupPlaceDescription', values: [currentPartner.address || currentPartner.name] }]
-                  : [],
-                dropoffAnswers: [],
-              }],
-            },
-          };
-          console.log('[Booking] submit payload:', JSON.stringify(submitPayload));
-          const { data: submitRes } = await db.functions.invoke('bokun-sync', {
-            body: { path: '/checkout.json/submit', method: 'POST', payload: submitPayload }
-          });
-          const submitBody = submitRes?.body;
-          console.log('[Booking] submit response:', JSON.stringify(submitBody));
-          if (submitBody && ![400, 404, 422, 500].includes(submitBody?.status)) {
-            bokunConfirmationCode = submitBody.confirmationCode || submitBody.bookingConfirmationCode || submitBody.id;
-          } else {
-            console.warn('[Booking] submit failed:', submitBody?.status, submitBody?.message || '');
-          }
+        const submitBody = submitRes?.body;
+        console.log('[Booking] submit response:', JSON.stringify(submitBody));
+        if (submitBody && ![400, 404, 422, 500].includes(submitBody?.status)) {
+          bokunConfirmationCode = submitBody.confirmationCode || submitBody.bookingConfirmationCode || submitBody.id;
         } else {
-          console.warn('[Booking] options failed:', optionsBody?.status, optionsBody?.message || '');
+          console.warn('[Booking] submit failed:', submitBody?.status, submitBody?.message || '');
         }
       } catch(e) { console.warn('[Booking] Bokun creation failed:', e.message); }
     }
