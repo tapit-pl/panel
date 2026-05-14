@@ -1329,7 +1329,7 @@ tailwind.config = {
             <label class="block text-xs font-semibold text-gray-600 mb-1.5">Property name <span class="text-red-400">*</span></label>
             <input id="ap-name" type="text" placeholder="e.g. Hotel Wawel Kraków" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           </div>
-          <div class="col-span-2">
+          <div>
             <label class="block text-xs font-semibold text-gray-600 mb-1.5">Type</label>
             <select id="ap-type" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 text-dark">
               <option value="Hotel">Hotel</option>
@@ -1337,6 +1337,13 @@ tailwind.config = {
               <option value="Hostel">Hostel</option>
               <option value="Guesthouse">Guesthouse</option>
               <option value="Other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Panel role</label>
+            <select id="ap-role" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 text-dark">
+              <option value="manager">Manager (pełny dostęp)</option>
+              <option value="reception">Recepcja (bez prowizji i broszur)</option>
             </select>
           </div>
           <!-- Copy address button -->
@@ -1467,6 +1474,13 @@ tailwind.config = {
               <option value="Hostel">Hostel</option>
               <option value="Guesthouse">Guesthouse</option>
               <option value="Other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Panel role</label>
+            <select id="pd-edit-role" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 text-dark">
+              <option value="manager">Manager</option>
+              <option value="reception">Recepcja</option>
             </select>
           </div>
           <div>
@@ -2084,6 +2098,15 @@ tailwind.config = {
     showScreen('screen-admin');
     const dateEl = document.getElementById('header-date');
     if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+    // Load admin role
+    const { data: { session } } = await db.auth.getSession();
+    if (session) {
+      const { data: adminUser } = await db.from('admin_users').select('role').eq('email', session.user.email).maybeSingle();
+      currentAdminRole = adminUser?.role || 'administrator';
+      applyAdminRoleUI();
+    }
+
     initDashMonthSelector();
     await loadBookings();
     await updateDashboardKPIs();
@@ -2092,6 +2115,19 @@ tailwind.config = {
     await loadPrintOrders();
     await loadNotifications();
     await loadActivityLog();
+  }
+
+  function applyAdminRoleUI() {
+    if (currentAdminRole === 'manager') {
+      // Manager cannot manage admin staff — hide Staff nav item
+      document.querySelectorAll('.nav-item').forEach(el => {
+        if (el.getAttribute('onclick')?.includes('section-staff')) el.style.display = 'none';
+      });
+    }
+    if (currentAdminRole !== 'owner') {
+      // Non-owners cannot delete other admins — hide delete button in staff section
+      document.querySelectorAll('.staff-delete-btn').forEach(el => el.style.display = 'none');
+    }
   }
 
   document.addEventListener('DOMContentLoaded', async function() {
@@ -2210,7 +2246,7 @@ tailwind.config = {
     if (error) { console.error('partners:', error); return; }
     allPartners.length = 0;
     data.forEach(p => allPartners.push({
-      id: p.id, name: p.name, initials: p.initials, color: p.color, type: p.type,
+      id: p.id, name: p.name, initials: p.initials, color: p.color, type: p.type, role: p.role || 'manager',
       stars: p.stars, address: p.address, contact: p.contact, phone: p.phone,
       email: p.email, username: p.username,
       since: p.created_at ? new Date(p.created_at).toLocaleDateString('en', {month:'long', year:'numeric'}) : '—',
@@ -3369,6 +3405,7 @@ tailwind.config = {
   }
 
   const allPartners = [];
+  let currentAdminRole = 'owner';
 
   function renderPartnersTable(data) {
     const tbody = document.getElementById('partners-tbody');
@@ -3420,6 +3457,7 @@ tailwind.config = {
      'ap-inv-street','ap-inv-house','ap-inv-apt','ap-inv-postal','ap-inv-city'
     ].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
     document.getElementById('ap-type').value = 'Hotel';
+    document.getElementById('ap-role').value = 'manager';
     const st = document.getElementById('ap-nip-status');
     if (st) { st.textContent = ''; st.className = 'text-xs mt-1.5 hidden'; }
     const vb = document.getElementById('ap-vat-badge');
@@ -3586,7 +3624,8 @@ tailwind.config = {
     const invPostal = document.getElementById('ap-inv-postal').value.trim();
     const invCity   = document.getElementById('ap-inv-city').value.trim();
     const invoiceAddressFull = [invStreet + (invHouse ? ' ' + invHouse : '') + (invApt ? '/' + invApt : ''), invPostal + (invCity ? ' ' + invCity : '')].filter(Boolean).join(', ');
-    await db.from('partners').update({ contact: contactFull, address: addressFull, invoice_address: invoiceAddressFull || null }).eq('email', email);
+    const partnerRole = document.getElementById('ap-role').value;
+    await db.from('partners').update({ contact: contactFull, address: addressFull, invoice_address: invoiceAddressFull || null, role: partnerRole }).eq('email', email);
 
     await loadPartners();
     closeAddPartner();
@@ -3611,6 +3650,7 @@ tailwind.config = {
     document.getElementById('pd-comm').textContent = p.comm > 0 ? p.comm + ' zł' : '—';
     document.getElementById('pd-edit-name').value     = p.name;
     document.getElementById('pd-edit-type').value     = p.type;
+    document.getElementById('pd-edit-role').value     = p.role || 'manager';
     document.getElementById('pd-edit-contact').value  = p.contact;
     document.getElementById('pd-edit-phone').value    = p.phone;
     document.getElementById('pd-edit-email').value    = p.email;
@@ -3680,6 +3720,7 @@ tailwind.config = {
     if (!p) return;
     p.name           = document.getElementById('pd-edit-name').value;
     p.type           = document.getElementById('pd-edit-type').value;
+    p.role           = document.getElementById('pd-edit-role').value;
     p.contact        = document.getElementById('pd-edit-contact').value;
     p.phone          = document.getElementById('pd-edit-phone').value;
     p.email          = document.getElementById('pd-edit-email').value;
@@ -3694,7 +3735,7 @@ tailwind.config = {
     p.invoiceAddress = document.getElementById('pd-edit-invoice-address').value;
     p.tourGroups     = [...document.querySelectorAll('.partner-tour-group-cb:checked')].map(cb => cb.value);
     await db.from('partners').update({
-      name: p.name, type: p.type, contact: p.contact, phone: p.phone,
+      name: p.name, type: p.type, role: p.role, contact: p.contact, phone: p.phone,
       email: p.email, address: p.address, notes: p.notes,
       contract_signed: p.contractSigned || null, contract_expiry: p.contractExpiry || null,
       notify_email: p.notifyEmail,

@@ -2026,7 +2026,8 @@ tailwind.config = {
     // Password set — show welcome screen for new partners
     const { data: { session } } = await db.auth.getSession();
     if (session) {
-      if (session.user.email !== 'kontakt@tapit.com.pl') {
+      const { data: adminCheck } = await db.from('admin_users').select('role').eq('email', session.user.email).maybeSingle();
+      if (!adminCheck) {
         const { data } = await db.from('partners').select('*').eq('email', session.user.email).maybeSingle();
         currentPartner = data || { email: session.user.email, name: session.user.email, initials: session.user.email.substring(0,2).toUpperCase() };
         const contactFirst = currentPartner.contact_first || (currentPartner.contact ? currentPartner.contact.split(' ')[0] : null);
@@ -2073,7 +2074,8 @@ tailwind.config = {
   }
 
   async function redirectByRole(user) {
-    if (user.email === 'kontakt@tapit.com.pl') {
+    const { data: adminUser } = await db.from('admin_users').select('role').eq('email', user.email).maybeSingle();
+    if (adminUser) {
       window.location.href = 'admin.html';
       return;
     }
@@ -2097,6 +2099,14 @@ tailwind.config = {
     document.querySelectorAll('.partner-name').forEach(el => el.textContent = p.name);
     document.querySelectorAll('.td-pickup-hotel-label').forEach(el => el.textContent = p.name || '—');
     document.querySelectorAll('.partner-type').forEach(el => el.textContent = p.type || '');
+
+    // Role-based tab visibility
+    if (p.role === 'reception') {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        const oc = btn.getAttribute('onclick') || '';
+        if (oc.includes('tab-faq') || oc.includes('tab-brochures')) btn.style.display = 'none';
+      });
+    }
 
     // Prefetch tours in background (no await — doesn't block dashboard load)
     loadToursFromBokun();
