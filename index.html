@@ -3000,7 +3000,7 @@ tailwind.config = {
             checkoutOption: selectedOptionType,
             paymentMethod: payment === 'link' ? 'RESERVE_FOR_EXTERNAL_PAYMENT' : 'CASH',
             sendNotificationToMainContact: false,
-            bookingRequest: {
+            directBooking: {
               mainContactDetails,
               activityBookings: [{
                 activityId: parseInt(tdCurrentTour.bokunId),
