@@ -2969,6 +2969,7 @@ tailwind.config = {
         }
 
         const payload = {
+          activityId: parseInt(tdCurrentTour.bokunId),
           startTimeId: tdSelectedTimeSlot.startTimeId,
           participants,
           customer: { firstName, lastName, email: email || undefined, phoneNumber: phone || undefined },
