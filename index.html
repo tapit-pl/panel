@@ -129,8 +129,8 @@ tailwind.config = {
 
     <!-- greeting -->
     <p class="text-sm tracking-[0.2em] uppercase mb-3" style="color:#8a9bb0">Welcome to your partner panel</p>
-    <h1 id="welcome-name" class="text-4xl font-light text-white mb-2" style="letter-spacing:0.02em">—</h1>
-    <p id="welcome-type" class="text-sm mb-12" style="color:#c9a96e; letter-spacing:0.15em"></p>
+    <h1 id="welcome-contact" class="text-4xl font-light text-white mb-1" style="letter-spacing:0.02em">—</h1>
+    <p id="welcome-name" class="text-sm mb-12" style="color:#c9a96e; letter-spacing:0.15em"></p>
 
     <!-- divider -->
     <div class="flex items-center justify-center gap-3 mb-12">
@@ -2019,8 +2019,9 @@ tailwind.config = {
       if (session.user.email !== 'kontakt@tapit.com.pl') {
         const { data } = await db.from('partners').select('*').eq('email', session.user.email).maybeSingle();
         currentPartner = data || { email: session.user.email, name: session.user.email, initials: session.user.email.substring(0,2).toUpperCase() };
-        document.getElementById('welcome-name').textContent = currentPartner.name || currentPartner.email;
-        document.getElementById('welcome-type').textContent = currentPartner.type ? currentPartner.type.toUpperCase() : '';
+        const contactFirst = currentPartner.contact_first || (currentPartner.contact ? currentPartner.contact.split(' ')[0] : null);
+        document.getElementById('welcome-contact').textContent = contactFirst || currentPartner.name || currentPartner.email;
+        document.getElementById('welcome-name').textContent = contactFirst ? (currentPartner.name || '') : '';
         goTo('screen-welcome');
       } else {
         window.location.href = 'admin.html';

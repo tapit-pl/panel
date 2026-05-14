@@ -572,7 +572,7 @@ tailwind.config = {
           <div class="flex items-center justify-between mb-6">
             <div>
               <h1 class="text-xl font-bold text-dark">Partners</h1>
-              <p class="text-xs text-gray-400 mt-0.5">4 active partners · Kraków</p>
+              <p id="partners-subtitle" class="text-xs text-gray-400 mt-0.5">Partners · Kraków</p>
             </div>
             <button onclick="openAddPartner()" class="flex items-center gap-2 bg-brand hover:bg-brand-dark text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors">
               <i class="fa-solid fa-plus"></i>Add partner
@@ -743,57 +743,8 @@ tailwind.config = {
             <div>
               <div class="bg-white rounded-2xl shadow-sm p-5">
                 <div class="font-semibold text-dark text-sm mb-4">Settlement history</div>
-                <div class="space-y-3">
-                  <div class="flex items-center justify-between py-3 border-b border-gray-100">
-                    <div>
-                      <div class="text-xs font-semibold text-dark">Hotel Wawel · March 2026</div>
-                      <div class="text-xs text-gray-400 mt-0.5">8 bookings · settled Apr 3</div>
-                    </div>
-                    <div class="text-right">
-                      <div class="text-sm font-bold text-dark">2 340 pln</div>
-                      <span class="text-xs status-settled font-semibold px-2 py-0.5 rounded-full">Settled</span>
-                    </div>
-                  </div>
-                  <div class="flex items-center justify-between py-3 border-b border-gray-100">
-                    <div>
-                      <div class="text-xs font-semibold text-dark">Hotel Stary · March 2026</div>
-                      <div class="text-xs text-gray-400 mt-0.5">5 bookings · settled Apr 3</div>
-                    </div>
-                    <div class="text-right">
-                      <div class="text-sm font-bold text-dark">890 pln</div>
-                      <span class="text-xs status-settled font-semibold px-2 py-0.5 rounded-full">Settled</span>
-                    </div>
-                  </div>
-                  <div class="flex items-center justify-between py-3 border-b border-gray-100">
-                    <div>
-                      <div class="text-xs font-semibold text-dark">Hotel Wawel · Feb 2026</div>
-                      <div class="text-xs text-gray-400 mt-0.5">6 bookings · settled Mar 2</div>
-                    </div>
-                    <div class="text-right">
-                      <div class="text-sm font-bold text-dark">1 820 pln</div>
-                      <span class="text-xs status-settled font-semibold px-2 py-0.5 rounded-full">Settled</span>
-                    </div>
-                  </div>
-                  <div class="flex items-center justify-between py-3 border-b border-gray-100">
-                    <div>
-                      <div class="text-xs font-semibold text-dark">Hotel Stary · Feb 2026</div>
-                      <div class="text-xs text-gray-400 mt-0.5">3 bookings · settled Mar 2</div>
-                    </div>
-                    <div class="text-right">
-                      <div class="text-sm font-bold text-dark">510 pln</div>
-                      <span class="text-xs status-settled font-semibold px-2 py-0.5 rounded-full">Settled</span>
-                    </div>
-                  </div>
-                  <div class="flex items-center justify-between py-3">
-                    <div>
-                      <div class="text-xs font-semibold text-dark">Hotel Copernicus · Feb 2026</div>
-                      <div class="text-xs text-gray-400 mt-0.5">1 booking</div>
-                    </div>
-                    <div class="text-right">
-                      <div class="text-sm font-bold text-dark">100 pln</div>
-                      <span class="text-xs status-pending font-semibold px-2 py-0.5 rounded-full">Pending</span>
-                    </div>
-                  </div>
+                <div id="settlement-history-list" class="space-y-3">
+                  <p class="text-xs text-gray-400 text-center py-4">No settlements yet.</p>
                 </div>
               </div>
             </div>
@@ -1239,12 +1190,8 @@ tailwind.config = {
           </div>
           <div>
             <label class="block text-xs font-semibold text-gray-600 mb-1.5">Partner (optional)</label>
-            <select class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+            <select id="manual-booking-partner" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
               <option value="">— direct —</option>
-              <option>Hotel Wawel</option>
-              <option>Hotel Stary</option>
-              <option>Hotel Copernicus</option>
-              <option>Hotel Pod Różą</option>
             </select>
           </div>
           <div>
@@ -1813,10 +1760,6 @@ tailwind.config = {
           <label class="block text-xs font-semibold text-gray-600 mb-1.5">Partner</label>
           <select id="edit-hotel" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-dark">
             <option value="—">— direct —</option>
-            <option value="Wawel">Hotel Wawel</option>
-            <option value="Stary">Hotel Stary</option>
-            <option value="Copernicus">Hotel Copernicus</option>
-            <option value="Pod Różą">Hotel Pod Różą</option>
           </select>
         </div>
         <div>
@@ -2286,6 +2229,8 @@ tailwind.config = {
     renderPartnersTable();
     const kpi = document.getElementById('kpi-partners');
     if (kpi) kpi.textContent = allPartners.filter(p => p.active).length;
+    const sub = document.getElementById('partners-subtitle');
+    if (sub) sub.textContent = `${allPartners.filter(p => p.active).length} active partners · Kraków`;
   }
 
   async function loadTickets() {
@@ -3274,13 +3219,7 @@ tailwind.config = {
     showToast('Booking saved successfully!');
   }
 
-  const allTickets = [
-    { id:'TM-HELP-7', partner:'Hotel Wawel Kraków', subject:'Guest cannot find booking confirmation', message:'One of our guests (Room 204, Mr. Smith) says he did not receive a confirmation email for his Zakopane trip tomorrow at 8:30. Can you resend?', received:'Apr 7, 10:22', priority:'High',   status:'Open',        attachment:null, reply:'' },
-    { id:'TM-HELP-6', partner:'Hotel Stary',        subject:'Incorrect pickup time on voucher',       message:'The voucher shows 8:15 but we agreed the pickup would be at 8:00. Please correct this for future bookings.', received:'Apr 6, 15:44', priority:'Medium', status:'In Progress', attachment:'voucher_scan.jpg', reply:'We are checking with the guide.' },
-    { id:'TM-HELP-5', partner:'Hotel Copernicus',   subject:'Request to add extra tour option',        message:'Several guests have asked about a night city tour. Is this something you offer? We would like to add it to our recommendations.', received:'Apr 5, 09:11', priority:'Low',    status:'Open',        attachment:null, reply:'' },
-    { id:'TM-HELP-4', partner:'Hotel Wawel Kraków', subject:'Commission amount seems incorrect',       message:'For March we counted 7 bookings but the settlement shows only 6. Please verify booking #TM-00847.', received:'Apr 3, 14:05', priority:'High',   status:'Resolved',    attachment:null, reply:'Verified — booking was cancelled and excluded from settlement.' },
-    { id:'TM-HELP-3', partner:'Hotel Pod Różą',     subject:'Cannot log into panel',                  message:'We have been trying to log in since yesterday but keep getting "invalid password". Please reset our access.', received:'Apr 1, 08:30', priority:'High',   status:'Resolved',    attachment:null, reply:'Password has been reset and sent to your email.' },
-  ];
+  const allTickets = [];
 
   let currentTicketFilter = 'all';
   let editingTicketId = null;
@@ -3353,13 +3292,7 @@ tailwind.config = {
     showToast('Ticket updated.');
   }
 
-  const allPrintOrders = [
-    { id:'PO-012', partner:'Hotel Wawel Kraków', material:'Trifold brochure (PL)',  qty:200, ordered:'Apr 6', note:'',                    status:'New' },
-    { id:'PO-011', partner:'Hotel Stary',        material:'Desk flyer A5 (EN)',     qty:100, ordered:'Apr 4', note:'',                    status:'New' },
-    { id:'PO-010', partner:'Hotel Copernicus',   material:'Trifold brochure (EN)',  qty:150, ordered:'Mar 28', note:'Delivered Apr 2',    status:'Sent' },
-    { id:'PO-009', partner:'Hotel Wawel Kraków', material:'Poster A3',              qty:10,  ordered:'Mar 20', note:'Delivered Mar 25',   status:'Sent' },
-    { id:'PO-008', partner:'Hotel Pod Różą',     material:'Desk flyer A5 (PL/EN)', qty:50,  ordered:'Mar 10', note:'Delivered Mar 14',   status:'Sent' },
-  ];
+  const allPrintOrders = [];
 
   function renderPrintOrders() {
     const tbody = document.getElementById('printorders-tbody');
@@ -3453,6 +3386,10 @@ tailwind.config = {
     if (settleHotel) settleHotel.innerHTML = `<option value="">— select partner —</option>${partnerOpts}`;
     const notifTarget = document.getElementById('notif-target');
     if (notifTarget) notifTarget.innerHTML = `<option value="all">All partners</option>${partnerOpts}`;
+    const manualPartner = document.getElementById('manual-booking-partner');
+    if (manualPartner) manualPartner.innerHTML = `<option value="">— direct —</option>${partnerOpts}`;
+    const editHotel = document.getElementById('edit-hotel');
+    if (editHotel) { const cur = editHotel.value; editHotel.innerHTML = `<option value="—">— direct —</option>${partnerOpts}`; editHotel.value = cur; }
     rows.forEach(p => {
       const statusBadge = p.active
         ? `<span class="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-100 px-2.5 py-1 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>Active</span>`
