@@ -1836,15 +1836,12 @@ tailwind.config = {
   let currentPartner = null;
   let partnerBookings = [];
 
-  // ===== Supabase =====
   const { createClient } = supabase;
   const db = createClient(
     'https://jzsiuvcgpwukxpcjxcsg.supabase.co',
     'sb_publishable_jTg5-5J24uo7BNBVBLTTLA_xAeB9iK4'
   );
 
-  // Check session on load
-  // ===== Commission price map (PLN) from Commissions table DOM =====
   let COMM_MAP = {}; // normalized name → { pricePln, commPln, cat }
 
   async function buildCommMap() {
@@ -1912,7 +1909,6 @@ tailwind.config = {
           </tr>`);
       });
     });
-    // Trigger filter in case search is active
     if (typeof filterCommTable === 'function') filterCommTable();
   }
 
@@ -2056,7 +2052,6 @@ tailwind.config = {
   async function initPartnerDashboard() {
     const p = currentPartner;
 
-    // Header: initials + name
     document.querySelectorAll('.partner-initials').forEach(el => el.textContent = p.initials || p.name.substring(0,2).toUpperCase());
     document.querySelectorAll('.partner-name').forEach(el => el.textContent = p.name);
     document.querySelectorAll('.partner-type').forEach(el => el.textContent = p.type || '');
@@ -2064,10 +2059,8 @@ tailwind.config = {
     // Prefetch tours in background (no await — doesn't block dashboard load)
     loadToursFromBokun();
 
-    // Load bookings
     await loadPartnerBookings();
 
-    // Load notifications
     await loadPartnerNotifications();
 
     goTo('screen-dashboard');
@@ -2217,7 +2210,6 @@ tailwind.config = {
     body.scrollBy({ top: rect.top - bodyRect.top - 80, behavior: 'smooth' });
   }
 
-  // ===== Tours from Bokun =====
   let bokunProducts = [];
   let currentTourAvailability = {}; // date → [{startTime, startTimeId, availabilityCount, rates: [{id, title, price}]}, ...]
   let tdSelectedTimeSlot = null;
@@ -2268,21 +2260,17 @@ tailwind.config = {
     const partnerGroups = currentPartner?.tour_groups || [];
 
     try {
-      // Load from tour_config (admin-curated list with sort order and group visibility)
       const { data: tours, error } = await db.from('tour_config').select('*').eq('active', true).order('sort_order');
       if (error) throw error;
 
-      // Build set of tour_config IDs that have active commission entries
       const { data: commLinks } = await db.from('tour_commissions')
         .select('tour_config_id').eq('active', true).not('tour_config_id', 'is', null);
       const commConfigIds = new Set((commLinks || []).map(c => c.tour_config_id));
 
-      // Filter tours: prefer commission-based visibility (by tour_config_id), fallback to groups
       const visible = (tours || []).filter(t => {
         if (commConfigIds.size > 0) {
           return commConfigIds.has(t.id);
         }
-        // Fallback: group-based visibility
         if (!t.groups || t.groups.length === 0) return true;
         if (partnerGroups.length === 0) return false;
         return t.groups.some(g => partnerGroups.includes(g));
@@ -2294,7 +2282,6 @@ tailwind.config = {
         return;
       }
 
-      // For each tour, try to enrich with Bokun activity details
       bokunProducts = await Promise.all(visible.map(async (t, idx) => {
         const base = {
           id: idx, bokunId: t.bokun_id || null, title: t.title,
@@ -2371,7 +2358,6 @@ tailwind.config = {
     modal.classList.remove('hidden');
     modal.classList.add('flex');
 
-    // Reset booking form state
     document.getElementById('td-booking-form').classList.add('hidden');
     document.getElementById('td-booking-success').classList.add('hidden');
 
@@ -2388,7 +2374,6 @@ tailwind.config = {
     const catList = (p.pricing || []).filter(c => c.defaultPrice?.amount);
     if (catList.length > 0) {
       pricingEl.innerHTML = catList.map((c, ci) => {
-        // Use PLN for adult (first) category; keep EUR for child/infant
         const pln = ci === 0 || catList.length === 1 ? tourPlnPrice : null;
         const display = pln ? `${pln} pln` : `${c.defaultPrice.amount} zł`;
         return `<div class="bg-gray-50 rounded-xl px-3 py-2.5 text-center">
@@ -2405,7 +2390,6 @@ tailwind.config = {
       pricingEl.innerHTML = '';
     }
 
-    // Load availability
     const calContainer = document.getElementById('td-cal');
     const calLoading  = document.getElementById('td-cal-loading');
     calContainer.innerHTML = '';
@@ -2538,12 +2522,10 @@ tailwind.config = {
   let tdCurrentTour = null;
 
   function selectBookingDate(dateStr) {
-    // Highlight selected day
     document.querySelectorAll('.cal-day').forEach(el => {
       el.classList.remove('!bg-brand', '!text-white', 'ring-2', 'ring-brand');
       if (el.dataset.date === dateStr) el.classList.add('!bg-brand', '!text-white', 'ring-2', 'ring-brand');
     });
-    // Hide booking form, pickers, success
     document.getElementById('td-booking-form').classList.add('hidden');
     document.getElementById('td-booking-success').classList.add('hidden');
     document.getElementById('td-rate-section').classList.add('hidden');
@@ -2565,7 +2547,6 @@ tailwind.config = {
       return;
     }
 
-    // Show time slot picker
     const section = document.getElementById('td-timeslot-section');
     document.getElementById('td-timeslot-date').textContent = formatDate(dateStr);
     const list = document.getElementById('td-timeslot-list');
@@ -2591,7 +2572,6 @@ tailwind.config = {
     document.getElementById('td-rate-section').classList.add('hidden');
     document.getElementById('td-category-section').classList.add('hidden');
     document.getElementById('td-language-section').classList.add('hidden');
-    // Highlight selected time button
     document.querySelectorAll('#td-timeslot-list button').forEach((btn, i) => {
       btn.classList.toggle('border-brand', i === slotIdx);
       btn.classList.toggle('bg-brand/5', i === slotIdx);
@@ -2630,7 +2610,6 @@ tailwind.config = {
     const _tourPln = lookupCommPln(tdCurrentTour?.title || '');
     document.getElementById('td-category-list').innerHTML = tdCategorySelections.map((s, i) => {
       const ageRange = s.category.ageQualified ? ` (${s.category.minAge}–${s.category.maxAge})` : '';
-      // Use PLN for all categories when available; EUR only if no PLN price configured
       const pln = _tourPln || null;
       const priceStr = pln
         ? `<span class="text-brand font-semibold text-sm">${pln} pln</span><span class="text-gray-400 text-xs">/os.</span>`
@@ -2723,7 +2702,6 @@ tailwind.config = {
       btn.classList.toggle('border-brand', i === rateIdx);
       btn.classList.toggle('bg-brand/5', i === rateIdx);
     });
-    // Proceed to category picker or form
     const slotCatPrices = tdSelectedTimeSlot?.rates?.find(r => r.id === tdSelectedRate?.id)?.pricesByCategory || tdSelectedTimeSlot?.rates?.[0]?.pricesByCategory || [];
     const categories = (tdCurrentTour?.pricing || []).filter(c => !c.internalUseOnly && slotCatPrices.some(p => p.id === c.id));
     if (categories.length > 1) {
@@ -2975,7 +2953,6 @@ tailwind.config = {
       ? tdCategorySelections.filter(x => x.count > 0).map(x => `${x.count}× ${x.category.title}`).join(', ')
       : null;
 
-    // Try to create the booking in Bokun first
     let bokunConfirmationCode = null;
     if (tdCurrentTour?.bokunId && tdSelectedTimeSlot?.startTimeId) {
       try {
@@ -3009,7 +2986,6 @@ tailwind.config = {
       } catch(e) { console.warn('[Booking] Bokun creation failed:', e.message); }
     }
 
-    // Save to Supabase as local record
     const { data, error } = await db.from('bookings').insert({
       tour,
       date: dateStr,
@@ -3031,7 +3007,6 @@ tailwind.config = {
       return;
     }
 
-    // Show success
     form.classList.add('hidden');
     const success = document.getElementById('td-booking-success');
     success.classList.remove('hidden');
@@ -3046,7 +3021,6 @@ tailwind.config = {
     document.getElementById('td-success-msg').textContent =
       `${tour} · ${formatDate(dateStr)} · ${tdGuestCount} guest${tdGuestCount > 1 ? 's' : ''} · ${payLabel}${statusLine}`;
 
-    // Refresh bookings list in background
     await loadPartnerBookings();
   }
 
@@ -3075,7 +3049,6 @@ tailwind.config = {
     });
     btn.classList.add('selected');
     btn.classList.remove('text-gray-700');
-    // Last seats warning in booking form
     const warning = document.getElementById('last-seats-warning');
     const count   = document.getElementById('last-seats-count');
     if (warning) {
@@ -3193,17 +3166,14 @@ tailwind.config = {
     const total = items.reduce((s,i) => s + i.total, 0);
     let html = '';
 
-    // "Use same guest" button — only if multiple items
     if (items.length > 1) {
       html += `<button onclick="useSameGuest()" class="w-full border-2 border-brand text-brand hover:bg-brand-light font-semibold py-2.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2">
         <i class="fa-solid fa-copy text-xs"></i> Use same guest for all tours
       </button>`;
     }
 
-    // Per-tour sections
     items.forEach((item, idx) => { html += buildTourSection(item, idx); });
 
-    // Total + disclaimer + confirm
     html += `
       <div class="bg-brand-light rounded-xl p-3.5 flex items-center justify-between">
         <span class="text-sm font-semibold text-dark">Total</span>
@@ -3217,12 +3187,10 @@ tailwind.config = {
 
     document.getElementById('booking-form-body').innerHTML = html;
 
-    // Populate phone dropdowns
     items.forEach((_, idx) => fillPhonePrefix('bk-phone-prefix-' + idx));
   }
 
   function buildTourSection(item, idx) {
-    // Additional participant fields (guests - 1)
     let participantsHtml = '';
     if (item.guests > 1) {
       participantsHtml = `<div class="text-xs font-bold text-gray-400 uppercase tracking-wide pt-1">Other participants</div>`;
@@ -3381,7 +3349,6 @@ tailwind.config = {
     const srcGuests = items[0]?.guests || 1;
 
     for (let i = 1; i < items.length; i++) {
-      // Copy main guest
       const f = document.getElementById('bk-first-' + i);
       const l = document.getElementById('bk-last-' + i);
       const e = document.getElementById('bk-email-' + i);
@@ -3389,7 +3356,6 @@ tailwind.config = {
       if (l) l.value = last;
       if (e) e.value = email;
 
-      // Copy additional participants from tour 0 to tour i
       const destGuests = items[i]?.guests || 1;
       for (let p = 2; p <= destGuests; p++) {
         const srcF = document.getElementById('bk-p-first-0-' + p);
@@ -3459,7 +3425,6 @@ tailwind.config = {
     });
 
     if (errors.length > 0) {
-      // Highlight empty fields
       items.forEach((item, idx) => {
         ['bk-first-'+idx,'bk-last-'+idx,'bk-email-'+idx].forEach(id => {
           const el = document.getElementById(id);
@@ -3472,7 +3437,6 @@ tailwind.config = {
           });
         }
       });
-      // Make sure first section with error is expanded
       items.forEach((_, idx) => {
         const sec = document.getElementById('bk-section-' + idx);
         if (sec) sec.classList.remove('hidden');
@@ -3505,13 +3469,11 @@ tailwind.config = {
     icon.style.transform = answer.classList.contains('hidden') ? '' : 'rotate(180deg)';
   }
 
-  // ---- Monthly chart ----
   let commChart = null;
   let chartYear = 2026, chartMonth = 3; // 0-indexed month (3 = April)
 
   const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-  // Seeded random data per month so it's consistent
   function seededRand(seed) {
     let s = seed;
     return function() { s = (s * 16807 + 0) % 2147483647; return (s - 1) / 2147483646; };
@@ -3593,7 +3555,6 @@ tailwind.config = {
     renderChart();
   }
 
-  // Init chart when tab is first opened
   const origSetTab = window.setTab;
   document.addEventListener('DOMContentLoaded', () => {
     const tabBtns = document.querySelectorAll('.tab-btn');
@@ -3607,7 +3568,6 @@ tailwind.config = {
     });
   });
 
-  // Tours search + filter
   let tourActiveCat = 'all';
 
   function filterTours() {
@@ -3817,7 +3777,6 @@ tailwind.config = {
     }, 100);
   }
 
-  // ---- Hold / temporary reservation ----
   const holdTimers = {};
 
   function selectSlotWithHold(btn, spots, holdId) {
@@ -3944,7 +3903,6 @@ tailwind.config = {
     result.textContent = (!isNaN(comm) && pax > 0) ? (comm * pax) + ' pln' : '—';
   }
 
-  // ---- Bookings tab filter & search (Feature 1) ----
   let bookingActiveStatus = 'all';
 
   function filterBookings(status, btn) {
@@ -3981,7 +3939,6 @@ tailwind.config = {
     if (noResults) noResults.classList.toggle('hidden', visible > 0);
   }
 
-  // ---- Guest Vouchers filter (Feature 2) ----
   function filterVouchers() {
     const q = (document.getElementById('voucher-search')?.value || '').toLowerCase();
     const cards = document.querySelectorAll('.voucher-card');
@@ -3998,7 +3955,6 @@ tailwind.config = {
     if (list) list.classList.toggle('hidden', visible === 0);
   }
 
-  // ---- Account panel (Feature 4) ----
   function openAccountPanel() {
     document.getElementById('panel-account').classList.remove('hidden');
     document.getElementById('panel-account').classList.add('flex');
@@ -4011,7 +3967,6 @@ tailwind.config = {
     document.getElementById('panel-account-backdrop').classList.add('hidden');
   }
 
-  // ---- Help panel (Feature 5) ----
   function openHelpPanel() {
     document.getElementById('panel-help').classList.remove('hidden');
     document.getElementById('panel-help').classList.add('flex');

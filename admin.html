@@ -1902,14 +1902,12 @@ tailwind.config = {
 </div>
 
 <script>
-  // ===== Supabase =====
   const { createClient } = supabase;
   const db = createClient(
     'https://jzsiuvcgpwukxpcjxcsg.supabase.co',
     'sb_publishable_jTg5-5J24uo7BNBVBLTTLA_xAeB9iK4'
   );
 
-  // ===== Auth helpers =====
   function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
@@ -1949,13 +1947,11 @@ tailwind.config = {
       return;
     }
 
-    // Check if MFA is required
     const { data: mfaData } = await db.auth.mfa.listFactors();
     const totpFactor = mfaData?.totp?.find(f => f.status === 'verified');
 
     if (totpFactor) {
       mfaFactorId = totpFactor.id;
-      // Skip MFA if device is trusted
       if (isMfaTrusted()) {
         await initDashboard();
         return;
@@ -1966,7 +1962,6 @@ tailwind.config = {
       showScreen('screen-mfa-verify');
       document.getElementById('mfa-verify-code').focus();
     } else {
-      // No MFA yet — enroll
       await startMfaEnroll();
     }
   }
@@ -1976,7 +1971,6 @@ tailwind.config = {
     const { data, error } = await db.auth.mfa.enroll({ factorType: 'totp', issuer: 'Thousand Miles Admin' });
     if (error) { console.error(error); return; }
     mfaFactorId = data.id;
-    // Show QR
     const qrEl = document.getElementById('mfa-qr');
     // Extract SVG from data URL and inject directly
     if (data.totp.qr_code.startsWith('data:image/svg+xml')) {
@@ -2058,7 +2052,6 @@ tailwind.config = {
     const todayEnd   = todayStart + 86400000;
     const yesterdayStart = todayStart - 86400000;
 
-    // --- Load from Supabase bokun_bookings ---
     const fromIso = new Date(Math.min(prevStart, yesterdayStart)).toISOString();
     const toIso   = new Date(monthEnd).toISOString();
     const { data: rows } = await db.from('bokun_bookings')
@@ -2098,7 +2091,6 @@ tailwind.config = {
       status: r.status === 'CONFIRMED' ? 'Paid' : r.status === 'CANCELLED' ? 'Cancelled' : 'Pending',
       _creationTs: r.booked_at ? new Date(r.booked_at).getTime() : 0,
     }));
-    // --- End Supabase load ---
 
     const active = b => b.status !== 'Cancelled';
     const todayB    = supaDash.filter(b => active(b) && b._creationTs >= todayStart && b._creationTs < todayEnd);
@@ -2120,7 +2112,6 @@ tailwind.config = {
       return { html: `<i class="fa-solid fa-arrow-${arrow} text-xs mr-1"></i>${sign}${diff}${suffix} vs prev month`, color };
     };
 
-    // Today
     if (el('kpi-today-bookings')) el('kpi-today-bookings').textContent = todayB.length;
     const diffToday = todayB.length - yesterdayB.length;
     if (el('kpi-today-vs-yesterday')) {
@@ -2130,22 +2121,18 @@ tailwind.config = {
       el('kpi-today-vs-yesterday').className = `text-xs mt-1 font-medium ${color}`;
     }
 
-    // Month bookings
     if (el('kpi-month-bookings')) el('kpi-month-bookings').textContent = monthB.length;
     const tB = trend(monthB.length, prevMonthB.length);
     if (el('kpi-month-vs-prev')) { el('kpi-month-vs-prev').innerHTML = tB.html; el('kpi-month-vs-prev').className = `text-xs mt-1 font-medium ${tB.color}`; }
 
-    // Month revenue
     if (el('kpi-month-revenue')) el('kpi-month-revenue').innerHTML = monthRev.toLocaleString('pl') + ' <span class="text-sm font-normal text-gray-400">zł</span>';
     const tR = trend(Math.round(monthRev), Math.round(prevRev), ' zł');
     if (el('kpi-revenue-vs-prev')) { el('kpi-revenue-vs-prev').innerHTML = tR.html; el('kpi-revenue-vs-prev').className = `text-xs mt-1 font-medium ${tR.color}`; }
 
-    // Pax
     if (el('kpi-pax')) el('kpi-pax').textContent = monthPax;
     const tP = trend(monthPax, prevPax);
     if (el('kpi-pax-vs-prev')) { el('kpi-pax-vs-prev').innerHTML = tP.html; el('kpi-pax-vs-prev').className = `text-xs mt-1 font-medium ${tP.color}`; }
 
-    // Top tours
     const tourCounts = {};
     monthB.forEach(b => { tourCounts[b.tour] = (tourCounts[b.tour]||0) + 1; });
     const topTours = Object.entries(tourCounts).sort((a,b)=>b[1]-a[1]).slice(0,5);
@@ -2162,7 +2149,6 @@ tailwind.config = {
         </div>
       </div>`).join('') : '<div class="text-xs text-slate-500">No bookings this month yet</div>';
 
-    // Channels
     const channelCounts = {};
     monthB.forEach(b => { channelCounts[b.source] = (channelCounts[b.source]||0)+1; });
     const totalCh = monthB.length || 1;
@@ -2174,7 +2160,6 @@ tailwind.config = {
         <span class="font-semibold text-white">${Math.round(cnt/totalCh*100)}%</span>
       </div>`).join('') || '<div class="text-xs text-slate-500">No data</div>';
 
-    // Recent bookings (last 5 ever, from Supabase)
     const tbody = el('dash-recent-tbody');
     if (tbody) tbody.innerHTML = recentMapped.map(b => {
       const sc = b.source==='Viator'?'source-viator':b.source==='GYG'?'source-gyg':b.source==='Klook'?'source-klook':b.source==='Website'?'source-website':b.source==='Bokun'?'source-bokun':'source-manual';
@@ -2191,7 +2176,6 @@ tailwind.config = {
       </tr>`;
     }).join('');
 
-    // Chart dates from month selector
     const { y, m } = getSelectedMonthRange();
     const fromEl = el('chart-date-from');
     const toEl   = el('chart-date-to');
@@ -2202,7 +2186,6 @@ tailwind.config = {
 
   function globalSearch(q) {
     if (!q.trim()) return;
-    // Switch to bookings section and apply search
     showSection('bookings');
     const searchEl = document.getElementById('booking-search');
     if (searchEl) { searchEl.value = q; filterAllBookings(); }
@@ -2222,24 +2205,20 @@ tailwind.config = {
     await loadActivityLog();
   }
 
-  // ===== Init =====
   document.addEventListener('DOMContentLoaded', async function() {
     const { data: { session } } = await db.auth.getSession();
     if (!session) { window.location.href = 'index.html'; return; }
 
-    // Check MFA status
     const { data: mfaData } = await db.auth.mfa.listFactors();
     const totpFactor = mfaData?.totp?.find(f => f.status === 'verified');
 
     if (totpFactor && !isMfaTrusted()) {
-      // Has MFA enrolled but device not trusted — require verification
       mfaFactorId = totpFactor.id;
       const { data: challenge } = await db.auth.mfa.challenge({ factorId: mfaFactorId });
       mfaChallengeId = challenge.id;
       showScreen('screen-mfa-verify');
       document.getElementById('mfa-verify-code').focus();
     } else if (!totpFactor) {
-      // No MFA enrolled yet — force enrollment
       await startMfaEnroll();
     } else {
       await initDashboard();
@@ -2286,7 +2265,6 @@ tailwind.config = {
   async function loadBookings() {
     allBookings.length = 0;
 
-    // Load manual/website bookings from Supabase
     const { data: dbRows } = await db.from('bookings').select('*').order('created_at', { ascending: false });
     (dbRows || []).forEach(b => allBookings.push({
       id: b.id, tour: b.tour, guest: b.guest, email: b.email, phone: b.phone,
@@ -2294,7 +2272,6 @@ tailwind.config = {
       pax: b.pax, total: b.total, comm: b.comm, source: b.source, status: b.status, notes: b.notes || ''
     }));
 
-    // Load bookings from Bokun
     try {
       const today = new Date();
       const past = new Date(today); past.setMonth(past.getMonth() - 6);
@@ -2322,17 +2299,14 @@ tailwind.config = {
       }
     } catch(e) { console.warn('Bokun load error:', e); }
 
-    // Populate tour dropdown
     const tourSel = document.getElementById('booking-filter-tour');
     if (tourSel) {
       const tours = [...new Set(allBookings.map(b => b.tour).filter(Boolean))].sort();
       tourSel.innerHTML = '<option value="">All tours</option>' + tours.map(t => `<option value="${t}">${t}</option>`).join('');
     }
 
-    // Default view: Recent
     setBookingView('recent');
 
-    // Update KPI
     const kpiBk = document.getElementById('kpi-bookings');
     if (kpiBk) kpiBk.textContent = allBookings.filter(b => b.status !== 'Cancelled').length;
   }
@@ -2398,7 +2372,6 @@ tailwind.config = {
     window.location.href = 'index.html';
   }
 
-  // ===== Activity Log =====
   let allActivityLogs = [];
   let activityPage = 0;
   const ACTIVITY_PAGE_SIZE = 50;
@@ -2437,7 +2410,6 @@ tailwind.config = {
     if (error) { console.error('audit_log:', error); return; }
     allActivityLogs = data || [];
 
-    // Populate user filter
     const users = [...new Set(allActivityLogs.map(l => l.user_email))].filter(Boolean);
     const userSelect = document.getElementById('activity-filter-user');
     userSelect.innerHTML = '<option value="">All users</option>' +
@@ -2504,7 +2476,6 @@ tailwind.config = {
     }).join('');
   }
 
-  // ===== TOURS CONFIG =====
   let allTourConfig = [];
   let tourConfigLoaded = false;
   let editingTourId = null;
@@ -2548,7 +2519,6 @@ tailwind.config = {
       const last     = idx === allTourConfig.length - 1;
       const groups   = (t.groups || []).length > 0 ? t.groups.map(groupChip).join('') : '<span class="text-gray-300 text-xs">all partners</span>';
       const packages = allCommissions.filter(c => c.tour_config_id === t.id).sort((a,b) => (a.sort_order||0)-(b.sort_order||0));
-      // Tour row
       tbody.insertAdjacentHTML('beforeend', `
         <tr class="hover:bg-gray-50/60 transition-colors border-t border-gray-100 ${t.active ? '' : 'opacity-50'}">
           <td class="px-3 py-2.5 text-gray-300 font-mono text-xs">${idx + 1}</td>
@@ -2574,7 +2544,6 @@ tailwind.config = {
             </div>
           </td>
         </tr>`);
-      // Package sub-rows
       packages.forEach(pkg => {
         tbody.insertAdjacentHTML('beforeend', `
           <tr class="bg-gray-50/40 ${pkg.active ? '' : 'opacity-40'}">
@@ -2607,7 +2576,6 @@ tailwind.config = {
             </td>
           </tr>`);
       });
-      // "no packages" hint row
       if (packages.length === 0) {
         tbody.insertAdjacentHTML('beforeend', `
           <tr class="bg-gray-50/20">
@@ -2695,7 +2663,6 @@ tailwind.config = {
     showToast('Tour removed.');
   }
 
-  // ===== PIN LOCK + PACKAGE MANAGEMENT =====
   let allCommissions  = [];
   let editingCommId   = null;
   let editingPkgId    = null;
@@ -2738,7 +2705,6 @@ tailwind.config = {
     { title: 'Airport transfer', category: 'other', price_pln: 159, commission_pln: 30, sort_order: 300 },
   ];
 
-  // ===== PIN LOCK =====
   async function tryUnlockEditing() {
     const pin = document.getElementById('tours-pin-input').value;
     if (!pin) return;
@@ -2797,7 +2763,6 @@ tailwind.config = {
     showToast('PIN changed successfully.');
   }
 
-  // ===== PACKAGE (COMMISSION) MANAGEMENT =====
   async function quickSavePkg(id, field, value) {
     const { error } = await db.from('tour_commissions').update({ [field]: value }).eq('id', id);
     if (error) { showToast('Save error: ' + error.message, true); return; }
@@ -2977,7 +2942,6 @@ tailwind.config = {
     if (name === 'tours' && !tourConfigLoaded) loadTourConfig();
   }
 
-  // ===== Dashboard chart =====
   let dashChart = null;
   const MONTH_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
@@ -3017,7 +2981,6 @@ tailwind.config = {
     const toDate   = new Date(toVal   + 'T00:00:00');
     if (fromDate > toDate) return;
 
-    // Build daily series
     const labels = [], bookings = [], revenue = [];
     for (let d = new Date(fromDate); d <= toDate; d.setDate(d.getDate() + 1)) {
       const iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -3027,14 +2990,12 @@ tailwind.config = {
       revenue.push(r);
     }
 
-    // Period label
     const fromY = fromDate.getFullYear(), toY = toDate.getFullYear();
     const sameYear = fromY === toY;
     const periodLabel = fmtDateShort(fromVal) + (sameYear ? '' : ', ' + fromY) + ' – ' + fmtDateShort(toVal) + ', ' + toY;
     const pl = document.getElementById('chart-period-label');
     if (pl) pl.textContent = periodLabel;
 
-    // Stats
     const totalB = bookings.reduce((a,b)=>a+b,0);
     const totalR = revenue.reduce((a,b)=>a+b,0);
     const avgB   = (totalB / labels.length).toFixed(1);
@@ -3047,7 +3008,6 @@ tailwind.config = {
     document.getElementById('cstat-avg').textContent      = avgB;
     document.getElementById('cstat-best').textContent     = labels[bestIdx] + ' · ' + maxB;
 
-    // Bar width: wider for fewer days
     const days = labels.length;
     const barThickness = days <= 14 ? 18 : days <= 31 ? undefined : undefined;
 
@@ -3114,7 +3074,6 @@ tailwind.config = {
     });
   }
 
-  // ===== Bookings data — loaded dynamically from Bokun + Supabase =====
   const allBookings = [];
   let supaDash = []; // Dashboard data loaded from Supabase bokun_bookings
 
@@ -3154,7 +3113,6 @@ tailwind.config = {
     if (label) label.textContent = rows.length + ' result' + (rows.length !== 1 ? 's' : '');
     document.getElementById('bookings-no-results').classList.toggle('hidden', rows.length > 0);
 
-    // Update subtitle
     const subtitle = document.getElementById('bookings-subtitle');
     if (subtitle) {
       subtitle.textContent = rows.length > 0
@@ -3176,7 +3134,6 @@ tailwind.config = {
     const fromEl = document.getElementById('booking-filter-from');
     if (fromEl) fromEl.value = view === 'upcoming' ? new Date().toISOString().slice(0, 10) : '';
 
-    // Sort
     if (view === 'recent') {
       allBookings.sort((a, b) => (b._creationTs || 0) - (a._creationTs || 0));
     } else {
@@ -3216,7 +3173,6 @@ tailwind.config = {
     filterAllBookings();
   }
 
-  // ===== Voucher =====
   function openVoucher(id) {
     const b = allBookings.find(x => x.id === id);
     if (!b) return;
@@ -3243,7 +3199,6 @@ tailwind.config = {
     wrap.innerHTML = '';
   }
 
-  // ===== Edit booking =====
   let editingBookingId = null;
   function openEditBooking(id) {
     const b = allBookings.find(x => x.id === id);
@@ -3267,11 +3222,9 @@ tailwind.config = {
     document.getElementById('edit-source-label').textContent = b.source;
     document.getElementById('edit-bokun-id').textContent     = b.source === 'Bokun' ? b.id : '—';
     document.getElementById('edit-confirm-check').checked    = false;
-    // Set partner select
     const hotelSel = document.getElementById('edit-hotel');
     const hotelVal = b.hotel === '—' ? '—' : Object.values({Wawel:'Wawel',Stary:'Stary',Copernicus:'Copernicus','Pod Różą':'Pod Różą'}).find(v => b.hotel.toLowerCase().includes(v.toLowerCase())) || '—';
     hotelSel.value = hotelVal;
-    // Open panel
     const panel = document.getElementById('edit-booking-panel');
     panel.classList.remove('hidden');
     requestAnimationFrame(() => document.getElementById('edit-booking-drawer').classList.add('open'));
@@ -3313,8 +3266,6 @@ tailwind.config = {
     setTimeout(() => toast.remove(), 3500);
   }
 
-  // ===== Manual booking modal =====
-  // ===== Tour search autocomplete =====
   const TOURS_LIST = [
     'Trip to Zakopane', 'Auschwitz-Birkenau Tour', 'Shooting Range – Starter',
     'Shooting Range – Standard', 'Shooting Range – Commando', 'Shooting Range – VIP Elite',
@@ -3369,7 +3320,6 @@ tailwind.config = {
     showToast('Booking saved successfully!');
   }
 
-  // ===== Support Tickets =====
   const allTickets = [
     { id:'TM-HELP-7', partner:'Hotel Wawel Kraków', subject:'Guest cannot find booking confirmation', message:'One of our guests (Room 204, Mr. Smith) says he did not receive a confirmation email for his Zakopane trip tomorrow at 8:30. Can you resend?', received:'Apr 7, 10:22', priority:'High',   status:'Open',        attachment:null, reply:'' },
     { id:'TM-HELP-6', partner:'Hotel Stary',        subject:'Incorrect pickup time on voucher',       message:'The voucher shows 8:15 but we agreed the pickup would be at 8:00. Please correct this for future bookings.', received:'Apr 6, 15:44', priority:'Medium', status:'In Progress', attachment:'voucher_scan.jpg', reply:'We are checking with the guide.' },
@@ -3400,7 +3350,6 @@ tailwind.config = {
           <td class="px-4 py-3 text-right"><button class="text-gray-300 hover:text-brand text-xs"><i class="fa-solid fa-arrow-right"></i></button></td>
         </tr>`);
     });
-    // Update sidebar badge
     const openCount = allTickets.filter(t => t.status === 'Open').length;
     const badge = document.getElementById('sidebar-support-badge');
     if (badge) { badge.textContent = openCount; badge.classList.toggle('hidden', openCount === 0); }
@@ -3450,7 +3399,6 @@ tailwind.config = {
     showToast('Ticket updated.');
   }
 
-  // ===== Print Orders =====
   const allPrintOrders = [
     { id:'PO-012', partner:'Hotel Wawel Kraków', material:'Trifold brochure (PL)',  qty:200, ordered:'Apr 6', note:'',                    status:'New' },
     { id:'PO-011', partner:'Hotel Stary',        material:'Desk flyer A5 (EN)',     qty:100, ordered:'Apr 4', note:'',                    status:'New' },
@@ -3483,7 +3431,6 @@ tailwind.config = {
           </td>
         </tr>`);
     });
-    // Update sidebar badge
     const newCount = allPrintOrders.filter(o => o.status === 'New').length;
     const badge = document.getElementById('sidebar-print-badge');
     if (badge) { badge.textContent = newCount; badge.classList.toggle('hidden', newCount === 0); }
@@ -3500,7 +3447,6 @@ tailwind.config = {
     showToast('Order ' + id + ' marked as ' + newStatus + '.');
   }
 
-  // ===== Notifications =====
   const sentNotifications = [
     { id:1, target:'All partners',        type:'info',    title:'New tour: Bochnia Salt Mine evening',     message:'We have added a new evening departure for Bochnia Salt Mine every Friday at 17:00. Update your recommendations!', sent:'Apr 5, 09:00' },
     { id:2, target:'Hotel Wawel Kraków',  type:'warning', title:'Pickup time change — Apr 10',              message:'Due to road works on ul. Sławkowska, the Auschwitz pickup on April 10 will be 15 minutes earlier (7:45 instead of 8:00).', sent:'Apr 4, 16:30' },
@@ -3538,7 +3484,6 @@ tailwind.config = {
     showToast('Notification sent to ' + targetLabel + '!');
   }
 
-  // ===== Partners =====
   const allPartners = [];
 
   function renderPartnersTable(data) {
@@ -3572,7 +3517,6 @@ tailwind.config = {
     });
   }
 
-  // ===== Add Partner =====
   function openAddPartner() {
     ['ap-name','ap-street','ap-house','ap-apt','ap-postal','ap-city',
      'ap-contact-first','ap-contact-last','ap-phone','ap-email','ap-notes',
@@ -3733,25 +3677,21 @@ tailwind.config = {
     showToast('Partner added and invite sent to ' + email);
   }
 
-  // ===== Partner Detail =====
   let editingPartnerId = null;
   function openPartnerDetail(id) {
     const p = allPartners.find(x => x.id === id);
     if (!p) return;
     editingPartnerId = id;
-    // Avatar
     const av = document.getElementById('pd-avatar');
     av.style.background = p.color;
     av.textContent = p.initials;
     document.getElementById('pd-name').textContent = p.name;
     document.getElementById('pd-type-since').textContent = p.type + ' · Partner since ' + p.since;
-    // Stats
     const sb = document.getElementById('pd-status-badge');
     sb.textContent = p.active ? 'Active' : 'Inactive';
     sb.className = p.active ? 'text-xs font-semibold px-2.5 py-1 rounded-full bg-green-100 text-green-700' : 'text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-500';
     document.getElementById('pd-bookings').textContent = p.bookings || '0';
     document.getElementById('pd-comm').textContent = p.comm > 0 ? p.comm + ' zł' : '—';
-    // Fields
     document.getElementById('pd-edit-name').value     = p.name;
     document.getElementById('pd-edit-type').value     = p.type;
     document.getElementById('pd-edit-contact').value  = p.contact;
@@ -3768,7 +3708,6 @@ tailwind.config = {
     document.getElementById('pd-lastlogin').textContent = p.lastLogin;
     document.getElementById('pd-new-password').value    = '';
 
-    // Logo
     const logoEl = document.getElementById('pd-logo-preview');
     if (p.logo) {
       logoEl.innerHTML = `<img src="${p.logo}" class="w-full h-full object-cover">`;
@@ -3776,24 +3715,19 @@ tailwind.config = {
       logoEl.innerHTML = `<div class="w-full h-full flex items-center justify-center text-white font-bold text-lg rounded-xl" style="background:${p.color}">${p.initials}</div>`;
     }
 
-    // Contract
     document.getElementById('pd-contract-signed').value = p.contractSigned || '';
     document.getElementById('pd-contract-expiry').value = p.contractExpiry || '';
     renderContractStatus(p.contractExpiry);
 
-    // Notifications
     document.getElementById('pd-notify-email').checked = !!p.notifyEmail;
 
-    // Tour groups — load tour_config first if needed
     if (!tourConfigLoaded) {
       loadTourConfig().then(() => renderPartnerTourGroups(p.tourGroups));
     } else {
       renderPartnerTourGroups(p.tourGroups);
     }
 
-    // Settlement history
     renderSettlementHistory(p.settlements || []);
-    // Activate / Deactivate block
     const block = document.getElementById('pd-status-block');
     if (p.active) {
       block.innerHTML = `<div class="bg-red-50 rounded-xl p-4 flex items-start gap-3">
@@ -3877,7 +3811,6 @@ tailwind.config = {
     showToast('Partner deleted.');
   }
 
-  // ===== Contract status =====
   function renderContractStatus(expiryStr) {
     const el = document.getElementById('pd-contract-status');
     if (!expiryStr) { el.classList.add('hidden'); return; }
@@ -3897,7 +3830,6 @@ tailwind.config = {
     }
   }
 
-  // ===== Settlement history =====
   function renderSettlementHistory(list) {
     const el = document.getElementById('pd-settlement-history');
     if (!list || list.length === 0) {
@@ -3936,7 +3868,6 @@ tailwind.config = {
     renderSettlementHistory(p.settlements);
   }
 
-  // ===== Logo preview =====
   function previewPartnerLogo(input) {
     const file = input.files[0];
     if (!file) return;
@@ -3949,7 +3880,6 @@ tailwind.config = {
     reader.readAsDataURL(file);
   }
 
-  // ===== Password helpers =====
   function generatePassword(inputId) {
     const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789!@#';
     let pw = '';
@@ -3962,7 +3892,6 @@ tailwind.config = {
     navigator.clipboard.writeText(val).then(() => showToast('Password copied to clipboard!'));
   }
 
-  // ===== Toast helper =====
   function showToast(msg) {
     const t = document.createElement('div');
     t.className = 'fixed bottom-6 right-6 z-50 bg-green-500 text-white text-sm font-semibold px-5 py-3.5 rounded-xl shadow-xl flex items-center gap-2 fade-in';
@@ -3971,7 +3900,6 @@ tailwind.config = {
     setTimeout(() => t.remove(), 3500);
   }
 
-  // ===== Settlement =====
   function calculateSettlement() {
     document.getElementById('settlement-result').classList.remove('hidden');
     document.getElementById('settlement-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
