@@ -1473,9 +1473,25 @@ tailwind.config = {
           </div>
         </div>
         <div class="space-y-2 text-sm text-gray-600">
-          <div id="acct-address-row" class="flex items-center gap-2 hidden"><i class="fa-solid fa-location-dot text-brand w-4"></i><span id="acct-address"></span></div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-calendar text-brand w-4"></i>Partner since: <span id="acct-since">—</span></div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-id-badge text-brand w-4"></i>Partner ID: <span id="acct-id" class="font-mono text-xs">—</span></div>
+          <div id="acct-address-row" class="hidden">
+            <div class="flex items-start gap-2">
+              <i class="fa-solid fa-location-dot text-brand w-4 mt-0.5 shrink-0"></i>
+              <div>
+                <div id="acct-address-line1"></div>
+                <div id="acct-address-line2" class="text-gray-400"></div>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-calendar text-brand w-4 shrink-0"></i>
+            <span class="text-gray-400 shrink-0">Partner since:</span>
+            <span id="acct-since">—</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-id-badge text-brand w-4 shrink-0"></i>
+            <span class="text-gray-400 shrink-0">Partner ID:</span>
+            <span id="acct-id" class="font-mono text-xs truncate">—</span>
+          </div>
         </div>
       </div>
 
@@ -4060,7 +4076,11 @@ tailwind.config = {
       } else { starsEl.classList.add('hidden'); }
       const addr = currentPartner.address && !currentPartner.address.includes('@') ? currentPartner.address : null;
       if (addr) {
-        document.getElementById('acct-address').textContent = addr;
+        const commaIdx = addr.lastIndexOf(',');
+        const line1 = commaIdx > -1 ? addr.substring(0, commaIdx).trim() : addr;
+        const line2 = commaIdx > -1 ? addr.substring(commaIdx + 1).trim() : '';
+        document.getElementById('acct-address-line1').textContent = line1;
+        document.getElementById('acct-address-line2').textContent = line2;
         document.getElementById('acct-address-row').classList.remove('hidden');
       } else { document.getElementById('acct-address-row').classList.add('hidden'); }
       const sinceVal = currentPartner.since || (currentPartner.created_at ? new Date(currentPartner.created_at).toLocaleDateString('en', {month:'long', year:'numeric'}) : '—');
