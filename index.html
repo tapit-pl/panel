@@ -1391,6 +1391,34 @@ tailwind.config = {
           </div>
         </div>
 
+        <!-- Pick-up point -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Pick-up point</label>
+          <div class="space-y-2">
+            <label class="flex items-start gap-2.5 cursor-pointer">
+              <input type="radio" name="td-pickup" value="hotel" checked class="mt-1 accent-brand shrink-0" onchange="tdUpdatePickup()">
+              <div class="flex-1 min-w-0">
+                <div class="text-sm font-medium text-dark">Pick-up from Hotel</div>
+                <div class="text-xs text-gray-400 td-pickup-hotel-label truncate">—</div>
+                <div id="td-pickup-other-wrap" class="mt-2 hidden">
+                  <label class="flex items-center gap-1.5 text-xs text-brand cursor-pointer mb-1.5">
+                    <input type="checkbox" id="td-pickup-other-check" onchange="tdTogglePickupOther()" class="accent-brand">
+                    Different address
+                  </label>
+                  <input type="text" id="td-pickup-other-input" placeholder="e.g. ul. Floriańska 12, Kraków" class="hidden w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand/30">
+                </div>
+              </div>
+            </label>
+            <label class="flex items-start gap-2.5 cursor-pointer">
+              <input type="radio" name="td-pickup" value="meeting" class="mt-1 accent-brand shrink-0" onchange="tdUpdatePickup()">
+              <div>
+                <div class="text-sm font-medium text-dark">Pick-up from Garbarska Street</div>
+                <div class="text-xs text-gray-400">Meeting point · no hotel transfer</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
         <!-- Notes -->
         <div>
           <label class="block text-xs font-semibold text-gray-600 mb-1.5">Notes (optional)</label>
@@ -2054,6 +2082,7 @@ tailwind.config = {
 
     document.querySelectorAll('.partner-initials').forEach(el => el.textContent = p.initials || p.name.substring(0,2).toUpperCase());
     document.querySelectorAll('.partner-name').forEach(el => el.textContent = p.name);
+    document.querySelectorAll('.td-pickup-hotel-label').forEach(el => el.textContent = p.address || p.name || '—');
     document.querySelectorAll('.partner-type').forEach(el => el.textContent = p.type || '');
 
     // Prefetch tours in background (no await — doesn't block dashboard load)
@@ -2818,8 +2847,34 @@ tailwind.config = {
     renderAdditionalGuestFields(tdGuestCount);
     document.querySelector('input[name="td-payment"][value="driver"]').checked = true;
     updatePayOptStyles();
+    document.querySelector('input[name="td-pickup"][value="hotel"]').checked = true;
+    document.getElementById('td-pickup-other-wrap').classList.add('hidden');
+    document.getElementById('td-pickup-other-check').checked = false;
+    document.getElementById('td-pickup-other-input').classList.add('hidden');
+    document.getElementById('td-pickup-other-input').value = '';
+    tdUpdatePickup();
     scrollModalTo(form);
     form.dataset.date = dateStr;
+  }
+
+  function tdUpdatePickup() {
+    const val = document.querySelector('input[name="td-pickup"]:checked')?.value;
+    document.getElementById('td-pickup-other-wrap').classList.toggle('hidden', val !== 'hotel');
+  }
+
+  function tdTogglePickupOther() {
+    const checked = document.getElementById('td-pickup-other-check').checked;
+    const input = document.getElementById('td-pickup-other-input');
+    input.classList.toggle('hidden', !checked);
+    if (checked) input.focus();
+  }
+
+  function tdGetPickupDescription() {
+    const val = document.querySelector('input[name="td-pickup"]:checked')?.value;
+    if (val === 'meeting') return 'Garbarska Street, Kraków — meeting point';
+    const otherChecked = document.getElementById('td-pickup-other-check')?.checked;
+    if (otherChecked) return document.getElementById('td-pickup-other-input')?.value.trim() || '';
+    return currentPartner?.address || currentPartner?.name || '';
   }
 
   function formatDate(dateStr) {
@@ -2979,7 +3034,7 @@ tailwind.config = {
           extraGuests.length ? 'Guests: ' + [guest, ...extraGuests].join(', ') : null, notes
         ].filter(Boolean).join(' | ');
 
-        const pickupDesc = currentPartner?.address || currentPartner?.name;
+        const pickupDesc = tdGetPickupDescription();
         const submitPayload = {
           source: 'DIRECT_REQUEST',
           checkoutOption: 'CUSTOMER_FULL_PAYMENT',
