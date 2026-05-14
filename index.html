@@ -2978,10 +2978,22 @@ tailwind.config = {
         const { data: bookingRes } = await db.functions.invoke('bokun-sync', {
           body: { path: '/booking.json/reserve', method: 'POST', payload }
         });
-        if (bookingRes?.body && ![400, 404, 422, 500].includes(bookingRes.body?.status)) {
-          bokunConfirmationCode = bookingRes.body.confirmationCode || bookingRes.body.id || String(bookingRes.body);
+        const reserveBody = bookingRes?.body;
+        if (reserveBody && ![400, 404, 422, 500].includes(reserveBody?.status)) {
+          const reserveId = reserveBody.id;
+          if (reserveId) {
+            const { data: confirmRes } = await db.functions.invoke('bokun-sync', {
+              body: { path: `/booking.json/${reserveId}/confirm`, method: 'POST', payload: {} }
+            });
+            const confirmBody = confirmRes?.body;
+            if (confirmBody && ![400, 404, 422, 500].includes(confirmBody?.status)) {
+              bokunConfirmationCode = confirmBody.confirmationCode || confirmBody.id || String(reserveId);
+            } else {
+              console.warn('[Booking] Bokun confirm failed:', confirmBody?.status, confirmBody?.message || '');
+            }
+          }
         } else {
-          console.warn('[Booking] Bokun reserve returned:', bookingRes?.body?.status, bookingRes?.body?.message || '');
+          console.warn('[Booking] Bokun reserve returned:', reserveBody?.status, reserveBody?.message || '');
         }
       } catch(e) { console.warn('[Booking] Bokun creation failed:', e.message); }
     }
