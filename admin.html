@@ -2213,7 +2213,7 @@ tailwind.config = {
       id: p.id, name: p.name, initials: p.initials, color: p.color, type: p.type,
       stars: p.stars, address: p.address, contact: p.contact, phone: p.phone,
       email: p.email, username: p.username,
-      since: p.since || (p.created_at ? new Date(p.created_at).toLocaleDateString('en', {month:'long', year:'numeric'}) : '—'),
+      since: p.created_at ? new Date(p.created_at).toLocaleDateString('en', {month:'long', year:'numeric'}) : '—',
       bookings: p.bookings_count, comm: p.comm, commRate: p.comm_rate,
       active: p.active, notes: p.notes || '', lastLogin: p.last_login || 'Never',
       contractSigned: p.contract_signed, contractExpiry: p.contract_expiry,
