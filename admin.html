@@ -505,9 +505,6 @@ tailwind.config = {
               </div>
               <select id="booking-filter-hotel" onchange="filterAllBookings()" class="text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 text-gray-600">
                 <option value="">All partners</option>
-                <option>Hotel Wawel</option>
-                <option>Hotel Stary</option>
-                <option>Hotel Copernicus</option>
                 <option value="none">No partner (direct)</option>
               </select>
               <select id="booking-filter-source" onchange="filterAllBookings()" class="text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 text-gray-600">
@@ -626,10 +623,6 @@ tailwind.config = {
                     <label class="block text-xs text-gray-500 mb-1.5">Partner</label>
                     <select id="settle-hotel" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-dark">
                       <option value="">— select partner —</option>
-                      <option value="wawel" selected>Hotel Wawel Kraków</option>
-                      <option value="stary">Hotel Stary</option>
-                      <option value="copernicus">Hotel Copernicus</option>
-                      <option value="rozsa">Hotel Pod Różą</option>
                     </select>
                   </div>
                   <div>
@@ -1048,10 +1041,6 @@ tailwind.config = {
                   <label class="block text-xs font-semibold text-gray-600 mb-1.5">Send to</label>
                   <select id="notif-target" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 text-dark">
                     <option value="all">All partners</option>
-                    <option value="wawel">Hotel Wawel Kraków</option>
-                    <option value="stary">Hotel Stary</option>
-                    <option value="copernicus">Hotel Copernicus</option>
-                    <option value="roza">Hotel Pod Różą</option>
                   </select>
                 </div>
                 <div>
@@ -3456,6 +3445,14 @@ tailwind.config = {
     if (!tbody) return;
     const rows = data || allPartners;
     tbody.innerHTML = '';
+
+    const partnerOpts = allPartners.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    const hotelFilter = document.getElementById('booking-filter-hotel');
+    if (hotelFilter) hotelFilter.innerHTML = `<option value="">All partners</option>${partnerOpts}<option value="none">No partner (direct)</option>`;
+    const settleHotel = document.getElementById('settle-hotel');
+    if (settleHotel) settleHotel.innerHTML = `<option value="">— select partner —</option>${partnerOpts}`;
+    const notifTarget = document.getElementById('notif-target');
+    if (notifTarget) notifTarget.innerHTML = `<option value="all">All partners</option>${partnerOpts}`;
     rows.forEach(p => {
       const statusBadge = p.active
         ? `<span class="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-100 px-2.5 py-1 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>Active</span>`
