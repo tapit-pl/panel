@@ -3002,9 +3002,8 @@ tailwind.config = {
     const maxB   = Math.max(...bookings);
     const bestIdx = bookings.indexOf(maxB);
 
-    const fmtR = v => v >= 1000 ? Math.round(v/10)*10 : v;
     document.getElementById('cstat-bookings').textContent = totalB;
-    document.getElementById('cstat-revenue').textContent  = fmtR(totalR).toLocaleString('pl') + ' zł';
+    document.getElementById('cstat-revenue').textContent  = Math.round(totalR).toLocaleString('pl') + ' zł';
     document.getElementById('cstat-avg').textContent      = avgB;
     document.getElementById('cstat-best').textContent     = labels[bestIdx] + ' · ' + maxB;
 
