@@ -2246,7 +2246,7 @@ tailwind.config = {
           payload: {
             startDate: fmt(past),
             endDate: fmt(future),
-            pageSize: 500,
+            pageSize: 10000,
             page: 0
           }
         }
@@ -2828,7 +2828,7 @@ tailwind.config = {
       while (true) {
         const { data: res } = await db.functions.invoke('bokun-sync', {
           body: { path: '/booking.json/booking-search', method: 'POST',
-            payload: { startDate: fmt(past), endDate: fmt(future), pageSize: 500, page } }
+            payload: { startDate: fmt(past), endDate: fmt(future), pageSize: 10000, page }}
         });
         const items = res?.body?.items || [];
         if (items.length === 0) break;
