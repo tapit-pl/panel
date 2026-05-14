@@ -2692,6 +2692,7 @@ tailwind.config = {
     const modal = document.getElementById('modal-tour');
     modal.classList.remove('hidden');
     modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
 
     document.getElementById('td-booking-form').classList.add('hidden');
     document.getElementById('td-booking-success').classList.add('hidden');
@@ -3440,6 +3441,7 @@ tailwind.config = {
     const modal = document.getElementById('modal-tour');
     modal.classList.add('hidden');
     modal.classList.remove('flex');
+    document.body.style.overflow = '';
   }
 
   function selectSlot(btn, spotsLeft) {
