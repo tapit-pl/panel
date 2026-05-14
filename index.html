@@ -2082,11 +2082,27 @@ tailwind.config = {
     if (session) {
       const { data: adminCheck } = await db.from('admin_users').select('role').eq('email', session.user.email).maybeSingle();
       if (!adminCheck) {
-        const { data } = await db.from('partners').select('*').eq('email', session.user.email).maybeSingle();
-        currentPartner = data || { email: session.user.email, name: session.user.email, initials: session.user.email.substring(0,2).toUpperCase() };
-        const contactFirst = currentPartner.contact_first || (currentPartner.contact ? currentPartner.contact.split(' ')[0] : null);
-        document.getElementById('welcome-contact').textContent = contactFirst || currentPartner.name || currentPartner.email;
-        document.getElementById('welcome-name').textContent = contactFirst ? (currentPartner.name || '') : '';
+        const { data: partnerData } = await db.from('partners').select('*').eq('email', session.user.email).maybeSingle();
+        let welcomeName, welcomeHotel;
+        if (partnerData) {
+          const contactFirst = partnerData.contact_first || (partnerData.contact ? partnerData.contact.split(' ')[0] : null);
+          welcomeName = contactFirst || partnerData.name || session.user.email;
+          welcomeHotel = contactFirst ? (partnerData.name || '') : '';
+          currentPartner = partnerData;
+        } else {
+          const { data: staffData } = await db.from('staff').select('*, partners(*)').eq('email', session.user.email).maybeSingle();
+          if (staffData) {
+            welcomeName = staffData.first_name;
+            welcomeHotel = staffData.partners?.name || '';
+            currentPartner = { ...staffData.partners, role: 'reception', _isStaff: true, _staffId: staffData.id, _staffName: `${staffData.first_name} ${staffData.last_name || ''}`.trim() };
+          } else {
+            welcomeName = session.user.email;
+            welcomeHotel = '';
+            currentPartner = { email: session.user.email, name: session.user.email, initials: session.user.email.substring(0,2).toUpperCase() };
+          }
+        }
+        document.getElementById('welcome-contact').textContent = welcomeName;
+        document.getElementById('welcome-name').textContent = welcomeHotel;
         goTo('screen-welcome');
       } else {
         window.location.href = 'admin.html';
