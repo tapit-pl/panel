@@ -3346,7 +3346,7 @@ tailwind.config = {
         const submitPayload = {
           source: 'DIRECT_REQUEST',
           checkoutOption: 'CUSTOMER_FULL_PAYMENT',
-          paymentMethod: payment === 'link' ? 'RESERVE_FOR_EXTERNAL_PAYMENT' : 'CASH',
+          paymentMethod: 'RESERVE_FOR_EXTERNAL_PAYMENT',
           sendNotificationToMainContact: false,
           directBooking: {
             mainContactDetails,
@@ -3385,13 +3385,12 @@ tailwind.config = {
       pax: tdGuestCount,
       status: bokunConfirmationCode ? 'confirmed' : 'pending',
       partner_id: currentPartner?.id,
-      payment_type: payment,
     }).select().single();
 
     btn.disabled = false;
     btn.innerHTML = '<i class="fa-solid fa-check"></i> Confirm booking';
 
-    if (error && error.code !== 'PGRST204' && !error.message?.includes('payment_type')) {
+    if (error) {
       errEl.textContent = 'Error saving booking: ' + error.message;
       errEl.classList.remove('hidden');
       return;
