@@ -1485,10 +1485,6 @@ tailwind.config = {
             <label class="block text-xs text-gray-400 mb-1">Address</label>
             <input id="pd-edit-address" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           </div>
-          <div>
-            <label class="block text-xs text-gray-400 mb-1">Commission rate (%)</label>
-            <input id="pd-edit-commrate" type="number" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-          </div>
         </div>
       </div>
 
@@ -1591,7 +1587,7 @@ tailwind.config = {
         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Security & access</div>
         <div class="bg-gray-50 rounded-xl p-4 mb-3">
           <div class="flex items-center justify-between text-xs mb-1">
-            <span class="text-gray-400">Username</span>
+            <span class="text-gray-400">Login email</span>
             <span class="font-mono font-semibold text-dark" id="pd-username">—</span>
           </div>
           <div class="flex items-center justify-between text-xs">
@@ -2216,7 +2212,8 @@ tailwind.config = {
     data.forEach(p => allPartners.push({
       id: p.id, name: p.name, initials: p.initials, color: p.color, type: p.type,
       stars: p.stars, address: p.address, contact: p.contact, phone: p.phone,
-      email: p.email, username: p.username, since: p.since,
+      email: p.email, username: p.username,
+      since: p.since || (p.created_at ? new Date(p.created_at).toLocaleDateString('en', {month:'long', year:'numeric'}) : '—'),
       bookings: p.bookings_count, comm: p.comm, commRate: p.comm_rate,
       active: p.active, notes: p.notes || '', lastLogin: p.last_login || 'Never',
       contractSigned: p.contract_signed, contractExpiry: p.contract_expiry,
@@ -3578,7 +3575,13 @@ tailwind.config = {
     const postal  = document.getElementById('ap-postal').value.trim();
     const city    = document.getElementById('ap-city').value.trim();
     const addressFull = [street + (house ? ' ' + house : '') + (apt ? '/' + apt : ''), postal + (city ? ' ' + city : '')].filter(Boolean).join(', ');
-    await db.from('partners').update({ contact: contactFull, address: addressFull }).eq('email', email);
+    const invStreet = document.getElementById('ap-inv-street').value.trim();
+    const invHouse  = document.getElementById('ap-inv-house').value.trim();
+    const invApt    = document.getElementById('ap-inv-apt').value.trim();
+    const invPostal = document.getElementById('ap-inv-postal').value.trim();
+    const invCity   = document.getElementById('ap-inv-city').value.trim();
+    const invoiceAddressFull = [invStreet + (invHouse ? ' ' + invHouse : '') + (invApt ? '/' + invApt : ''), invPostal + (invCity ? ' ' + invCity : '')].filter(Boolean).join(', ');
+    await db.from('partners').update({ contact: contactFull, address: addressFull, invoice_address: invoiceAddressFull || null }).eq('email', email);
 
     await loadPartners();
     closeAddPartner();
@@ -3607,14 +3610,14 @@ tailwind.config = {
     document.getElementById('pd-edit-phone').value    = p.phone;
     document.getElementById('pd-edit-email').value    = p.email;
     document.getElementById('pd-edit-address').value  = p.address;
-    document.getElementById('pd-edit-commrate').value = p.commRate;
+
     document.getElementById('pd-edit-notes').value    = p.notes || '';
     document.getElementById('pd-edit-nip').value             = p.nip || '';
     document.getElementById('pd-edit-invoice-email').value   = p.invoiceEmail || '';
     document.getElementById('pd-edit-invoice-company').value = p.invoiceCompany || '';
     document.getElementById('pd-edit-invoice-address').value = p.invoiceAddress || '';
-    document.getElementById('pd-username').textContent  = p.username;
-    document.getElementById('pd-lastlogin').textContent = p.lastLogin;
+    document.getElementById('pd-username').textContent  = p.email || '—';
+    document.getElementById('pd-lastlogin').textContent = p.lastLogin && p.lastLogin !== 'Never' ? p.lastLogin : '—';
     document.getElementById('pd-new-password').value    = '';
 
     const logoEl = document.getElementById('pd-logo-preview');
@@ -3659,10 +3662,12 @@ tailwind.config = {
     }
     const panel = document.getElementById('partner-detail-panel');
     panel.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
     requestAnimationFrame(() => document.getElementById('partner-detail-drawer').classList.add('open'));
   }
   function closePartnerDetail() {
     document.getElementById('partner-detail-drawer').classList.remove('open');
+    document.body.style.overflow = '';
     setTimeout(() => document.getElementById('partner-detail-panel').classList.add('hidden'), 280);
   }
   async function savePartnerDetail() {
@@ -3674,7 +3679,6 @@ tailwind.config = {
     p.phone          = document.getElementById('pd-edit-phone').value;
     p.email          = document.getElementById('pd-edit-email').value;
     p.address        = document.getElementById('pd-edit-address').value;
-    p.commRate       = parseFloat(document.getElementById('pd-edit-commrate').value) || p.commRate;
     p.notes          = document.getElementById('pd-edit-notes').value;
     p.contractSigned = document.getElementById('pd-contract-signed').value;
     p.contractExpiry = document.getElementById('pd-contract-expiry').value;
@@ -3686,7 +3690,7 @@ tailwind.config = {
     p.tourGroups     = [...document.querySelectorAll('.partner-tour-group-cb:checked')].map(cb => cb.value);
     await db.from('partners').update({
       name: p.name, type: p.type, contact: p.contact, phone: p.phone,
-      email: p.email, address: p.address, comm_rate: p.commRate, notes: p.notes,
+      email: p.email, address: p.address, notes: p.notes,
       contract_signed: p.contractSigned || null, contract_expiry: p.contractExpiry || null,
       notify_email: p.notifyEmail,
       nip: p.nip, invoice_email: p.invoiceEmail,

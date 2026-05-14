@@ -1082,7 +1082,7 @@ tailwind.config = {
           </div>
           <div>
             <div class="font-bold text-dark text-sm">Order sent successfully!</div>
-            <p class="text-xs text-gray-500 mt-1">Our team will confirm your order within 24 hours and arrange delivery to <strong>Hotel Wawel Kraków</strong>.</p>
+            <p class="text-xs text-gray-500 mt-1">Our team will confirm your order within 24 hours and arrange delivery to <strong id="printorder-hotel-name">your hotel</strong>.</p>
           </div>
         </div>
 
@@ -1465,23 +1465,17 @@ tailwind.config = {
       <!-- Hotel info card -->
       <div class="bg-brand-light rounded-2xl p-5">
         <div class="flex items-center gap-4 mb-4">
-          <div class="w-16 h-16 bg-brand rounded-2xl flex items-center justify-center text-white text-2xl font-bold shrink-0">HW</div>
+          <div id="acct-avatar" class="w-16 h-16 bg-brand rounded-2xl flex items-center justify-center text-white text-2xl font-bold shrink-0 overflow-hidden">—</div>
           <div>
-            <div class="font-bold text-dark text-lg">Hotel Wawel</div>
-            <div class="text-sm text-gray-500">Kraków, Poland</div>
-            <div class="flex items-center gap-1 mt-1">
-              <i class="fa-solid fa-star text-amber-400 text-xs"></i>
-              <i class="fa-solid fa-star text-amber-400 text-xs"></i>
-              <i class="fa-solid fa-star text-amber-400 text-xs"></i>
-              <i class="fa-solid fa-star text-amber-400 text-xs"></i>
-              <span class="text-xs text-gray-500 ml-1">4-star hotel</span>
-            </div>
+            <div class="font-bold text-dark text-lg" id="acct-name">—</div>
+            <div class="text-sm text-gray-500" id="acct-type">—</div>
+            <div id="acct-stars" class="flex items-center gap-1 mt-1 hidden"></div>
           </div>
         </div>
         <div class="space-y-2 text-sm text-gray-600">
-          <div class="flex items-center gap-2"><i class="fa-solid fa-location-dot text-brand w-4"></i>ul. Sławkowska 12, 31-014 Kraków</div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-calendar text-brand w-4"></i>Partner since: January 2023</div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-id-badge text-brand w-4"></i>Partner ID: HW-KRK-001</div>
+          <div id="acct-address-row" class="flex items-center gap-2 hidden"><i class="fa-solid fa-location-dot text-brand w-4"></i><span id="acct-address"></span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-calendar text-brand w-4"></i>Partner since: <span id="acct-since">—</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-id-badge text-brand w-4"></i>Partner ID: <span id="acct-id" class="font-mono text-xs">—</span></div>
         </div>
       </div>
 
@@ -1489,24 +1483,24 @@ tailwind.config = {
       <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
         <div class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Your Account Manager</div>
         <div class="flex items-center gap-3 mb-4">
-          <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-lg shrink-0">MK</div>
+          <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-lg shrink-0">KC</div>
           <div>
-            <div class="font-semibold text-dark">Monika Kowalska</div>
-            <div class="text-xs text-gray-500">Partner Relations Manager</div>
+            <div class="font-semibold text-dark">Karolina Ciastoń</div>
+            <div class="text-xs text-gray-500">Thousand Miles Manager</div>
           </div>
         </div>
         <div class="space-y-2 text-sm text-gray-600 mb-4">
-          <div class="flex items-center gap-2"><i class="fa-solid fa-phone text-gray-400 w-4"></i>+48 12 345 67 89</div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-envelope text-gray-400 w-4"></i>m.kowalska@thousandmiles.pl</div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-phone text-gray-400 w-4"></i>+48 601 295 505</div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-envelope text-gray-400 w-4"></i>director@thousandmiles.pl</div>
         </div>
         <div class="grid grid-cols-2 gap-2">
           <div class="flex items-center gap-2 px-3 py-2.5 bg-gray-50 rounded-xl">
             <i class="fa-brands fa-whatsapp text-green-500 shrink-0"></i>
-            <span class="text-xs text-gray-600">+48 12 345 67 89</span>
+            <span class="text-xs text-gray-600">+48 601 295 505</span>
           </div>
           <div class="flex items-center gap-2 px-3 py-2.5 bg-gray-50 rounded-xl">
             <i class="fa-solid fa-phone text-brand shrink-0"></i>
-            <span class="text-xs text-gray-600">+48 12 345 67 89</span>
+            <span class="text-xs text-gray-600">+48 601 295 505</span>
           </div>
         </div>
       </div>
@@ -1771,10 +1765,9 @@ tailwind.config = {
           </div>
         </div>
         <div class="text-right text-xs text-gray-500 leading-relaxed">
-          <div class="font-bold text-dark text-sm">Hotel Wawel Kraków</div>
-          <div>ul. Sławkowska 12</div>
-          <div>31-014 Kraków</div>
-          <div>tel. +48 12 422 36 00</div>
+          <div class="font-bold text-dark text-sm" id="voucher-hotel-name">—</div>
+          <div id="voucher-hotel-address"></div>
+          <div id="voucher-hotel-phone"></div>
           <div class="mt-2 text-gray-400">Kraków, April 8, 2026</div>
         </div>
       </div>
@@ -3346,7 +3339,7 @@ tailwind.config = {
           <label class="flex items-start gap-3 p-3 border-2 border-brand rounded-xl cursor-pointer bg-brand/5 bk-pickup" onclick="highlightPickup(this)">
             <input type="radio" name="bk-pickup-${idx}" value="hotel" checked class="mt-0.5 accent-brand shrink-0">
             <div>
-              <div class="text-sm font-semibold text-dark">Hotel Wawel Kraków <span class="text-xs font-normal text-brand">(your hotel)</span></div>
+              <div class="text-sm font-semibold text-dark bk-hotel-pickup-label">${currentPartner?.name || 'Hotel'} <span class="text-xs font-normal text-brand">(your hotel)</span></div>
               <div class="text-xs text-gray-500 mt-0.5">Driver picks up the guest from hotel reception.</div>
             </div>
           </label>
@@ -3545,6 +3538,12 @@ tailwind.config = {
 
   function printVoucher() {
     closeConfirm();
+    if (currentPartner) {
+      document.getElementById('voucher-hotel-name').textContent = currentPartner.name || '—';
+      const addr = currentPartner.address && !currentPartner.address.includes('@') ? currentPartner.address : '';
+      document.getElementById('voucher-hotel-address').textContent = addr;
+      document.getElementById('voucher-hotel-phone').textContent = currentPartner.phone ? 'tel. ' + currentPartner.phone : '';
+    }
     document.getElementById('modal-voucher').classList.remove('hidden');
     document.getElementById('modal-voucher').classList.add('flex');
   }
@@ -4043,12 +4042,40 @@ tailwind.config = {
   }
 
   function openAccountPanel() {
+    // Populate hotel info from currentPartner
+    if (currentPartner) {
+      const av = document.getElementById('acct-avatar');
+      if (currentPartner.logo) {
+        av.innerHTML = `<img src="${currentPartner.logo}" class="w-full h-full object-cover">`;
+      } else {
+        av.style.background = currentPartner.color || '#E8751A';
+        av.textContent = currentPartner.initials || (currentPartner.name || '?').substring(0,2).toUpperCase();
+      }
+      document.getElementById('acct-name').textContent = currentPartner.name || '—';
+      document.getElementById('acct-type').textContent = currentPartner.type || '';
+      const starsEl = document.getElementById('acct-stars');
+      if (currentPartner.stars) {
+        starsEl.innerHTML = Array(currentPartner.stars).fill('<i class="fa-solid fa-star text-amber-400 text-xs"></i>').join('') + `<span class="text-xs text-gray-500 ml-1">${currentPartner.stars}-star hotel</span>`;
+        starsEl.classList.remove('hidden');
+      } else { starsEl.classList.add('hidden'); }
+      const addr = currentPartner.address && !currentPartner.address.includes('@') ? currentPartner.address : null;
+      if (addr) {
+        document.getElementById('acct-address').textContent = addr;
+        document.getElementById('acct-address-row').classList.remove('hidden');
+      } else { document.getElementById('acct-address-row').classList.add('hidden'); }
+      document.getElementById('acct-since').textContent = currentPartner.since || '—';
+      document.getElementById('acct-id').textContent = currentPartner.id || '—';
+      const phn = document.getElementById('printorder-hotel-name');
+      if (phn) phn.textContent = currentPartner.name || 'your hotel';
+    }
+    document.body.style.overflow = 'hidden';
     document.getElementById('panel-account').classList.remove('hidden');
     document.getElementById('panel-account').classList.add('flex');
     document.getElementById('panel-account-backdrop').classList.remove('hidden');
   }
 
   function closeAccountPanel() {
+    document.body.style.overflow = '';
     document.getElementById('panel-account').classList.add('hidden');
     document.getElementById('panel-account').classList.remove('flex');
     document.getElementById('panel-account-backdrop').classList.add('hidden');
