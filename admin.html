@@ -3472,18 +3472,23 @@ tailwind.config = {
       const subj = data?.result?.subject;
       if (!subj) throw new Error('no subject');
 
+      // Normalize ALL CAPS → Title Case (e.g. "HOTEL MACIEJEWSKI" → "Hotel Maciejewski")
+      const toTitleCase = str => str
+        ? str.toLowerCase().replace(/(?:^|\s|[-–/])\S/g, c => c.toUpperCase())
+        : str;
+
       // Company name
-      if (subj.name) document.getElementById('ap-invoice-company').value = subj.name;
+      if (subj.name) document.getElementById('ap-invoice-company').value = toTitleCase(subj.name);
 
       // Address → split into fields
       const addrRaw = subj.workingAddress || subj.residenceAddress || null;
       if (addrRaw) {
         const { street, house, apt, postal, city } = parsePolishAddress(addrRaw);
-        if (street) document.getElementById('ap-inv-street').value = street;
+        if (street) document.getElementById('ap-inv-street').value = toTitleCase(street);
         if (house)  document.getElementById('ap-inv-house').value  = house;
         if (apt)    document.getElementById('ap-inv-apt').value    = apt;
         if (postal) document.getElementById('ap-inv-postal').value = postal;
-        if (city)   document.getElementById('ap-inv-city').value   = city;
+        if (city)   document.getElementById('ap-inv-city').value   = toTitleCase(city);
       }
 
       // VAT status badge
