@@ -2239,24 +2239,23 @@ tailwind.config = {
       const future = new Date(today); future.setDate(future.getDate() + 90);
       const fmt = d => d.toISOString().slice(0, 10);
 
-      const { data: bokunResp, error: bokunErr } = await db.functions.invoke('bokun-sync', {
-        body: {
-          path: '/booking.json/booking-search',
-          method: 'POST',
-          payload: {
-            startDate: fmt(past),
-            endDate: fmt(future),
-            pageSize: 10000,
-            page: 0
+      let page = 0;
+      while (true) {
+        const { data: bokunResp, error: bokunErr } = await db.functions.invoke('bokun-sync', {
+          body: {
+            path: '/booking.json/booking-search',
+            method: 'POST',
+            payload: { startDate: fmt(past), endDate: fmt(future), pageSize: 500, page }
           }
-        }
-      });
-
-      if (!bokunErr && bokunResp?.body?.items) {
-        bokunResp.body.items.forEach(item => {
+        });
+        if (bokunErr || !bokunResp?.body?.items) break;
+        const items = bokunResp.body.items;
+        items.forEach(item => {
           const mapped = mapBokunBooking(item);
           if (mapped) allBookings.push(mapped);
         });
+        if (items.length < 500) break;
+        page++;
       }
     } catch(e) { console.warn('Bokun load error:', e); }
 
