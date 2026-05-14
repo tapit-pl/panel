@@ -3379,7 +3379,7 @@ tailwind.config = {
         const submitBody = submitRes?.body;
         console.log('[Booking] submit response:', JSON.stringify(submitBody));
         if (submitBody && ![400, 404, 422, 500].includes(submitBody?.status)) {
-          bokunConfirmationCode = submitBody.confirmationCode || submitBody.bookingConfirmationCode || submitBody.id;
+          bokunConfirmationCode = submitBody.confirmationCode || submitBody.bookingConfirmationCode || submitBody.booking?.confirmationCode || submitBody.id;
         } else {
           console.warn('[Booking] submit failed:', submitBody?.status, submitBody?.message || '');
         }
