@@ -1965,11 +1965,14 @@ tailwind.config = {
   function fmtPln(pln) { return pln ? `${pln} pln` : null; }
 
   document.addEventListener('DOMContentLoaded', async function() {
+    // Capture URL signals BEFORE any async calls — Supabase clears hash via history.replaceState
+    const savedUrl = window.location.hash + window.location.search;
+    const isInviteOrRecovery = savedUrl.includes('type=invite') || savedUrl.includes('type=recovery');
+
     await buildCommMap();
     renderPartnerCommissionsTab(Object.values(COMM_MAP));
-    // Handle invite / password reset token in URL hash
-    const hash = window.location.hash;
-    if (hash && (hash.includes('type=invite') || hash.includes('type=recovery'))) {
+
+    if (isInviteOrRecovery) {
       const { data: { session } } = await db.auth.getSession();
       if (session) {
         goTo('screen-set-password');
