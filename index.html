@@ -2263,14 +2263,14 @@ tailwind.config = {
     const m = document.getElementById('modal-add-staff');
     m.classList.remove('hidden');
     m.classList.add('flex');
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden'; document.documentElement.style.overflow = 'hidden';
   }
 
   function closeAddStaffModal() {
     const m = document.getElementById('modal-add-staff');
     m.classList.add('hidden');
     m.classList.remove('flex');
-    document.body.style.overflow = '';
+    document.body.style.overflow = ''; document.documentElement.style.overflow = '';
   }
 
   async function doAddStaff() {
@@ -2689,7 +2689,7 @@ tailwind.config = {
     const modal = document.getElementById('modal-tour');
     modal.classList.remove('hidden');
     modal.classList.add('flex');
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden'; document.documentElement.style.overflow = 'hidden';
 
     document.getElementById('td-booking-form').classList.add('hidden');
     document.getElementById('td-booking-success').classList.add('hidden');
@@ -3438,7 +3438,7 @@ tailwind.config = {
     const modal = document.getElementById('modal-tour');
     modal.classList.add('hidden');
     modal.classList.remove('flex');
-    document.body.style.overflow = '';
+    document.body.style.overflow = ''; document.documentElement.style.overflow = '';
   }
 
   function selectSlot(btn, spotsLeft) {
@@ -4334,14 +4334,14 @@ tailwind.config = {
     const m = document.getElementById('modal-edit-booking');
     m.classList.remove('hidden');
     m.classList.add('flex');
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden'; document.documentElement.style.overflow = 'hidden';
   }
 
   function closeEditBooking() {
     const m = document.getElementById('modal-edit-booking');
     m.classList.add('hidden');
     m.classList.remove('flex');
-    document.body.style.overflow = '';
+    document.body.style.overflow = ''; document.documentElement.style.overflow = '';
     editingBookingId = null;
   }
 
@@ -4482,14 +4482,14 @@ tailwind.config = {
       const phn = document.getElementById('printorder-hotel-name');
       if (phn) phn.textContent = currentPartner.name || 'your hotel';
     }
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden'; document.documentElement.style.overflow = 'hidden';
     document.getElementById('panel-account').classList.remove('hidden');
     document.getElementById('panel-account').classList.add('flex');
     document.getElementById('panel-account-backdrop').classList.remove('hidden');
   }
 
   function closeAccountPanel() {
-    document.body.style.overflow = '';
+    document.body.style.overflow = ''; document.documentElement.style.overflow = '';
     document.getElementById('panel-account').classList.add('hidden');
     document.getElementById('panel-account').classList.remove('flex');
     document.getElementById('panel-account-backdrop').classList.add('hidden');
