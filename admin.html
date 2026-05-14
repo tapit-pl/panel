@@ -3776,7 +3776,22 @@ tailwind.config = {
     const p = allPartners.find(x => x.id === editingPartnerId);
     if (!p) return;
     if (!confirm(`Are you sure you want to permanently delete "${p.name}"? This cannot be undone.`)) return;
+
+    const { data: { session } } = await db.auth.getSession();
+    const token = session?.access_token;
+
+    // Delete from partners table
     await db.from('partners').delete().eq('id', editingPartnerId);
+
+    // Delete auth account (requires service role — done via edge function)
+    if (p.email) {
+      await fetch('https://jzsiuvcgpwukxpcjxcsg.supabase.co/functions/v1/delete-partner', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ email: p.email })
+      });
+    }
+
     await logActivity('partner_deleted', `Partner "${p.name}" (${p.email}) permanently deleted`, editingPartnerId);
     await loadPartners();
     closePartnerDetail();
