@@ -4063,7 +4063,8 @@ tailwind.config = {
         document.getElementById('acct-address').textContent = addr;
         document.getElementById('acct-address-row').classList.remove('hidden');
       } else { document.getElementById('acct-address-row').classList.add('hidden'); }
-      document.getElementById('acct-since').textContent = currentPartner.since || '—';
+      const sinceVal = currentPartner.since || (currentPartner.created_at ? new Date(currentPartner.created_at).toLocaleDateString('en', {month:'long', year:'numeric'}) : '—');
+      document.getElementById('acct-since').textContent = sinceVal;
       document.getElementById('acct-id').textContent = currentPartner.id || '—';
       const phn = document.getElementById('printorder-hotel-name');
       if (phn) phn.textContent = currentPartner.name || 'your hotel';
