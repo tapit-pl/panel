@@ -2082,7 +2082,7 @@ tailwind.config = {
 
     document.querySelectorAll('.partner-initials').forEach(el => el.textContent = p.initials || p.name.substring(0,2).toUpperCase());
     document.querySelectorAll('.partner-name').forEach(el => el.textContent = p.name);
-    document.querySelectorAll('.td-pickup-hotel-label').forEach(el => el.textContent = p.address || p.name || '—');
+    document.querySelectorAll('.td-pickup-hotel-label').forEach(el => el.textContent = p.name || '—');
     document.querySelectorAll('.partner-type').forEach(el => el.textContent = p.type || '');
 
     // Prefetch tours in background (no await — doesn't block dashboard load)
@@ -2874,7 +2874,9 @@ tailwind.config = {
     if (val === 'meeting') return 'Garbarska Street, Kraków — meeting point';
     const otherChecked = document.getElementById('td-pickup-other-check')?.checked;
     if (otherChecked) return document.getElementById('td-pickup-other-input')?.value.trim() || '';
-    return currentPartner?.address || currentPartner?.name || '';
+    const addr = currentPartner?.address;
+    const validAddr = addr && !addr.includes('@') ? addr : null;
+    return validAddr || currentPartner?.name || '';
   }
 
   function formatDate(dateStr) {
