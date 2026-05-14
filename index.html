@@ -3283,6 +3283,16 @@ tailwind.config = {
       errEl.classList.remove('hidden');
       return;
     }
+    if (!email) {
+      errEl.textContent = 'Guest email is required by the booking system.';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    if (!phone) {
+      errEl.textContent = 'Guest phone number is required by the booking system.';
+      errEl.classList.remove('hidden');
+      return;
+    }
     if (!dateStr) {
       errEl.textContent = 'Please select a date from the calendar.';
       errEl.classList.remove('hidden');
@@ -3376,7 +3386,7 @@ tailwind.config = {
       } catch(e) { console.warn('[Booking] Bokun creation failed:', e.message); }
     }
 
-    const { data, error } = await db.from('bookings').insert({
+    const { error } = await db.from('bookings').insert({
       tour,
       date: dateStr,
       guest,
@@ -3385,7 +3395,7 @@ tailwind.config = {
       pax: tdGuestCount,
       status: bokunConfirmationCode ? 'confirmed' : 'pending',
       partner_id: currentPartner?.id,
-    }).select().single();
+    });
 
     btn.disabled = false;
     btn.innerHTML = '<i class="fa-solid fa-check"></i> Confirm booking';
