@@ -2983,12 +2983,11 @@ tailwind.config = {
         console.log('[Booking] options type:', selectedOptionType);
 
         if (selectedOptionType) {
-          const mcQids = (optionsBody?.questions?.mainContactDetails || []).map(q => q.questionId);
           const mainContactDetails = [
-            mcQids.includes('firstName') && { questionId: 'firstName', values: [firstName] },
-            mcQids.includes('lastName')  && { questionId: 'lastName',  values: [lastName] },
-            mcQids.includes('email') && email && { questionId: 'email', values: [email] },
-            mcQids.includes('phone') && phone && { questionId: 'phone', values: [phone] },
+            { questionId: 'firstName', values: [firstName] },
+            { questionId: 'lastName',  values: [lastName] },
+            email && { questionId: 'email', values: [email] },
+            phone && { questionId: 'phoneNumber', values: [phone] },
           ].filter(Boolean);
 
           const bookingNote = [payLabel, packageLines || categoryLines,
@@ -3008,7 +3007,11 @@ tailwind.config = {
                 date: dateStr,
                 passengers: buildPassengerGroups(),
                 note: bookingNote || undefined,
-                answers: [], pickupAnswers: [], dropoffAnswers: [],
+                answers: [],
+                pickupAnswers: currentPartner?.address || currentPartner?.name
+                  ? [{ questionId: 'pickupPlaceDescription', values: [currentPartner.address || currentPartner.name] }]
+                  : [],
+                dropoffAnswers: [],
               }],
             },
           };
