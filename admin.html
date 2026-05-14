@@ -3602,15 +3602,16 @@ tailwind.config = {
       body: JSON.stringify({
         email,
         name,
-        type:     document.getElementById('ap-type').value,
-        street:   document.getElementById('ap-street').value,
-        house:    document.getElementById('ap-house').value,
-        apt:      document.getElementById('ap-apt').value,
-        postal:   document.getElementById('ap-postal').value,
-        city:     document.getElementById('ap-city').value,
-        contact_first: document.getElementById('ap-contact-first').value,
-        contact_last:  document.getElementById('ap-contact-last').value,
-        phone:    document.getElementById('ap-phone').value,
+        type:    document.getElementById('ap-type').value,
+        street:  document.getElementById('ap-street').value,
+        house:   document.getElementById('ap-house').value,
+        apt:     document.getElementById('ap-apt').value,
+        postal:  document.getElementById('ap-postal').value,
+        city:    document.getElementById('ap-city').value,
+        contact: [document.getElementById('ap-contact-first').value.trim(), document.getElementById('ap-contact-last').value.trim()].filter(Boolean).join(' '),
+        contact_first: document.getElementById('ap-contact-first').value.trim(),
+        contact_last:  document.getElementById('ap-contact-last').value.trim(),
+        phone:   document.getElementById('ap-phone').value,
         commRate: 10,
         notes:           document.getElementById('ap-notes').value,
         nip:             document.getElementById('ap-nip').value,
@@ -3632,6 +3633,15 @@ tailwind.config = {
       showToast('Error: ' + (err.error || res.statusText), 'error');
       return;
     }
+
+    const contactFull = [document.getElementById('ap-contact-first').value.trim(), document.getElementById('ap-contact-last').value.trim()].filter(Boolean).join(' ');
+    const street  = document.getElementById('ap-street').value.trim();
+    const house   = document.getElementById('ap-house').value.trim();
+    const apt     = document.getElementById('ap-apt').value.trim();
+    const postal  = document.getElementById('ap-postal').value.trim();
+    const city    = document.getElementById('ap-city').value.trim();
+    const addressFull = [street + (house ? ' ' + house : '') + (apt ? '/' + apt : ''), postal + (city ? ' ' + city : '')].filter(Boolean).join(', ');
+    await db.from('partners').update({ contact: contactFull, address: addressFull }).eq('email', email);
 
     await loadPartners();
     closeAddPartner();
