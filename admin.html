@@ -2052,51 +2052,12 @@ tailwind.config = {
     const todayEnd   = todayStart + 86400000;
     const yesterdayStart = todayStart - 86400000;
 
-    const fromIso = new Date(Math.min(prevStart, yesterdayStart)).toISOString();
-    const toIso   = new Date(monthEnd).toISOString();
-    const { data: rows } = await db.from('bokun_bookings')
-      .select('id, tour, guest_first, guest_last, channel, status, tour_date, booked_at, pax, total_pln')
-      .gte('booked_at', fromIso)
-      .lt('booked_at', toIso)
-      .order('booked_at', { ascending: false })
-      .limit(5000);
-
-    supaDash = (rows || []).map(r => ({
-      id: r.id,
-      tour: r.tour || '—',
-      guest: [r.guest_first, r.guest_last].filter(Boolean).join(' ') || '—',
-      hotel: '—',
-      date: r.tour_date ? new Date(r.tour_date).toLocaleDateString('en-GB', {day:'numeric',month:'short'}) : '—',
-      total: Math.round(r.total_pln || 0),
-      source: r.channel || 'Bokun',
-      status: r.status === 'CONFIRMED' ? 'Paid' : r.status === 'CANCELLED' ? 'Cancelled' : 'Pending',
-      pax: r.pax || 1,
-      _creationTs: r.booked_at ? new Date(r.booked_at).getTime() : 0,
-      _startTs: r.tour_date ? new Date(r.tour_date).getTime() : 0,
-    }));
-
-    // Also fetch last 5 recent bookings overall for the Recent widget
-    const { data: recentRows } = await db.from('bokun_bookings')
-      .select('id, tour, guest_first, guest_last, channel, status, tour_date, booked_at, total_pln')
-      .order('booked_at', { ascending: false })
-      .limit(5);
-    const recentMapped = (recentRows || []).map(r => ({
-      id: r.id,
-      tour: r.tour || '—',
-      guest: [r.guest_first, r.guest_last].filter(Boolean).join(' ') || '—',
-      hotel: '—',
-      date: r.tour_date ? new Date(r.tour_date).toLocaleDateString('en-GB', {day:'numeric',month:'short'}) : '—',
-      total: Math.round(r.total_pln || 0),
-      source: r.channel || 'Bokun',
-      status: r.status === 'CONFIRMED' ? 'Paid' : r.status === 'CANCELLED' ? 'Cancelled' : 'Pending',
-      _creationTs: r.booked_at ? new Date(r.booked_at).getTime() : 0,
-    }));
-
     const active = b => b.status !== 'Cancelled';
-    const todayB    = supaDash.filter(b => active(b) && b._creationTs >= todayStart && b._creationTs < todayEnd);
-    const yesterdayB= supaDash.filter(b => active(b) && b._creationTs >= yesterdayStart && b._creationTs < todayStart);
-    const monthB    = supaDash.filter(b => active(b) && b._creationTs >= monthStart && b._creationTs < monthEnd);
-    const prevMonthB= supaDash.filter(b => active(b) && b._creationTs >= prevStart && b._creationTs < prevEnd);
+    const todayB    = allBookings.filter(b => active(b) && b._creationTs >= todayStart && b._creationTs < todayEnd);
+    const yesterdayB= allBookings.filter(b => active(b) && b._creationTs >= yesterdayStart && b._creationTs < todayStart);
+    const monthB    = allBookings.filter(b => active(b) && b._creationTs >= monthStart && b._creationTs < monthEnd);
+    const prevMonthB= allBookings.filter(b => active(b) && b._creationTs >= prevStart && b._creationTs < prevEnd);
+    const recentMapped = [...allBookings].filter(b => b._creationTs > 0).sort((a,b) => b._creationTs - a._creationTs).slice(0, 5);
 
     const monthRev  = monthB.reduce((s,b) => s+(b.total||0), 0);
     const prevRev   = prevMonthB.reduce((s,b) => s+(b.total||0), 0);
@@ -2955,7 +2916,7 @@ tailwind.config = {
   function generateDayData(dateStr) {
     const dayStart = new Date(dateStr + 'T00:00:00').getTime();
     const dayEnd   = dayStart + 86400000;
-    const items = supaDash.filter(b => b._creationTs >= dayStart && b._creationTs < dayEnd && b.status !== 'Cancelled');
+    const items = allBookings.filter(b => b._creationTs >= dayStart && b._creationTs < dayEnd && b.status !== 'Cancelled');
     return { b: items.length, r: items.reduce((s, x) => s + (x.total || 0), 0) };
   }
 
@@ -3074,7 +3035,7 @@ tailwind.config = {
   }
 
   const allBookings = [];
-  let supaDash = []; // Dashboard data loaded from Supabase bokun_bookings
+  let supaDash = [];
 
   function renderBookingsTable(data) {
     const rows = data || allBookings;
