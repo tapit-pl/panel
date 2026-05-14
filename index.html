@@ -2991,14 +2991,14 @@ tailwind.config = {
         const optionsBody = optionsRes?.body;
         console.log('[Booking] options response:', JSON.stringify(optionsBody));
 
-        if (optionsBody && ![400, 404, 422, 500].includes(optionsBody?.status)) {
-          const checkoutOption = Array.isArray(optionsBody) ? optionsBody[0] : optionsBody;
+        const selectedOption = (optionsBody?.options || (Array.isArray(optionsBody) ? optionsBody : []))[0];
+        if (selectedOption) {
           const submitPayload = {
             source: 'DIRECT_REQUEST',
             directBooking: activityRequest,
-            checkoutOption,
+            checkoutOption: { type: selectedOption.type },
             paymentMethod: payment === 'link' ? 'RESERVE_FOR_EXTERNAL_PAYMENT' : 'CASH',
-            sendNotificationToMainContact: false,
+            answers: { sendNotificationToMainContact: false, showPricesInNotification: false },
           };
           console.log('[Booking] submit payload:', JSON.stringify(submitPayload));
           const { data: submitRes } = await db.functions.invoke('bokun-sync', {
