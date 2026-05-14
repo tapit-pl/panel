@@ -2981,7 +2981,6 @@ tailwind.config = {
           startTimeId: tdSelectedTimeSlot.startTimeId,
           date: dateStr,
           passengers: buildPassengers(),
-          internalNote: [payLabel, packageLines || categoryLines, extraGuests.length ? 'Guests: ' + [guest, ...extraGuests].join(', ') : null, notes].filter(Boolean).join(' · ') || undefined,
         };
 
         console.log('[Booking] options payload:', JSON.stringify(activityRequest));
@@ -2998,7 +2997,7 @@ tailwind.config = {
             directBooking: activityRequest,
             checkoutOption: { type: selectedOption.type },
             paymentMethod: payment === 'link' ? 'RESERVE_FOR_EXTERNAL_PAYMENT' : 'CASH',
-            answers: { sendNotificationToMainContact: false, showPricesInNotification: false },
+            mainContactDetails: { firstName, lastName, email: email || undefined },
           };
           console.log('[Booking] submit payload:', JSON.stringify(submitPayload));
           const { data: submitRes } = await db.functions.invoke('bokun-sync', {
