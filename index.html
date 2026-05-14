@@ -2975,10 +2975,12 @@ tailwind.config = {
           internalComment: [payLabel, packageLines || categoryLines, extraGuests.length ? 'Guests: ' + [guest, ...extraGuests].join(', ') : null, notes].filter(Boolean).join(' · ') || undefined,
         };
 
+        console.log('[Booking] reserve payload:', JSON.stringify(payload));
         const { data: bookingRes } = await db.functions.invoke('bokun-sync', {
           body: { path: '/booking.json/reserve', method: 'POST', payload }
         });
         const reserveBody = bookingRes?.body;
+        console.log('[Booking] reserve response:', JSON.stringify(reserveBody));
         if (reserveBody && ![400, 404, 422, 500].includes(reserveBody?.status)) {
           const reserveId = reserveBody.id;
           if (reserveId) {
