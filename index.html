@@ -2538,11 +2538,8 @@ tailwind.config = {
   }
 
   function scrollModalTo(el) {
-    const body = document.getElementById('modal-tour-body');
-    if (!body) return;
-    const rect = el.getBoundingClientRect();
-    const bodyRect = body.getBoundingClientRect();
-    body.scrollBy({ top: rect.top - bodyRect.top - 80, behavior: 'smooth' });
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   let bokunProducts = [];
