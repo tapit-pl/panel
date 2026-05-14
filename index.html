@@ -3401,6 +3401,7 @@ tailwind.config = {
     btn.innerHTML = '<i class="fa-solid fa-check"></i> Confirm booking';
 
     if (error) {
+      console.error('[Booking] DB insert error:', JSON.stringify(error));
       errEl.textContent = 'Error saving booking: ' + error.message;
       errEl.classList.remove('hidden');
       return;
