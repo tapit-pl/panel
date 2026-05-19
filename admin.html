@@ -2214,7 +2214,8 @@ tailwind.config = {
     (dbRows || []).forEach(b => allBookings.push({
       id: b.id, tour: b.tour, guest: b.guest, email: b.email, phone: b.phone,
       hotel: b.partner_id || '—', date: b.date, time: b.time, pickup: b.pickup,
-      pax: b.pax, total: b.total, comm: b.comm, source: b.source, status: b.status, notes: b.notes || ''
+      pax: b.pax, total: b.total, comm: b.comm, source: b.source, status: b.status, notes: b.notes || '',
+      _dbBooking: true, _stripeSessionId: b.stripe_session_id, _bokunCode: b.bokun_confirmation_code,
     }));
 
     try {
@@ -3059,6 +3060,7 @@ tailwind.config = {
           <td class="px-4 py-3 text-right whitespace-nowrap">
             <button onclick="openVoucher('${b.id}')" title="View voucher" class="text-gray-300 hover:text-brand transition-colors ml-1"><i class="fa-solid fa-file-pdf text-xs"></i></button>
             <button onclick="openEditBooking('${b.id}')" title="Edit booking" class="text-gray-300 hover:text-brand transition-colors ml-2"><i class="fa-solid fa-pen text-xs"></i></button>
+            ${b._dbBooking && b.status !== 'cancelled' ? `<button onclick="cancelBooking('${b.id}', '${(b.guest||'').replace(/'/g,"\\'")}', ${!!b._stripeSessionId})" title="Cancel booking" class="text-gray-300 hover:text-red-500 transition-colors ml-2"><i class="fa-solid fa-xmark text-xs"></i></button>` : ''}
           </td>
         </tr>`);
     });
@@ -3124,6 +3126,27 @@ tailwind.config = {
     document.getElementById('booking-filter-from').value = '';
     document.getElementById('booking-filter-to').value = '';
     filterAllBookings();
+  }
+
+  async function cancelBooking(id, guestName, hasStripe) {
+    const refundMsg = hasStripe ? ' and refund the Stripe payment' : '';
+    if (!confirm(`Cancel booking for ${guestName}${refundMsg}?\n\nThis cannot be undone.`)) return;
+    const btn = document.querySelector(`[onclick*="cancelBooking('${id}'"]`);
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-xs"></i>'; }
+    try {
+      const { data, error } = await db.functions.invoke('cancel-booking', { body: { booking_id: id } });
+      if (error || !data?.success) {
+        alert('Error: ' + (error?.message || data?.error || 'Unknown error'));
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-xmark text-xs"></i>'; }
+        return;
+      }
+      const b = allBookings.find(x => x.id === id);
+      if (b) b.status = 'cancelled';
+      renderBookingsTable();
+    } catch(e) {
+      alert('Error: ' + e.message);
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-xmark text-xs"></i>'; }
+    }
   }
 
   function openVoucher(id) {
