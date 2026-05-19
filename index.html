@@ -2155,44 +2155,45 @@ tailwind.config = {
     }
 
     errEl.classList.add('hidden');
-    const { data, error } = await db.auth.updateUser({ password: pwd });
+    const { data: updateData, error } = await db.auth.updateUser({ password: pwd });
     if (error) {
       errMsg.textContent = error.message;
       errEl.classList.remove('hidden');
       return;
     }
 
-    // Password set — show welcome screen for new partners
-    const { data: { session } } = await db.auth.getSession();
-    if (session) {
-      const { data: adminCheck } = await db.from('admin_users').select('role').eq('email', session.user.email).maybeSingle();
-      if (!adminCheck) {
-        const { data: partnerData } = await db.from('partners').select('*').eq('email', session.user.email).maybeSingle();
-        let welcomeName, welcomeHotel;
-        if (partnerData) {
-          const contactFirst = partnerData.contact_first || (partnerData.contact ? partnerData.contact.split(' ')[0] : null);
-          welcomeName = contactFirst || partnerData.name || session.user.email;
-          welcomeHotel = contactFirst ? (partnerData.name || '') : '';
-          currentPartner = partnerData;
-        } else {
-          const { data: staffData } = await db.from('staff').select('*, partners(*)').eq('email', session.user.email).maybeSingle();
-          if (staffData) {
-            welcomeName = staffData.first_name;
-            welcomeHotel = staffData.partners?.name || '';
-            currentPartner = { ...staffData.partners, role: 'reception', _isStaff: true, _staffId: staffData.id, _staffName: `${staffData.first_name} ${staffData.last_name || ''}`.trim() };
-          } else {
-            welcomeName = session.user.email;
-            welcomeHotel = '';
-            currentPartner = { email: session.user.email, name: session.user.email, initials: session.user.email.substring(0,2).toUpperCase() };
-          }
-        }
-        document.getElementById('welcome-contact').textContent = welcomeName;
-        document.getElementById('welcome-name').textContent = welcomeHotel;
-        goTo('screen-welcome');
+    // Password set — use user from updateUser response (avoids session timing issues)
+    const userEmail = updateData?.user?.email;
+    if (!userEmail) return;
+
+    const { data: adminCheck } = await db.from('admin_users').select('role').eq('email', userEmail).maybeSingle();
+    if (adminCheck) {
+      window.location.href = 'admin.html';
+      return;
+    }
+
+    const { data: partnerData } = await db.from('partners').select('*').eq('email', userEmail).maybeSingle();
+    let welcomeName, welcomeHotel;
+    if (partnerData) {
+      const contactFirst = partnerData.contact_first || (partnerData.contact ? partnerData.contact.split(' ')[0] : null);
+      welcomeName = contactFirst || partnerData.name || userEmail;
+      welcomeHotel = contactFirst ? (partnerData.name || '') : '';
+      currentPartner = partnerData;
+    } else {
+      const { data: staffData } = await db.from('staff').select('*, partners(*)').eq('email', userEmail).maybeSingle();
+      if (staffData) {
+        welcomeName = staffData.first_name;
+        welcomeHotel = staffData.partners?.name || '';
+        currentPartner = { ...staffData.partners, role: 'reception', _isStaff: true, _staffId: staffData.id, _staffName: `${staffData.first_name} ${staffData.last_name || ''}`.trim() };
       } else {
-        window.location.href = 'admin.html';
+        welcomeName = userEmail;
+        welcomeHotel = '';
+        currentPartner = { email: userEmail, name: userEmail, initials: userEmail.substring(0,2).toUpperCase() };
       }
     }
+    document.getElementById('welcome-contact').textContent = welcomeName;
+    document.getElementById('welcome-name').textContent = welcomeHotel;
+    goTo('screen-welcome');
   }
 
   async function doResetPassword() {
@@ -2539,7 +2540,12 @@ tailwind.config = {
 
   function scrollModalTo(el) {
     if (!el) return;
-    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    const container = document.getElementById('modal-tour-body');
+    if (!container) return;
+    const containerRect = container.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+    const newTop = container.scrollTop + elRect.top - containerRect.top - 16;
+    container.scrollTo({ top: newTop, behavior: 'smooth' });
   }
 
   let bokunProducts = [];
@@ -3682,21 +3688,21 @@ tailwind.config = {
         <div class="text-xs font-bold text-gray-400 uppercase tracking-wide pt-1">Payment method</div>
         <div class="space-y-2">
           <label class="flex items-start gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-brand/40 bk-payment" onclick="highlightPayment(this)">
-            <input type="radio" name="bk-payment-${idx}" value="online" class="mt-0.5 accent-brand shrink-0">
+            <input type="radio" name="bk-payment-${idx}" value="online" class="mt-0.5 accent-brand shrink-0" tabindex="-1" onfocus="this.blur()">
             <div>
               <div class="text-sm font-semibold text-dark flex items-center gap-2">Online payment link <span class="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-normal">Recommended</span></div>
               <div class="text-xs text-gray-500 mt-0.5">A payment link will be sent to the guest's e-mail.</div>
             </div>
           </label>
           <label class="flex items-start gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-brand/40 bk-payment" onclick="highlightPayment(this)">
-            <input type="radio" name="bk-payment-${idx}" value="hotel" class="mt-0.5 accent-brand shrink-0">
+            <input type="radio" name="bk-payment-${idx}" value="hotel" class="mt-0.5 accent-brand shrink-0" tabindex="-1" onfocus="this.blur()">
             <div>
               <div class="text-sm font-semibold text-dark">Paid at hotel</div>
               <div class="text-xs text-gray-500 mt-0.5">Commission settled monthly.</div>
             </div>
           </label>
           <label class="flex items-start gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-brand/40 bk-payment" onclick="highlightPayment(this)">
-            <input type="radio" name="bk-payment-${idx}" value="cash" class="mt-0.5 accent-brand shrink-0">
+            <input type="radio" name="bk-payment-${idx}" value="cash" class="mt-0.5 accent-brand shrink-0" tabindex="-1" onfocus="this.blur()">
             <div>
               <div class="text-sm font-semibold text-dark">Cash — paid to driver</div>
               <div class="text-xs text-gray-500 mt-0.5">The guest pays cash on the day of the tour.</div>
