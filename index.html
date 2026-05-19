@@ -1537,12 +1537,12 @@ tailwind.config = {
               </div>
             </div>
           </div>
-          <div class="flex items-center gap-2">
+          <div id="acct-since-row" class="flex items-center gap-2">
             <i class="fa-solid fa-calendar text-brand w-4 shrink-0"></i>
             <span class="text-gray-400 shrink-0">Partner since:</span>
             <span id="acct-since">—</span>
           </div>
-          <div class="flex items-center gap-2">
+          <div id="acct-id-row" class="flex items-center gap-2">
             <i class="fa-solid fa-id-badge text-brand w-4 shrink-0"></i>
             <span class="text-gray-400 shrink-0">Partner ID:</span>
             <span id="acct-id" class="font-mono text-xs truncate">—</span>
@@ -4475,8 +4475,13 @@ tailwind.config = {
         av.style.background = currentPartner.color || '#E8751A';
         av.textContent = currentPartner.initials || (currentPartner.name ? currentPartner.name.substring(0,2).toUpperCase() : null) || staffInitials || '??';
       }
-      document.getElementById('acct-name').textContent = isStaff ? (currentPartner._staffName || currentPartner.name || '—') : (currentPartner.name || '—');
-      document.getElementById('acct-type').textContent = isStaff ? ('Reception · ' + (currentPartner.name || 'hotel')) : (currentPartner.type || '');
+      document.getElementById('acct-name').textContent = isStaff ? (currentPartner._staffName || '—') : (currentPartner.name || '—');
+      document.getElementById('acct-type').textContent = isStaff ? (currentPartner.name || '') : (currentPartner.type || '');
+      // Hide partner-specific rows for staff
+      const sinceRow = document.getElementById('acct-since-row');
+      const idRow = document.getElementById('acct-id-row');
+      if (sinceRow) sinceRow.classList.toggle('hidden', isStaff);
+      if (idRow) idRow.classList.toggle('hidden', isStaff);
       // Commission summary — hide for staff
       const commEl = document.getElementById('acct-commission');
       if (commEl) commEl.classList.toggle('hidden', isStaff);
