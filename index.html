@@ -2374,7 +2374,7 @@ tailwind.config = {
   async function initPartnerDashboard() {
     const p = currentPartner;
 
-    document.querySelectorAll('.partner-initials').forEach(el => el.textContent = p.initials || p.name.substring(0,2).toUpperCase());
+    document.querySelectorAll('.partner-initials').forEach(el => el.textContent = p.initials || (p.name || '??').substring(0,2).toUpperCase());
     document.querySelectorAll('.partner-name').forEach(el => el.textContent = p.name);
     document.querySelectorAll('.td-pickup-hotel-label').forEach(el => el.textContent = p.name || '—');
     document.querySelectorAll('.partner-type').forEach(el => el.textContent = p.type || '');
@@ -2516,7 +2516,13 @@ tailwind.config = {
       return;
     }
 
-    await redirectByRole(data.user);
+    try {
+      await redirectByRole(data.user);
+    } catch(e) {
+      console.error('Login redirect failed:', e);
+      errEl.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Login error: ' + e.message;
+      errEl.classList.remove('hidden');
+    }
   }
 
   function goTo(screen) {
