@@ -3462,7 +3462,11 @@ tailwind.config = {
         const totalPln = hasPackages
           ? tdRateSelections.reduce((s, x) => s + x.count * (lookupCommPln(x.rate.title) || 0), 0)
           : (lookupCommPln(tdCurrentTour?.title || '') || 0) * tdGuestCount;
-        const { data: stripeRes } = await db.functions.invoke('create-stripe-session', {
+        console.log('[Stripe] totalPln:', totalPln, 'bookingId:', insertedBooking.id, 'reservationCode:', bokunReservationCode);
+        if (!totalPln) {
+          console.warn('[Stripe] totalPln is 0 — tour missing from tour_commissions. Add price_pln for:', tour);
+        }
+        const { data: stripeRes, error: stripeErr } = await db.functions.invoke('create-stripe-session', {
           body: {
             booking_id: insertedBooking.id,
             bokun_reservation_code: bokunReservationCode,
@@ -3474,11 +3478,12 @@ tailwind.config = {
             guest_email: email,
           }
         });
+        console.log('[Stripe] response:', JSON.stringify(stripeRes), 'error:', JSON.stringify(stripeErr));
         stripeSessionUrl = stripeRes?.session_url;
         if (stripeRes?.session_id) {
           await db.from('bookings').update({ stripe_session_id: stripeRes.session_id }).eq('id', insertedBooking.id);
         }
-      } catch(e) { console.warn('[Booking] Stripe session error:', e.message); }
+      } catch(e) { console.warn('[Stripe] error:', e.message); }
     }
 
     form.classList.add('hidden');
