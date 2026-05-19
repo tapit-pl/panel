@@ -3328,11 +3328,11 @@ tailwind.config = {
           if (hasCategories) {
             return tdCategorySelections
               .filter(x => x.count > 0)
-              .map(x => ({ pricingCategoryId: x.category.id, groupSize: x.count, passengerDetails: [], answers: [], extras: [] }));
+              .map(x => ({ pricingCategoryId: x.category.id, groupSize: x.count, unitPrice: 0, passengerDetails: [], answers: [], extras: [] }));
           }
           const pricingCat = tdCurrentTour.pricing?.[0];
           return pricingCat
-            ? [{ pricingCategoryId: pricingCat.id, groupSize: tdGuestCount, passengerDetails: [], answers: [], extras: [] }]
+            ? [{ pricingCategoryId: pricingCat.id, groupSize: tdGuestCount, unitPrice: 0, passengerDetails: [], answers: [], extras: [] }]
             : [];
         };
 
