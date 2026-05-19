@@ -1417,9 +1417,9 @@ tailwind.config = {
         <div id="td-additional-guests"></div>
 
         <!-- Payment type -->
-        <div>
+        <div id="td-payment-section">
           <label class="block text-xs font-semibold text-gray-600 mb-2">Payment method</label>
-          <div class="grid grid-cols-3 gap-2">
+          <div class="grid gap-2" id="td-payment-grid">
             <div class="pay-opt cursor-pointer" data-payment="driver" onclick="selectTdPayment('driver')">
               <div class="pay-opt-box border-2 border-brand bg-brand/5 rounded-xl p-3 text-center transition-all">
                 <i class="fa-solid fa-car text-brand text-lg block mb-1"></i>
@@ -2387,6 +2387,20 @@ tailwind.config = {
     if (p.role === 'manager' && !p._isStaff) {
       document.getElementById('tab-btn-management').classList.remove('hidden');
       loadStaff();
+    }
+
+    // Filter payment options based on partner config
+    const allowedPayments = p.payment_options && p.payment_options.length ? p.payment_options : ['driver', 'hotel', 'link'];
+    const payGrid = document.getElementById('td-payment-grid');
+    if (payGrid) {
+      const visible = payGrid.querySelectorAll('.pay-opt[data-payment]');
+      visible.forEach(el => {
+        el.style.display = allowedPayments.includes(el.dataset.payment) ? '' : 'none';
+      });
+      const count = allowedPayments.length;
+      payGrid.className = `grid gap-2 grid-cols-${count}`;
+      const firstVisible = payGrid.querySelector(`.pay-opt[data-payment="${allowedPayments[0]}"]`);
+      if (firstVisible) selectTdPayment(allowedPayments[0]);
     }
 
     // Prefetch tours in background (no await — doesn't block dashboard load)
