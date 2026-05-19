@@ -3348,8 +3348,10 @@ tailwind.config = {
         });
         const optionsBody = optionsRes?.body;
         console.log('[Booking] options response:', JSON.stringify(optionsBody));
-        const checkoutOption = optionsBody?.options?.[0];
-        const checkoutOptionType = checkoutOption?.type || 'CUSTOMER_NO_PAYMENT';
+        const checkoutOptions = optionsBody?.options || [];
+        console.log('[Booking] available checkoutOptions:', checkoutOptions.map(o => o.type));
+        const checkoutOption = checkoutOptions.find(o => o.type === 'CUSTOMER_NO_PAYMENT') || checkoutOptions[0];
+        const checkoutOptionType = checkoutOption?.type || 'CUSTOMER_FULL_PAYMENT';
         console.log('[Booking] using checkoutOptionType:', checkoutOptionType);
         const optionAnswers = (checkoutOption?.questions || []).map((q) => ({
           questionId: q.questionId,
