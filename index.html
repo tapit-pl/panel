@@ -1420,28 +1420,25 @@ tailwind.config = {
         <div>
           <label class="block text-xs font-semibold text-gray-600 mb-2">Payment method</label>
           <div class="grid grid-cols-3 gap-2">
-            <label class="pay-opt cursor-pointer" onmousedown="event.preventDefault()" onclick="this.querySelector('input').checked=true; updatePayOptStyles()">
-              <input type="radio" name="td-payment" value="driver" class="sr-only" tabindex="-1" checked>
+            <div class="pay-opt cursor-pointer" data-payment="driver" onclick="selectTdPayment('driver')">
               <div class="pay-opt-box border-2 border-brand bg-brand/5 rounded-xl p-3 text-center transition-all">
                 <i class="fa-solid fa-car text-brand text-lg block mb-1"></i>
                 <div class="text-xs font-semibold text-dark">Pay at driver</div>
               </div>
-            </label>
-            <label class="pay-opt cursor-pointer" onmousedown="event.preventDefault()" onclick="this.querySelector('input').checked=true; updatePayOptStyles()">
-              <input type="radio" name="td-payment" value="hotel" class="sr-only" tabindex="-1">
+            </div>
+            <div class="pay-opt cursor-pointer" data-payment="hotel" onclick="selectTdPayment('hotel')">
               <div class="pay-opt-box border-2 border-gray-200 rounded-xl p-3 text-center transition-all hover:border-brand/40">
                 <i class="fa-solid fa-building text-gray-400 text-lg block mb-1"></i>
                 <div class="text-xs font-semibold text-gray-600">Pay at hotel</div>
               </div>
-            </label>
-            <label class="pay-opt cursor-pointer" onmousedown="event.preventDefault()" onclick="this.querySelector('input').checked=true; updatePayOptStyles()">
-              <input type="radio" name="td-payment" value="link" class="sr-only" tabindex="-1">
+            </div>
+            <div class="pay-opt cursor-pointer" data-payment="link" onclick="selectTdPayment('link')">
               <div class="pay-opt-box border-2 border-gray-200 rounded-xl p-3 text-center transition-all hover:border-brand/40">
                 <i class="fa-solid fa-envelope text-gray-400 text-lg block mb-1"></i>
                 <div class="text-xs font-semibold text-gray-600">Payment link</div>
                 <div class="text-xs text-gray-400 mt-0.5">sent by email</div>
               </div>
-            </label>
+            </div>
           </div>
         </div>
 
@@ -3154,8 +3151,7 @@ tailwind.config = {
     document.getElementById('td-phone').value = '';
     document.getElementById('td-notes').value = '';
     renderAdditionalGuestFields(tdGuestCount);
-    document.querySelector('input[name="td-payment"][value="driver"]').checked = true;
-    updatePayOptStyles();
+    selectTdPayment('driver');
     document.querySelector('input[name="td-pickup"][value="hotel"]').checked = true;
     document.getElementById('td-pickup-other-wrap').classList.add('hidden');
     document.getElementById('td-pickup-other-check').checked = false;
@@ -3249,26 +3245,22 @@ tailwind.config = {
     renderAdditionalGuestFields(tdGuestCount);
   }
 
-  function updatePayOptStyles() {
-    document.querySelectorAll('.pay-opt input[type=radio]').forEach(radio => {
-      const box = radio.closest('.pay-opt').querySelector('.pay-opt-box');
-      if (radio.checked) {
-        box.classList.add('border-brand', 'bg-brand/5');
-        box.classList.remove('border-gray-200');
-        box.querySelectorAll('i').forEach(i => { i.classList.add('text-brand'); i.classList.remove('text-gray-400'); });
-        box.querySelectorAll('div').forEach(d => { d.classList.add('text-dark'); d.classList.remove('text-gray-600'); });
-      } else {
-        box.classList.remove('border-brand', 'bg-brand/5');
-        box.classList.add('border-gray-200');
-        box.querySelectorAll('i').forEach(i => { i.classList.remove('text-brand'); i.classList.add('text-gray-400'); });
-        box.querySelectorAll('div').forEach(d => { d.classList.remove('text-dark'); d.classList.add('text-gray-600'); });
-      }
+  let tdPayment = 'driver';
+
+  function selectTdPayment(value) {
+    tdPayment = value;
+    document.querySelectorAll('.pay-opt[data-payment]').forEach(opt => {
+      const box = opt.querySelector('.pay-opt-box');
+      const active = opt.dataset.payment === value;
+      box.classList.toggle('border-brand', active);
+      box.classList.toggle('bg-brand/5', active);
+      box.classList.toggle('border-gray-200', !active);
+      box.querySelectorAll('i').forEach(i => { i.classList.toggle('text-brand', active); i.classList.toggle('text-gray-400', !active); });
+      box.querySelectorAll('div').forEach(d => { d.classList.toggle('text-dark', active); d.classList.toggle('text-gray-600', !active); });
     });
   }
 
-  document.addEventListener('change', e => {
-    if (e.target.name === 'td-payment') updatePayOptStyles();
-  });
+  function updatePayOptStyles() { selectTdPayment(tdPayment); }
 
   async function submitTourBooking() {
     const form = document.getElementById('td-booking-form');
@@ -3278,7 +3270,7 @@ tailwind.config = {
     const email     = document.getElementById('td-email').value.trim();
     const phone     = document.getElementById('td-phone').value.trim();
     const notes     = document.getElementById('td-notes').value.trim();
-    const payment   = document.querySelector('input[name="td-payment"]:checked')?.value || 'driver';
+    const payment   = tdPayment || 'driver';
     const errEl     = document.getElementById('td-booking-error');
 
     if (!firstName || !lastName) {
