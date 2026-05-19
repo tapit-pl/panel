@@ -1,42 +1,41 @@
-import Stripe from 'https://esm.sh/stripe@14?target=deno'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type' }
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
 
   const { booking_id, bokun_reservation_code, amount_pln, pax, tour_name, date, guest_name, guest_email } = await req.json()
 
-  const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, { apiVersion: '2024-04-10', httpClient: Stripe.createFetchHttpClient() })
+  const stripeKey = Deno.env.get('STRIPE_SECRET_KEY')!
+  const params = new URLSearchParams()
+  params.set('mode', 'payment')
+  if (guest_email) params.set('customer_email', guest_email)
+  params.set('line_items[0][price_data][currency]', 'pln')
+  params.set('line_items[0][price_data][product_data][name]', tour_name)
+  params.set('line_items[0][price_data][product_data][description]', `${date} · ${pax} os.`)
+  params.set('line_items[0][price_data][unit_amount]', String(Math.round(amount_pln * 100)))
+  params.set('line_items[0][quantity]', '1')
+  params.set('success_url', 'https://panel.thousandmiles.pl/payment-success.html')
+  params.set('cancel_url', 'https://panel.thousandmiles.pl/payment-cancel.html')
+  params.set('metadata[booking_id]', String(booking_id))
+  params.set('metadata[bokun_reservation_code]', bokun_reservation_code)
+  params.set('payment_intent_data[metadata][booking_id]', String(booking_id))
+  params.set('payment_intent_data[metadata][bokun_reservation_code]', bokun_reservation_code)
 
-  const session = await stripe.checkout.sessions.create({
-    mode: 'payment',
-    customer_email: guest_email || undefined,
-    line_items: [{
-      price_data: {
-        currency: 'pln',
-        product_data: {
-          name: tour_name,
-          description: `${date} · ${pax} os.`,
-        },
-        unit_amount: Math.round(amount_pln * 100),
-      },
-      quantity: 1,
-    }],
-    success_url: 'https://panel.thousandmiles.pl/payment-success.html',
-    cancel_url:  'https://panel.thousandmiles.pl/payment-cancel.html',
-    metadata: { booking_id: String(booking_id), bokun_reservation_code },
-    payment_intent_data: {
-      metadata: { booking_id: String(booking_id), bokun_reservation_code },
+  const stripeRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${stripeKey}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
+    body: params.toString(),
   })
+  const session = await stripeRes.json()
+  console.log('[Stripe] session:', JSON.stringify({ id: session.id, url: session.url, error: session.error }))
 
-  // Send email via Resend
-  if (guest_email) {
-    await fetch('https://api.resend.com/emails', {
+  if (guest_email && session.url) {
+    const emailRes = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${Deno.env.get('RESEND_API_KEY')}`,
@@ -60,6 +59,7 @@ Deno.serve(async (req) => {
         `,
       }),
     })
+    console.log('[Resend] status:', emailRes.status)
   }
 
   return new Response(

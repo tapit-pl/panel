@@ -1,4 +1,3 @@
-import Stripe from 'https://esm.sh/stripe@14?target=deno'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type' }
@@ -13,6 +12,27 @@ async function hmac(secret: string, message: string): Promise<string> {
   const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-1' }, false, ['sign'])
   const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(message))
   return btoa(String.fromCharCode(...new Uint8Array(sig)))
+}
+
+async function verifyStripeSignature(body: string, sigHeader: string, secret: string): Promise<boolean> {
+  const parts: Record<string, string[]> = {}
+  for (const part of sigHeader.split(',')) {
+    const eq = part.indexOf('=')
+    if (eq < 0) continue
+    const k = part.slice(0, eq)
+    const v = part.slice(eq + 1)
+    if (!parts[k]) parts[k] = []
+    parts[k].push(v)
+  }
+  const timestamp = parts['t']?.[0]
+  const signatures = parts['v1'] || []
+  if (!timestamp || signatures.length === 0) return false
+
+  const payload = `${timestamp}.${body}`
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'])
+  const sigBytes = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(payload))
+  const expected = Array.from(new Uint8Array(sigBytes)).map(b => b.toString(16).padStart(2, '0')).join('')
+  return signatures.some(s => s === expected)
 }
 
 async function bokunConfirm(confirmationCode: string) {
@@ -40,32 +60,36 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
 
   const body = await req.text()
-  const sig  = req.headers.get('stripe-signature') || ''
-  const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, { apiVersion: '2024-04-10', httpClient: Stripe.createFetchHttpClient() })
+  const sigHeader = req.headers.get('stripe-signature') || ''
+  const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET')!
 
-  let event: Stripe.Event
-  try {
-    event = stripe.webhooks.constructEvent(body, sig, Deno.env.get('STRIPE_WEBHOOK_SECRET')!)
-  } catch (err) {
-    return new Response(JSON.stringify({ error: `Webhook error: ${err.message}` }), { status: 400 })
+  const valid = await verifyStripeSignature(body, sigHeader, webhookSecret)
+  if (!valid) {
+    console.error('[Webhook] invalid signature')
+    return new Response(JSON.stringify({ error: 'Invalid signature' }), { status: 400 })
   }
 
+  const event = JSON.parse(body)
+  console.log('[Webhook] event type:', event.type)
+
   if (event.type === 'checkout.session.completed') {
-    const session = event.data.object as Stripe.Checkout.Session
-    const bookingId           = session.metadata?.booking_id
-    const bokunReservationCode = session.metadata?.bokun_reservation_code
+    const session = event.data?.object
+    const bookingId = session?.metadata?.booking_id
+    const bokunReservationCode = session?.metadata?.bokun_reservation_code
 
     const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
 
     if (bokunReservationCode) {
-      await bokunConfirm(bokunReservationCode)
+      const confirmResult = await bokunConfirm(bokunReservationCode)
+      console.log('[Webhook] bokun confirm:', JSON.stringify({ code: bokunReservationCode, status: confirmResult?.booking?.status }))
     }
 
     if (bookingId) {
-      await db.from('bookings').update({
+      const { error } = await db.from('bookings').update({
         status: 'confirmed',
         stripe_session_id: session.id,
       }).eq('id', bookingId)
+      console.log('[Webhook] db update error:', error)
     }
   }
 
