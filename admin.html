@@ -2216,6 +2216,8 @@ tailwind.config = {
       hotel: b.partner_id || '—', date: b.date, time: b.time, pickup: b.pickup,
       pax: b.pax, total: b.total, comm: b.comm, source: b.source, status: b.status, notes: b.notes || '',
       _dbBooking: true, _stripeSessionId: b.stripe_session_id, _bokunCode: b.bokun_confirmation_code,
+      _creationTs: b.created_at ? new Date(b.created_at).getTime() : 0,
+      _startTs: b.date ? new Date(b.date).getTime() : 0,
     }));
 
     try {
