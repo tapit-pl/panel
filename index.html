@@ -2545,15 +2545,7 @@ tailwind.config = {
     if (tabId === 'tab-tours') loadToursFromBokun();
   }
 
-  function scrollModalTo(el) {
-    if (!el) return;
-    const container = document.getElementById('modal-tour-body');
-    if (!container) return;
-    const containerRect = container.getBoundingClientRect();
-    const elRect = el.getBoundingClientRect();
-    const newTop = container.scrollTop + elRect.top - containerRect.top - 16;
-    container.scrollTo({ top: newTop, behavior: 'smooth' });
-  }
+  function scrollModalTo(el) { /* auto-scroll disabled */ }
 
   let bokunProducts = [];
   let currentTourAvailability = {}; // date → [{startTime, startTimeId, availabilityCount, rates: [{id, title, price}]}, ...]
