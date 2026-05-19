@@ -3341,7 +3341,6 @@ tailwind.config = {
           startTimeId: tdSelectedTimeSlot.startTimeId,
           date: dateStr,
           passengers: buildPassengers(),
-          promoCode: 'HOTELBOOKING',
         };
         console.log('[Booking] options payload:', JSON.stringify(optionsPayload));
         const { data: optionsRes } = await db.functions.invoke('bokun-sync', {
@@ -3374,7 +3373,8 @@ tailwind.config = {
         const pickupDesc = tdGetPickupDescription() || currentPartner?.name || 'Hotel pickup';
         const submitPayload = {
           source: 'DIRECT_REQUEST',
-          checkoutOption: checkoutOptionType,
+          checkoutOption: 'CUSTOMER_FULL_PAYMENT',
+          paymentMethod: 'CASH',
           sendNotificationToMainContact: false,
           directBooking: {
             mainContactDetails,
