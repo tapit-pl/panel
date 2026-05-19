@@ -3349,7 +3349,13 @@ tailwind.config = {
         });
         const optionsBody = optionsRes?.body;
         console.log('[Booking] options response:', JSON.stringify(optionsBody));
-        const checkoutOptionType = 'CUSTOMER_FULL_PAYMENT';
+        // Use the option type from options endpoint; answer its required questions via optionAnswers
+        const checkoutOption = optionsBody?.options?.[0];
+        const checkoutOptionType = checkoutOption?.type || 'CUSTOMER_FULL_PAYMENT';
+        const optionAnswers = (checkoutOption?.questions || []).map((q: any) => ({
+          questionId: q.questionId,
+          values: [q.defaultValue ?? 'false'],
+        }));
 
         const mainContactDetails = [
           { questionId: 'firstName', values: [firstName] },
@@ -3366,6 +3372,7 @@ tailwind.config = {
         const submitPayload = {
           source: 'DIRECT_REQUEST',
           checkoutOption: checkoutOptionType,
+          optionAnswers: optionAnswers.length ? optionAnswers : undefined,
           paymentMethod: 'RESERVE_FOR_EXTERNAL_PAYMENT',
           sendNotificationToMainContact: false,
           directBooking: {
