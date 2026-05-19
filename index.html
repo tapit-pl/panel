@@ -3315,10 +3315,10 @@ tailwind.config = {
 
     const payLabel = { driver: 'Pay at driver', hotel: 'Pay at hotel', link: 'Payment link' }[payment] || payment;
     const packageLines = hasPackages
-      ? tdRateSelections.filter(x => x.count > 0).map(x => `${x.count}× ${x.rate.title}`).join(', ')
+      ? tdRateSelections.filter(x => x.count > 0).map(x => `${x.count}x ${x.rate.title}`).join(', ')
       : null;
     const categoryLines = hasCategories
-      ? tdCategorySelections.filter(x => x.count > 0).map(x => `${x.count}× ${x.category.title}`).join(', ')
+      ? tdCategorySelections.filter(x => x.count > 0).map(x => `${x.count}x ${x.category.title}`).join(', ')
       : null;
 
     let bokunConfirmationCode = null;
