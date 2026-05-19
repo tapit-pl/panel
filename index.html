@@ -3328,11 +3328,11 @@ tailwind.config = {
           if (hasCategories) {
             return tdCategorySelections
               .filter(x => x.count > 0)
-              .map(x => ({ pricingCategoryId: x.category.id, groupSize: x.count, customDiscount: 100, passengerDetails: [], answers: [], extras: [] }));
+              .map(x => ({ pricingCategoryId: x.category.id, groupSize: x.count, passengerDetails: [], answers: [], extras: [] }));
           }
           const pricingCat = tdCurrentTour.pricing?.[0];
           return pricingCat
-            ? [{ pricingCategoryId: pricingCat.id, groupSize: tdGuestCount, customDiscount: 100, passengerDetails: [], answers: [], extras: [] }]
+            ? [{ pricingCategoryId: pricingCat.id, groupSize: tdGuestCount, passengerDetails: [], answers: [], extras: [] }]
             : [];
         };
 
@@ -3341,7 +3341,6 @@ tailwind.config = {
           startTimeId: tdSelectedTimeSlot.startTimeId,
           date: dateStr,
           passengers: buildPassengers(),
-          priceCatalogId: 156973,
         };
         console.log('[Booking] options payload:', JSON.stringify(optionsPayload));
         const { data: optionsRes } = await db.functions.invoke('bokun-sync', {
