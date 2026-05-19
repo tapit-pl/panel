@@ -1420,22 +1420,22 @@ tailwind.config = {
         <div>
           <label class="block text-xs font-semibold text-gray-600 mb-2">Payment method</label>
           <div class="grid grid-cols-3 gap-2">
-            <label class="pay-opt cursor-pointer">
-              <input type="radio" name="td-payment" value="driver" class="sr-only" tabindex="-1" onfocus="this.blur()" checked>
+            <label class="pay-opt cursor-pointer" onmousedown="event.preventDefault()" onclick="this.querySelector('input').checked=true; updatePayOptStyles()">
+              <input type="radio" name="td-payment" value="driver" class="sr-only" tabindex="-1" checked>
               <div class="pay-opt-box border-2 border-brand bg-brand/5 rounded-xl p-3 text-center transition-all">
                 <i class="fa-solid fa-car text-brand text-lg block mb-1"></i>
                 <div class="text-xs font-semibold text-dark">Pay at driver</div>
               </div>
             </label>
-            <label class="pay-opt cursor-pointer">
-              <input type="radio" name="td-payment" value="hotel" class="sr-only" tabindex="-1" onfocus="this.blur()">
+            <label class="pay-opt cursor-pointer" onmousedown="event.preventDefault()" onclick="this.querySelector('input').checked=true; updatePayOptStyles()">
+              <input type="radio" name="td-payment" value="hotel" class="sr-only" tabindex="-1">
               <div class="pay-opt-box border-2 border-gray-200 rounded-xl p-3 text-center transition-all hover:border-brand/40">
                 <i class="fa-solid fa-building text-gray-400 text-lg block mb-1"></i>
                 <div class="text-xs font-semibold text-gray-600">Pay at hotel</div>
               </div>
             </label>
-            <label class="pay-opt cursor-pointer">
-              <input type="radio" name="td-payment" value="link" class="sr-only" tabindex="-1" onfocus="this.blur()">
+            <label class="pay-opt cursor-pointer" onmousedown="event.preventDefault()" onclick="this.querySelector('input').checked=true; updatePayOptStyles()">
+              <input type="radio" name="td-payment" value="link" class="sr-only" tabindex="-1">
               <div class="pay-opt-box border-2 border-gray-200 rounded-xl p-3 text-center transition-all hover:border-brand/40">
                 <i class="fa-solid fa-envelope text-gray-400 text-lg block mb-1"></i>
                 <div class="text-xs font-semibold text-gray-600">Payment link</div>
@@ -3694,22 +3694,22 @@ tailwind.config = {
         <!-- Payment -->
         <div class="text-xs font-bold text-gray-400 uppercase tracking-wide pt-1">Payment method</div>
         <div class="space-y-2">
-          <label class="flex items-start gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-brand/40 bk-payment" onclick="highlightPayment(this)">
-            <input type="radio" name="bk-payment-${idx}" value="online" class="mt-0.5 accent-brand shrink-0" tabindex="-1" onfocus="this.blur()">
+          <label class="flex items-start gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-brand/40 bk-payment" onmousedown="event.preventDefault()" onclick="highlightPayment(this)">
+            <input type="radio" name="bk-payment-${idx}" value="online" class="mt-0.5 accent-brand shrink-0" tabindex="-1">
             <div>
               <div class="text-sm font-semibold text-dark flex items-center gap-2">Online payment link <span class="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-normal">Recommended</span></div>
               <div class="text-xs text-gray-500 mt-0.5">A payment link will be sent to the guest's e-mail.</div>
             </div>
           </label>
-          <label class="flex items-start gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-brand/40 bk-payment" onclick="highlightPayment(this)">
-            <input type="radio" name="bk-payment-${idx}" value="hotel" class="mt-0.5 accent-brand shrink-0" tabindex="-1" onfocus="this.blur()">
+          <label class="flex items-start gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-brand/40 bk-payment" onmousedown="event.preventDefault()" onclick="highlightPayment(this)">
+            <input type="radio" name="bk-payment-${idx}" value="hotel" class="mt-0.5 accent-brand shrink-0" tabindex="-1">
             <div>
               <div class="text-sm font-semibold text-dark">Paid at hotel</div>
               <div class="text-xs text-gray-500 mt-0.5">Commission settled monthly.</div>
             </div>
           </label>
-          <label class="flex items-start gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-brand/40 bk-payment" onclick="highlightPayment(this)">
-            <input type="radio" name="bk-payment-${idx}" value="cash" class="mt-0.5 accent-brand shrink-0" tabindex="-1" onfocus="this.blur()">
+          <label class="flex items-start gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-brand/40 bk-payment" onmousedown="event.preventDefault()" onclick="highlightPayment(this)">
+            <input type="radio" name="bk-payment-${idx}" value="cash" class="mt-0.5 accent-brand shrink-0" tabindex="-1">
             <div>
               <div class="text-sm font-semibold text-dark">Cash — paid to driver</div>
               <div class="text-xs text-gray-500 mt-0.5">The guest pays cash on the day of the tour.</div>
@@ -3746,6 +3746,8 @@ tailwind.config = {
     });
     label.classList.remove('border-gray-200');
     label.classList.add('border-brand','bg-brand/5');
+    const radio = label.querySelector('input[type="radio"]');
+    if (radio) radio.checked = true;
   }
 
   function toggleOtherPickup(idx, radio) {
