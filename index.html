@@ -3362,7 +3362,7 @@ tailwind.config = {
           extraGuests.length ? 'Guests: ' + [guest, ...extraGuests].join(', ') : null, notes
         ].filter(Boolean).join(' | ');
 
-        const pickupDesc = tdGetPickupDescription();
+        const pickupDesc = tdGetPickupDescription() || currentPartner?.name || 'Hotel pickup';
         const submitPayload = {
           source: 'DIRECT_REQUEST',
           checkoutOption: checkoutOptionType,
@@ -3377,7 +3377,7 @@ tailwind.config = {
               passengers: buildPassengers(),
               note: bookingNote || undefined,
               answers: [],
-              pickupAnswers: pickupDesc ? [{ questionId: 'pickupPlaceDescription', values: [pickupDesc] }] : [],
+              pickupAnswers: [{ questionId: 'pickupPlaceDescription', values: [pickupDesc] }],
               dropoffAnswers: [],
             }],
           },
