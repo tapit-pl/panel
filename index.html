@@ -3324,52 +3324,74 @@ tailwind.config = {
     let bokunConfirmationCode = null;
     if (tdCurrentTour?.bokunId && tdSelectedTimeSlot?.startTimeId) {
       try {
-        let participants;
-        if (hasCategories) {
-          participants = tdCategorySelections
-            .filter(x => x.count > 0)
-            .map(x => ({ pricingCategoryBooking: { pricingCategoryId: x.category.id, pricingCategoryTitle: x.category.title, count: x.count } }));
-        } else {
+        const buildPassengers = () => {
+          if (hasCategories) {
+            return tdCategorySelections
+              .filter(x => x.count > 0)
+              .map(x => ({ pricingCategoryId: x.category.id, groupSize: x.count, passengerDetails: [], answers: [], extras: [] }));
+          }
           const pricingCat = tdCurrentTour.pricing?.[0];
-          participants = pricingCat
-            ? [{ pricingCategoryBooking: { pricingCategoryId: pricingCat.id, pricingCategoryTitle: pricingCat.title || 'Adult', count: tdGuestCount } }]
+          return pricingCat
+            ? [{ pricingCategoryId: pricingCat.id, groupSize: tdGuestCount, passengerDetails: [], answers: [], extras: [] }]
             : [];
-        }
+        };
 
-        const internalComment = [payLabel, packageLines || categoryLines,
-          extraGuests.length ? 'Guests: ' + [guest, ...extraGuests].join(', ') : null, notes
-        ].filter(Boolean).join(' | ') || undefined;
-
-        const pickupDesc = tdGetPickupDescription();
-        const reservePayload = {
+        // Get valid checkoutOption type for this tour
+        const optionsPayload = {
           activityId: parseInt(tdCurrentTour.bokunId),
           startTimeId: tdSelectedTimeSlot.startTimeId,
-          participants,
-          customer: { firstName, lastName, email: email || undefined, phoneNumber: phone || undefined },
-          internalComment: pickupDesc ? [internalComment, 'Pickup: ' + pickupDesc].filter(Boolean).join(' | ') : internalComment,
+          date: dateStr,
+          passengers: buildPassengers(),
         };
-        console.log('[Booking] reserve payload:', JSON.stringify(reservePayload));
-        const { data: reserveRes } = await db.functions.invoke('bokun-sync', {
-          body: { path: '/booking.json/reserve', method: 'POST', payload: reservePayload }
+        console.log('[Booking] options payload:', JSON.stringify(optionsPayload));
+        const { data: optionsRes } = await db.functions.invoke('bokun-sync', {
+          body: { path: '/checkout.json/options/booking-request', method: 'POST', payload: optionsPayload }
         });
-        const reserveBody = reserveRes?.body;
-        console.log('[Booking] reserve response:', JSON.stringify(reserveBody));
-        if (reserveBody && ![400, 404, 422, 500].includes(reserveBody?.status)) {
-          const reserveId = reserveBody.id;
-          if (reserveId) {
-            const { data: confirmRes } = await db.functions.invoke('bokun-sync', {
-              body: { path: `/booking.json/${reserveId}/confirm`, method: 'POST', payload: {} }
-            });
-            const confirmBody = confirmRes?.body;
-            console.log('[Booking] confirm response:', JSON.stringify(confirmBody));
-            if (confirmBody && ![400, 404, 422, 500].includes(confirmBody?.status)) {
-              bokunConfirmationCode = confirmBody.confirmationCode || confirmBody.id || String(reserveId);
-            } else {
-              console.warn('[Booking] Bokun confirm failed:', confirmBody?.status, confirmBody?.message || '');
-            }
-          }
+        const optionsBody = optionsRes?.body;
+        console.log('[Booking] options response:', JSON.stringify(optionsBody));
+        const checkoutOptionType = (optionsBody?.options || [])[0]?.type || 'CUSTOMER_FULL_PAYMENT';
+
+        const mainContactDetails = [
+          { questionId: 'firstName', values: [firstName] },
+          { questionId: 'lastName',  values: [lastName] },
+          email && { questionId: 'email', values: [email] },
+          phone && { questionId: 'phoneNumber', values: [phone] },
+        ].filter(Boolean);
+
+        const bookingNote = [payLabel, packageLines || categoryLines,
+          extraGuests.length ? 'Guests: ' + [guest, ...extraGuests].join(', ') : null, notes
+        ].filter(Boolean).join(' | ');
+
+        const pickupDesc = tdGetPickupDescription();
+        const submitPayload = {
+          source: 'DIRECT_REQUEST',
+          checkoutOption: checkoutOptionType,
+          paymentMethod: 'RESERVE_FOR_EXTERNAL_PAYMENT',
+          sendNotificationToMainContact: false,
+          directBooking: {
+            mainContactDetails,
+            activityBookings: [{
+              activityId: parseInt(tdCurrentTour.bokunId),
+              startTimeId: tdSelectedTimeSlot.startTimeId,
+              date: dateStr,
+              passengers: buildPassengers(),
+              note: bookingNote || undefined,
+              answers: [],
+              pickupAnswers: pickupDesc ? [{ questionId: 'pickupPlaceDescription', values: [pickupDesc] }] : [],
+              dropoffAnswers: [],
+            }],
+          },
+        };
+        console.log('[Booking] submit payload:', JSON.stringify(submitPayload));
+        const { data: submitRes } = await db.functions.invoke('bokun-sync', {
+          body: { path: '/checkout.json/submit', method: 'POST', payload: submitPayload }
+        });
+        const submitBody = submitRes?.body;
+        console.log('[Booking] submit response:', JSON.stringify(submitBody));
+        if (submitBody && ![400, 404, 422, 500].includes(submitBody?.status)) {
+          bokunConfirmationCode = submitBody.confirmationCode || submitBody.bookingConfirmationCode || submitBody.booking?.confirmationCode || submitBody.id;
         } else {
-          console.warn('[Booking] Bokun reserve failed:', reserveBody?.status, reserveBody?.message || '');
+          console.warn('[Booking] submit failed:', submitBody?.status, submitBody?.message || '');
         }
       } catch(e) { console.warn('[Booking] Bokun creation failed:', e.message); }
     }
