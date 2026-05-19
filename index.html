@@ -3341,6 +3341,7 @@ tailwind.config = {
           startTimeId: tdSelectedTimeSlot.startTimeId,
           date: dateStr,
           passengers: buildPassengers(),
+          priceCatalogId: 156973,
         };
         console.log('[Booking] options payload:', JSON.stringify(optionsPayload));
         const { data: optionsRes } = await db.functions.invoke('bokun-sync', {
