@@ -1577,7 +1577,7 @@ tailwind.config = {
       </div>
 
       <!-- Commission summary -->
-      <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+      <div id="acct-commission" class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
         <div class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Commission Summary</div>
         <div class="mb-3">
           <div class="flex justify-between text-sm mb-1">
@@ -2374,8 +2374,9 @@ tailwind.config = {
   async function initPartnerDashboard() {
     const p = currentPartner;
 
-    document.querySelectorAll('.partner-initials').forEach(el => el.textContent = p.initials || (p.name || '??').substring(0,2).toUpperCase());
-    document.querySelectorAll('.partner-name').forEach(el => el.textContent = p.name);
+    const staffInitials = p._staffName ? p._staffName.split(' ').filter(Boolean).map(w=>w[0]).join('').substring(0,2).toUpperCase() : null;
+    document.querySelectorAll('.partner-initials').forEach(el => el.textContent = p.initials || (p.name ? p.name.substring(0,2).toUpperCase() : null) || staffInitials || '??');
+    document.querySelectorAll('.partner-name').forEach(el => el.textContent = p._isStaff ? (p._staffName || p.name || '—') : (p.name || '—'));
     document.querySelectorAll('.td-pickup-hotel-label').forEach(el => el.textContent = p.name || '—');
     document.querySelectorAll('.partner-type').forEach(el => el.textContent = p.type || '');
 
@@ -4465,15 +4466,20 @@ tailwind.config = {
   function openAccountPanel() {
     // Populate hotel info from currentPartner
     if (currentPartner) {
+      const isStaff = !!currentPartner._isStaff;
+      const staffInitials = currentPartner._staffName ? currentPartner._staffName.split(' ').filter(Boolean).map(w=>w[0]).join('').substring(0,2).toUpperCase() : null;
       const av = document.getElementById('acct-avatar');
       if (currentPartner.logo) {
         av.innerHTML = `<img src="${currentPartner.logo}" class="w-full h-full object-cover">`;
       } else {
         av.style.background = currentPartner.color || '#E8751A';
-        av.textContent = currentPartner.initials || (currentPartner.name || '?').substring(0,2).toUpperCase();
+        av.textContent = currentPartner.initials || (currentPartner.name ? currentPartner.name.substring(0,2).toUpperCase() : null) || staffInitials || '??';
       }
-      document.getElementById('acct-name').textContent = currentPartner.name || '—';
-      document.getElementById('acct-type').textContent = currentPartner.type || '';
+      document.getElementById('acct-name').textContent = isStaff ? (currentPartner._staffName || currentPartner.name || '—') : (currentPartner.name || '—');
+      document.getElementById('acct-type').textContent = isStaff ? ('Reception · ' + (currentPartner.name || 'hotel')) : (currentPartner.type || '');
+      // Commission summary — hide for staff
+      const commEl = document.getElementById('acct-commission');
+      if (commEl) commEl.classList.toggle('hidden', isStaff);
       const starsEl = document.getElementById('acct-stars');
       if (currentPartner.stars) {
         starsEl.innerHTML = Array(currentPartner.stars).fill('<i class="fa-solid fa-star text-amber-400 text-xs"></i>').join('') + `<span class="text-xs text-gray-500 ml-1">${currentPartner.stars}-star hotel</span>`;
