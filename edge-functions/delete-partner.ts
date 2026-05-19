@@ -29,7 +29,11 @@ Deno.serve(async (req) => {
   const { email } = await req.json()
   if (!email) return new Response(JSON.stringify({ error: 'Missing email' }), { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } })
 
-  // Find user by email and delete
+  // Delete from partners table
+  const { error: dbError } = await adminClient.from('partners').delete().eq('email', email)
+  if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...CORS, 'Content-Type': 'application/json' } })
+
+  // Delete Supabase Auth user
   const { data: { users } } = await adminClient.auth.admin.listUsers()
   const user = users.find((u: any) => u.email === email)
   if (user) {

@@ -3336,6 +3336,7 @@ tailwind.config = {
       : null;
 
     let bokunConfirmationCode = null;
+    let bokunReservationCode = null;
     if (tdCurrentTour?.bokunId && tdSelectedTimeSlot?.startTimeId) {
       try {
         const buildPassengers = () => {
@@ -3413,29 +3414,37 @@ tailwind.config = {
         console.log('[Booking] submit response:', JSON.stringify(submitBody));
         const reservedCode = submitBody?.booking?.confirmationCode || submitBody?.confirmationCode;
         if (reservedCode) {
-          console.log('[Booking] confirming reserved booking:', reservedCode);
-          const { data: confirmRes } = await db.functions.invoke('bokun-sync', {
-            body: { path: `/checkout.json/confirm-reserved/${reservedCode}`, method: 'POST', payload: {} }
-          });
-          const confirmBody = confirmRes?.body;
-          console.log('[Booking] confirm response:', JSON.stringify(confirmBody));
-          bokunConfirmationCode = confirmBody?.booking?.confirmationCode || confirmBody?.confirmationCode || reservedCode;
+          bokunReservationCode = reservedCode;
+          if (payment !== 'link') {
+            console.log('[Booking] confirming reserved booking:', reservedCode);
+            const { data: confirmRes } = await db.functions.invoke('bokun-sync', {
+              body: { path: `/checkout.json/confirm-reserved/${reservedCode}`, method: 'POST', payload: {} }
+            });
+            const confirmBody = confirmRes?.body;
+            console.log('[Booking] confirm response:', JSON.stringify(confirmBody));
+            bokunConfirmationCode = confirmBody?.booking?.confirmationCode || confirmBody?.confirmationCode || reservedCode;
+          }
         } else {
           console.warn('[Booking] submit failed:', submitBody?.message || '');
         }
       } catch(e) { console.warn('[Booking] Bokun creation failed:', e.message); }
     }
 
-    const { error } = await db.from('bookings').insert({
+    const insertStatus = payment === 'link'
+      ? (bokunReservationCode ? 'pending_payment' : 'pending')
+      : (bokunConfirmationCode ? 'confirmed' : 'pending');
+
+    const { data: insertedBooking, error } = await db.from('bookings').insert({
       tour,
       date: dateStr,
       guest,
       email: email || null,
       phone: phone || null,
       pax: tdGuestCount,
-      status: bokunConfirmationCode ? 'confirmed' : 'pending',
+      status: insertStatus,
       partner_id: currentPartner?.id,
-    });
+      bokun_confirmation_code: payment === 'link' ? (bokunReservationCode || null) : (bokunConfirmationCode || null),
+    }).select('id').single();
 
     btn.disabled = false;
     btn.innerHTML = '<i class="fa-solid fa-check"></i> Confirm booking';
@@ -3447,14 +3456,39 @@ tailwind.config = {
       return;
     }
 
+    let stripeSessionUrl = null;
+    if (payment === 'link' && bokunReservationCode && insertedBooking?.id) {
+      try {
+        const totalPln = hasPackages
+          ? tdRateSelections.reduce((s, x) => s + x.count * (lookupCommPln(x.rate.title) || 0), 0)
+          : (lookupCommPln(tdCurrentTour?.title || '') || 0) * tdGuestCount;
+        const { data: stripeRes } = await db.functions.invoke('create-stripe-session', {
+          body: {
+            booking_id: insertedBooking.id,
+            bokun_reservation_code: bokunReservationCode,
+            amount_pln: totalPln,
+            pax: tdGuestCount,
+            tour_name: tour,
+            date: dateStr,
+            guest_name: guest,
+            guest_email: email,
+          }
+        });
+        stripeSessionUrl = stripeRes?.session_url;
+        if (stripeRes?.session_id) {
+          await db.from('bookings').update({ stripe_session_id: stripeRes.session_id }).eq('id', insertedBooking.id);
+        }
+      } catch(e) { console.warn('[Booking] Stripe session error:', e.message); }
+    }
+
     form.classList.add('hidden');
     const success = document.getElementById('td-booking-success');
     success.classList.remove('hidden');
     let statusLine;
     if (payment === 'link') {
-      statusLine = bokunConfirmationCode
-        ? ` · Bokun #${bokunConfirmationCode} · Payment link sent to ${email || 'guest'}`
-        : ' · Payment link pending';
+      statusLine = stripeSessionUrl
+        ? ` · Payment link sent to ${email}`
+        : (bokunReservationCode ? ` · Bokun reserved #${bokunReservationCode} · Payment link failed` : ' · Payment link pending');
     } else {
       statusLine = bokunConfirmationCode ? ` · Bokun #${bokunConfirmationCode}` : ' · Pending confirmation';
     }
