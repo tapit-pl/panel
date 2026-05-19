@@ -3349,7 +3349,7 @@ tailwind.config = {
         });
         const optionsBody = optionsRes?.body;
         console.log('[Booking] options response:', JSON.stringify(optionsBody));
-        const checkoutOptionType = (optionsBody?.options || [])[0]?.type || 'CUSTOMER_FULL_PAYMENT';
+        const checkoutOptionType = 'CUSTOMER_FULL_PAYMENT';
 
         const mainContactDetails = [
           { questionId: 'firstName', values: [firstName] },
