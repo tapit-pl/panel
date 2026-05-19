@@ -3352,7 +3352,7 @@ tailwind.config = {
         // Use the option type from options endpoint; answer its required questions via optionAnswers
         const checkoutOption = optionsBody?.options?.[0];
         const checkoutOptionType = checkoutOption?.type || 'CUSTOMER_FULL_PAYMENT';
-        const optionAnswers = (checkoutOption?.questions || []).map((q: any) => ({
+        const optionAnswers = (checkoutOption?.questions || []).map((q) => ({
           questionId: q.questionId,
           values: [q.defaultValue ?? 'false'],
         }));
