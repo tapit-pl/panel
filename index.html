@@ -3370,7 +3370,6 @@ tailwind.config = {
 
         const pickupDesc = tdGetPickupDescription() || currentPartner?.name || 'Hotel pickup';
         const submitPayload = {
-          source: 'DIRECT_REQUEST',
           checkoutOption: checkoutOptionType,
           optionAnswers: optionAnswers.length ? optionAnswers : undefined,
           sendNotificationToMainContact: false,
