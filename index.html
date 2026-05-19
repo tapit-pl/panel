@@ -3374,7 +3374,7 @@ tailwind.config = {
         const submitPayload = {
           source: 'DIRECT_REQUEST',
           checkoutOption: 'CUSTOMER_FULL_PAYMENT',
-          paymentMethod: 'EXTERNAL_PAYMENT',
+          paymentMethod: 'RESERVE_FOR_EXTERNAL_PAYMENT',
           sendNotificationToMainContact: false,
           directBooking: {
             mainContactDetails,
@@ -3397,10 +3397,17 @@ tailwind.config = {
         });
         const submitBody = submitRes?.body;
         console.log('[Booking] submit response:', JSON.stringify(submitBody));
-        if (submitBody && ![400, 404, 422, 500].includes(submitBody?.status)) {
-          bokunConfirmationCode = submitBody.confirmationCode || submitBody.bookingConfirmationCode || submitBody.booking?.confirmationCode || submitBody.id;
+        const reservedCode = submitBody?.booking?.confirmationCode || submitBody?.confirmationCode;
+        if (reservedCode) {
+          console.log('[Booking] confirming reserved booking:', reservedCode);
+          const { data: confirmRes } = await db.functions.invoke('bokun-sync', {
+            body: { path: `/checkout.json/confirm-reserved/${reservedCode}`, method: 'POST', payload: {} }
+          });
+          const confirmBody = confirmRes?.body;
+          console.log('[Booking] confirm response:', JSON.stringify(confirmBody));
+          bokunConfirmationCode = confirmBody?.booking?.confirmationCode || confirmBody?.confirmationCode || reservedCode;
         } else {
-          console.warn('[Booking] submit failed:', submitBody?.status, submitBody?.message || '');
+          console.warn('[Booking] submit failed:', submitBody?.message || '');
         }
       } catch(e) { console.warn('[Booking] Bokun creation failed:', e.message); }
     }
