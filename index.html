@@ -3336,12 +3336,14 @@ tailwind.config = {
             : [];
         };
 
-        // Get valid checkoutOption type for this tour
+        const INTERNAL_CHANNEL_UUID = '3efafca6-21c8-454f-829f-ee67e81124ba';
+
         const optionsPayload = {
           activityId: parseInt(tdCurrentTour.bokunId),
           startTimeId: tdSelectedTimeSlot.startTimeId,
           date: dateStr,
           passengers: buildPassengers(),
+          bookingChannelUuid: INTERNAL_CHANNEL_UUID,
         };
         console.log('[Booking] options payload:', JSON.stringify(optionsPayload));
         const { data: optionsRes } = await db.functions.invoke('bokun-sync', {
@@ -3349,9 +3351,9 @@ tailwind.config = {
         });
         const optionsBody = optionsRes?.body;
         console.log('[Booking] options response:', JSON.stringify(optionsBody));
-        // Use the option type from options endpoint; answer its required questions via optionAnswers
         const checkoutOption = optionsBody?.options?.[0];
-        const checkoutOptionType = checkoutOption?.type || 'CUSTOMER_FULL_PAYMENT';
+        const checkoutOptionType = checkoutOption?.type || 'CUSTOMER_NO_PAYMENT';
+        console.log('[Booking] using checkoutOptionType:', checkoutOptionType);
         const optionAnswers = (checkoutOption?.questions || []).map((q) => ({
           questionId: q.questionId,
           values: [q.defaultValue ?? 'false'],
@@ -3371,8 +3373,8 @@ tailwind.config = {
         const pickupDesc = tdGetPickupDescription() || currentPartner?.name || 'Hotel pickup';
         const submitPayload = {
           source: 'DIRECT_REQUEST',
-          checkoutOption: 'CUSTOMER_FULL_PAYMENT',
-          paymentMethod: 'RESERVE_FOR_EXTERNAL_PAYMENT',
+          checkoutOption: checkoutOptionType,
+          bookingChannelUuid: INTERNAL_CHANNEL_UUID,
           sendNotificationToMainContact: false,
           directBooking: {
             mainContactDetails,
