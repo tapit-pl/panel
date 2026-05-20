@@ -2971,13 +2971,23 @@ tailwind.config = {
       }
     } else {
       tdSelectedRate = uniqueRates[0] || null;
-      // Check for per-category pricing (Adult/Child/Infant etc.)
       const slotCatPrices = uniqueRates[0]?.pricesByCategory || [];
-      const categories = (tdCurrentTour?.pricing || []).filter(c =>
-        !c.internalUseOnly && slotCatPrices.some(p => p.id === c.id)
-      );
-      if (categories.length > 1) {
-        showCategoryPicker(dateStr, categories, slotCatPrices);
+      const allBokunCats = (tdCurrentTour?.pricing || []).filter(c => !c.internalUseOnly);
+      const slotFilteredCats = allBokunCats.filter(c => slotCatPrices.some(p => p.id === c.id));
+
+      // If admin configured per-category prices, use all Bokun cats (Bokun slots often
+      // return only Adult in pricesByCategory even when other categories exist).
+      const tourName = tdCurrentTour?.title || '';
+      const hasAdminCatConfig = allBokunCats.some(c => {
+        const pln = lookupCategoryPricePln(tourName, c.title);
+        return pln !== undefined && pln !== null;
+      });
+      const categoriesToShow = (hasAdminCatConfig && allBokunCats.length > 0)
+        ? allBokunCats
+        : slotFilteredCats;
+
+      if (categoriesToShow.length > 1) {
+        showCategoryPicker(dateStr, categoriesToShow, slotCatPrices);
       } else {
         showBookingForm(dateStr);
       }
