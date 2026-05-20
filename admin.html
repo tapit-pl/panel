@@ -673,15 +673,17 @@ tailwind.config = {
                         <th class="text-left px-4 py-3 text-gray-400 font-semibold">Date</th>
                         <th class="text-center px-4 py-3 text-gray-400 font-semibold">Pax</th>
                         <th class="text-right px-4 py-3 text-gray-400 font-semibold">Total</th>
-                        <th class="text-right px-5 py-3 text-gray-400 font-semibold">Commission</th>
+                        <th class="text-right px-5 py-3 text-gray-400 font-semibold">Settlement</th>
+                        <th class="text-left px-4 py-3 text-gray-400 font-semibold">Payment</th>
                         <th class="text-left px-4 py-3 text-gray-400 font-semibold">Status</th>
                       </tr>
                     </thead>
                     <tbody id="settlement-tbody" class="divide-y divide-gray-50"></tbody>
                     <tfoot>
                       <tr class="bg-dark">
-                        <td colspan="6" class="px-5 py-3.5 font-bold text-white text-right text-sm">Total commission (excl. cancelled):</td>
+                        <td colspan="6" class="px-5 py-3.5 font-bold text-white text-right text-sm">Net settlement (excl. cancelled):</td>
                         <td class="px-5 py-3.5 text-right font-bold text-brand text-lg" id="settlement-total"></td>
+                        <td></td>
                         <td></td>
                       </tr>
                     </tfoot>
@@ -4038,10 +4040,20 @@ tailwind.config = {
 
     const rows = bookings || [];
     const confirmedRows = rows.filter(b => (b.status||'').toLowerCase() !== 'cancelled');
-    const totalComm = confirmedRows.reduce((s, b) => s + (parseFloat(b.comm)||0), 0);
+
+    // hotel payment: guest paid hotel → hotel owes TM (total - comm)
+    // cash/link: guest paid TM → TM owes hotel (comm)
+    let hotelOwesTM = 0, tmOwesHotel = 0;
+    for (const b of confirmedRows) {
+      const total = parseFloat(b.total||0), comm = parseFloat(b.comm||0);
+      if (b.payment_method === 'hotel') hotelOwesTM += total - comm;
+      else tmOwesHotel += comm;
+    }
+    const netToSettle = hotelOwesTM - tmOwesHotel; // positive = hotel pays TM, negative = TM pays hotel
+
     const settledAmount = (history||[]).filter(s => s.period === period).reduce((s, r) => s + parseFloat(r.amount||0), 0);
-    const toSettle = Math.max(0, totalComm - settledAmount);
-    const alreadySettled = toSettle <= 0;
+    const toSettle = netToSettle - settledAmount;
+    const alreadySettled = Math.abs(toSettle) < 0.01;
 
     currentSettlement = { partnerId, partnerName: partner?.name||'', period, periodLabel, total: toSettle };
 
@@ -4051,23 +4063,27 @@ tailwind.config = {
       : '<i class="fa-solid fa-check"></i>Mark as settled';
 
     document.getElementById('settlement-result-title').textContent = `${partner?.name||''} · ${periodLabel}`;
-    const subtitle = settledAmount > 0 && toSettle > 0
-      ? `${rows.length} booking${rows.length!==1?'s':''} · ${settledAmount} pln already settled`
-      : `${rows.length} booking${rows.length!==1?'s':''} · from partner panel`;
+    const direction = toSettle > 0 ? 'Hotel pays TM' : toSettle < 0 ? 'TM pays hotel' : 'Settled';
+    const subtitle = settledAmount !== 0
+      ? `${confirmedRows.length} booking${confirmedRows.length!==1?'s':''} · ${Math.abs(settledAmount)} pln already settled`
+      : `${confirmedRows.length} booking${confirmedRows.length!==1?'s':''} · ${direction}`;
     document.getElementById('settlement-result-subtitle').textContent = subtitle;
-    document.getElementById('settlement-total').textContent = `${toSettle} pln`;
+    document.getElementById('settlement-total').textContent = `${Math.abs(toSettle)} pln`;
 
     const tbody = document.getElementById('settlement-tbody');
     tbody.innerHTML = rows.length === 0
-      ? `<tr><td colspan="8" class="px-5 py-8 text-center text-gray-400">No bookings in this period.</td></tr>`
+      ? `<tr><td colspan="9" class="px-5 py-8 text-center text-gray-400">No bookings in this period.</td></tr>`
       : rows.map(b => {
           const cancelled = (b.status||'').toLowerCase() === 'cancelled';
           const dateStr = b.date ? new Date(b.date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : '—';
           const staffName = b.staff ? `${b.staff.first_name||''} ${b.staff.last_name||''}`.trim() : '—';
-          const commVal = parseFloat(b.comm)||0;
+          const total = parseFloat(b.total||0), comm = parseFloat(b.comm||0);
+          const isHotel = b.payment_method === 'hotel';
+          const settlementAmt = isHotel ? (total - comm) : comm;
+          const pmLabel = b.payment_method === 'hotel' ? 'Reception' : b.payment_method === 'cash' ? 'Driver' : b.payment_method === 'link' ? 'Online' : '—';
           const commCell = cancelled
-            ? `<td class="px-5 py-3 text-right font-bold text-gray-300 line-through">${commVal||'—'} pln</td>`
-            : `<td class="px-5 py-3 text-right font-bold text-dark">${commVal||'—'} pln</td>`;
+            ? `<td class="px-5 py-3 text-right font-bold text-gray-300 line-through">${settlementAmt||'—'} pln</td>`
+            : `<td class="px-5 py-3 text-right font-bold text-dark">${settlementAmt||'—'} pln</td>`;
           return `<tr class="hover:bg-gray-50${cancelled?' opacity-50':''}">
             <td class="px-5 py-3 font-medium text-dark text-xs">${b.tour||'—'}</td>
             <td class="px-4 py-3 text-gray-600">${b.guest||'—'}</td>
@@ -4076,6 +4092,7 @@ tailwind.config = {
             <td class="px-4 py-3 text-center text-dark">${b.pax||'—'}</td>
             <td class="px-4 py-3 text-right text-gray-600">${b.total ? b.total+' pln' : '—'}</td>
             ${commCell}
+            <td class="px-4 py-3 text-xs text-gray-400">${pmLabel}</td>
             <td class="px-4 py-3">${statusBadge(b.status)}</td>
           </tr>`;
         }).join('');
