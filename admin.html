@@ -25,6 +25,7 @@ tailwind.config = {
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
+  html, body { background: #0e1724; }
   body { font-family: 'Inter', sans-serif; }
   .screen { display: none !important; }
   .screen.active { display: flex !important; }
@@ -2956,6 +2957,8 @@ tailwind.config = {
     document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
     const btn = [...document.querySelectorAll('.sidebar-link')].find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes("'" + name + "'"));
     if (btn) btn.classList.add('active');
+    const scroller = document.querySelector('#screen-admin .overflow-y-auto');
+    if (scroller) scroller.scrollTop = 0;
     if (name === 'tours' && !tourConfigLoaded) loadTourConfig();
   }
 
