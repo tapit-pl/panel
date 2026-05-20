@@ -2463,6 +2463,35 @@ tailwind.config = {
     allCommissions  = commRes.data || [];
     tourConfigLoaded = true;
     renderTourConfigTable();
+    // Fetch missing Bokun pricing categories in background
+    refreshBokunPricingCategories();
+  }
+
+  async function refreshBokunPricingCategories() {
+    const missing = allTourConfig.filter(t => t.bokun_id && !t.bokun_pricing_categories);
+    if (missing.length === 0) return;
+    await Promise.all(missing.map(async t => {
+      try {
+        const { data } = await db.functions.invoke('bokun-sync', { body: { path: `/activity.json/${t.bokun_id}`, method: 'GET' } });
+        const cats = (data?.body?.pricingCategories || []).map(c => c.title).filter(Boolean);
+        await db.from('tour_config').update({ bokun_pricing_categories: cats }).eq('id', t.id);
+        t.bokun_pricing_categories = cats;
+      } catch(e) {}
+    }));
+    renderTourConfigTable();
+  }
+
+  function bokunHasCat(tourId, keyword) {
+    const t = allTourConfig.find(x => x.id === tourId);
+    if (!t?.bokun_pricing_categories) return null; // unknown — not fetched yet
+    return t.bokun_pricing_categories.some(title => title.toLowerCase().includes(keyword));
+  }
+
+  function catWarning(tourId, keyword, label) {
+    const has = bokunHasCat(tourId, keyword);
+    if (has === null) return ''; // not fetched yet — no warning
+    if (has) return '';
+    return `<span title="'${label}' category doesn't exist in Bokun for this tour — price won't show until you add it there." class="ml-1 cursor-help text-amber-500 text-xs">⚠</span>`;
   }
 
   function renderTourConfigTable() {
@@ -2529,19 +2558,28 @@ tailwind.config = {
                 onchange="quickSavePkg('${pkg.id}', 'price_pln', this.value === '' ? null : parseInt(this.value)||0)">
             </td>
             <td class="px-2 py-2.5 text-center">
-              <input type="number" value="${pkg.price_student ?? ''}" min="0" placeholder="off" ${locked ? 'disabled' : ''}
-                class="w-16 text-center text-xs border border-gray-300 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 text-gray-800 font-medium placeholder-gray-400 ${locked ? 'bg-gray-100' : 'bg-white'}"
-                onchange="quickSavePkg('${pkg.id}', 'price_student', this.value === '' ? null : parseInt(this.value)||0)">
+              <div class="inline-flex items-center gap-0.5">
+                <input type="number" value="${pkg.price_student ?? ''}" min="0" placeholder="off" ${locked ? 'disabled' : ''}
+                  class="w-16 text-center text-xs border border-gray-300 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 text-gray-800 font-medium placeholder-gray-400 ${locked ? 'bg-gray-100' : 'bg-white'}"
+                  onchange="quickSavePkg('${pkg.id}', 'price_student', this.value === '' ? null : parseInt(this.value)||0)">
+                ${pkg.price_student !== null && pkg.price_student !== undefined ? catWarning(t.id, 'student', 'Student') : ''}
+              </div>
             </td>
             <td class="px-2 py-2.5 text-center">
-              <input type="number" value="${pkg.price_child ?? ''}" min="0" placeholder="off" ${locked ? 'disabled' : ''}
-                class="w-16 text-center text-xs border border-gray-300 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 text-gray-800 font-medium placeholder-gray-400 ${locked ? 'bg-gray-100' : 'bg-white'}"
-                onchange="quickSavePkg('${pkg.id}', 'price_child', this.value === '' ? null : parseInt(this.value)||0)">
+              <div class="inline-flex items-center gap-0.5">
+                <input type="number" value="${pkg.price_child ?? ''}" min="0" placeholder="off" ${locked ? 'disabled' : ''}
+                  class="w-16 text-center text-xs border border-gray-300 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 text-gray-800 font-medium placeholder-gray-400 ${locked ? 'bg-gray-100' : 'bg-white'}"
+                  onchange="quickSavePkg('${pkg.id}', 'price_child', this.value === '' ? null : parseInt(this.value)||0)">
+                ${pkg.price_child !== null && pkg.price_child !== undefined ? catWarning(t.id, 'child', 'Child') : ''}
+              </div>
             </td>
             <td class="px-2 py-2.5 text-center">
-              <input type="number" value="${pkg.price_infant ?? ''}" min="0" placeholder="off" ${locked ? 'disabled' : ''}
-                class="w-16 text-center text-xs border border-gray-300 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 text-gray-800 font-medium placeholder-gray-400 ${locked ? 'bg-gray-100' : 'bg-white'}"
-                onchange="quickSavePkg('${pkg.id}', 'price_infant', this.value === '' ? null : parseInt(this.value)||0)">
+              <div class="inline-flex items-center gap-0.5">
+                <input type="number" value="${pkg.price_infant ?? ''}" min="0" placeholder="off" ${locked ? 'disabled' : ''}
+                  class="w-16 text-center text-xs border border-gray-300 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 text-gray-800 font-medium placeholder-gray-400 ${locked ? 'bg-gray-100' : 'bg-white'}"
+                  onchange="quickSavePkg('${pkg.id}', 'price_infant', this.value === '' ? null : parseInt(this.value)||0)">
+                ${pkg.price_infant !== null && pkg.price_infant !== undefined ? catWarning(t.id, 'infant', 'Infant') : ''}
+              </div>
             </td>
             <td class="px-2 py-2.5 text-center">
               <input type="number" value="${pkg.commission_pln || 0}" min="0" ${locked ? 'disabled' : ''}
