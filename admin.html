@@ -714,161 +714,207 @@ tailwind.config = {
         <div id="section-tours" class="section fade-in">
           <div class="flex items-center justify-between mb-4">
             <div>
-              <h1 class="text-xl font-bold text-dark">Tours & Pricing</h1>
-              <p class="text-xs text-gray-400 mt-0.5" id="tours-config-subtitle">Tour catalogue with commissions and partner visibility</p>
+              <h1 class="text-xl font-bold" style="color:#f1f5f9">Tours & Pricing</h1>
+              <p class="text-xs mt-0.5" style="color:#4e6180" id="tours-config-subtitle">Tour catalogue with commissions and partner visibility</p>
             </div>
             <div class="flex items-center gap-2">
               <button onclick="syncToursFromBokun()" id="btn-sync-tours"
-                class="flex items-center gap-2 border border-brand/30 bg-brand/5 hover:bg-brand/10 text-brand text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors">
+                class="flex items-center gap-2 text-xs font-semibold px-4 py-2.5 rounded-xl transition-opacity hover:opacity-80"
+                style="color:#E8751A;border:1px solid rgba(232,117,26,0.35);background:rgba(232,117,26,0.08)">
                 <i class="fa-solid fa-rotate"></i>Sync from Bokun
               </button>
               <button onclick="openAddTourModal()"
-                class="flex items-center gap-2 bg-brand hover:bg-brand-dark text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors">
+                class="flex items-center gap-2 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-opacity hover:opacity-80"
+                style="background:#E8751A">
                 <i class="fa-solid fa-plus"></i>Add tour
               </button>
             </div>
           </div>
 
           <!-- PIN lock banner -->
-          <div id="tours-locked-banner" class="bg-white border-2 border-amber-300 rounded-2xl px-4 py-3 mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center gap-2 text-sm text-amber-700 font-medium">
-              <i class="fa-solid fa-lock text-amber-500"></i>
+          <div id="tours-locked-banner" class="rounded-xl px-4 py-3 mb-4 flex flex-wrap items-center justify-between gap-3"
+            style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25)">
+            <div class="flex items-center gap-2 text-sm font-medium" style="color:#fbbf24">
+              <i class="fa-solid fa-lock"></i>
               <span>Changes are locked — enter PIN to edit</span>
             </div>
             <div class="flex items-center gap-2">
               <input id="tours-pin-input" type="password" maxlength="20" placeholder="Enter PIN"
-                class="w-28 text-center border-2 border-gray-300 rounded-xl px-3 py-1.5 text-sm font-semibold text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-400 bg-white"
+                class="w-28 text-center rounded-xl px-3 py-1.5 text-sm font-semibold focus:outline-none"
+                style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);color:#f1f5f9"
                 onkeydown="if(event.key==='Enter')tryUnlockEditing()">
               <button onclick="tryUnlockEditing()"
-                class="px-4 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold rounded-xl transition-colors">
+                class="px-4 py-1.5 text-white text-sm font-semibold rounded-xl transition-opacity hover:opacity-80"
+                style="background:#d97706">
                 <i class="fa-solid fa-unlock mr-1"></i>Unlock
               </button>
             </div>
           </div>
-          <div id="tours-unlocked-banner" class="hidden bg-white border-2 border-green-300 rounded-2xl px-4 py-3 mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center gap-2 text-sm text-green-700 font-medium">
-              <i class="fa-solid fa-lock-open text-green-500"></i>
-              <span>Editing unlocked — auto-locks in <span id="tours-lock-countdown" class="font-bold text-green-800">10:00</span></span>
+          <div id="tours-unlocked-banner" class="hidden rounded-xl px-4 py-3 mb-4 flex flex-wrap items-center justify-between gap-3"
+            style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25)">
+            <div class="flex items-center gap-2 text-sm font-medium" style="color:#4ade80">
+              <i class="fa-solid fa-lock-open"></i>
+              <span>Editing unlocked — auto-locks in <span id="tours-lock-countdown" class="font-bold">10:00</span></span>
             </div>
             <div class="flex items-center gap-2">
-              <button onclick="openChangePinModal()" class="text-xs text-gray-700 font-semibold hover:text-brand px-3 py-1.5 border-2 border-gray-300 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
-                <i class="fa-solid fa-key mr-1 text-gray-500"></i>Change PIN
+              <button onclick="openChangePinModal()" class="text-xs font-semibold px-3 py-1.5 rounded-xl transition-opacity hover:opacity-80"
+                style="color:#94a3b8;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05)">
+                <i class="fa-solid fa-key mr-1"></i>Change PIN
               </button>
-              <button onclick="lockEditing()" class="px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-xl transition-colors">
+              <button onclick="lockEditing()" class="px-4 py-1.5 text-white text-xs font-semibold rounded-xl transition-opacity hover:opacity-80"
+                style="background:#16a34a">
                 <i class="fa-solid fa-lock mr-1"></i>Lock now
               </button>
             </div>
           </div>
 
-          <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-            <div id="tour-config-loading" class="py-12 text-center text-gray-400 text-sm">
-              <i class="fa-solid fa-circle-notch animate-spin text-xl block mb-3 text-brand"></i>Loading...
+          <div class="rounded-2xl overflow-hidden" style="background:#1a2332;border:1px solid rgba(255,255,255,0.07)">
+            <div id="tour-config-loading" class="py-12 text-center text-sm" style="color:#4e6180">
+              <i class="fa-solid fa-circle-notch animate-spin text-xl block mb-3" style="color:#E8751A"></i>Loading...
             </div>
             <div id="tour-config-table" class="hidden overflow-x-auto">
               <table class="w-full text-xs">
                 <thead>
-                  <tr class="border-b border-gray-100 bg-gray-50/80">
-                    <th class="text-left px-3 py-3 text-gray-400 font-semibold w-8">#</th>
-                    <th class="text-left px-3 py-3 text-gray-400 font-semibold">Tour / Package</th>
-                    <th class="text-left px-3 py-3 text-gray-400 font-semibold w-24">Bokun ID</th>
-                    <th class="text-left px-3 py-3 text-gray-400 font-semibold">Groups</th>
-                    <th class="text-center px-2 py-3 text-gray-400 font-semibold w-20">Adult</th>
-                    <th class="text-center px-2 py-3 text-gray-400 font-semibold w-20">Student</th>
-                    <th class="text-center px-2 py-3 text-gray-400 font-semibold w-20">Child</th>
-                    <th class="text-center px-2 py-3 text-gray-400 font-semibold w-20">Infant</th>
-                    <th class="text-center px-2 py-3 text-gray-400 font-semibold w-28 text-brand">Commission</th>
-                    <th class="text-center px-3 py-3 text-gray-400 font-semibold w-20">Active</th>
+                  <tr style="border-bottom:1px solid rgba(255,255,255,0.07);background:rgba(0,0,0,0.15)">
+                    <th class="text-left px-3 py-3 font-semibold tracking-wide w-8" style="color:#4e6180">#</th>
+                    <th class="text-left px-3 py-3 font-semibold tracking-wide" style="color:#4e6180">TOUR / PACKAGE</th>
+                    <th class="text-left px-3 py-3 font-semibold tracking-wide w-24" style="color:#4e6180">BOKUN ID</th>
+                    <th class="text-left px-3 py-3 font-semibold tracking-wide" style="color:#4e6180">GROUPS</th>
+                    <th class="text-center px-2 py-3 font-semibold tracking-wide w-20" style="color:#4e6180">ADULT</th>
+                    <th class="text-center px-2 py-3 font-semibold tracking-wide w-20" style="color:#4e6180">STUDENT</th>
+                    <th class="text-center px-2 py-3 font-semibold tracking-wide w-20" style="color:#4e6180">CHILD</th>
+                    <th class="text-center px-2 py-3 font-semibold tracking-wide w-20" style="color:#4e6180">INFANT</th>
+                    <th class="text-center px-2 py-3 font-semibold tracking-wide w-28" style="color:#E8751A">COMMISSION</th>
+                    <th class="text-center px-3 py-3 font-semibold tracking-wide w-20" style="color:#4e6180">ACTIVE</th>
                     <th class="text-right px-3 py-3 w-36"></th>
                   </tr>
                 </thead>
-                <tbody id="tour-config-tbody" class="divide-y divide-gray-50"></tbody>
+                <tbody id="tour-config-tbody"></tbody>
               </table>
             </div>
             <div id="tour-config-empty" class="hidden py-12 text-center">
               <div class="text-3xl mb-3">🗺️</div>
-              <div class="text-sm font-semibold text-dark mb-1">No tours yet</div>
-              <div class="text-xs text-gray-400 mb-4">Click "Sync from Bokun" to import tours, or add manually. Then click the pencil to set Bokun ID, groups and commission rates.</div>
+              <div class="text-sm font-semibold mb-1" style="color:#e2e8f0">No tours yet</div>
+              <div class="text-xs" style="color:#4e6180">Click "Sync from Bokun" to import tours, or add manually.</div>
             </div>
           </div>
         </div>
 
         <!-- ===== SECTION: STAFF ===== -->
         <div id="section-staff" class="section fade-in">
-          <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center justify-between mb-5">
             <div>
-              <h1 class="text-xl font-bold text-dark">Staff</h1>
-              <p class="text-xs text-gray-400 mt-0.5">4 team members</p>
+              <h1 class="text-xl font-bold" style="color:#f1f5f9">Staff</h1>
+              <p class="text-xs mt-0.5" style="color:#4e6180">4 team members</p>
             </div>
-            <button class="flex items-center gap-2 bg-brand hover:bg-brand-dark text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors">
+            <button class="flex items-center gap-2 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-opacity hover:opacity-80" style="background:#E8751A">
               <i class="fa-solid fa-user-plus"></i>Add member
             </button>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-
-            <div class="bg-white rounded-2xl shadow-sm p-5">
-              <div class="flex items-start justify-between mb-4">
-                <div class="w-12 h-12 bg-brand rounded-xl flex items-center justify-center text-white font-bold">MK</div>
-                <span class="text-xs bg-violet-100 text-violet-700 font-bold px-2 py-0.5 rounded-full">Owner</span>
-              </div>
-              <div class="font-bold text-dark text-sm mb-0.5">Maciej Kowalski</div>
-              <div class="text-xs text-gray-400 mb-3">maciej@thousandmiles.pl</div>
-              <div class="text-xs text-gray-400 flex items-center gap-1.5">
-                <span class="w-2 h-2 bg-green-400 rounded-full inline-block"></span>Active now
-              </div>
-              <div class="mt-4 pt-4 border-t border-gray-100 flex gap-2">
-                <button class="flex-1 text-xs text-gray-500 hover:text-brand border border-gray-200 rounded-lg py-1.5 transition-colors">Edit</button>
-              </div>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-sm p-5">
-              <div class="flex items-start justify-between mb-4">
-                <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white font-bold">AW</div>
-                <span class="text-xs bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded-full">Manager</span>
-              </div>
-              <div class="font-bold text-dark text-sm mb-0.5">Anna Wiśniewska</div>
-              <div class="text-xs text-gray-400 mb-3">anna@thousandmiles.pl</div>
-              <div class="text-xs text-gray-400 flex items-center gap-1.5">
-                <span class="w-2 h-2 bg-green-400 rounded-full inline-block"></span>Active now
-              </div>
-              <div class="mt-4 pt-4 border-t border-gray-100 flex gap-2">
-                <button class="flex-1 text-xs text-gray-500 hover:text-brand border border-gray-200 rounded-lg py-1.5 transition-colors">Edit</button>
-                <button class="flex-1 text-xs text-red-400 hover:text-red-600 border border-gray-200 rounded-lg py-1.5 transition-colors">Remove</button>
-              </div>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-sm p-5">
-              <div class="flex items-start justify-between mb-4">
-                <div class="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center text-white font-bold">PJ</div>
-                <span class="text-xs bg-gray-100 text-gray-600 font-bold px-2 py-0.5 rounded-full">Employee</span>
-              </div>
-              <div class="font-bold text-dark text-sm mb-0.5">Piotr Jabłoński</div>
-              <div class="text-xs text-gray-400 mb-3">piotr@thousandmiles.pl</div>
-              <div class="text-xs text-gray-400 flex items-center gap-1.5">
-                <span class="w-2 h-2 bg-gray-300 rounded-full inline-block"></span>Last seen 2h ago
-              </div>
-              <div class="mt-4 pt-4 border-t border-gray-100 flex gap-2">
-                <button class="flex-1 text-xs text-gray-500 hover:text-brand border border-gray-200 rounded-lg py-1.5 transition-colors">Edit</button>
-                <button class="flex-1 text-xs text-red-400 hover:text-red-600 border border-gray-200 rounded-lg py-1.5 transition-colors">Remove</button>
-              </div>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-sm p-5">
-              <div class="flex items-start justify-between mb-4">
-                <div class="w-12 h-12 bg-pink-400 rounded-xl flex items-center justify-center text-white font-bold">KN</div>
-                <span class="text-xs bg-gray-100 text-gray-600 font-bold px-2 py-0.5 rounded-full">Employee</span>
-              </div>
-              <div class="font-bold text-dark text-sm mb-0.5">Kasia Nowak</div>
-              <div class="text-xs text-gray-400 mb-3">kasia@thousandmiles.pl</div>
-              <div class="text-xs text-gray-400 flex items-center gap-1.5">
-                <span class="w-2 h-2 bg-gray-300 rounded-full inline-block"></span>Last seen Apr 6
-              </div>
-              <div class="mt-4 pt-4 border-t border-gray-100 flex gap-2">
-                <button class="flex-1 text-xs text-gray-500 hover:text-brand border border-gray-200 rounded-lg py-1.5 transition-colors">Edit</button>
-                <button class="flex-1 text-xs text-red-400 hover:text-red-600 border border-gray-200 rounded-lg py-1.5 transition-colors">Remove</button>
-              </div>
-            </div>
-
+          <div class="rounded-2xl overflow-hidden" style="background:#1a2332; border:1px solid rgba(255,255,255,0.07)">
+            <table class="w-full">
+              <thead>
+                <tr style="border-bottom:1px solid rgba(255,255,255,0.07); background:rgba(0,0,0,0.15)">
+                  <th class="text-left px-5 py-3 text-xs font-semibold tracking-wide" style="color:#4e6180">MEMBER</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold tracking-wide" style="color:#4e6180">EMAIL</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold tracking-wide" style="color:#4e6180">ROLE</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold tracking-wide" style="color:#4e6180">STATUS</th>
+                  <th class="px-5 py-3 w-32"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
+                  <td class="px-5 py-4">
+                    <div class="flex items-center gap-3">
+                      <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-bold shrink-0" style="background:#E8751A">MK</div>
+                      <span class="text-sm font-semibold" style="color:#f1f5f9">Maciej Kowalski</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-4 text-sm" style="color:#64748b">maciej@thousandmiles.pl</td>
+                  <td class="px-4 py-4">
+                    <span class="text-xs font-semibold px-2.5 py-1 rounded-full" style="background:rgba(139,92,246,0.15);color:#a78bfa">Owner</span>
+                  </td>
+                  <td class="px-4 py-4">
+                    <div class="flex items-center gap-1.5 text-xs" style="color:#4ade80">
+                      <span class="w-1.5 h-1.5 rounded-full" style="background:#4ade80"></span>Active now
+                    </div>
+                  </td>
+                  <td class="px-5 py-4 text-right">
+                    <button class="text-xs px-3 py-1.5 rounded-lg transition-colors hover:opacity-80" style="color:#94a3b8;border:1px solid rgba(255,255,255,0.1)">Edit</button>
+                  </td>
+                </tr>
+                <tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
+                  <td class="px-5 py-4">
+                    <div class="flex items-center gap-3">
+                      <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-bold shrink-0" style="background:#3b82f6">AW</div>
+                      <span class="text-sm font-semibold" style="color:#f1f5f9">Anna Wiśniewska</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-4 text-sm" style="color:#64748b">anna@thousandmiles.pl</td>
+                  <td class="px-4 py-4">
+                    <span class="text-xs font-semibold px-2.5 py-1 rounded-full" style="background:rgba(59,130,246,0.15);color:#60a5fa">Manager</span>
+                  </td>
+                  <td class="px-4 py-4">
+                    <div class="flex items-center gap-1.5 text-xs" style="color:#4ade80">
+                      <span class="w-1.5 h-1.5 rounded-full" style="background:#4ade80"></span>Active now
+                    </div>
+                  </td>
+                  <td class="px-5 py-4 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      <button class="text-xs px-3 py-1.5 rounded-lg transition-colors hover:opacity-80" style="color:#94a3b8;border:1px solid rgba(255,255,255,0.1)">Edit</button>
+                      <button class="text-xs px-3 py-1.5 rounded-lg transition-colors hover:opacity-80" style="color:#f87171;border:1px solid rgba(248,113,113,0.25)">Remove</button>
+                    </div>
+                  </td>
+                </tr>
+                <tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
+                  <td class="px-5 py-4">
+                    <div class="flex items-center gap-3">
+                      <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-bold shrink-0" style="background:#10b981">PJ</div>
+                      <span class="text-sm font-semibold" style="color:#f1f5f9">Piotr Jabłoński</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-4 text-sm" style="color:#64748b">piotr@thousandmiles.pl</td>
+                  <td class="px-4 py-4">
+                    <span class="text-xs font-semibold px-2.5 py-1 rounded-full" style="background:rgba(255,255,255,0.07);color:#94a3b8">Employee</span>
+                  </td>
+                  <td class="px-4 py-4">
+                    <div class="flex items-center gap-1.5 text-xs" style="color:#64748b">
+                      <span class="w-1.5 h-1.5 rounded-full" style="background:#475569"></span>Last seen 2h ago
+                    </div>
+                  </td>
+                  <td class="px-5 py-4 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      <button class="text-xs px-3 py-1.5 rounded-lg transition-colors hover:opacity-80" style="color:#94a3b8;border:1px solid rgba(255,255,255,0.1)">Edit</button>
+                      <button class="text-xs px-3 py-1.5 rounded-lg transition-colors hover:opacity-80" style="color:#f87171;border:1px solid rgba(248,113,113,0.25)">Remove</button>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="px-5 py-4">
+                    <div class="flex items-center gap-3">
+                      <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-bold shrink-0" style="background:#ec4899">KN</div>
+                      <span class="text-sm font-semibold" style="color:#f1f5f9">Kasia Nowak</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-4 text-sm" style="color:#64748b">kasia@thousandmiles.pl</td>
+                  <td class="px-4 py-4">
+                    <span class="text-xs font-semibold px-2.5 py-1 rounded-full" style="background:rgba(255,255,255,0.07);color:#94a3b8">Employee</span>
+                  </td>
+                  <td class="px-4 py-4">
+                    <div class="flex items-center gap-1.5 text-xs" style="color:#64748b">
+                      <span class="w-1.5 h-1.5 rounded-full" style="background:#475569"></span>Last seen Apr 6
+                    </div>
+                  </td>
+                  <td class="px-5 py-4 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      <button class="text-xs px-3 py-1.5 rounded-lg transition-colors hover:opacity-80" style="color:#94a3b8;border:1px solid rgba(255,255,255,0.1)">Edit</button>
+                      <button class="text-xs px-3 py-1.5 rounded-lg transition-colors hover:opacity-80" style="color:#f87171;border:1px solid rgba(248,113,113,0.25)">Remove</button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -2504,99 +2550,100 @@ tailwind.config = {
     tbody.innerHTML = '';
     const locked = !editingUnlocked;
     const lockCls = locked ? 'opacity-40 pointer-events-none select-none' : '';
+    const inputStyle = `width:64px;text-align:center;font-size:11px;border-radius:8px;padding:3px 6px;outline:none;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:#e2e8f0;font-weight:500`;
+    const inputDisabledStyle = `width:64px;text-align:center;font-size:11px;border-radius:8px;padding:3px 6px;outline:none;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);color:#4e6180;font-weight:500`;
+    const commStyle = `width:64px;text-align:center;font-size:11px;border-radius:8px;padding:3px 6px;outline:none;background:rgba(232,117,26,0.12);border:1.5px solid rgba(232,117,26,0.4);color:#E8751A;font-weight:700`;
+    const commDisabledStyle = `width:64px;text-align:center;font-size:11px;border-radius:8px;padding:3px 6px;outline:none;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);color:#4e6180;font-weight:700`;
     allTourConfig.forEach((t, idx) => {
       const last     = idx === allTourConfig.length - 1;
-      const groups   = (t.groups || []).length > 0 ? t.groups.map(groupChip).join('') : '<span class="text-gray-300 text-xs">all partners</span>';
+      const groups   = (t.groups || []).length > 0 ? t.groups.map(groupChip).join('') : '<span style="color:#4e6180;font-size:11px">all partners</span>';
       const packages = allCommissions.filter(c => c.tour_config_id === t.id).sort((a,b) => (a.sort_order||0)-(b.sort_order||0));
       tbody.insertAdjacentHTML('beforeend', `
-        <tr class="hover:bg-gray-50/60 transition-colors border-t border-gray-100 ${t.active ? '' : 'opacity-50'}">
-          <td class="px-3 py-2.5 text-gray-300 font-mono text-xs">${idx + 1}</td>
-          <td class="px-3 py-2.5 font-semibold text-dark text-xs">${t.title}</td>
-          <td class="px-3 py-2.5 font-mono text-xs text-gray-400">${t.bokun_id || '<span class="text-red-300">no id</span>'}</td>
+        <tr style="border-top:1px solid rgba(255,255,255,0.06);${t.active ? '' : 'opacity:0.45'}" onmouseenter="this.style.background='rgba(255,255,255,0.03)'" onmouseleave="this.style.background=''">
+          <td class="px-3 py-2.5 font-mono text-xs" style="color:#3d5166">${idx + 1}</td>
+          <td class="px-3 py-2.5 font-semibold text-xs" style="color:#e2e8f0">${t.title}</td>
+          <td class="px-3 py-2.5 font-mono text-xs" style="color:#64748b">${t.bokun_id || '<span style="color:#f87171">no id</span>'}</td>
           <td class="px-3 py-2.5"><div class="flex flex-wrap gap-1">${groups}</div></td>
-          <td class="px-2 py-2.5 text-center text-gray-300 text-xs">—</td>
-          <td class="px-2 py-2.5 text-center text-gray-300 text-xs">—</td>
-          <td class="px-2 py-2.5 text-center text-gray-300 text-xs">—</td>
-          <td class="px-2 py-2.5 text-center text-gray-300 text-xs">—</td>
-          <td class="px-2 py-2.5 text-center text-gray-300 text-xs">—</td>
+          <td class="px-2 py-2.5 text-center text-xs" style="color:#3d5166">—</td>
+          <td class="px-2 py-2.5 text-center text-xs" style="color:#3d5166">—</td>
+          <td class="px-2 py-2.5 text-center text-xs" style="color:#3d5166">—</td>
+          <td class="px-2 py-2.5 text-center text-xs" style="color:#3d5166">—</td>
+          <td class="px-2 py-2.5 text-center text-xs" style="color:#3d5166">—</td>
           <td class="px-2 py-2.5 text-center">
             <label class="relative inline-flex ${lockCls} cursor-pointer">
               <input type="checkbox" class="sr-only peer" ${t.active ? 'checked' : ''} ${locked ? 'disabled' : ''} onchange="toggleTourActive('${t.id}', this.checked)">
-              <div class="w-9 h-5 bg-gray-300 peer-checked:bg-green-500 rounded-full transition-colors"></div>
+              <div class="w-9 h-5 rounded-full transition-colors peer-checked:bg-green-500" style="background:rgba(255,255,255,0.12)"></div>
               <div class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4"></div>
             </label>
           </td>
           <td class="px-3 py-2.5 text-right">
             <div class="flex items-center justify-end gap-0.5">
-              <button onclick="openAddPackageModal('${t.id}')" title="Add package" class="text-xs px-2 py-1 rounded-lg border border-dashed border-brand/40 text-brand hover:bg-brand/5 transition-colors ${lockCls}">+ pkg</button>
-              <button onclick="moveTour('${t.id}',-1)" ${idx===0||locked?'disabled':''} title="Move up" class="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 ${idx===0?'opacity-20 cursor-not-allowed':''} ${lockCls}"><i class="fa-solid fa-chevron-up text-xs"></i></button>
-              <button onclick="moveTour('${t.id}',1)" ${last||locked?'disabled':''} title="Move down" class="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 ${last?'opacity-20 cursor-not-allowed':''} ${lockCls}"><i class="fa-solid fa-chevron-down text-xs"></i></button>
-              <button onclick="openEditTour('${t.id}')" title="Edit tour" class="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 ${lockCls}"><i class="fa-solid fa-pen text-xs"></i></button>
-              <button onclick="deleteTour('${t.id}')" title="Delete" class="w-6 h-6 flex items-center justify-center rounded hover:bg-red-50 text-gray-300 hover:text-red-400 ${lockCls}"><i class="fa-solid fa-trash text-xs"></i></button>
+              <button onclick="openAddPackageModal('${t.id}')" title="Add package" class="text-xs px-2 py-1 rounded-lg transition-opacity hover:opacity-70 ${lockCls}" style="color:#E8751A;border:1px dashed rgba(232,117,26,0.4)">+ pkg</button>
+              <button onclick="moveTour('${t.id}',-1)" ${idx===0||locked?'disabled':''} title="Move up" class="w-6 h-6 flex items-center justify-center rounded ${lockCls}" style="color:#4e6180;${idx===0?'opacity:0.2;cursor:not-allowed':''}"><i class="fa-solid fa-chevron-up text-xs"></i></button>
+              <button onclick="moveTour('${t.id}',1)" ${last||locked?'disabled':''} title="Move down" class="w-6 h-6 flex items-center justify-center rounded ${lockCls}" style="color:#4e6180;${last?'opacity:0.2;cursor:not-allowed':''}"><i class="fa-solid fa-chevron-down text-xs"></i></button>
+              <button onclick="openEditTour('${t.id}')" title="Edit tour" class="w-6 h-6 flex items-center justify-center rounded ${lockCls}" style="color:#4e6180"><i class="fa-solid fa-pen text-xs"></i></button>
+              <button onclick="deleteTour('${t.id}')" title="Delete" class="w-6 h-6 flex items-center justify-center rounded ${lockCls}" style="color:#3d5166"><i class="fa-solid fa-trash text-xs"></i></button>
             </div>
           </td>
         </tr>`);
       packages.forEach(pkg => {
+        const iStyle = locked ? inputDisabledStyle : inputStyle;
+        const cStyle = locked ? commDisabledStyle : commStyle;
         tbody.insertAdjacentHTML('beforeend', `
-          <tr class="bg-gray-50 border-b border-gray-100 ${pkg.active ? '' : 'opacity-50'}">
-            <td class="pl-5 py-2.5 text-gray-300 text-sm">└</td>
-            <td class="pl-2 pr-3 py-2.5 text-xs font-medium text-gray-700">${pkg.title}</td>
-            <td class="px-3 py-2.5 text-gray-300 text-xs">—</td>
-            <td class="px-3 py-2.5 text-gray-300 text-xs">—</td>
+          <tr style="background:rgba(0,0,0,0.12);border-bottom:1px solid rgba(255,255,255,0.05);${pkg.active ? '' : 'opacity:0.4'}">
+            <td class="pl-5 py-2.5 text-sm" style="color:#3d5166">└</td>
+            <td class="pl-2 pr-3 py-2.5 text-xs font-medium" style="color:#94a3b8">${pkg.title}</td>
+            <td class="px-3 py-2.5 text-xs" style="color:#3d5166">—</td>
+            <td class="px-3 py-2.5 text-xs" style="color:#3d5166">—</td>
             <td class="px-2 py-2.5 text-center">
               <input type="number" value="${pkg.price_pln ?? ''}" min="0" placeholder="off" ${locked ? 'disabled' : ''}
-                class="w-16 text-center text-xs border border-gray-300 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 text-gray-800 font-medium placeholder-gray-400 ${locked ? 'bg-gray-100' : 'bg-white'}"
-                onchange="quickSavePkg('${pkg.id}', 'price_pln', this.value === '' ? null : parseInt(this.value)||0)">
+                style="${iStyle}" onchange="quickSavePkg('${pkg.id}', 'price_pln', this.value === '' ? null : parseInt(this.value)||0)">
             </td>
             <td class="px-2 py-2.5 text-center">
               <div class="inline-flex items-center gap-0.5">
                 <input type="number" value="${pkg.price_student ?? ''}" min="0" placeholder="off" ${locked ? 'disabled' : ''}
-                  class="w-16 text-center text-xs border border-gray-300 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 text-gray-800 font-medium placeholder-gray-400 ${locked ? 'bg-gray-100' : 'bg-white'}"
-                  onchange="quickSavePkg('${pkg.id}', 'price_student', this.value === '' ? null : parseInt(this.value)||0)">
+                  style="${iStyle}" onchange="quickSavePkg('${pkg.id}', 'price_student', this.value === '' ? null : parseInt(this.value)||0)">
                 ${pkg.price_student !== null && pkg.price_student !== undefined ? catWarning(t.id, 'student', 'Student') : ''}
               </div>
             </td>
             <td class="px-2 py-2.5 text-center">
               <div class="inline-flex items-center gap-0.5">
                 <input type="number" value="${pkg.price_child ?? ''}" min="0" placeholder="off" ${locked ? 'disabled' : ''}
-                  class="w-16 text-center text-xs border border-gray-300 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 text-gray-800 font-medium placeholder-gray-400 ${locked ? 'bg-gray-100' : 'bg-white'}"
-                  onchange="quickSavePkg('${pkg.id}', 'price_child', this.value === '' ? null : parseInt(this.value)||0)">
+                  style="${iStyle}" onchange="quickSavePkg('${pkg.id}', 'price_child', this.value === '' ? null : parseInt(this.value)||0)">
                 ${pkg.price_child !== null && pkg.price_child !== undefined ? catWarning(t.id, 'child', 'Child') : ''}
               </div>
             </td>
             <td class="px-2 py-2.5 text-center">
               <div class="inline-flex items-center gap-0.5">
                 <input type="number" value="${pkg.price_infant ?? ''}" min="0" placeholder="off" ${locked ? 'disabled' : ''}
-                  class="w-16 text-center text-xs border border-gray-300 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 text-gray-800 font-medium placeholder-gray-400 ${locked ? 'bg-gray-100' : 'bg-white'}"
-                  onchange="quickSavePkg('${pkg.id}', 'price_infant', this.value === '' ? null : parseInt(this.value)||0)">
+                  style="${iStyle}" onchange="quickSavePkg('${pkg.id}', 'price_infant', this.value === '' ? null : parseInt(this.value)||0)">
                 ${pkg.price_infant !== null && pkg.price_infant !== undefined ? catWarning(t.id, 'infant', 'Infant') : ''}
               </div>
             </td>
             <td class="px-2 py-2.5 text-center">
               <input type="number" value="${pkg.commission_pln || 0}" min="0" ${locked ? 'disabled' : ''}
-                class="w-16 text-center text-xs border-2 border-brand/40 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 font-bold text-brand ${locked ? 'bg-gray-100' : 'bg-orange-50'}"
-                onchange="quickSavePkg('${pkg.id}', 'commission_pln', parseInt(this.value)||0)">
+                style="${cStyle}" onchange="quickSavePkg('${pkg.id}', 'commission_pln', parseInt(this.value)||0)">
             </td>
             <td class="px-3 py-2 text-center">
               <label class="relative inline-flex ${lockCls} cursor-pointer">
                 <input type="checkbox" class="sr-only peer" ${pkg.active ? 'checked' : ''} ${locked ? 'disabled' : ''} onchange="togglePkgActive('${pkg.id}', this.checked)">
-                <div class="w-8 h-4 bg-gray-300 peer-checked:bg-green-500 rounded-full transition-colors"></div>
+                <div class="w-8 h-4 rounded-full transition-colors peer-checked:bg-green-500" style="background:rgba(255,255,255,0.12)"></div>
                 <div class="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4"></div>
               </label>
             </td>
             <td class="px-3 py-2 text-right">
               <div class="flex items-center justify-end gap-0.5 ${lockCls}">
-                <button onclick="openEditPackageModal('${pkg.id}')" title="Edit package" class="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400"><i class="fa-solid fa-pen text-xs"></i></button>
-                <button onclick="deletePackage('${pkg.id}')" title="Delete package" class="w-6 h-6 flex items-center justify-center rounded hover:bg-red-50 text-gray-300 hover:text-red-400"><i class="fa-solid fa-trash text-xs"></i></button>
+                <button onclick="openEditPackageModal('${pkg.id}')" title="Edit package" class="w-6 h-6 flex items-center justify-center rounded" style="color:#4e6180"><i class="fa-solid fa-pen text-xs"></i></button>
+                <button onclick="deletePackage('${pkg.id}')" title="Delete package" class="w-6 h-6 flex items-center justify-center rounded" style="color:#3d5166"><i class="fa-solid fa-trash text-xs"></i></button>
               </div>
             </td>
           </tr>`);
       });
       if (packages.length === 0) {
         tbody.insertAdjacentHTML('beforeend', `
-          <tr class="bg-gray-50/20">
-            <td class="pl-5 py-1.5 text-gray-200 text-sm">└</td>
-            <td colspan="10" class="pl-2 pr-3 py-1.5 text-xs text-gray-300 italic">No packages — click "+ pkg" to add price &amp; commission</td>
+          <tr style="background:rgba(0,0,0,0.08)">
+            <td class="pl-5 py-1.5 text-sm" style="color:#3d5166">└</td>
+            <td colspan="10" class="pl-2 pr-3 py-1.5 text-xs italic" style="color:#3d5166">No packages — click "+ pkg" to add price &amp; commission</td>
           </tr>`);
       }
     });
