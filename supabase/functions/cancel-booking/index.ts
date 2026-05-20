@@ -61,7 +61,15 @@ async function stripeRefund(stripeSessionId: string): Promise<{ ok: boolean, ref
   console.log('[Cancel] Stripe session status:', session.payment_status, 'pi:', paymentIntent)
 
   if (!paymentIntent || session.payment_status !== 'paid') {
-    return { ok: true } // Nothing to refund
+    // Expire the checkout session so the guest can't pay after cancellation
+    if (session.status === 'open') {
+      await fetch(`https://api.stripe.com/v1/checkout/sessions/${stripeSessionId}/expire`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${stripeKey}` },
+      })
+      console.log('[Cancel] Stripe session expired')
+    }
+    return { ok: true }
   }
 
   const refundRes = await fetch('https://api.stripe.com/v1/refunds', {
