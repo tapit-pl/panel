@@ -2195,7 +2195,10 @@ tailwind.config = {
       const future = new Date(today); future.setDate(future.getDate() + 90);
       const fmt = d => d.toISOString().slice(0, 10);
 
-      const seenIds = new Set(allBookings.map(b => b.id));
+      const seenIds = new Set([
+        ...allBookings.map(b => b.id),
+        ...allBookings.filter(b => b._bokunCode).map(b => b._bokunCode),
+      ]);
       let page = 0;
       while (true) {
         const { data: bokunResp, error: bokunErr } = await db.functions.invoke('bokun-sync', {
