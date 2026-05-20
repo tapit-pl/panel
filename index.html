@@ -4110,7 +4110,7 @@ tailwind.config = {
       .select('date, total, comm, status')
       .eq('partner_id', partnerId)
       .gte('date', from).lte('date', to)
-      .neq('status', 'cancelled');
+      .eq('status', 'confirmed');
     const salesByDay = {}, commByDay = {};
     for (let d = 1; d <= days; d++) { salesByDay[d] = 0; commByDay[d] = 0; }
     let maxComm = 0;
@@ -4747,7 +4747,7 @@ tailwind.config = {
       .select('comm, date, status')
       .eq('partner_id', partnerId)
       .gte('date', yearFrom)
-      .not('status', 'eq', 'cancelled');
+      .eq('status', 'confirmed');
 
     const { data: settlements } = await db.from('settlements')
       .select('amount, period')

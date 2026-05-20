@@ -38,10 +38,13 @@ async function bokunCancel(confirmationCode: string) {
   const path = `/booking.json/cancel-booking/${confirmationCode}`
   const res = await bokunRequest('POST', path, { notify: true })
   console.log('[Cancel] cancel response status:', res.status, 'body:', JSON.stringify(res.body).slice(0, 300))
+  const msg = res.body?.message || res.body?.errorMessage || ''
+  // "Booking is not confirmed" = reservation was never paid, nothing to cancel in Bokun
+  const ignorable = !res.ok && (msg.toLowerCase().includes('not confirmed') || msg.toLowerCase().includes('not found'))
   return {
-    ok: res.ok,
+    ok: res.ok || ignorable,
     status: res.status,
-    error: res.ok ? null : (res.body?.message || res.body?.errorMessage || `HTTP ${res.status}`),
+    error: (res.ok || ignorable) ? null : (msg || `HTTP ${res.status}`),
     body: res.body,
   }
 }

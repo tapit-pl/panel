@@ -4039,7 +4039,7 @@ tailwind.config = {
       .order('created_at', { ascending: false });
 
     const rows = bookings || [];
-    const confirmedRows = rows.filter(b => (b.status||'').toLowerCase() !== 'cancelled');
+    const confirmedRows = rows.filter(b => (b.status||'').toLowerCase() === 'confirmed');
 
     // hotel payment: guest paid hotel → hotel owes TM (total - comm)
     // cash/link: guest paid TM → TM owes hotel (comm)
@@ -4080,7 +4080,7 @@ tailwind.config = {
           const total = parseFloat(b.total||0), comm = parseFloat(b.comm||0);
           const isHotel = b.payment_method === 'hotel';
           const settlementAmt = isHotel ? (total - comm) : comm;
-          const pmLabel = b.payment_method === 'hotel' ? 'Reception' : b.payment_method === 'cash' ? 'Driver' : b.payment_method === 'link' ? 'Online' : '—';
+          const pmLabel = b.payment_method === 'hotel' ? 'Reception' : b.payment_method === 'driver' ? 'Driver' : b.payment_method === 'link' ? 'Online' : '—';
           const commCell = cancelled
             ? `<td class="px-5 py-3 text-right font-bold text-gray-300 line-through">${settlementAmt||'—'} pln</td>`
             : `<td class="px-5 py-3 text-right font-bold text-dark">${settlementAmt||'—'} pln</td>`;
