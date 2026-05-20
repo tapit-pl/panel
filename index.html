@@ -2016,15 +2016,29 @@ tailwind.config = {
     'sb_publishable_jTg5-5J24uo7BNBVBLTTLA_xAeB9iK4'
   );
 
-  let COMM_MAP = {}; // normalized name → { pricePln, commPln, cat }
+  let COMM_MAP = {}; // normalized name → entry (for name-based lookups)
+  let COMM_MAP_BY_TOUR = {}; // tour_config_id → best entry (most category prices)
 
   async function buildCommMap() {
     COMM_MAP = {};
+    COMM_MAP_BY_TOUR = {};
     try {
       const { data, error } = await db.from('tour_commissions').select('*').eq('active', true).order('sort_order');
       if (!error && data && data.length > 0) {
         data.forEach(c => {
-          COMM_MAP[_normComm(c.title)] = { pricePln: c.price_pln ?? null, priceStudent: c.price_student ?? null, priceChild: c.price_child ?? null, priceInfant: c.price_infant ?? null, commPln: c.commission_pln || 0, cat: c.category || '', originalName: c.title, tourConfigId: c.tour_config_id || null };
+          const entry = { pricePln: c.price_pln ?? null, priceStudent: c.price_student ?? null, priceChild: c.price_child ?? null, priceInfant: c.price_infant ?? null, commPln: c.commission_pln || 0, cat: c.category || '', originalName: c.title, tourConfigId: c.tour_config_id || null };
+          const key = _normComm(c.title);
+          // For name-based map: prefer entry with more configured category prices
+          const existing = COMM_MAP[key];
+          const countNew = [entry.priceStudent, entry.priceChild, entry.priceInfant].filter(p => p !== null && p !== undefined).length;
+          const countExisting = existing ? [existing.priceStudent, existing.priceChild, existing.priceInfant].filter(p => p !== null && p !== undefined).length : -1;
+          if (countNew >= countExisting) COMM_MAP[key] = entry;
+          // For ID-based map: also prefer entry with more configured prices
+          if (c.tour_config_id) {
+            const existingById = COMM_MAP_BY_TOUR[c.tour_config_id];
+            const countExistingById = existingById ? [existingById.priceStudent, existingById.priceChild, existingById.priceInfant].filter(p => p !== null && p !== undefined).length : -1;
+            if (countNew >= countExistingById) COMM_MAP_BY_TOUR[c.tour_config_id] = entry;
+          }
         });
         _commDataSource = 'supabase';
         return;
@@ -2115,11 +2129,8 @@ tailwind.config = {
   function lookupCategoryPricePln(tourName, categoryTitle) {
     const configId = tdCurrentTour?.configId || null;
     const entry = (() => {
-      // Prefer exact match by tour_config_id (avoids name collision between packages)
-      if (configId) {
-        const byId = Object.values(COMM_MAP).find(v => v.tourConfigId === configId);
-        if (byId) return byId;
-      }
+      // Prefer ID-based lookup — immune to package name collisions
+      if (configId && COMM_MAP_BY_TOUR[configId]) return COMM_MAP_BY_TOUR[configId];
       const key = _normComm(tourName);
       if (COMM_MAP[key]) return COMM_MAP[key];
       const words = key.split(' ').filter(w => w.length > 2);
