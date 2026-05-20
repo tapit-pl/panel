@@ -2818,8 +2818,12 @@ tailwind.config = {
               } else {
                 cls = 'text-gray-400 cursor-default';
               }
-              const lowLabel = isLow ? `<div class="text-orange-500 font-bold leading-none" style="font-size:9px">Last ${minSeats}!</div>` : '';
-              return `<div class="text-center text-xs py-1 transition-colors ${cls} cal-day" data-date="${dateStr}" ${isAvailable ? `onclick="selectBookingDate('${dateStr}')"` : ''} title="${tooltip}">${d}${lowLabel}</div>`;
+              const seatsLabel = isAvailable && minSeats < 99
+                ? isLow
+                  ? `<div class="text-orange-500 font-bold leading-none" style="font-size:9px">Last ${minSeats}!</div>`
+                  : `<div class="text-green-700 leading-none" style="font-size:9px">${minSeats} seats</div>`
+                : '';
+              return `<div class="text-center text-xs py-1 transition-colors ${cls} cal-day" data-date="${dateStr}" ${isAvailable ? `onclick="selectBookingDate('${dateStr}')"` : ''} title="${tooltip}">${d}${seatsLabel}</div>`;
             }).join('')}
           </div>
         </div>
