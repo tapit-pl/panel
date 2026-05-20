@@ -258,10 +258,11 @@ tailwind.config = {
 </div>
 
 <!-- ===================== SCREEN: ADMIN DASHBOARD ===================== -->
-<div id="screen-admin" class="screen" style="background:#0e1724; position:fixed; inset:0;">
+<div id="screen-admin" class="screen min-h-screen w-full">
+  <div class="flex h-screen overflow-hidden w-full">
 
   <!-- SIDEBAR -->
-  <aside id="sidebar" class="flex flex-col overflow-y-auto" style="position:absolute; top:0; left:0; bottom:0; width:240px; background:#1a2332; z-index:5;">
+  <aside id="sidebar" class="w-60 shrink-0 flex flex-col h-screen sticky top-0 overflow-y-auto" style="background:#1a2332">
       <!-- Logo -->
       <div class="px-5 py-4 border-b border-white/8">
         <div class="flex items-center gap-3">
@@ -321,10 +322,13 @@ tailwind.config = {
           </button>
         </div>
       </div>
-  </aside>
+    </aside>
 
-  <!-- TOP HEADER -->
-  <header style="position:absolute; top:0; left:240px; right:0; height:56px; z-index:10; background:#1a2332; border-bottom:1px solid rgba(255,255,255,0.08)">
+    <!-- MAIN CONTENT -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-y-auto" style="background:#0e1724">
+
+    <!-- TOP HEADER -->
+    <header class="sticky top-0 z-30" style="background:#1a2332; border-bottom:1px solid rgba(255,255,255,0.08)">
         <div class="h-14 px-6 flex items-center justify-between gap-4">
           <div class="flex-1"></div>
           <div class="flex items-center gap-2">
@@ -338,11 +342,9 @@ tailwind.config = {
             </button>
           </div>
         </div>
-  </header>
+    </header>
 
-  <!-- SCROLL AREA -->
-  <div id="main-scroll" style="position:absolute; top:56px; left:240px; right:0; bottom:0; overflow-y:auto; background:#0e1724;">
-    <main style="padding:20px; display:block; width:100%;">
+    <main id="main-scroll" class="flex-1 p-5">
 
         <!-- ===== SECTION: DASHBOARD ===== -->
         <div id="section-dashboard" class="section active fade-in">
@@ -1061,6 +1063,7 @@ tailwind.config = {
         </div>
 
     </main>
+    </div>
   </div>
 </div>
 
@@ -2953,7 +2956,7 @@ tailwind.config = {
     document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
     const btn = [...document.querySelectorAll('.sidebar-link')].find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes("'" + name + "'"));
     if (btn) btn.classList.add('active');
-    const scroller = document.getElementById('main-scroll');
+    const scroller = document.getElementById('main-scroll') || document.querySelector('.overflow-y-auto');
     if (scroller) scroller.scrollTop = 0;
     if (name === 'tours' && !tourConfigLoaded) loadTourConfig();
   }
