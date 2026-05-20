@@ -4039,18 +4039,23 @@ tailwind.config = {
     const rows = bookings || [];
     const confirmedRows = rows.filter(b => (b.status||'').toLowerCase() !== 'cancelled');
     const totalComm = confirmedRows.reduce((s, b) => s + (parseFloat(b.comm)||0), 0);
+    const settledAmount = (history||[]).filter(s => s.period === period).reduce((s, r) => s + parseFloat(r.amount||0), 0);
+    const toSettle = Math.max(0, totalComm - settledAmount);
+    const alreadySettled = toSettle <= 0;
 
-    currentSettlement = { partnerId, partnerName: partner?.name||'', period, periodLabel, total: totalComm };
+    currentSettlement = { partnerId, partnerName: partner?.name||'', period, periodLabel, total: toSettle };
 
-    // Check if already settled
-    const alreadySettled = (history||[]).some(s => s.period === period);
     document.getElementById('btn-mark-settled').disabled = alreadySettled;
-    document.getElementById('btn-mark-settled').textContent = alreadySettled ? 'Already settled' : '';
-    if (!alreadySettled) document.getElementById('btn-mark-settled').innerHTML = '<i class="fa-solid fa-check"></i>Mark as settled';
+    document.getElementById('btn-mark-settled').innerHTML = alreadySettled
+      ? '<i class="fa-solid fa-check"></i>Already settled'
+      : '<i class="fa-solid fa-check"></i>Mark as settled';
 
     document.getElementById('settlement-result-title').textContent = `${partner?.name||''} · ${periodLabel}`;
-    document.getElementById('settlement-result-subtitle').textContent = `${rows.length} booking${rows.length!==1?'s':''} · from partner panel`;
-    document.getElementById('settlement-total').textContent = `${totalComm} pln`;
+    const subtitle = settledAmount > 0 && toSettle > 0
+      ? `${rows.length} booking${rows.length!==1?'s':''} · ${settledAmount} pln already settled`
+      : `${rows.length} booking${rows.length!==1?'s':''} · from partner panel`;
+    document.getElementById('settlement-result-subtitle').textContent = subtitle;
+    document.getElementById('settlement-total').textContent = `${toSettle} pln`;
 
     const tbody = document.getElementById('settlement-tbody');
     tbody.innerHTML = rows.length === 0
