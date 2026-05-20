@@ -38,13 +38,7 @@ async function bokunResolveId(bookingId: number | null, confirmationCode: string
   // 1. Use stored booking ID directly if available
   if (bookingId) return bookingId
 
-  // 2. Try confirmation code number directly (TM-XXXXXXXX → XXXXXXXX)
-  if (confirmationCode) {
-    const codeNum = Number(confirmationCode.replace(/^[A-Z]+-/i, ''))
-    if (codeNum) return codeNum
-  }
-
-  // 3. Search Bokun by confirmation code
+  // 2. Search Bokun by confirmation code
   if (confirmationCode) {
     const today = new Date()
     const past = new Date(today); past.setFullYear(past.getFullYear() - 1)
