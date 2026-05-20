@@ -811,8 +811,11 @@ tailwind.config = {
                     <th class="text-left px-3 py-3 text-gray-400 font-semibold">Tour / Package</th>
                     <th class="text-left px-3 py-3 text-gray-400 font-semibold w-24">Bokun ID</th>
                     <th class="text-left px-3 py-3 text-gray-400 font-semibold">Groups</th>
-                    <th class="text-center px-3 py-3 text-gray-400 font-semibold w-28">Price PLN</th>
-                    <th class="text-center px-3 py-3 text-gray-400 font-semibold w-32 text-brand">Commission</th>
+                    <th class="text-center px-2 py-3 text-gray-400 font-semibold w-20">Adult</th>
+                    <th class="text-center px-2 py-3 text-gray-400 font-semibold w-20">Student</th>
+                    <th class="text-center px-2 py-3 text-gray-400 font-semibold w-20">Child</th>
+                    <th class="text-center px-2 py-3 text-gray-400 font-semibold w-20">Infant</th>
+                    <th class="text-center px-2 py-3 text-gray-400 font-semibold w-28 text-brand">Commission</th>
                     <th class="text-center px-3 py-3 text-gray-400 font-semibold w-20">Active</th>
                     <th class="text-right px-3 py-3 w-36"></th>
                   </tr>
@@ -2489,9 +2492,12 @@ tailwind.config = {
           <td class="px-3 py-2.5 font-semibold text-dark text-xs">${t.title}</td>
           <td class="px-3 py-2.5 font-mono text-xs text-gray-400">${t.bokun_id || '<span class="text-red-300">no id</span>'}</td>
           <td class="px-3 py-2.5"><div class="flex flex-wrap gap-1">${groups}</div></td>
-          <td class="px-3 py-2.5 text-center text-gray-300 text-xs">—</td>
-          <td class="px-3 py-2.5 text-center text-gray-300 text-xs">—</td>
-          <td class="px-3 py-2.5 text-center">
+          <td class="px-2 py-2.5 text-center text-gray-300 text-xs">—</td>
+          <td class="px-2 py-2.5 text-center text-gray-300 text-xs">—</td>
+          <td class="px-2 py-2.5 text-center text-gray-300 text-xs">—</td>
+          <td class="px-2 py-2.5 text-center text-gray-300 text-xs">—</td>
+          <td class="px-2 py-2.5 text-center text-gray-300 text-xs">—</td>
+          <td class="px-2 py-2.5 text-center">
             <label class="relative inline-flex ${lockCls} cursor-pointer">
               <input type="checkbox" class="sr-only peer" ${t.active ? 'checked' : ''} ${locked ? 'disabled' : ''} onchange="toggleTourActive('${t.id}', this.checked)">
               <div class="w-9 h-5 bg-gray-300 peer-checked:bg-green-500 rounded-full transition-colors"></div>
@@ -2515,14 +2521,29 @@ tailwind.config = {
             <td class="pl-2 pr-3 py-2 text-xs text-gray-600">${pkg.title}</td>
             <td class="px-3 py-2 text-gray-300 text-xs">—</td>
             <td class="px-3 py-2 text-gray-300 text-xs">—</td>
-            <td class="px-3 py-2 text-center">
-              <input type="number" value="${pkg.price_pln || 0}" min="0" ${locked ? 'disabled' : ''}
-                class="w-20 text-center text-xs border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 ${locked ? 'bg-gray-100' : 'bg-white'}"
-                onchange="quickSavePkg('${pkg.id}', 'price_pln', parseInt(this.value)||0)">
+            <td class="px-2 py-2 text-center">
+              <input type="number" value="${pkg.price_pln ?? ''}" min="0" placeholder="off" ${locked ? 'disabled' : ''}
+                class="w-16 text-center text-xs border border-gray-200 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 ${locked ? 'bg-gray-100' : 'bg-white'}"
+                onchange="quickSavePkg('${pkg.id}', 'price_pln', this.value === '' ? null : parseInt(this.value)||0)">
             </td>
-            <td class="px-3 py-2 text-center">
+            <td class="px-2 py-2 text-center">
+              <input type="number" value="${pkg.price_student ?? ''}" min="0" placeholder="off" ${locked ? 'disabled' : ''}
+                class="w-16 text-center text-xs border border-gray-200 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 ${locked ? 'bg-gray-100' : 'bg-white'}"
+                onchange="quickSavePkg('${pkg.id}', 'price_student', this.value === '' ? null : parseInt(this.value)||0)">
+            </td>
+            <td class="px-2 py-2 text-center">
+              <input type="number" value="${pkg.price_child ?? ''}" min="0" placeholder="off" ${locked ? 'disabled' : ''}
+                class="w-16 text-center text-xs border border-gray-200 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 ${locked ? 'bg-gray-100' : 'bg-white'}"
+                onchange="quickSavePkg('${pkg.id}', 'price_child', this.value === '' ? null : parseInt(this.value)||0)">
+            </td>
+            <td class="px-2 py-2 text-center">
+              <input type="number" value="${pkg.price_infant ?? ''}" min="0" placeholder="off" ${locked ? 'disabled' : ''}
+                class="w-16 text-center text-xs border border-gray-200 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 ${locked ? 'bg-gray-100' : 'bg-white'}"
+                onchange="quickSavePkg('${pkg.id}', 'price_infant', this.value === '' ? null : parseInt(this.value)||0)">
+            </td>
+            <td class="px-2 py-2 text-center">
               <input type="number" value="${pkg.commission_pln || 0}" min="0" ${locked ? 'disabled' : ''}
-                class="w-20 text-center text-xs border border-brand/30 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 font-semibold text-brand ${locked ? 'bg-gray-100' : 'bg-brand/5'}"
+                class="w-16 text-center text-xs border border-brand/30 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 font-semibold text-brand ${locked ? 'bg-gray-100' : 'bg-brand/5'}"
                 onchange="quickSavePkg('${pkg.id}', 'commission_pln', parseInt(this.value)||0)">
             </td>
             <td class="px-3 py-2 text-center">
@@ -2544,7 +2565,7 @@ tailwind.config = {
         tbody.insertAdjacentHTML('beforeend', `
           <tr class="bg-gray-50/20">
             <td class="pl-5 py-1.5 text-gray-200 text-sm">└</td>
-            <td colspan="7" class="pl-2 pr-3 py-1.5 text-xs text-gray-300 italic">No packages — click "+ pkg" to add price &amp; commission</td>
+            <td colspan="10" class="pl-2 pr-3 py-1.5 text-xs text-gray-300 italic">No packages — click "+ pkg" to add price &amp; commission</td>
           </tr>`);
       }
     });

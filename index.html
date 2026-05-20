@@ -2024,7 +2024,7 @@ tailwind.config = {
       const { data, error } = await db.from('tour_commissions').select('*').eq('active', true).order('sort_order');
       if (!error && data && data.length > 0) {
         data.forEach(c => {
-          COMM_MAP[_normComm(c.title)] = { pricePln: c.price_pln || 0, commPln: c.commission_pln || 0, cat: c.category || '', originalName: c.title, tourConfigId: c.tour_config_id || null };
+          COMM_MAP[_normComm(c.title)] = { pricePln: c.price_pln ?? null, priceStudent: c.price_student ?? null, priceChild: c.price_child ?? null, priceInfant: c.price_infant ?? null, commPln: c.commission_pln || 0, cat: c.category || '', originalName: c.title, tourConfigId: c.tour_config_id || null };
         });
         _commDataSource = 'supabase';
         return;
@@ -2109,6 +2109,30 @@ tailwind.config = {
   }
 
   function fmtPln(pln) { return pln ? `${pln} pln` : null; }
+
+  // Returns PLN price for a specific Bokun category title from COMM_MAP.
+  // null = category disabled, 0 = FREE, >0 = price.
+  function lookupCategoryPricePln(tourName, categoryTitle) {
+    const entry = (() => {
+      const key = _normComm(tourName);
+      if (COMM_MAP[key]) return COMM_MAP[key];
+      const words = key.split(' ').filter(w => w.length > 2);
+      for (const [k, v] of Object.entries(COMM_MAP)) {
+        if (words.every(w => k.includes(w))) return v;
+      }
+      for (const [k, v] of Object.entries(COMM_MAP)) {
+        const kw = k.split(' ').filter(w => w.length > 2);
+        if (kw.length && kw.every(w => key.includes(w))) return v;
+      }
+      return null;
+    })();
+    if (!entry) return undefined; // no config — fall back to Bokun price
+    const t = (categoryTitle || '').toLowerCase();
+    if (t.includes('student')) return entry.priceStudent;
+    if (t.includes('child') || t.includes('kid')) return entry.priceChild;
+    if (t.includes('infant') || t.includes('baby')) return entry.priceInfant;
+    return entry.pricePln; // adult / default
+  }
 
   document.addEventListener('DOMContentLoaded', async function() {
     // Capture URL signals BEFORE any async calls — Supabase clears hash via history.replaceState
@@ -2903,11 +2927,16 @@ tailwind.config = {
     document.getElementById('td-timeslot-date').textContent = formatDate(dateStr);
     const list = document.getElementById('td-timeslot-list');
     list.innerHTML = slots.map((s, i) => {
-      const low = s.availabilityCount > 0 && s.availabilityCount < 5;
-      return `<button onclick="selectTimeSlot('${dateStr}', ${i})"
-        class="px-4 py-2.5 rounded-xl border-2 border-gray-200 hover:border-brand hover:bg-brand/5 text-sm font-semibold text-dark transition-all flex flex-col items-center gap-0.5">
+      const cnt = s.availabilityCount || 0;
+      const seatLabel = cnt === 0
+        ? `<span class="text-xs font-normal text-red-500">Full</span>`
+        : cnt <= 4
+          ? `<span class="text-xs font-normal text-orange-500">Only ${cnt} left</span>`
+          : `<span class="text-xs font-normal text-gray-400">${cnt} seats</span>`;
+      return `<button onclick="selectTimeSlot('${dateStr}', ${i})" ${cnt === 0 ? 'disabled' : ''}
+        class="px-4 py-2.5 rounded-xl border-2 ${cnt === 0 ? 'border-gray-100 opacity-40 cursor-not-allowed' : 'border-gray-200 hover:border-brand hover:bg-brand/5 cursor-pointer'} text-sm font-semibold text-dark transition-all flex flex-col items-center gap-0.5">
         <span>${s.startTime || 'Departure'}</span>
-        ${low ? `<span class="text-xs font-normal text-orange-500">Only ${s.availabilityCount} left</span>` : ''}
+        ${seatLabel}
       </button>`;
     }).join('');
     section.classList.remove('hidden');
@@ -2952,22 +2981,29 @@ tailwind.config = {
   }
 
   function showCategoryPicker(dateStr, categories, slotCatPrices) {
-    tdCategorySelections = categories.map(c => {
-      const priceInfo = slotCatPrices.find(p => p.id === c.id);
-      return { category: c, count: 0, price: priceInfo?.amount };
+    const tourName = tdCurrentTour?.title || '';
+    const allCats = categories.map(c => {
+      const bokunPrice = slotCatPrices.find(p => p.id === c.id);
+      const configPln = lookupCategoryPricePln(tourName, c.title);
+      // configPln: undefined = no config (use Bokun price), null = disabled, >=0 = PLN price
+      return { category: c, count: 0, configPln, bokunPrice: bokunPrice?.amount };
     });
+    // Filter out explicitly disabled categories (configPln === null)
+    tdCategorySelections = allCats.filter(s => s.configPln !== null);
+
     const section = document.getElementById('td-category-section');
     const timeLabel = tdSelectedTimeSlot?.startTime ? ' · ' + tdSelectedTimeSlot.startTime : '';
     document.getElementById('td-category-subtitle').textContent = formatDate(dateStr) + timeLabel;
-    const _tourPln = lookupCommPln(tdCurrentTour?.title || '');
     document.getElementById('td-category-list').innerHTML = tdCategorySelections.map((s, i) => {
       const ageRange = s.category.ageQualified ? ` (${s.category.minAge}–${s.category.maxAge})` : '';
-      const pln = _tourPln || null;
-      const priceStr = pln
-        ? `<span class="text-brand font-semibold text-sm">${pln} pln</span><span class="text-gray-400 text-xs">/os.</span>`
-        : s.price
-          ? `<span class="text-brand font-semibold text-sm">${s.price.amount} ${s.price.currency}</span><span class="text-gray-400 text-xs">/os.</span>`
-          : '';
+      let priceStr = '';
+      if (s.configPln !== undefined) {
+        priceStr = s.configPln === 0
+          ? `<span class="text-green-600 font-semibold text-sm">FREE</span>`
+          : `<span class="text-brand font-semibold text-sm">${s.configPln} pln</span><span class="text-gray-400 text-xs">/os.</span>`;
+      } else if (s.bokunPrice) {
+        priceStr = `<span class="text-brand font-semibold text-sm">${s.bokunPrice.amount} ${s.bokunPrice.currency}</span><span class="text-gray-400 text-xs">/os.</span>`;
+      }
       return `<div class="flex items-center justify-between px-4 py-3 bg-white">
         <div class="flex-1 min-w-0 mr-3">
           <div class="text-sm font-semibold text-dark">${s.category.title}${ageRange}</div>
@@ -3006,9 +3042,11 @@ tailwind.config = {
       btn.disabled = true;
       btn.className = 'px-5 py-2.5 rounded-xl text-sm font-semibold transition-all bg-gray-100 text-gray-400 cursor-not-allowed';
     } else {
-      // Show PLN estimate using adult price from commissions table
-      const tourPln = lookupCommPln(tdCurrentTour?.title || '');
-      const priceStr = tourPln ? ` · ~${totalPax * tourPln} pln` : '';
+      const totalPln = tdCategorySelections.reduce((s, x) => {
+        const pln = x.configPln !== undefined ? (x.configPln || 0) : (lookupCommPln(tdCurrentTour?.title || '') || 0);
+        return s + x.count * pln;
+      }, 0);
+      const priceStr = totalPln > 0 ? ` · ~${totalPln} pln` : '';
       totalEl.textContent = `${totalPax} ${totalPax === 1 ? 'person' : 'people'}${priceStr}`;
       btn.disabled = false;
       btn.className = 'px-5 py-2.5 rounded-xl text-sm font-semibold transition-all bg-brand text-white hover:bg-brand/90 cursor-pointer';
@@ -3464,7 +3502,12 @@ tailwind.config = {
       try {
         const totalPln = hasPackages
           ? tdRateSelections.reduce((s, x) => s + x.count * (lookupCommPln(x.rate.title) || 0), 0)
-          : (lookupCommPln(tdCurrentTour?.title || '') || 0) * tdGuestCount;
+          : hasCategories
+            ? tdCategorySelections.filter(x => x.count > 0).reduce((s, x) => {
+                const pln = x.configPln !== undefined ? (x.configPln || 0) : (lookupCommPln(tdCurrentTour?.title || '') || 0);
+                return s + x.count * pln;
+              }, 0)
+            : (lookupCommPln(tdCurrentTour?.title || '') || 0) * tdGuestCount;
         console.log('[Stripe] totalPln:', totalPln, 'bookingId:', insertedBooking.id, 'reservationCode:', bokunReservationCode);
         if (!totalPln) {
           console.warn('[Stripe] totalPln is 0 — tour missing from tour_commissions. Add price_pln for:', tour);
