@@ -3530,7 +3530,8 @@ tailwind.config = {
             const confirmBody = confirmRes?.body;
             console.log('[Booking] confirm response:', JSON.stringify(confirmBody));
             bokunConfirmationCode = confirmBody?.booking?.confirmationCode || confirmBody?.confirmationCode || reservedCode;
-            bokunBookingId = confirmBody?.booking?.id || null;
+            bokunBookingId = confirmBody?.booking?.id || confirmBody?.id || submitBody?.booking?.id || submitBody?.id || null;
+            console.log('[Booking] bokun booking id resolved:', bokunBookingId);
           }
         } else {
           console.warn('[Booking] submit failed:', submitBody?.message || '');
