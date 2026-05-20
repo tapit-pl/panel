@@ -2238,8 +2238,13 @@ tailwind.config = {
       const { data: staffData } = await db.from('staff').select('*, partners(*)').eq('email', userEmail).maybeSingle();
       if (staffData) {
         welcomeName = staffData.first_name;
-        welcomeHotel = staffData.partners?.name || '';
-        currentPartner = { ...staffData.partners, role: 'reception', _isStaff: true, _staffId: staffData.id, _staffName: `${staffData.first_name} ${staffData.last_name || ''}`.trim() };
+        let partnerData = staffData.partners;
+        if (!partnerData?.id && staffData.partner_id) {
+          const { data: pd } = await db.from('partners').select('*').eq('id', staffData.partner_id).maybeSingle();
+          partnerData = pd;
+        }
+        welcomeHotel = partnerData?.name || '';
+        currentPartner = { ...partnerData, role: 'reception', _isStaff: true, _staffId: staffData.id, _staffName: `${staffData.first_name} ${staffData.last_name || ''}`.trim() };
       } else {
         welcomeName = userEmail;
         welcomeHotel = '';
