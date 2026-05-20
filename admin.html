@@ -2130,6 +2130,13 @@ tailwind.config = {
     initDashMonthSelector();
     await loadBookings();
     await updateDashboardKPIs();
+
+    db.channel('bookings-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, async () => {
+        await loadBookings();
+        await updateDashboardKPIs();
+      })
+      .subscribe();
     await loadPartners();
     await loadTickets();
     await loadPrintOrders();
