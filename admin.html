@@ -3206,6 +3206,9 @@ tailwind.config = {
         if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-xmark text-xs"></i>'; }
         return;
       }
+      if (data?.bokun?.ok === false) {
+        alert('Cancelled in system, but Bokun cancellation failed:\n' + (data.bokun.error || 'Unknown Bokun error') + '\n\nPlease cancel manually in Bokun.');
+      }
       const b = allBookings.find(x => x.id === id);
       if (b) b.status = 'cancelled';
       renderBookingsTable();

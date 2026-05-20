@@ -35,8 +35,8 @@ async function bokunCancel(confirmationCode: string) {
     body: '{}',
   })
   const body = await res.json()
-  console.log('[Cancel] Bokun cancel response:', JSON.stringify({ status: res.status, bookingStatus: body?.booking?.status || body?.status }))
-  return { ok: res.ok, body }
+  console.log('[Cancel] Bokun cancel response:', JSON.stringify({ status: res.status, bookingStatus: body?.booking?.status || body?.status, message: body?.message || body?.errorMessage }))
+  return { ok: res.ok, status: res.status, error: res.ok ? null : (body?.message || body?.errorMessage || `HTTP ${res.status}`), body }
 }
 
 async function stripeRefund(stripeSessionId: string): Promise<{ ok: boolean, refundId?: string, error?: string }> {
@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
   // Cancel in Bokun
   if (booking.bokun_confirmation_code) {
     const cancel = await bokunCancel(booking.bokun_confirmation_code)
-    results.bokun = { ok: cancel.ok }
+    results.bokun = { ok: cancel.ok, error: cancel.error }
   }
 
   // Update DB status
