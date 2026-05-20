@@ -2113,7 +2113,13 @@ tailwind.config = {
   // Returns PLN price for a specific Bokun category title from COMM_MAP.
   // null = category disabled, 0 = FREE, >0 = price.
   function lookupCategoryPricePln(tourName, categoryTitle) {
+    const configId = tdCurrentTour?.configId || null;
     const entry = (() => {
+      // Prefer exact match by tour_config_id (avoids name collision between packages)
+      if (configId) {
+        const byId = Object.values(COMM_MAP).find(v => v.tourConfigId === configId);
+        if (byId) return byId;
+      }
       const key = _normComm(tourName);
       if (COMM_MAP[key]) return COMM_MAP[key];
       const words = key.split(' ').filter(w => w.length > 2);
@@ -2656,7 +2662,7 @@ tailwind.config = {
 
       bokunProducts = await Promise.all(visible.map(async (t, idx) => {
         const base = {
-          id: idx, bokunId: t.bokun_id || null, title: t.title,
+          id: idx, configId: t.id, bokunId: t.bokun_id || null, title: t.title,
           description: '', photo: getTourPhoto(t.title), cat: getTourCat(t.title),
           durationMins: null, maxPax: null, pricing: [],
         };
@@ -3093,7 +3099,6 @@ tailwind.config = {
       const pln = lookupCategoryPricePln(tourName, c.title);
       return pln !== undefined && pln !== null;
     });
-    console.log('[Cat] allBokunCats:', allBokunCats.length, 'hasAdminCatConfig:', hasAdminCatConfig, 'tourName:', tourName);
     return (hasAdminCatConfig && allBokunCats.length > 0)
       ? allBokunCats
       : allBokunCats.filter(c => slotCatPrices.some(p => p.id === c.id));
