@@ -2957,7 +2957,7 @@ tailwind.config = {
     document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
     const btn = [...document.querySelectorAll('.sidebar-link')].find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes("'" + name + "'"));
     if (btn) btn.classList.add('active');
-    const scroller = document.querySelector('#screen-admin .overflow-y-auto');
+    const scroller = document.getElementById('section-' + name).closest('.overflow-y-auto');
     if (scroller) scroller.scrollTop = 0;
     if (name === 'tours' && !tourConfigLoaded) loadTourConfig();
   }
