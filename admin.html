@@ -552,6 +552,7 @@ tailwind.config = {
                     <th class="text-left px-4 py-3 text-gray-400 font-semibold">Partner</th>
                     <th class="text-left px-4 py-3 text-gray-400 font-semibold">Booked</th>
                     <th class="text-left px-4 py-3 text-gray-400 font-semibold">Tour date</th>
+                    <th class="text-left px-4 py-3 text-gray-400 font-semibold">Language</th>
                     <th class="text-center px-4 py-3 text-gray-400 font-semibold">Pax</th>
                     <th class="text-right px-4 py-3 text-gray-400 font-semibold">Total</th>
                     <th class="text-center px-4 py-3 text-gray-400 font-semibold">Source</th>
@@ -1109,15 +1110,11 @@ tailwind.config = {
           <input type="date" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Departure time</label>
-          <select class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-            <option>07:00</option>
-            <option>08:00</option>
-            <option>09:00</option>
-            <option>09:30</option>
-            <option>10:00</option>
-            <option>14:00</option>
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Departure / Language</label>
+          <select id="manual-departure" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-gray-400">
+            <option value="">— select tour first —</option>
           </select>
+          <input type="hidden" id="manual-departure-id">
         </div>
       </div>
 
@@ -2162,6 +2159,7 @@ tailwind.config = {
       hotel: '—',
       date: dateStr,
       time: pb.fields?.startTimeStr || '—',
+      language: pb.fields?.startTimeStr ? (pb.fields.startTimeStr.includes(' - ') ? pb.fields.startTimeStr.split(' - ').slice(1).join(' - ') : '') : '',
       pickup: pb.fields?.pickupPlaceDescription || '—',
       pax: pb.totalParticipants || pb.fields?.totalParticipants || 1,
       total: Math.round(total),
@@ -2187,6 +2185,7 @@ tailwind.config = {
       allBookings.push({
         id: b.id, displayId: b.bokun_confirmation_code || b.id, tour: b.tour, guest: b.guest, email: b.email, phone: b.phone,
         hotel: partner?.name || '—', date: dateFormatted, time: b.time, pickup: b.pickup,
+        language: b.language || '',
         pax: b.pax, total: b.total || 0, comm: b.comm, source, status: b.status, notes: b.notes || '',
         _dbBooking: true, _stripeSessionId: b.stripe_session_id, _bokunCode: b.bokun_confirmation_code,
         _creationTs: b.created_at ? new Date(b.created_at).getTime() : 0,
@@ -2432,6 +2431,12 @@ tailwind.config = {
     refreshBokunPricingCategories();
   }
 
+  function bokunTimeToHHMM(val) {
+    if (!val && val !== 0) return '';
+    const mins = val > 1440 ? Math.round(val / 60) : val;
+    return String(Math.floor(mins / 60)).padStart(2, '0') + ':' + String(mins % 60).padStart(2, '0');
+  }
+
   async function refreshBokunPricingCategories() {
     const missing = allTourConfig.filter(t => t.bokun_id && !t.bokun_pricing_categories);
     if (missing.length === 0) return;
@@ -2439,8 +2444,14 @@ tailwind.config = {
       try {
         const { data } = await db.functions.invoke('bokun-sync', { body: { path: `/activity.json/${t.bokun_id}`, method: 'GET' } });
         const cats = (data?.body?.pricingCategories || []).map(c => c.title).filter(Boolean);
-        await db.from('tour_config').update({ bokun_pricing_categories: cats }).eq('id', t.id);
+        const startTimes = (data?.body?.startTimes || []).map(s => ({
+          id: s.id,
+          time: bokunTimeToHHMM(s.startTime),
+          label: s.externalLabel || s.label || bokunTimeToHHMM(s.startTime),
+        })).filter(s => s.id);
+        await db.from('tour_config').update({ bokun_pricing_categories: cats, start_times: startTimes.length ? startTimes : null }).eq('id', t.id);
         t.bokun_pricing_categories = cats;
+        t.start_times = startTimes.length ? startTimes : null;
       } catch(e) {}
     }));
     renderTourConfigTable();
@@ -3126,6 +3137,7 @@ tailwind.config = {
           <td class="px-4 py-3 text-gray-500">${b.hotel}</td>
           <td class="px-4 py-3 text-gray-500 whitespace-nowrap">${b._creationTs ? new Date(b._creationTs).toLocaleDateString('en-GB', {day:'numeric',month:'short'}) : '—'}</td>
           <td class="px-4 py-3 text-gray-500 whitespace-nowrap">${b.date}</td>
+          <td class="px-4 py-3 text-gray-500">${b.language ? `<span class="inline-flex items-center gap-1"><i class="fa-solid fa-language text-brand/60 text-xs"></i>${b.language}</span>` : '<span class="text-gray-300">—</span>'}</td>
           <td class="px-4 py-3 text-center text-dark">${b.pax}</td>
           <td class="px-4 py-3 text-right font-semibold text-dark whitespace-nowrap">${b.total} zł</td>
           <td class="px-4 py-3 text-slate-300 text-xs">${b.source}</td>
@@ -3349,6 +3361,22 @@ tailwind.config = {
     document.getElementById('tour-search-input').value = name;
     document.getElementById('tour-search-value').value = name;
     document.getElementById('tour-suggestions').classList.add('hidden');
+    const dep = document.getElementById('manual-departure');
+    const depId = document.getElementById('manual-departure-id');
+    if (!dep) return;
+    const tour = allTourConfig.find(t => t.title === name);
+    const times = tour?.start_times;
+    if (times && times.length > 0) {
+      dep.innerHTML = times.map(s =>
+        `<option value="${s.id}">${s.time}${s.label && s.label !== s.time ? ' – ' + s.label : ''}</option>`
+      ).join('');
+      dep.classList.remove('text-gray-400');
+      if (depId) depId.value = dep.value;
+    } else {
+      dep.innerHTML = '<option value="">— no departures configured —</option>';
+      dep.classList.add('text-gray-400');
+      if (depId) depId.value = '';
+    }
   }
 
   document.addEventListener('click', function(e) {
@@ -3362,6 +3390,10 @@ tailwind.config = {
     m.classList.remove('hidden'); m.classList.add('flex');
     document.getElementById('tour-search-input').value = '';
     document.getElementById('tour-search-value').value = '';
+    const dep = document.getElementById('manual-departure');
+    if (dep) { dep.innerHTML = '<option value="">— select tour first —</option>'; dep.classList.add('text-gray-400'); }
+    const depId = document.getElementById('manual-departure-id');
+    if (depId) depId.value = '';
   }
   function closeManualBooking() {
     const m = document.getElementById('modal-manual');
