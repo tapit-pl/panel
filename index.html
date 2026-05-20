@@ -2673,8 +2673,6 @@ tailwind.config = {
     grid.innerHTML = '';
 
     bokunProducts.forEach((p, idx) => {
-      const pricePln = lookupCommPln(p.title);
-      const priceTag = pricePln ? `<span class="text-xs text-brand font-semibold">from ${pricePln} pln</span>` : '';
       grid.insertAdjacentHTML('beforeend', `
         <div class="tour-card bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
              data-name="${(p.title || '').toLowerCase().replace(/"/g,'')}" data-cat="${p.cat || 'day'}"
@@ -2684,10 +2682,6 @@ tailwind.config = {
           </div>
           <div class="p-4">
             <h3 class="font-bold text-dark text-sm leading-snug">${p.title}</h3>
-            <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
-              ${priceTag}
-              <button class="text-xs bg-brand-light text-brand px-3 py-1.5 rounded-lg font-semibold hover:bg-brand hover:text-white transition-colors">View availability</button>
-            </div>
           </div>
         </div>`);
     });
@@ -2701,6 +2695,9 @@ tailwind.config = {
     const p = bokunProducts[idx];
     if (!p) return;
     tdCurrentTour = p;
+    tdGuestCount = 2;
+    tdRateSelections = [];
+    tdCategorySelections = [];
 
     const modal = document.getElementById('modal-tour');
     modal.classList.remove('hidden');
@@ -3253,7 +3250,7 @@ tailwind.config = {
   }
 
   function changeTdGuests(delta) {
-    const maxGuests = tdSelectedTimeSlot?.availabilityCount || 50;
+    const maxGuests = tdSelectedTimeSlot?.availabilityCount || tdCurrentTour?.maxPax || 16;
     tdGuestCount = Math.max(1, Math.min(maxGuests, tdGuestCount + delta));
     document.getElementById('td-guest-count').textContent = tdGuestCount;
     renderAdditionalGuestFields(tdGuestCount);
