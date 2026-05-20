@@ -14,6 +14,55 @@ async function hmac(secret: string, message: string): Promise<string> {
   return btoa(String.fromCharCode(...new Uint8Array(sig)))
 }
 
+async function bokunRequest(method: string, path: string, payload?: unknown) {
+  const accessKey = Deno.env.get('BOKUN_ACCESS_KEY')!
+  const secretKey = Deno.env.get('BOKUN_SECRET_KEY')!
+  const date = bokunDate()
+  const message = date + accessKey + method + path
+  const signature = await hmac(secretKey, message)
+  const res = await fetch(`https://api.bokun.io${path}`, {
+    method,
+    headers: {
+      'X-Bokun-Date': date,
+      'X-Bokun-AccessKey': accessKey,
+      'X-Bokun-Signature': signature,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: payload ? JSON.stringify(payload) : undefined,
+  })
+  return { ok: res.ok, status: res.status, body: await res.json() }
+}
+
+async function bokunResolveId(bookingId: number | null, confirmationCode: string | null): Promise<number | null> {
+  // 1. Use stored booking ID directly if available
+  if (bookingId) return bookingId
+
+  // 2. Try confirmation code number directly (TM-XXXXXXXX → XXXXXXXX)
+  if (confirmationCode) {
+    const codeNum = Number(confirmationCode.replace(/^[A-Z]+-/i, ''))
+    if (codeNum) return codeNum
+  }
+
+  // 3. Search Bokun by confirmation code
+  if (confirmationCode) {
+    const today = new Date()
+    const past = new Date(today); past.setFullYear(past.getFullYear() - 1)
+    const fmt = (d: Date) => `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`
+    const search = await bokunRequest('POST', '/booking.json/booking-search', {
+      confirmationCode,
+      startDate: fmt(past),
+      endDate: fmt(new Date(today.getFullYear()+1, today.getMonth(), today.getDate())),
+      pageSize: 1,
+    })
+    console.log('[Cancel] search result:', JSON.stringify({ status: search.status, count: search.body?.items?.length, firstId: search.body?.items?.[0]?.id }))
+    const id = search.body?.items?.[0]?.id
+    if (id) return id
+  }
+
+  return null
+}
+
 async function bokunCancel(bookingId: string | number) {
   const accessKey = Deno.env.get('BOKUN_ACCESS_KEY')!
   const secretKey = Deno.env.get('BOKUN_SECRET_KEY')!
@@ -88,11 +137,16 @@ Deno.serve(async (req) => {
     results.stripe = refund
   }
 
-  // Cancel in Bokun — prefer internal booking ID, fall back to parsing confirmation code
-  const bokunId = booking.bokun_booking_id || booking.bokun_confirmation_code?.replace(/^TM-/i, '')
-  if (bokunId) {
-    const cancel = await bokunCancel(bokunId)
-    results.bokun = { ok: cancel.ok, error: cancel.error }
+  // Cancel in Bokun — look up internal booking ID via search, then cancel
+  if (booking.bokun_booking_id || booking.bokun_confirmation_code) {
+    const resolvedId = await bokunResolveId(booking.bokun_booking_id, booking.bokun_confirmation_code)
+    console.log('[Cancel] resolved Bokun ID:', resolvedId, 'from bookingId:', booking.bokun_booking_id, 'code:', booking.bokun_confirmation_code)
+    if (resolvedId) {
+      const cancel = await bokunCancel(resolvedId)
+      results.bokun = { ok: cancel.ok, error: cancel.error }
+    } else {
+      results.bokun = { ok: false, error: 'Could not resolve Bokun booking ID' }
+    }
   }
 
   // Update DB status
