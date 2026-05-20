@@ -324,11 +324,11 @@ tailwind.config = {
       </div>
     </aside>
 
-    <!-- MAIN CONTENT -->
-    <div class="flex-1 min-w-0" style="background:#0e1724; height:100%; display:flex; flex-direction:column; overflow:hidden">
+    <!-- MAIN CONTENT (relative container for absolute children) -->
+    <div class="flex-1 min-w-0" style="position:relative; height:100%; background:#0e1724">
 
-      <!-- Top header: zawsze widoczny, poza scroll containerem -->
-      <header style="flex-shrink:0; height:56px; background:#1a2332; border-bottom:1px solid rgba(255,255,255,0.08)">
+      <!-- Top header: absolute, zawsze na górze -->
+      <header style="position:absolute; top:0; left:0; right:0; height:56px; z-index:10; background:#1a2332; border-bottom:1px solid rgba(255,255,255,0.08)">
         <div class="h-14 px-6 flex items-center justify-between gap-4">
           <div class="flex-1"></div>
           <div class="flex items-center gap-2">
@@ -344,8 +344,8 @@ tailwind.config = {
         </div>
       </header>
 
-      <!-- Section scroll container -->
-      <div style="flex:1; overflow-y:auto; min-height:0; background:#0e1724">
+      <!-- Section scroll container: absolute, fills space below header -->
+      <div id="main-scroll" style="position:absolute; top:56px; left:0; right:0; bottom:0; overflow-y:auto; background:#0e1724">
       <main class="p-5" style="background:#0e1724; display:block; width:100%">
 
         <!-- ===== SECTION: DASHBOARD ===== -->
@@ -3006,7 +3006,7 @@ tailwind.config = {
     document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
     const btn = [...document.querySelectorAll('.sidebar-link')].find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes("'" + name + "'"));
     if (btn) btn.classList.add('active');
-    const scroller = document.getElementById('section-' + name).closest('.overflow-y-auto');
+    const scroller = document.getElementById('main-scroll');
     if (scroller) scroller.scrollTop = 0;
     if (name === 'tours' && !tourConfigLoaded) loadTourConfig();
   }
