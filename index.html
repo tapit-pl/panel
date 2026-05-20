@@ -3535,8 +3535,6 @@ tailwind.config = {
       ? (bokunReservationCode ? 'pending_payment' : 'pending')
       : (bokunConfirmationCode ? 'confirmed' : 'pending');
 
-    const hasPackages = tdRateSelections.some(x => x.count > 0);
-    const hasCategories = tdCategorySelections.some(x => x.count > 0);
     const insertTotal = hasPackages
       ? tdRateSelections.reduce((s, x) => s + x.count * (lookupCommPln(x.rate.title) || 0), 0)
       : hasCategories
