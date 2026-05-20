@@ -3560,7 +3560,34 @@ tailwind.config = {
           }, 0)
         : (lookupCommCommissionPln(tdCurrentTour?.title || '') || 0) * tdGuestCount;
 
-    const { data: insertedBooking, error } = await db.from('bookings').insert({
+    // Pre-generate booking ID so stripe_session_id can be included in the insert
+    const bookingId = crypto.randomUUID();
+
+    let stripeSessionUrl = null;
+    let stripeSessionId = null;
+    if (payment === 'link' && bokunReservationCode) {
+      try {
+        const totalPln = hasPackages
+          ? tdRateSelections.reduce((s, x) => s + x.count * (lookupCommPln(x.rate.title) || 0), 0)
+          : hasCategories
+            ? tdCategorySelections.filter(x => x.count > 0).reduce((s, x) => {
+                const pln = x.configPln !== undefined ? (x.configPln || 0) : (lookupCommPln(tdCurrentTour?.title || '') || 0);
+                return s + x.count * pln;
+              }, 0)
+            : (lookupCommPln(tdCurrentTour?.title || '') || 0) * tdGuestCount;
+        console.log('[Stripe] totalPln:', totalPln, 'bookingId:', bookingId, 'reservationCode:', bokunReservationCode);
+        if (!totalPln) console.warn('[Stripe] totalPln is 0 — tour missing from tour_commissions:', tour);
+        const { data: stripeRes, error: stripeErr } = await db.functions.invoke('create-stripe-session', {
+          body: { booking_id: bookingId, bokun_reservation_code: bokunReservationCode, amount_pln: totalPln, pax: tdGuestCount, tour_name: tour, date: dateStr, guest_name: guest, guest_email: email }
+        });
+        console.log('[Stripe] response:', JSON.stringify(stripeRes), 'error:', JSON.stringify(stripeErr));
+        stripeSessionUrl = stripeRes?.session_url;
+        stripeSessionId = stripeRes?.session_id || null;
+      } catch(e) { console.warn('[Stripe] error:', e.message); }
+    }
+
+    const { error } = await db.from('bookings').insert({
+      id: bookingId,
       tour,
       date: dateStr,
       guest,
@@ -3571,11 +3598,12 @@ tailwind.config = {
       comm: insertComm || null,
       payment_method: payment || null,
       status: insertStatus,
+      stripe_session_id: stripeSessionId,
       partner_id: currentPartner?.id,
       staff_id: currentPartner?._staffId || null,
       bokun_confirmation_code: payment === 'link' ? (bokunReservationCode || null) : (bokunConfirmationCode || null),
       bokun_booking_id: bokunBookingId,
-    }).select('id').single();
+    });
 
     btn.disabled = false;
     btn.innerHTML = '<i class="fa-solid fa-check"></i> Confirm booking';
@@ -3585,41 +3613,6 @@ tailwind.config = {
       errEl.textContent = 'Error saving booking: ' + error.message;
       errEl.classList.remove('hidden');
       return;
-    }
-
-    let stripeSessionUrl = null;
-    if (payment === 'link' && bokunReservationCode && insertedBooking?.id) {
-      try {
-        const totalPln = hasPackages
-          ? tdRateSelections.reduce((s, x) => s + x.count * (lookupCommPln(x.rate.title) || 0), 0)
-          : hasCategories
-            ? tdCategorySelections.filter(x => x.count > 0).reduce((s, x) => {
-                const pln = x.configPln !== undefined ? (x.configPln || 0) : (lookupCommPln(tdCurrentTour?.title || '') || 0);
-                return s + x.count * pln;
-              }, 0)
-            : (lookupCommPln(tdCurrentTour?.title || '') || 0) * tdGuestCount;
-        console.log('[Stripe] totalPln:', totalPln, 'bookingId:', insertedBooking.id, 'reservationCode:', bokunReservationCode);
-        if (!totalPln) {
-          console.warn('[Stripe] totalPln is 0 — tour missing from tour_commissions. Add price_pln for:', tour);
-        }
-        const { data: stripeRes, error: stripeErr } = await db.functions.invoke('create-stripe-session', {
-          body: {
-            booking_id: insertedBooking.id,
-            bokun_reservation_code: bokunReservationCode,
-            amount_pln: totalPln,
-            pax: tdGuestCount,
-            tour_name: tour,
-            date: dateStr,
-            guest_name: guest,
-            guest_email: email,
-          }
-        });
-        console.log('[Stripe] response:', JSON.stringify(stripeRes), 'error:', JSON.stringify(stripeErr));
-        stripeSessionUrl = stripeRes?.session_url;
-        if (stripeRes?.session_id) {
-          await db.from('bookings').update({ stripe_session_id: stripeRes.session_id }).eq('id', insertedBooking.id);
-        }
-      } catch(e) { console.warn('[Stripe] error:', e.message); }
     }
 
     form.classList.add('hidden');
