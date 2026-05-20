@@ -258,11 +258,10 @@ tailwind.config = {
 </div>
 
 <!-- ===================== SCREEN: ADMIN DASHBOARD ===================== -->
-<div id="screen-admin" class="screen" style="background:#0e1724; position:fixed; inset:0; overflow:hidden;">
-  <div class="flex overflow-hidden" style="background:#0e1724; width:100%; height:100%">
+<div id="screen-admin" class="screen" style="background:#0e1724; position:fixed; inset:0;">
 
-    <!-- SIDEBAR -->
-    <aside id="sidebar" class="w-60 shrink-0 flex flex-col overflow-y-auto" style="background:#1a2332; height:100%">
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="flex flex-col overflow-y-auto" style="position:absolute; top:0; left:0; bottom:0; width:240px; background:#1a2332; z-index:5;">
       <!-- Logo -->
       <div class="px-5 py-4 border-b border-white/8">
         <div class="flex items-center gap-3">
@@ -322,13 +321,10 @@ tailwind.config = {
           </button>
         </div>
       </div>
-    </aside>
+  </aside>
 
-    <!-- MAIN CONTENT (relative container for absolute children) -->
-    <div class="flex-1 min-w-0" style="position:relative; height:100%; background:#0e1724">
-
-      <!-- Top header: absolute, zawsze na górze -->
-      <header style="position:absolute; top:0; left:0; right:0; height:56px; z-index:10; background:#1a2332; border-bottom:1px solid rgba(255,255,255,0.08)">
+  <!-- TOP HEADER -->
+  <header style="position:absolute; top:0; left:240px; right:0; height:56px; z-index:10; background:#1a2332; border-bottom:1px solid rgba(255,255,255,0.08)">
         <div class="h-14 px-6 flex items-center justify-between gap-4">
           <div class="flex-1"></div>
           <div class="flex items-center gap-2">
@@ -342,11 +338,11 @@ tailwind.config = {
             </button>
           </div>
         </div>
-      </header>
+  </header>
 
-      <!-- Section scroll container: absolute, fills space below header -->
-      <div id="main-scroll" style="position:absolute; top:56px; left:0; right:0; bottom:0; overflow-y:auto; background:#0e1724">
-      <main class="p-5" style="background:#0e1724; display:block; width:100%">
+  <!-- SCROLL AREA -->
+  <div id="main-scroll" style="position:absolute; top:56px; left:240px; right:0; bottom:0; overflow-y:auto; background:#0e1724;">
+    <main style="padding:20px; display:block; width:100%;">
 
         <!-- ===== SECTION: DASHBOARD ===== -->
         <div id="section-dashboard" class="section active fade-in">
@@ -711,7 +707,7 @@ tailwind.config = {
         </div>
 
         <!-- ===== SECTION: TOURS & PRICING ===== -->
-        <div id="section-tours" class="section fade-in">
+        <div id="section-tours" class="section">
           <div class="flex items-center justify-between mb-4">
             <div>
               <h1 class="text-xl font-bold" style="color:#f1f5f9">Tours & Pricing</h1>
@@ -801,7 +797,7 @@ tailwind.config = {
         </div>
 
         <!-- ===== SECTION: STAFF ===== -->
-        <div id="section-staff" class="section fade-in">
+        <div id="section-staff" class="section">
           <div class="flex items-center justify-between mb-5">
             <div>
               <h1 class="text-xl font-bold" style="color:#f1f5f9">Staff</h1>
@@ -1110,9 +1106,7 @@ tailwind.config = {
           </div>
         </div>
 
-      </main>
-      </div>
-    </div>
+    </main>
   </div>
 </div>
 
