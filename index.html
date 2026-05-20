@@ -2122,6 +2122,22 @@ tailwind.config = {
     return null;
   }
 
+  function lookupCommCommissionPln(name) {
+    if (!name || !Object.keys(COMM_MAP).length) return null;
+    const key = _normComm(name);
+    if (COMM_MAP[key]) return COMM_MAP[key].commPln;
+    const words = key.split(' ').filter(w => w.length > 2);
+    if (!words.length) return null;
+    for (const [k, v] of Object.entries(COMM_MAP)) {
+      if (words.every(w => k.includes(w))) return v.commPln;
+    }
+    for (const [k, v] of Object.entries(COMM_MAP)) {
+      const kw = k.split(' ').filter(w => w.length > 2);
+      if (kw.length && kw.every(w => key.includes(w))) return v.commPln;
+    }
+    return null;
+  }
+
   function fmtPln(pln) { return pln ? `${pln} pln` : null; }
 
   // Returns PLN price for a specific Bokun category title from COMM_MAP.
@@ -3529,6 +3545,14 @@ tailwind.config = {
           }, 0)
         : (lookupCommPln(tdCurrentTour?.title || '') || 0) * tdGuestCount;
 
+    const insertComm = hasPackages
+      ? tdRateSelections.reduce((s, x) => s + x.count * (lookupCommCommissionPln(x.rate.title) || 0), 0)
+      : hasCategories
+        ? tdCategorySelections.filter(x => x.count > 0).reduce((s, x) => {
+            return s + x.count * (lookupCommCommissionPln(tdCurrentTour?.title || '') || 0);
+          }, 0)
+        : (lookupCommCommissionPln(tdCurrentTour?.title || '') || 0) * tdGuestCount;
+
     const { data: insertedBooking, error } = await db.from('bookings').insert({
       tour,
       date: dateStr,
@@ -3537,8 +3561,10 @@ tailwind.config = {
       phone: phone || null,
       pax: tdGuestCount,
       total: insertTotal || null,
+      comm: insertComm || null,
       status: insertStatus,
       partner_id: currentPartner?.id,
+      staff_id: currentPartner?._staffId || null,
       bokun_confirmation_code: payment === 'link' ? (bokunReservationCode || null) : (bokunConfirmationCode || null),
     }).select('id').single();
 
