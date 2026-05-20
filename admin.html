@@ -771,18 +771,18 @@ tailwind.config = {
           </div>
 
           <!-- PIN lock banner -->
-          <div id="tours-locked-banner" class="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center gap-2 text-sm text-amber-700">
+          <div id="tours-locked-banner" class="bg-white border-2 border-amber-300 rounded-2xl px-4 py-3 mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2 text-sm text-amber-700 font-medium">
               <i class="fa-solid fa-lock text-amber-500"></i>
               <span>Changes are locked — enter PIN to edit</span>
             </div>
             <div class="flex items-center gap-2">
-              <input id="tours-pin-input" type="password" maxlength="20" placeholder="PIN"
-                class="w-24 text-center border border-amber-300 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 bg-white"
+              <input id="tours-pin-input" type="password" maxlength="20" placeholder="Enter PIN"
+                class="w-28 text-center border-2 border-gray-300 rounded-xl px-3 py-1.5 text-sm font-semibold text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-400 bg-white"
                 onkeydown="if(event.key==='Enter')tryUnlockEditing()">
               <button onclick="tryUnlockEditing()"
-                class="px-4 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold rounded-xl transition-colors">
-                Unlock
+                class="px-4 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold rounded-xl transition-colors">
+                <i class="fa-solid fa-unlock mr-1"></i>Unlock
               </button>
             </div>
           </div>
