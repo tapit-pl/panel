@@ -3518,6 +3518,17 @@ tailwind.config = {
       ? (bokunReservationCode ? 'pending_payment' : 'pending')
       : (bokunConfirmationCode ? 'confirmed' : 'pending');
 
+    const hasPackages = tdRateSelections.some(x => x.count > 0);
+    const hasCategories = tdCategorySelections.some(x => x.count > 0);
+    const insertTotal = hasPackages
+      ? tdRateSelections.reduce((s, x) => s + x.count * (lookupCommPln(x.rate.title) || 0), 0)
+      : hasCategories
+        ? tdCategorySelections.filter(x => x.count > 0).reduce((s, x) => {
+            const pln = x.configPln !== undefined ? (x.configPln || 0) : (lookupCommPln(tdCurrentTour?.title || '') || 0);
+            return s + x.count * pln;
+          }, 0)
+        : (lookupCommPln(tdCurrentTour?.title || '') || 0) * tdGuestCount;
+
     const { data: insertedBooking, error } = await db.from('bookings').insert({
       tour,
       date: dateStr,
@@ -3525,6 +3536,7 @@ tailwind.config = {
       email: email || null,
       phone: phone || null,
       pax: tdGuestCount,
+      total: insertTotal || null,
       status: insertStatus,
       partner_id: currentPartner?.id,
       bokun_confirmation_code: payment === 'link' ? (bokunReservationCode || null) : (bokunConfirmationCode || null),

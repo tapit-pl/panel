@@ -37,10 +37,14 @@ tailwind.config = {
   .sidebar-link i { width: 16px; text-align: center; opacity: 0.6; }
   .sidebar-link.active i { opacity: 1; }
   .modal-bg { backdrop-filter: blur(4px); }
-  .status-paid    { background:#dcfce7; color:#16a34a; }
-  .status-pending { background:#fef9c3; color:#ca8a04; }
-  .status-cancelled { background:#fee2e2; color:#dc2626; }
+  .status-paid            { background:#dcfce7; color:#16a34a; }
+  .status-confirmed       { background:transparent; color:#16a34a; border:1.5px solid #16a34a; }
+  .status-pending         { background:#fef9c3; color:#ca8a04; }
+  .status-pending-payment { background:#fef9c3; color:#ca8a04; }
+  .status-cancelled       { background:transparent; color:#dc2626; border:1.5px solid #dc2626; }
+  .status-arrived         { background:#ccfbf1; color:#0f766e; border:1.5px solid #0d9488; }
   .status-settled { background:#dbeafe; color:#2563eb; }
+  .source-partner { background:#e0f2fe; color:#0369a1; }
   .source-bokun   { background:#ede9fe; color:#7c3aed; }
   .source-viator  { background:#fce7f3; color:#be185d; }
   .source-gyg     { background:#fef9c3; color:#a16207; }
@@ -2223,14 +2227,19 @@ tailwind.config = {
     allBookings.length = 0;
 
     const { data: dbRows } = await db.from('bookings').select('*').order('created_at', { ascending: false });
-    (dbRows || []).forEach(b => allBookings.push({
-      id: b.id, tour: b.tour, guest: b.guest, email: b.email, phone: b.phone,
-      hotel: b.partner_id || '—', date: b.date, time: b.time, pickup: b.pickup,
-      pax: b.pax, total: b.total, comm: b.comm, source: b.source, status: b.status, notes: b.notes || '',
-      _dbBooking: true, _stripeSessionId: b.stripe_session_id, _bokunCode: b.bokun_confirmation_code,
-      _creationTs: b.created_at ? new Date(b.created_at).getTime() : 0,
-      _startTs: b.date ? new Date(b.date).getTime() : 0,
-    }));
+    (dbRows || []).forEach(b => {
+      const partner = allPartners.find(p => p.id === b.partner_id);
+      const dateFormatted = b.date ? new Date(b.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '—';
+      const source = partner ? 'Partner Panel' : (b.source || 'Manual');
+      allBookings.push({
+        id: b.id, tour: b.tour, guest: b.guest, email: b.email, phone: b.phone,
+        hotel: partner?.name || '—', date: dateFormatted, time: b.time, pickup: b.pickup,
+        pax: b.pax, total: b.total || 0, comm: b.comm, source, status: b.status, notes: b.notes || '',
+        _dbBooking: true, _stripeSessionId: b.stripe_session_id, _bokunCode: b.bokun_confirmation_code,
+        _creationTs: b.created_at ? new Date(b.created_at).getTime() : 0,
+        _startTs: b.date ? new Date(b.date).getTime() : 0,
+      });
+    });
 
     try {
       const today = new Date();
@@ -3127,6 +3136,16 @@ tailwind.config = {
   const allBookings = [];
   let supaDash = [];
 
+  function statusBadge(status) {
+    const s = (status || '').toLowerCase();
+    if (s === 'paid')    return `<span class="status-paid text-xs font-semibold px-2.5 py-0.5 rounded-full">Paid</span>`;
+    if (s === 'confirmed') return `<span class="status-confirmed text-xs font-semibold px-2.5 py-0.5 rounded-full">Confirmed</span>`;
+    if (s === 'cancelled') return `<span class="status-cancelled text-xs font-semibold px-2.5 py-0.5 rounded-full">Cancelled</span>`;
+    if (s === 'pending_payment') return `<span class="status-pending-payment text-xs font-semibold px-2.5 py-0.5 rounded-full">Pending payment</span>`;
+    if (s === 'arrived') return `<span class="status-arrived text-xs font-semibold px-2.5 py-0.5 rounded-full">Arrived ✓</span>`;
+    return `<span class="status-pending text-xs font-semibold px-2.5 py-0.5 rounded-full">${status || 'Pending'}</span>`;
+  }
+
   function renderBookingsTable(data) {
     const rows = data || allBookings;
     const tbody = document.getElementById('all-bookings-tbody');
@@ -3139,8 +3158,8 @@ tailwind.config = {
         : b.source === 'Expedia' ? 'source-expedia'
         : b.source === 'Website' ? 'source-website'
         : b.source === 'Bokun' ? 'source-bokun'
+        : b.source === 'Partner Panel' ? 'source-partner'
         : 'source-manual';
-      const statusClass = b.status === 'Paid' ? 'status-paid' : b.status === 'Pending' ? 'status-pending' : 'status-cancelled';
       tbody.insertAdjacentHTML('beforeend', `
         <tr class="hover:bg-gray-50 transition-colors text-xs" data-id="${b.id}" data-hotel="${b.hotel}" data-source="${b.source}" data-status="${b.status}">
           <td class="px-5 py-3 font-mono text-gray-400">#${b.id}</td>
@@ -3152,11 +3171,11 @@ tailwind.config = {
           <td class="px-4 py-3 text-center text-dark">${b.pax}</td>
           <td class="px-4 py-3 text-right font-semibold text-dark whitespace-nowrap">${b.total} zł</td>
           <td class="px-4 py-3 text-slate-300 text-xs">${b.source}</td>
-          <td class="px-4 py-3 text-center"><span class="${statusClass} text-xs font-semibold px-2 py-0.5 rounded-full">${b.status}</span></td>
+          <td class="px-4 py-3 text-center">${statusBadge(b.status)}</td>
           <td class="px-4 py-3 text-right whitespace-nowrap">
             <button onclick="openVoucher('${b.id}')" title="View voucher" class="text-gray-300 hover:text-brand transition-colors ml-1"><i class="fa-solid fa-file-pdf text-xs"></i></button>
             <button onclick="openEditBooking('${b.id}')" title="Edit booking" class="text-gray-300 hover:text-brand transition-colors ml-2"><i class="fa-solid fa-pen text-xs"></i></button>
-            ${b._dbBooking && b.status !== 'cancelled' ? `<button onclick="cancelBooking('${b.id}', '${(b.guest||'').replace(/'/g,"\\'")}', ${!!b._stripeSessionId})" title="Cancel booking" class="text-gray-300 hover:text-red-500 transition-colors ml-2"><i class="fa-solid fa-xmark text-xs"></i></button>` : ''}
+            ${b._dbBooking && (b.status||'').toLowerCase() !== 'cancelled' ? `<button onclick="cancelBooking('${b.id}', '${(b.guest||'').replace(/'/g,"\\'")}', ${!!b._stripeSessionId})" title="Cancel booking" class="text-gray-300 hover:text-red-500 transition-colors ml-2"><i class="fa-solid fa-xmark text-xs"></i></button>` : ''}
           </td>
         </tr>`);
     });
