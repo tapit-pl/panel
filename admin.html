@@ -56,8 +56,8 @@ tailwind.config = {
   ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
-  .section { display: none; }
-  .section.active { display: block; }
+  .section { display: none !important; }
+  .section.active { display: block !important; width: 100%; }
   input[type=range]::-webkit-slider-thumb { background: #E8751A; }
   #edit-booking-drawer, #partner-detail-drawer, #ticket-detail-drawer { transform: translateX(100%); transition: transform 0.28s cubic-bezier(.4,0,.2,1); }
   #edit-booking-drawer.open, #partner-detail-drawer.open, #ticket-detail-drawer.open { transform: translateX(0); }
@@ -345,7 +345,7 @@ tailwind.config = {
       </header>
 
       <!-- Section content -->
-      <main class="flex-1 p-5" style="background:#0e1724">
+      <main class="flex-1 p-5" style="background:#0e1724; display:block; width:100%">
 
         <!-- ===== SECTION: DASHBOARD ===== -->
         <div id="section-dashboard" class="section active fade-in">
