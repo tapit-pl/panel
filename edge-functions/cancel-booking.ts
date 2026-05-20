@@ -34,50 +34,16 @@ async function bokunRequest(method: string, path: string, payload?: unknown) {
   return { ok: res.ok, status: res.status, body: await res.json() }
 }
 
-async function bokunResolveId(bookingId: number | null, confirmationCode: string | null): Promise<number | null> {
-  // 1. Use stored booking ID directly if available
-  if (bookingId) return bookingId
-
-  // 2. Search Bokun by confirmation code
-  if (confirmationCode) {
-    const today = new Date()
-    const past = new Date(today); past.setFullYear(past.getFullYear() - 1)
-    const fmt = (d: Date) => `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`
-    const search = await bokunRequest('POST', '/booking.json/booking-search', {
-      confirmationCode,
-      startDate: fmt(past),
-      endDate: fmt(new Date(today.getFullYear()+1, today.getMonth(), today.getDate())),
-      pageSize: 1,
-    })
-    console.log('[Cancel] search result:', JSON.stringify({ status: search.status, count: search.body?.items?.length, firstId: search.body?.items?.[0]?.id }))
-    const id = search.body?.items?.[0]?.id
-    if (id) return id
+async function bokunCancel(confirmationCode: string) {
+  const path = `/booking.json/cancel-booking/${confirmationCode}`
+  const res = await bokunRequest('POST', path, { notify: true })
+  console.log('[Cancel] cancel response status:', res.status, 'body:', JSON.stringify(res.body).slice(0, 300))
+  return {
+    ok: res.ok,
+    status: res.status,
+    error: res.ok ? null : (res.body?.message || res.body?.errorMessage || `HTTP ${res.status}`),
+    body: res.body,
   }
-
-  return null
-}
-
-async function bokunCancel(bookingId: string | number) {
-  const accessKey = Deno.env.get('BOKUN_ACCESS_KEY')!
-  const secretKey = Deno.env.get('BOKUN_SECRET_KEY')!
-  const path = `/booking.json/${bookingId}/cancel`
-  const date = bokunDate()
-  const message = date + accessKey + 'POST' + path
-  const signature = await hmac(secretKey, message)
-  const res = await fetch(`https://api.bokun.io${path}`, {
-    method: 'POST',
-    headers: {
-      'X-Bokun-Date': date,
-      'X-Bokun-AccessKey': accessKey,
-      'X-Bokun-Signature': signature,
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    },
-    body: '{}',
-  })
-  const body = await res.json()
-  console.log('[Cancel] Bokun cancel response:', JSON.stringify({ status: res.status, bookingStatus: body?.booking?.status || body?.status, message: body?.message || body?.errorMessage }))
-  return { ok: res.ok, status: res.status, error: res.ok ? null : (body?.message || body?.errorMessage || `HTTP ${res.status}`), body }
 }
 
 async function stripeRefund(stripeSessionId: string): Promise<{ ok: boolean, refundId?: string, error?: string }> {
@@ -132,15 +98,10 @@ Deno.serve(async (req) => {
   }
 
   // Cancel in Bokun — look up internal booking ID via search, then cancel
-  if (booking.bokun_booking_id || booking.bokun_confirmation_code) {
-    const resolvedId = await bokunResolveId(booking.bokun_booking_id, booking.bokun_confirmation_code)
-    console.log('[Cancel] resolved Bokun ID:', resolvedId, 'from bookingId:', booking.bokun_booking_id, 'code:', booking.bokun_confirmation_code)
-    if (resolvedId) {
-      const cancel = await bokunCancel(resolvedId)
-      results.bokun = { ok: cancel.ok, error: cancel.error }
-    } else {
-      results.bokun = { ok: false, error: 'Could not resolve Bokun booking ID' }
-    }
+  if (booking.bokun_confirmation_code) {
+    console.log('[Cancel] cancelling Bokun confirmation code:', booking.bokun_confirmation_code)
+    const cancel = await bokunCancel(booking.bokun_confirmation_code)
+    results.bokun = { ok: cancel.ok, error: cancel.error }
   }
 
   // Update DB status

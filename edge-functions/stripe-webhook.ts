@@ -79,16 +79,17 @@ Deno.serve(async (req) => {
 
     const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
 
+    let bokunInternalId: number | null = null
     if (bokunReservationCode) {
       const confirmResult = await bokunConfirm(bokunReservationCode)
-      console.log('[Webhook] bokun confirm:', JSON.stringify({ code: bokunReservationCode, status: confirmResult?.booking?.status }))
+      bokunInternalId = confirmResult?.booking?.id || confirmResult?.id || null
+      console.log('[Webhook] bokun confirm:', JSON.stringify({ code: bokunReservationCode, status: confirmResult?.booking?.status, internalId: bokunInternalId }))
     }
 
     if (bookingId) {
-      const { error } = await db.from('bookings').update({
-        status: 'confirmed',
-        stripe_session_id: session.id,
-      }).eq('id', bookingId)
+      const updatePayload: Record<string, unknown> = { status: 'confirmed', stripe_session_id: session.id }
+      if (bokunInternalId) updatePayload.bokun_booking_id = bokunInternalId
+      const { error } = await db.from('bookings').update(updatePayload).eq('id', bookingId)
       console.log('[Webhook] db update error:', error)
     }
   }
