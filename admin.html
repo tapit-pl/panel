@@ -644,21 +644,21 @@ tailwind.config = {
                 </button>
               </div>
 
+              <!-- Empty state -->
+              <div id="settlement-empty" class="bg-white rounded-2xl shadow-sm p-10 text-center text-gray-400 text-sm">
+                <i class="fa-solid fa-coins text-3xl text-gray-200 block mb-3"></i>
+                Select a partner and month, then click Calculate.
+              </div>
+
               <!-- Result table -->
-              <div id="settlement-result" class="bg-white rounded-2xl shadow-sm overflow-hidden">
+              <div id="settlement-result" class="hidden bg-white rounded-2xl shadow-sm overflow-hidden">
                 <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                   <div>
-                    <div class="font-semibold text-dark text-sm">Hotel Wawel Kraków · April 2026</div>
-                    <div class="text-xs text-gray-400 mt-0.5">6 bookings · auto-calculated from commission table</div>
+                    <div class="font-semibold text-dark text-sm" id="settlement-result-title"></div>
+                    <div class="text-xs text-gray-400 mt-0.5" id="settlement-result-subtitle"></div>
                   </div>
                   <div class="flex gap-2">
-                    <button class="flex items-center gap-1.5 text-xs border border-gray-200 text-gray-600 hover:border-brand hover:text-brand px-3 py-2 rounded-xl transition-colors">
-                      <i class="fa-solid fa-file-pdf"></i>PDF
-                    </button>
-                    <button class="flex items-center gap-1.5 text-xs border border-gray-200 text-gray-600 hover:border-brand hover:text-brand px-3 py-2 rounded-xl transition-colors">
-                      <i class="fa-solid fa-envelope"></i>Email
-                    </button>
-                    <button onclick="markSettled()" class="flex items-center gap-1.5 text-xs bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-xl transition-colors font-semibold">
+                    <button onclick="markSettled()" id="btn-mark-settled" class="flex items-center gap-1.5 text-xs bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-xl transition-colors font-semibold">
                       <i class="fa-solid fa-check"></i>Mark as settled
                     </button>
                   </div>
@@ -667,80 +667,27 @@ tailwind.config = {
                   <table class="w-full text-xs">
                     <thead>
                       <tr class="border-b border-gray-100 bg-opacity-0">
-                        <th class="text-left px-5 py-3 text-gray-400 font-semibold">Booking #</th>
-                        <th class="text-left px-4 py-3 text-gray-400 font-semibold">Tour / Package</th>
+                        <th class="text-left px-5 py-3 text-gray-400 font-semibold">Tour</th>
                         <th class="text-left px-4 py-3 text-gray-400 font-semibold">Guest</th>
+                        <th class="text-left px-4 py-3 text-gray-400 font-semibold">Staff</th>
                         <th class="text-left px-4 py-3 text-gray-400 font-semibold">Date</th>
                         <th class="text-center px-4 py-3 text-gray-400 font-semibold">Pax</th>
-                        <th class="text-right px-4 py-3 text-gray-400 font-semibold">Rate/pax</th>
+                        <th class="text-right px-4 py-3 text-gray-400 font-semibold">Total</th>
                         <th class="text-right px-5 py-3 text-gray-400 font-semibold">Commission</th>
+                        <th class="text-left px-4 py-3 text-gray-400 font-semibold">Status</th>
                       </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-50">
-                      <tr class="hover:bg-gray-50">
-                        <td class="px-5 py-3 font-mono text-gray-400">#0847</td>
-                        <td class="px-4 py-3 font-medium text-dark">Zakopane · Standard Package</td>
-                        <td class="px-4 py-3 text-gray-600">Jan Kowalski</td>
-                        <td class="px-4 py-3 text-gray-500">Apr 8</td>
-                        <td class="px-4 py-3 text-center text-dark">2</td>
-                        <td class="px-4 py-3 text-right text-gray-600">100 pln</td>
-                        <td class="px-5 py-3 text-right font-bold text-dark">200 pln</td>
-                      </tr>
-                      <tr class="hover:bg-gray-50">
-                        <td class="px-5 py-3 font-mono text-gray-400">#0851</td>
-                        <td class="px-4 py-3 font-medium text-dark">Auschwitz · With guide</td>
-                        <td class="px-4 py-3 text-gray-600">Anna Nowak</td>
-                        <td class="px-4 py-3 text-gray-500">Apr 10</td>
-                        <td class="px-4 py-3 text-center text-dark">4</td>
-                        <td class="px-4 py-3 text-right text-gray-600">75 pln</td>
-                        <td class="px-5 py-3 text-right font-bold text-dark">300 pln</td>
-                      </tr>
-                      <tr class="hover:bg-gray-50">
-                        <td class="px-5 py-3 font-mono text-gray-400">#0854</td>
-                        <td class="px-4 py-3 font-medium text-dark">Shooting Range · Commando</td>
-                        <td class="px-4 py-3 text-gray-600">Tomasz Wiśniewski</td>
-                        <td class="px-4 py-3 text-gray-500">Apr 12</td>
-                        <td class="px-4 py-3 text-center text-dark">3</td>
-                        <td class="px-4 py-3 text-right text-gray-600">120 pln</td>
-                        <td class="px-5 py-3 text-right font-bold text-dark">360 pln</td>
-                      </tr>
-                      <tr class="hover:bg-gray-50">
-                        <td class="px-5 py-3 font-mono text-gray-400">#0861</td>
-                        <td class="px-4 py-3 font-medium text-dark">Wieliczka Salt Mine</td>
-                        <td class="px-4 py-3 text-gray-600">Maria García</td>
-                        <td class="px-4 py-3 text-gray-500">Apr 15</td>
-                        <td class="px-4 py-3 text-center text-dark">2</td>
-                        <td class="px-4 py-3 text-right text-gray-600">60 pln</td>
-                        <td class="px-5 py-3 text-right font-bold text-gray-400 line-through">120 pln <span class="text-xs font-normal not-italic text-red-400 no-underline" style="text-decoration:none">(cancelled)</span></td>
-                      </tr>
-                      <tr class="hover:bg-gray-50">
-                        <td class="px-5 py-3 font-mono text-gray-400">#0863</td>
-                        <td class="px-4 py-3 font-medium text-dark">Zakopane · Standard Package</td>
-                        <td class="px-4 py-3 text-gray-600">David Smith</td>
-                        <td class="px-4 py-3 text-gray-500">Apr 16</td>
-                        <td class="px-4 py-3 text-center text-dark">6</td>
-                        <td class="px-4 py-3 text-right text-gray-600">100 pln</td>
-                        <td class="px-5 py-3 text-right font-bold text-dark">600 pln</td>
-                      </tr>
-                      <tr class="hover:bg-gray-50">
-                        <td class="px-5 py-3 font-mono text-gray-400">#0869</td>
-                        <td class="px-4 py-3 font-medium text-dark">Transfer · Minivan</td>
-                        <td class="px-4 py-3 text-gray-600">Chen Wei</td>
-                        <td class="px-4 py-3 text-gray-500">Apr 19</td>
-                        <td class="px-4 py-3 text-center text-gray-400">1 veh</td>
-                        <td class="px-4 py-3 text-right text-gray-600">45 pln</td>
-                        <td class="px-5 py-3 text-right font-bold text-yellow-600">45 pln <span class="text-xs text-gray-400">(pending)</span></td>
-                      </tr>
-                    </tbody>
+                    <tbody id="settlement-tbody" class="divide-y divide-gray-50"></tbody>
                     <tfoot>
                       <tr class="bg-brand-light border-t-2 border-brand/20">
-                        <td colspan="6" class="px-5 py-3.5 font-bold text-dark text-right text-sm">Total commission (confirmed):</td>
-                        <td class="px-5 py-3.5 text-right font-bold text-brand text-lg">1 460 pln</td>
+                        <td colspan="7" class="px-5 py-3.5 font-bold text-dark text-right text-sm">Total commission (excl. cancelled):</td>
+                        <td class="px-5 py-3.5 text-right font-bold text-brand text-lg" id="settlement-total"></td>
                       </tr>
                     </tfoot>
                   </table>
                 </div>
               </div>
+            </div>
             </div>
 
             <!-- Right: settlement history -->
@@ -1867,7 +1814,7 @@ tailwind.config = {
       <i class="fa-solid fa-check text-white text-2xl"></i>
     </div>
     <h3 class="text-lg font-bold text-dark mb-1">Settlement recorded!</h3>
-    <p class="text-sm text-gray-500 mb-5">Hotel Wawel · April 2026 · <strong class="text-dark">1 460 pln</strong> has been marked as settled.</p>
+    <p class="text-sm text-gray-500 mb-5" id="modal-settled-text"></p>
     <button onclick="document.getElementById('modal-settled').classList.add('hidden');document.getElementById('modal-settled').classList.remove('flex')" class="w-full bg-brand hover:bg-brand-dark text-white font-semibold py-3 rounded-xl transition-colors text-sm">Close</button>
   </div>
 </div>
@@ -2137,6 +2084,7 @@ tailwind.config = {
     }
 
     initDashMonthSelector();
+    initSettleMonthDropdown();
     await loadBookings();
     await updateDashboardKPIs();
 
@@ -4043,13 +3991,122 @@ tailwind.config = {
     setTimeout(() => t.remove(), 3500);
   }
 
-  function calculateSettlement() {
+  // Populate month dropdown with last 18 months
+  function initSettleMonthDropdown() {
+    const sel = document.getElementById('settle-month');
+    if (!sel) return;
+    const now = new Date();
+    sel.innerHTML = '';
+    for (let i = 0; i < 18; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      const label = d.toLocaleDateString('en', { month: 'long', year: 'numeric' });
+      sel.innerHTML += `<option value="${val}"${i===0?' selected':''}>${label}</option>`;
+    }
+  }
+
+  let currentSettlement = null;
+
+  async function calculateSettlement() {
+    const partnerId = document.getElementById('settle-hotel').value;
+    const period    = document.getElementById('settle-month').value;
+    if (!partnerId) { alert('Please select a partner first.'); return; }
+
+    const partner = allPartners.find(p => p.id === partnerId);
+    const [yr, mo] = period.split('-').map(Number);
+    const from = `${yr}-${String(mo).padStart(2,'0')}-01`;
+    const lastDay = new Date(yr, mo, 0).getDate();
+    const to = `${yr}-${String(mo).padStart(2,'0')}-${lastDay}`;
+    const periodLabel = new Date(yr, mo-1).toLocaleDateString('en', { month: 'long', year: 'numeric' });
+
+    const { data: bookings } = await db.from('bookings')
+      .select('*, staff(first_name, last_name)')
+      .eq('partner_id', partnerId)
+      .gte('date', from).lte('date', to)
+      .order('date');
+
+    const { data: history } = await db.from('settlements')
+      .select('*').eq('partner_id', partnerId)
+      .order('created_at', { ascending: false });
+
+    const rows = bookings || [];
+    const confirmedRows = rows.filter(b => (b.status||'').toLowerCase() !== 'cancelled');
+    const totalComm = confirmedRows.reduce((s, b) => s + (parseFloat(b.comm)||0), 0);
+
+    currentSettlement = { partnerId, partnerName: partner?.name||'', period, periodLabel, total: totalComm };
+
+    // Check if already settled
+    const alreadySettled = (history||[]).some(s => s.period === period);
+    document.getElementById('btn-mark-settled').disabled = alreadySettled;
+    document.getElementById('btn-mark-settled').textContent = alreadySettled ? 'Already settled' : '';
+    if (!alreadySettled) document.getElementById('btn-mark-settled').innerHTML = '<i class="fa-solid fa-check"></i>Mark as settled';
+
+    document.getElementById('settlement-result-title').textContent = `${partner?.name||''} · ${periodLabel}`;
+    document.getElementById('settlement-result-subtitle').textContent = `${rows.length} booking${rows.length!==1?'s':''} · from partner panel`;
+    document.getElementById('settlement-total').textContent = `${totalComm} pln`;
+
+    const tbody = document.getElementById('settlement-tbody');
+    tbody.innerHTML = rows.length === 0
+      ? `<tr><td colspan="8" class="px-5 py-8 text-center text-gray-400">No bookings in this period.</td></tr>`
+      : rows.map(b => {
+          const cancelled = (b.status||'').toLowerCase() === 'cancelled';
+          const dateStr = b.date ? new Date(b.date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : '—';
+          const staffName = b.staff ? `${b.staff.first_name||''} ${b.staff.last_name||''}`.trim() : '—';
+          const commVal = parseFloat(b.comm)||0;
+          const commCell = cancelled
+            ? `<td class="px-5 py-3 text-right font-bold text-gray-300 line-through">${commVal||'—'} pln</td>`
+            : `<td class="px-5 py-3 text-right font-bold text-dark">${commVal||'—'} pln</td>`;
+          return `<tr class="hover:bg-gray-50${cancelled?' opacity-50':''}">
+            <td class="px-5 py-3 font-medium text-dark text-xs">${b.tour||'—'}</td>
+            <td class="px-4 py-3 text-gray-600">${b.guest||'—'}</td>
+            <td class="px-4 py-3 text-gray-500">${staffName}</td>
+            <td class="px-4 py-3 text-gray-500 whitespace-nowrap">${dateStr}</td>
+            <td class="px-4 py-3 text-center text-dark">${b.pax||'—'}</td>
+            <td class="px-4 py-3 text-right text-gray-600">${b.total ? b.total+' pln' : '—'}</td>
+            ${commCell}
+            <td class="px-4 py-3">${statusBadge(b.status)}</td>
+          </tr>`;
+        }).join('');
+
+    // Settlement history sidebar
+    const histList = document.getElementById('settlement-history-list');
+    if (histList) {
+      histList.innerHTML = (history||[]).length === 0
+        ? '<p class="text-xs text-gray-400 text-center py-4">No settlements yet.</p>'
+        : (history||[]).map(s => {
+            const d = s.settled_date ? new Date(s.settled_date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—';
+            const p = s.period ? new Date(s.period+'-01').toLocaleDateString('en',{month:'long',year:'numeric'}) : s.period;
+            return `<div class="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
+              <div>
+                <div class="text-xs font-semibold text-dark">${p}</div>
+                <div class="text-xs text-gray-400">${d}</div>
+              </div>
+              <div class="text-sm font-bold text-brand">${s.amount||0} pln</div>
+            </div>`;
+          }).join('');
+    }
+
+    document.getElementById('settlement-empty').classList.add('hidden');
     document.getElementById('settlement-result').classList.remove('hidden');
     document.getElementById('settlement-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
-  function markSettled() {
+
+  async function markSettled() {
+    if (!currentSettlement) return;
+    const { partnerId, partnerName, period, periodLabel, total } = currentSettlement;
+    const { error } = await db.from('settlements').insert({
+      partner_id: partnerId,
+      period,
+      amount: total,
+      settled_date: new Date().toISOString().slice(0,10),
+    });
+    if (error) { alert('Error: ' + error.message); return; }
+    const txt = document.getElementById('modal-settled-text');
+    if (txt) txt.innerHTML = `${partnerName} · ${periodLabel} · <strong class="text-dark">${total} pln</strong> has been marked as settled.`;
     const m = document.getElementById('modal-settled');
     m.classList.remove('hidden'); m.classList.add('flex');
+    document.getElementById('btn-mark-settled').disabled = true;
+    document.getElementById('btn-mark-settled').innerHTML = '<i class="fa-solid fa-check"></i>Already settled';
   }
 </script>
 
