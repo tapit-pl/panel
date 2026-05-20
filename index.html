@@ -1576,23 +1576,24 @@ tailwind.config = {
       <!-- Commission summary -->
       <div id="acct-commission" class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
         <div class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Commission Summary</div>
-        <div class="mb-3">
-          <div class="flex justify-between text-sm mb-1">
-            <span class="text-gray-600">This month</span>
-            <span class="font-bold text-brand">1,340 pln</span>
+        <div id="acct-comm-loading" class="text-xs text-gray-400 text-center py-3">Loading...</div>
+        <div id="acct-comm-data" class="hidden space-y-2">
+          <div class="flex items-center justify-between py-2">
+            <span class="text-sm text-gray-600">This month</span>
+            <span class="font-bold text-brand" id="acct-comm-this-month">—</span>
           </div>
-          <div class="w-full bg-gray-100 rounded-full h-2">
-            <div class="bg-brand h-2 rounded-full" style="width: 67%"></div>
+          <div class="flex items-center justify-between py-2 border-t border-gray-100">
+            <span class="text-sm text-gray-600">Year to date</span>
+            <span class="font-bold text-dark" id="acct-comm-ytd">—</span>
           </div>
-          <div class="text-xs text-gray-400 mt-1">Target: 2,000 pln</div>
+          <div class="border-t border-gray-100 pt-2">
+            <div class="flex items-center justify-between py-2">
+              <span class="text-sm font-semibold text-dark">Pending settlement</span>
+              <span class="font-bold text-brand text-base" id="acct-comm-pending">—</span>
+            </div>
+            <div class="text-xs text-gray-400" id="acct-comm-pending-label">Unsettled commission</div>
+          </div>
         </div>
-        <div class="flex items-center justify-between py-2 border-t border-gray-100">
-          <span class="text-sm text-gray-600">Year to date</span>
-          <span class="font-bold text-dark">8,450 pln</span>
-        </div>
-        <button class="w-full mt-3 border-2 border-brand text-brand hover:bg-brand hover:text-white text-xs font-semibold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2">
-          <i class="fa-solid fa-file-pdf"></i> Download commission report PDF
-        </button>
       </div>
 
     </div>
@@ -4702,10 +4703,52 @@ tailwind.config = {
       const phn = document.getElementById('printorder-hotel-name');
       if (phn) phn.textContent = currentPartner.name || 'your hotel';
     }
+    loadCommissionSummary();
     document.body.style.overflow = 'hidden'; document.documentElement.style.overflow = 'hidden';
     document.getElementById('panel-account').classList.remove('hidden');
     document.getElementById('panel-account').classList.add('flex');
     document.getElementById('panel-account-backdrop').classList.remove('hidden');
+  }
+
+  async function loadCommissionSummary() {
+    const commEl = document.getElementById('acct-commission');
+    if (!commEl || commEl.classList.contains('hidden')) return;
+    const partnerId = currentPartner?.id;
+    if (!partnerId) return;
+
+    const now = new Date();
+    const yr = now.getFullYear();
+    const mo = String(now.getMonth()+1).padStart(2,'0');
+    const monthFrom = `${yr}-${mo}-01`;
+    const monthTo   = `${yr}-${mo}-${new Date(yr, now.getMonth()+1, 0).getDate()}`;
+    const yearFrom  = `${yr}-01-01`;
+
+    const { data: bookings } = await db.from('bookings')
+      .select('comm, date, status')
+      .eq('partner_id', partnerId)
+      .gte('date', yearFrom)
+      .not('status', 'eq', 'cancelled');
+
+    const { data: settlements } = await db.from('settlements')
+      .select('amount, period')
+      .eq('partner_id', partnerId);
+
+    const rows = bookings || [];
+    const thisMonthComm = rows.filter(b => b.date >= monthFrom && b.date <= monthTo)
+      .reduce((s, b) => s + (parseFloat(b.comm)||0), 0);
+    const ytdComm = rows.reduce((s, b) => s + (parseFloat(b.comm)||0), 0);
+
+    const settledTotal = (settlements||[]).reduce((s, x) => s + (parseFloat(x.amount)||0), 0);
+    const pending = Math.max(0, ytdComm - settledTotal);
+
+    document.getElementById('acct-comm-this-month').textContent = `${thisMonthComm} pln`;
+    document.getElementById('acct-comm-ytd').textContent = `${ytdComm} pln`;
+    document.getElementById('acct-comm-pending').textContent = `${pending} pln`;
+    document.getElementById('acct-comm-pending-label').textContent =
+      settledTotal > 0 ? `${ytdComm} earned · ${settledTotal} settled` : 'Not yet settled with Thousand Miles';
+
+    document.getElementById('acct-comm-loading').classList.add('hidden');
+    document.getElementById('acct-comm-data').classList.remove('hidden');
   }
 
   function closeAccountPanel() {
