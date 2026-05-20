@@ -2915,8 +2915,12 @@ tailwind.config = {
         page++;
       }
       allTourConfig.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+      // Reset cached Bokun categories so refreshBokunPricingCategories re-fetches fresh data
+      allTourConfig.forEach(t => { t.bokun_pricing_categories = null; });
+      await db.from('tour_config').update({ bokun_pricing_categories: null }).not('bokun_id', 'is', null);
       renderTourConfigTable();
       showToast(newCount > 0 ? `Sync done — ${newCount} new tour${newCount !== 1 ? 's' : ''} added.` : 'Sync done — no new tours found.');
+      refreshBokunPricingCategories();
     } catch(e) {
       showToast('Sync failed: ' + e.message);
     }
