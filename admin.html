@@ -2229,7 +2229,7 @@ tailwind.config = {
     const { data: dbRows } = await db.from('bookings').select('*').order('created_at', { ascending: false });
     (dbRows || []).forEach(b => {
       const partner = allPartners.find(p => p.id === b.partner_id);
-      const dateFormatted = b.date ? new Date(b.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '—';
+      const dateFormatted = b.date ? new Date(b.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
       const source = partner ? 'Partner Panel' : (b.source || 'Manual');
       allBookings.push({
         id: b.id, tour: b.tour, guest: b.guest, email: b.email, phone: b.phone,
@@ -3166,7 +3166,7 @@ tailwind.config = {
           <td class="px-4 py-3 font-medium text-dark max-w-xs truncate">${b.tour}</td>
           <td class="px-4 py-3 text-gray-600">${b.guest}</td>
           <td class="px-4 py-3 text-gray-500">${b.hotel}</td>
-          <td class="px-4 py-3 text-gray-500 whitespace-nowrap">${b._creationTs ? new Date(b._creationTs).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}) : '—'}</td>
+          <td class="px-4 py-3 text-gray-500 whitespace-nowrap">${b._creationTs ? new Date(b._creationTs).toLocaleDateString('en-GB', {day:'numeric',month:'short'}) : '—'}</td>
           <td class="px-4 py-3 text-gray-500 whitespace-nowrap">${b.date}</td>
           <td class="px-4 py-3 text-center text-dark">${b.pax}</td>
           <td class="px-4 py-3 text-right font-semibold text-dark whitespace-nowrap">${b.total} zł</td>
