@@ -4737,7 +4737,7 @@ tailwind.config = {
     const yearFrom  = `${yr}-01-01`;
 
     const { data: bookings } = await db.from('bookings')
-      .select('comm, date, status')
+      .select('comm, total, date, status, payment_method')
       .eq('partner_id', partnerId)
       .gte('date', yearFrom)
       .eq('status', 'confirmed');
@@ -4746,19 +4746,32 @@ tailwind.config = {
       .select('amount, period')
       .eq('partner_id', partnerId);
 
+    function calcNet(rows) {
+      let tmOwesPartner = 0, partnerOwesTM = 0;
+      for (const b of rows) {
+        const comm = parseFloat(b.comm||0), total = parseFloat(b.total||0);
+        if (b.payment_method === 'hotel') partnerOwesTM += total - comm;
+        else if (b.payment_method) tmOwesPartner += comm;
+      }
+      return tmOwesPartner - partnerOwesTM; // positive = TM owes partner, negative = partner owes TM
+    }
+
     const rows = bookings || [];
-    const thisMonthComm = rows.filter(b => b.date >= monthFrom && b.date <= monthTo)
-      .reduce((s, b) => s + (parseFloat(b.comm)||0), 0);
-    const ytdComm = rows.reduce((s, b) => s + (parseFloat(b.comm)||0), 0);
+    const thisMonthRows = rows.filter(b => b.date >= monthFrom && b.date <= monthTo);
+    const thisMonthNet = calcNet(thisMonthRows);
+    const ytdNet = calcNet(rows);
 
     const settledTotal = (settlements||[]).reduce((s, x) => s + (parseFloat(x.amount)||0), 0);
-    const pending = Math.max(0, ytdComm - settledTotal);
+    const pending = ytdNet - settledTotal;
 
-    document.getElementById('acct-comm-this-month').textContent = `${thisMonthComm} pln`;
-    document.getElementById('acct-comm-ytd').textContent = `${ytdComm} pln`;
-    document.getElementById('acct-comm-pending').textContent = `${pending} pln`;
-    document.getElementById('acct-comm-pending-label').textContent =
-      settledTotal > 0 ? `${ytdComm} earned · ${settledTotal} settled` : 'Not yet settled with Thousand Miles';
+    const fmt = v => v >= 0 ? `${v} pln` : `−${Math.abs(v)} pln`;
+    document.getElementById('acct-comm-this-month').textContent = fmt(Math.round(thisMonthNet));
+    document.getElementById('acct-comm-ytd').textContent = fmt(Math.round(ytdNet));
+    document.getElementById('acct-comm-pending').textContent = fmt(Math.round(pending));
+    document.getElementById('acct-comm-pending').style.color = pending < 0 ? '#3b82f6' : '';
+    document.getElementById('acct-comm-pending-label').textContent = pending < 0
+      ? 'You owe Thousand Miles'
+      : pending > 0 ? 'Not yet settled with Thousand Miles' : 'All settled';
 
     document.getElementById('acct-comm-loading').classList.add('hidden');
     document.getElementById('acct-comm-data').classList.remove('hidden');
