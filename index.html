@@ -1104,7 +1104,7 @@ tailwind.config = {
           <div class="text-xs text-gray-400 mt-1">Total sales this month</div>
         </div>
         <div class="bg-white rounded-2xl shadow-sm p-4 text-center">
-          <div class="text-2xl font-bold text-dark">130 pln</div>
+          <div class="text-2xl font-bold text-dark" id="comm-highest">—</div>
           <div class="text-xs text-gray-400 mt-1">Highest commission</div>
         </div>
       </div>
@@ -4093,37 +4093,48 @@ tailwind.config = {
   }
 
   let commChart = null;
-  let chartYear = 2026, chartMonth = 3; // 0-indexed month (3 = April)
+  const _now = new Date();
+  let chartYear = _now.getFullYear(), chartMonth = _now.getMonth();
 
   const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-  function seededRand(seed) {
-    let s = seed;
-    return function() { s = (s * 16807 + 0) % 2147483647; return (s - 1) / 2147483646; };
-  }
-
-  function genMonthData(year, month) {
+  async function loadChartData(year, month) {
     const days = new Date(year, month + 1, 0).getDate();
-    const rand = seededRand(year * 100 + month);
-    const labels = [], sales = [], commissions = [];
-    for (let d = 1; d <= days; d++) {
-      labels.push(d);
-      const s = Math.round((rand() * 1800 + 200) / 50) * 50;
-      const c = Math.round(s * (0.08 + rand() * 0.07) / 10) * 10;
-      sales.push(s);
-      commissions.push(c);
+    const pad = n => String(n).padStart(2,'0');
+    const from = `${year}-${pad(month+1)}-01`;
+    const to   = `${year}-${pad(month+1)}-${pad(days)}`;
+    const partnerId = currentPartner?.id;
+    if (!partnerId) return null;
+    const { data: rows } = await db.from('bookings')
+      .select('date, total, comm, status')
+      .eq('partner_id', partnerId)
+      .gte('date', from).lte('date', to)
+      .neq('status', 'cancelled');
+    const salesByDay = {}, commByDay = {};
+    for (let d = 1; d <= days; d++) { salesByDay[d] = 0; commByDay[d] = 0; }
+    let maxComm = 0;
+    for (const b of rows || []) {
+      const d = parseInt((b.date || '').split('-')[2], 10);
+      if (d) { salesByDay[d] += b.total || 0; commByDay[d] += b.comm || 0; }
+      if ((b.comm || 0) > maxComm) maxComm = b.comm;
     }
-    return { labels, sales, commissions };
+    const labels = [], sales = [], commissions = [];
+    for (let d = 1; d <= days; d++) { labels.push(d); sales.push(salesByDay[d]); commissions.push(commByDay[d]); }
+    return { labels, sales, commissions, maxComm };
   }
 
-  function renderChart() {
-    const data = genMonthData(chartYear, chartMonth);
-    const totalSales = data.sales.reduce((a,b)=>a+b,0);
-    const totalComm = data.commissions.reduce((a,b)=>a+b,0);
-
+  async function renderChart() {
     document.getElementById('chart-month-label').textContent = monthNames[chartMonth] + ' ' + chartYear;
+    document.getElementById('comm-month-total').textContent = '…';
+    document.getElementById('comm-sales-total').textContent = '…';
+    document.getElementById('comm-highest').textContent = '…';
+    const data = await loadChartData(chartYear, chartMonth);
+    if (!data) return;
+    const totalSales = data.sales.reduce((a,b)=>a+b,0);
+    const totalComm  = data.commissions.reduce((a,b)=>a+b,0);
     document.getElementById('comm-month-total').textContent = totalComm.toLocaleString('pl-PL') + ' pln';
     document.getElementById('comm-sales-total').textContent = totalSales.toLocaleString('pl-PL') + ' pln';
+    document.getElementById('comm-highest').textContent = data.maxComm.toLocaleString('pl-PL') + ' pln';
 
     const ctx = document.getElementById('comm-chart').getContext('2d');
     if (commChart) commChart.destroy();
@@ -4177,6 +4188,7 @@ tailwind.config = {
     if (chartMonth < 0)  { chartMonth = 11; chartYear--; }
     renderChart();
   }
+
 
   const origSetTab = window.setTab;
   document.addEventListener('DOMContentLoaded', () => {
