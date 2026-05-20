@@ -3443,6 +3443,7 @@ tailwind.config = {
 
     let bokunConfirmationCode = null;
     let bokunReservationCode = null;
+    let bokunBookingId = null;
     if (tdCurrentTour?.bokunId && tdSelectedTimeSlot?.startTimeId) {
       try {
         const buildPassengers = () => {
@@ -3529,6 +3530,7 @@ tailwind.config = {
             const confirmBody = confirmRes?.body;
             console.log('[Booking] confirm response:', JSON.stringify(confirmBody));
             bokunConfirmationCode = confirmBody?.booking?.confirmationCode || confirmBody?.confirmationCode || reservedCode;
+            bokunBookingId = confirmBody?.booking?.id || null;
           }
         } else {
           console.warn('[Booking] submit failed:', submitBody?.message || '');
@@ -3570,6 +3572,7 @@ tailwind.config = {
       partner_id: currentPartner?.id,
       staff_id: currentPartner?._staffId || null,
       bokun_confirmation_code: payment === 'link' ? (bokunReservationCode || null) : (bokunConfirmationCode || null),
+      bokun_booking_id: bokunBookingId,
     }).select('id').single();
 
     btn.disabled = false;

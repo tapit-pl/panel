@@ -14,11 +14,9 @@ async function hmac(secret: string, message: string): Promise<string> {
   return btoa(String.fromCharCode(...new Uint8Array(sig)))
 }
 
-async function bokunCancel(confirmationCode: string) {
+async function bokunCancel(bookingId: string | number) {
   const accessKey = Deno.env.get('BOKUN_ACCESS_KEY')!
   const secretKey = Deno.env.get('BOKUN_SECRET_KEY')!
-  // Extract numeric booking ID from "TM-XXXXXXXX"
-  const bookingId = confirmationCode.replace(/^TM-/i, '')
   const path = `/booking.json/${bookingId}/cancel`
   const date = bokunDate()
   const message = date + accessKey + 'POST' + path
@@ -90,9 +88,10 @@ Deno.serve(async (req) => {
     results.stripe = refund
   }
 
-  // Cancel in Bokun
-  if (booking.bokun_confirmation_code) {
-    const cancel = await bokunCancel(booking.bokun_confirmation_code)
+  // Cancel in Bokun — prefer internal booking ID, fall back to parsing confirmation code
+  const bokunId = booking.bokun_booking_id || booking.bokun_confirmation_code?.replace(/^TM-/i, '')
+  if (bokunId) {
+    const cancel = await bokunCancel(bokunId)
     results.bokun = { ok: cancel.ok, error: cancel.error }
   }
 

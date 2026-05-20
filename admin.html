@@ -2180,7 +2180,7 @@ tailwind.config = {
       const dateFormatted = b.date ? new Date(b.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
       const source = partner ? 'Partner Panel' : (b.source || 'Manual');
       allBookings.push({
-        id: b.id, tour: b.tour, guest: b.guest, email: b.email, phone: b.phone,
+        id: b.id, displayId: b.bokun_confirmation_code || b.id, tour: b.tour, guest: b.guest, email: b.email, phone: b.phone,
         hotel: partner?.name || '—', date: dateFormatted, time: b.time, pickup: b.pickup,
         pax: b.pax, total: b.total || 0, comm: b.comm, source, status: b.status, notes: b.notes || '',
         _dbBooking: true, _stripeSessionId: b.stripe_session_id, _bokunCode: b.bokun_confirmation_code,
@@ -3113,7 +3113,7 @@ tailwind.config = {
         : 'source-manual';
       tbody.insertAdjacentHTML('beforeend', `
         <tr class="hover:bg-gray-50 transition-colors text-xs" data-id="${b.id}" data-hotel="${b.hotel}" data-source="${b.source}" data-status="${b.status}">
-          <td class="px-5 py-3 font-mono text-gray-400">#${b.id}</td>
+          <td class="px-5 py-3 font-mono text-gray-400">#${b.displayId || b.id}</td>
           <td class="px-4 py-3 font-medium text-dark max-w-xs truncate">${b.tour}</td>
           <td class="px-4 py-3 text-gray-600">${b.guest}</td>
           <td class="px-4 py-3 text-gray-500">${b.hotel}</td>
