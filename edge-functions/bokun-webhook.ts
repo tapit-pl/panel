@@ -2,14 +2,12 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type' }
 
-// HMAC-SHA256 — Bokun webhook signature verification
 async function hmacSha256(secret: string, message: string): Promise<string> {
   const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'])
   const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(message))
   return btoa(String.fromCharCode(...new Uint8Array(sig)))
 }
 
-// HMAC-SHA1 — Bokun REST API auth (same as other edge functions)
 async function hmacSha1(secret: string, message: string): Promise<string> {
   const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-1' }, false, ['sign'])
   const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(message))
@@ -54,6 +52,68 @@ const BOKUN_STATUS_MAP: Record<string, string> = {
   ON_HOLD:   'Pending',
 }
 
+function parseBokunDate(val: unknown): string | null {
+  if (!val) return null
+  // Bokun dates: [year, month, day] array or "YYYY-MM-DD" string
+  if (Array.isArray(val) && val.length >= 3) {
+    const [y, m, d] = val as number[]
+    return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+  }
+  if (typeof val === 'string') return val.substring(0, 10)
+  return null
+}
+
+function parseBokunTime(val: unknown): string | null {
+  if (!val) return null
+  if (Array.isArray(val) && val.length >= 2) {
+    const [h, m] = val as number[]
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`
+  }
+  if (typeof val === 'string') return val.substring(0, 5)
+  return null
+}
+
+function extractBookingRow(body: Record<string, unknown>, confirmationCode: string, status: string): Record<string, unknown> {
+  const pb = (body.productBookings as Record<string, unknown>[])?.[0] ?? {}
+  const customer = (body.customer ?? body.contactPerson ?? {}) as Record<string, unknown>
+  const firstName = String(customer.firstName ?? customer.first_name ?? '')
+  const lastName  = String(customer.lastName  ?? customer.last_name  ?? '')
+  const guest     = [firstName, lastName].filter(Boolean).join(' ') || null
+
+  const product   = (pb.product ?? {}) as Record<string, unknown>
+  const tourName  = String(product.title ?? pb.title ?? body.title ?? '')
+
+  // Start date/time from productBooking
+  const startDate = parseBokunDate(pb.startDate ?? pb.date)
+  const startTime = parseBokunTime(pb.startTime ?? pb.time)
+
+  // Pax: sum all participants
+  const passengers = (pb.passengers ?? body.passengers ?? []) as Record<string, unknown>[]
+  const pax = passengers.reduce((sum, p) => sum + (Number(p.count ?? p.quantity ?? 1)), 0) || Number(pb.paxCount ?? body.paxCount ?? 0) || null
+
+  // Price in local currency (PLN)
+  const priceObj  = (pb.totalPrice ?? pb.price ?? body.totalPrice ?? {}) as Record<string, unknown>
+  const total     = Number(priceObj.amount ?? priceObj.value ?? priceObj.price ?? 0) || null
+
+  const guestEmail = String(customer.email ?? '')
+  const phone      = String(customer.phoneNumber ?? customer.phone ?? '')
+
+  return {
+    bokun_confirmation_code: confirmationCode,
+    tour_name:  tourName || null,
+    guest:      guest,
+    guest_email: guestEmail || null,
+    phone:      phone || null,
+    date:       startDate,
+    time:       startTime,
+    pax:        pax,
+    total:      total,
+    source:     'bokun_ota',
+    status:     status,
+    partner_id: null,
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
   if (req.method !== 'POST') return new Response('Method Not Allowed', { status: 405 })
@@ -67,32 +127,30 @@ Deno.serve(async (req) => {
   const topic = req.headers.get('x-bokun-topic') || ''
   console.log('[bokun-webhook] topic:', topic || '(none)', '| keys:', Object.keys(payload).join(','))
 
-  // Verify signature — logs mismatch but doesn't block (enable strict mode by setting BOKUN_WEBHOOK_SECRET)
   const webhookSecret = Deno.env.get('BOKUN_WEBHOOK_SECRET')
   if (webhookSecret) {
     const valid = await verifyBokunSignature(req.headers, webhookSecret)
     if (!valid) console.warn('[bokun-webhook] Signature mismatch — check BOKUN_WEBHOOK_SECRET')
   }
 
-  // Skip non-booking events
   if (topic && !topic.startsWith('booking')) {
     return new Response(JSON.stringify({ ok: true, skipped: true, topic }), { headers: CORS })
   }
 
-  // --- Extract confirmation code + raw Bokun status ---
+  // --- Fetch full booking details from Bokun ---
   let confirmationCode: string | null = null
   let rawBokunStatus: string | null = null
+  let fullBooking: Record<string, unknown> | null = null
 
   if (payload.confirmationCode) {
-    // Old-style notification: full booking payload sent directly
     confirmationCode = String(payload.confirmationCode)
     const pb = (payload.productBookings as Record<string, unknown>[])?.[0]
     rawBokunStatus = String(pb?.status ?? payload.status ?? '')
+    fullBooking = payload
   } else if (payload.bookingId) {
-    // New-style (GraphQL webhook): bookingId is base64("Booking:12345") — fetch full details
     let numericId: string
     try {
-      const decoded = atob(String(payload.bookingId)) // e.g. "Booking:37648"
+      const decoded = atob(String(payload.bookingId))
       numericId = decoded.split(':')[1] ?? String(payload.bookingId)
     } catch {
       numericId = String(payload.bookingId)
@@ -105,18 +163,16 @@ Deno.serve(async (req) => {
     confirmationCode = String(resp.body.confirmationCode ?? '')
     const pb = (resp.body.productBookings as Record<string, unknown>[])?.[0]
     rawBokunStatus = String(pb?.status ?? resp.body.status ?? '')
+    fullBooking = resp.body
   }
 
   if (!confirmationCode) {
-    // Log full payload so we can diagnose the format on first real invocation
     console.error('[bokun-webhook] no confirmationCode — raw payload:', rawBody.slice(0, 600))
     return new Response(JSON.stringify({ error: 'no_confirmation_code', raw: rawBody.slice(0, 400) }), { status: 400, headers: CORS })
   }
 
-  // --- Determine new panel status ---
+  // --- Determine new status ---
   let newStatus: string | null = null
-
-  // Topic takes priority (cancel event is authoritative even if status field says otherwise)
   if (topic === 'bookings/cancel' || topic === 'booking/cancel') {
     newStatus = 'Cancelled'
   } else if (topic === 'bookings/create' || topic === 'booking/create') {
@@ -130,23 +186,54 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ ok: true, skipped: true, reason: 'no_status_mapping' }), { headers: CORS })
   }
 
-  // --- Update Supabase ---
   const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
 
-  const { data: updated, error } = await db
+  // --- Check if booking already exists in DB ---
+  const { data: existing } = await db
     .from('bookings')
-    .update({ status: newStatus })
-    .eq('bokun_confirmation_code', confirmationCode)
     .select('id, status')
+    .eq('bokun_confirmation_code', confirmationCode)
+    .maybeSingle()
 
-  if (error) {
-    console.error('[bokun-webhook] DB error:', error.message)
-    return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: CORS })
+  if (existing) {
+    // UPDATE status only
+    const { data: updated, error } = await db
+      .from('bookings')
+      .update({ status: newStatus })
+      .eq('bokun_confirmation_code', confirmationCode)
+      .select('id, status')
+
+    if (error) {
+      console.error('[bokun-webhook] DB update error:', error.message)
+      return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: CORS })
+    }
+    console.log(`[bokun-webhook] UPDATED | ${confirmationCode} → ${newStatus} | rows: ${updated?.length ?? 0}`)
+    return new Response(
+      JSON.stringify({ ok: true, action: 'updated', confirmationCode, newStatus, rowsUpdated: updated?.length ?? 0 }),
+      { headers: { ...CORS, 'Content-Type': 'application/json' } }
+    )
   }
 
-  console.log(`[bokun-webhook] ${topic || rawBokunStatus} | ${confirmationCode} → ${newStatus} | rows: ${updated?.length ?? 0}`)
+  // --- INSERT new booking ---
+  if (!fullBooking) {
+    console.log('[bokun-webhook] no full booking data for insert, skipping')
+    return new Response(JSON.stringify({ ok: true, skipped: true, reason: 'no_full_booking_for_insert' }), { headers: CORS })
+  }
+
+  const row = extractBookingRow(fullBooking, confirmationCode, newStatus)
+  const { data: inserted, error: insertError } = await db
+    .from('bookings')
+    .insert(row)
+    .select('id')
+
+  if (insertError) {
+    console.error('[bokun-webhook] DB insert error:', insertError.message)
+    return new Response(JSON.stringify({ error: insertError.message }), { status: 500, headers: CORS })
+  }
+
+  console.log(`[bokun-webhook] INSERTED | ${confirmationCode} | ${row.tour_name} | ${row.date} | pax:${row.pax} | ${newStatus}`)
   return new Response(
-    JSON.stringify({ ok: true, confirmationCode, newStatus, rowsUpdated: updated?.length ?? 0 }),
+    JSON.stringify({ ok: true, action: 'inserted', confirmationCode, newStatus, id: inserted?.[0]?.id }),
     { headers: { ...CORS, 'Content-Type': 'application/json' } }
   )
 })
