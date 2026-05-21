@@ -2400,7 +2400,8 @@ tailwind.config = {
       window.location.href = 'admin.html';
       return;
     }
-    const { data: partner } = await db.from('partners').select('*').eq('email', user.email).maybeSingle();
+    const { data: partnerRows } = await db.from('partners').select('*').eq('email', user.email);
+    const partner = Array.isArray(partnerRows) ? (partnerRows[0] || null) : partnerRows;
     if (partner) {
       if (partner.active === false) {
         await db.auth.signOut();
