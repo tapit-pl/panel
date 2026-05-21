@@ -2177,7 +2177,7 @@ tailwind.config = {
   async function loadBookings() {
     allBookings.length = 0;
 
-    const { data: dbRows } = await db.from('bookings').select('*').order('created_at', { ascending: false }).limit(10000);
+    const { data: dbRows } = await db.from('bookings').select('*').order('created_at', { ascending: false }).limit(50000);
     (dbRows || []).forEach(b => {
       const partner = allPartners.find(p => p.id === b.partner_id);
       const dateFormatted = b.date ? new Date(b.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
