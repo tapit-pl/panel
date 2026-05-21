@@ -2232,12 +2232,12 @@ tailwind.config = {
     if (partnerData) {
       const contactFirst = partnerData.contact_first || (partnerData.contact ? partnerData.contact.split(' ')[0] : null);
       welcomeName = contactFirst || partnerData.name || userEmail;
-      welcomeHotel = contactFirst ? (partnerData.name || '') : '';
+      welcomeHotel = partnerData.name || '';
       currentPartner = partnerData;
     } else {
       const { data: staffData } = await db.from('staff').select('*, partners(*)').eq('email', userEmail).maybeSingle();
       if (staffData) {
-        welcomeName = staffData.first_name;
+        welcomeName = staffData.first_name || userEmail;
         let partnerData = staffData.partners;
         if (!partnerData?.id && staffData.partner_id) {
           const { data: pd } = await db.from('partners').select('*').eq('id', staffData.partner_id).maybeSingle();
