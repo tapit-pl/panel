@@ -2195,9 +2195,13 @@ tailwind.config = {
 
     try {
       const today = new Date();
-      const past = new Date(today); past.setMonth(past.getMonth() - 6);
+      const past = new Date('2026-01-01');
       const future = new Date(today); future.setDate(future.getDate() + 90);
       const fmt = d => d.toISOString().slice(0, 10);
+
+      // Map confirmation code → index in allBookings for DB bookings (to fix creation date)
+      const bokunCodeIndex = new Map();
+      allBookings.forEach((b, i) => { if (b._bokunCode) bokunCodeIndex.set(b._bokunCode, i); });
 
       const seenIds = new Set([
         ...allBookings.map(b => b.id),
@@ -2217,7 +2221,13 @@ tailwind.config = {
         let added = 0;
         items.forEach(item => {
           const mapped = mapBokunBooking(item);
-          if (mapped && !seenIds.has(mapped.id)) {
+          if (!mapped) return;
+          if (bokunCodeIndex.has(mapped.id) && mapped._creationTs) {
+            // Fix creation date for DB booking that was bulk-imported with wrong created_at
+            allBookings[bokunCodeIndex.get(mapped.id)]._creationTs = mapped._creationTs;
+            return;
+          }
+          if (!seenIds.has(mapped.id)) {
             seenIds.add(mapped.id);
             allBookings.push(mapped);
             added++;
