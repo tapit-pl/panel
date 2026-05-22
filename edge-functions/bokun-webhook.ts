@@ -54,63 +54,107 @@ const BOKUN_STATUS_MAP: Record<string, string> = {
 
 function parseBokunDate(val: unknown): string | null {
   if (!val) return null
-  // Bokun dates: [year, month, day] array or "YYYY-MM-DD" string
+  if (typeof val === 'number' && val > 946684800000) {
+    // Unix ms timestamp — add UTC+2 (Warsaw) to get correct local date
+    return new Date(val + 7200000).toISOString().substring(0, 10)
+  }
   if (Array.isArray(val) && val.length >= 3) {
     const [y, m, d] = val as number[]
     return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`
   }
-  if (typeof val === 'string') return val.substring(0, 10)
+  if (typeof val === 'string' && val.length >= 10) return val.substring(0, 10)
   return null
 }
 
 function parseBokunTime(val: unknown): string | null {
   if (!val) return null
+  if (typeof val === 'number' && val > 946684800000) {
+    // Unix ms timestamp — extract UTC+2 (Warsaw) local time
+    const d = new Date(val + 7200000)
+    return `${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')}`
+  }
   if (Array.isArray(val) && val.length >= 2) {
     const [h, m] = val as number[]
     return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`
   }
-  if (typeof val === 'string') return val.substring(0, 5)
+  if (typeof val === 'string' && val.length >= 5) return val.substring(0, 5)
   return null
 }
 
 function extractBookingRow(body: Record<string, unknown>, confirmationCode: string, status: string): Record<string, unknown> {
+  // activityBookings = HTTP webhook format; productBookings = REST API format
+  const ab = (body.activityBookings as Record<string, unknown>[])?.[0] ?? {}
   const pb = (body.productBookings as Record<string, unknown>[])?.[0] ?? {}
+  // Use whichever has more data
+  const booking = Object.keys(ab).length > Object.keys(pb).length ? ab : pb
+
   const customer = (body.customer ?? body.contactPerson ?? {}) as Record<string, unknown>
   const firstName = String(customer.firstName ?? customer.first_name ?? '')
   const lastName  = String(customer.lastName  ?? customer.last_name  ?? '')
   const guest     = [firstName, lastName].filter(Boolean).join(' ') || null
 
-  const product   = (pb.product ?? {}) as Record<string, unknown>
-  const tourName  = String(product.title ?? pb.title ?? body.title ?? '')
+  // Tour name — try all known paths
+  const abActivity = (ab.activity ?? {}) as Record<string, unknown>
+  const pbProduct  = (pb.product ?? {}) as Record<string, unknown>
+  const tourName   = String(
+    ab.title ?? abActivity.title ??
+    pb.title ?? pbProduct.title ??
+    booking.title ?? body.title ?? ''
+  )
 
-  // Start date/time from productBooking
-  const startDate = parseBokunDate(pb.startDate ?? pb.date)
-  const startTime = parseBokunTime(pb.startTime ?? pb.time)
+  // Date: try plain date field first, then startDate, then parse from startDateTime array
+  const sdt = (booking.startDateTime ?? ab.startDateTime ?? pb.startDateTime) as number[] | null
+  let startDate: string | null =
+    parseBokunDate(booking.date ?? booking.startDate) ??
+    parseBokunDate(ab.date ?? ab.startDate) ??
+    parseBokunDate(pb.date ?? pb.startDate)
 
-  // Pax: sum all participants
-  const passengers = (pb.passengers ?? body.passengers ?? []) as Record<string, unknown>[]
-  const pax = passengers.reduce((sum, p) => sum + (Number(p.count ?? p.quantity ?? 1)), 0) || Number(pb.paxCount ?? body.paxCount ?? 0) || null
+  if (!startDate && Array.isArray(sdt) && sdt.length >= 3) {
+    startDate = parseBokunDate([sdt[0], sdt[1], sdt[2]])
+  }
 
-  // Price in local currency (PLN)
-  const priceObj  = (pb.totalPrice ?? pb.price ?? body.totalPrice ?? {}) as Record<string, unknown>
-  const total     = Number(priceObj.amount ?? priceObj.value ?? priceObj.price ?? 0) || null
+  // Time: try startTime/time field, then extract from startDateTime array
+  let startTime: string | null =
+    parseBokunTime(booking.startTime ?? booking.time) ??
+    parseBokunTime(ab.startTime ?? ab.time) ??
+    parseBokunTime(pb.startTime ?? pb.time)
+
+  if (!startTime && Array.isArray(sdt) && sdt.length >= 5) {
+    startTime = parseBokunTime([sdt[3], sdt[4]])
+  }
+
+  // Pax: totalParticipants (activityBooking), then sum passengers, then paxCount
+  const abPax = Number(ab.totalParticipants ?? 0)
+  const passengers = (booking.passengers ?? body.passengers ?? []) as Record<string, unknown>[]
+  const passengerPax = passengers.reduce((sum, p) => sum + (Number(p.count ?? p.quantity ?? 1)), 0)
+  const pax = abPax || passengerPax || Number(booking.paxCount ?? body.paxCount ?? 0) || null
+
+  // Price: prefer totalPriceConverted (seller currency = PLN), fall back to totalPrice
+  const tpc = body.totalPriceConverted ?? body.totalPrice ?? booking.totalPrice
+  const total = typeof tpc === 'number' && tpc > 0
+    ? tpc
+    : (Number(tpc) > 0 ? Number(tpc) : null)
 
   const guestEmail = String(customer.email ?? '')
   const phone      = String(customer.phoneNumber ?? customer.phone ?? '')
 
+  const currency = String(body.currency ?? 'PLN')
+
   return {
     bokun_confirmation_code: confirmationCode,
-    tour_name:  tourName || null,
-    guest:      guest,
+    tour:        tourName || 'Bokun OTA',
+    tour_name:   tourName || null,
+    guest:       guest,
     guest_email: guestEmail || null,
-    phone:      phone || null,
-    date:       startDate,
-    time:       startTime,
-    pax:        pax,
-    total:      total,
-    source:     'bokun_ota',
-    status:     status,
-    partner_id: null,
+    phone:       phone || null,
+    date:        startDate,
+    time:        startTime,
+    pax:         pax,
+    total:       total,
+    currency:    currency,
+    source:      'bokun_ota',
+    status:      status,
+    partner_id:  null,
   }
 }
 
@@ -137,7 +181,6 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ ok: true, skipped: true, topic }), { headers: CORS })
   }
 
-  // --- Fetch full booking details from Bokun ---
   let confirmationCode: string | null = null
   let rawBokunStatus: string | null = null
   let fullBooking: Record<string, unknown> | null = null
@@ -145,25 +188,38 @@ Deno.serve(async (req) => {
   if (payload.confirmationCode) {
     confirmationCode = String(payload.confirmationCode)
     const pb = (payload.productBookings as Record<string, unknown>[])?.[0]
-    rawBokunStatus = String(pb?.status ?? payload.status ?? '')
+    const ab = (payload.activityBookings as Record<string, unknown>[])?.[0]
+    rawBokunStatus = String(pb?.status ?? ab?.status ?? payload.status ?? '')
     fullBooking = payload
   } else if (payload.bookingId) {
     let numericId: string
     try {
       const decoded = atob(String(payload.bookingId))
-      numericId = decoded.split(':')[1] ?? String(payload.bookingId)
+      numericId = decoded.startsWith('Booking:') ? (decoded.split(':')[1] ?? String(payload.bookingId)) : String(payload.bookingId)
     } catch {
       numericId = String(payload.bookingId)
     }
     const resp = await bokunGet(`/booking.json/${numericId}`)
-    console.log('[bokun-webhook] fetched booking from Bokun API, HTTP', resp.status)
-    if (!resp.ok) {
+    console.log('[bokun-webhook] Bokun API HTTP', resp.status)
+    if (resp.ok) {
+      confirmationCode = String(resp.body.confirmationCode ?? '')
+      const pb = (resp.body.productBookings as Record<string, unknown>[])?.[0]
+      rawBokunStatus = String(pb?.status ?? resp.body.status ?? '')
+      fullBooking = resp.body
+    } else if (resp.status === 404) {
+      // Race condition — webhook fires before booking is in API, use payload as fallback
+      console.log('[bokun-webhook] 404 from Bokun API, falling back to payload')
+      const code = String(payload.confirmationCode ?? payload.bookingConfirmationCode ?? '')
+      if (code) {
+        confirmationCode = code
+        const pb = (payload.productBookings as Record<string, unknown>[])?.[0]
+        const ab = (payload.activityBookings as Record<string, unknown>[])?.[0]
+        rawBokunStatus = String(pb?.status ?? ab?.status ?? payload.status ?? '')
+        fullBooking = payload
+      }
+    } else {
       return new Response(JSON.stringify({ error: 'Bokun API fetch failed', bokun: resp.status }), { status: 502, headers: CORS })
     }
-    confirmationCode = String(resp.body.confirmationCode ?? '')
-    const pb = (resp.body.productBookings as Record<string, unknown>[])?.[0]
-    rawBokunStatus = String(pb?.status ?? resp.body.status ?? '')
-    fullBooking = resp.body
   }
 
   if (!confirmationCode) {
@@ -171,7 +227,7 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ error: 'no_confirmation_code', raw: rawBody.slice(0, 400) }), { status: 400, headers: CORS })
   }
 
-  // --- Determine new status ---
+  // Determine new status
   let newStatus: string | null = null
   if (topic === 'bookings/cancel' || topic === 'booking/cancel') {
     newStatus = 'Cancelled'
@@ -188,15 +244,14 @@ Deno.serve(async (req) => {
 
   const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
 
-  // --- Check if booking already exists in DB ---
-  const { data: existing } = await db
+  const { data: existingRows } = await db
     .from('bookings')
     .select('id, status')
     .eq('bokun_confirmation_code', confirmationCode)
-    .maybeSingle()
+
+  const existing = existingRows && existingRows.length > 0 ? existingRows[0] : null
 
   if (existing) {
-    // UPDATE status only
     const { data: updated, error } = await db
       .from('bookings')
       .update({ status: newStatus })
@@ -214,13 +269,28 @@ Deno.serve(async (req) => {
     )
   }
 
-  // --- INSERT new booking ---
   if (!fullBooking) {
     console.log('[bokun-webhook] no full booking data for insert, skipping')
     return new Response(JSON.stringify({ ok: true, skipped: true, reason: 'no_full_booking_for_insert' }), { headers: CORS })
   }
 
   const row = extractBookingRow(fullBooking, confirmationCode, newStatus)
+
+  // Debug logs to diagnose date/price fields
+  const pb0 = (fullBooking.productBookings as Record<string,unknown>[])?.[0] ?? {}
+  const ab0 = (fullBooking.activityBookings as Record<string,unknown>[])?.[0] ?? {}
+  console.log('[bokun-webhook] row:', JSON.stringify({ tour: row.tour, date: row.date, time: row.time, pax: row.pax, total: row.total, guest: row.guest }))
+  console.log('[bokun-webhook] date fields:', JSON.stringify({
+    pbDate: pb0.date, pbStartDate: pb0.startDate, pbStartDateTime: pb0.startDateTime,
+    abDate: ab0.date, abStartDate: ab0.startDate, abStartDateTime: ab0.startDateTime,
+  }))
+  console.log('[bokun-webhook] price fields:', JSON.stringify({
+    currency: fullBooking.currency,
+    totalPriceConverted: fullBooking.totalPriceConverted,
+    totalPrice: fullBooking.totalPrice,
+    pbTotalPrice: pb0.totalPrice,
+  }))
+
   const { data: inserted, error: insertError } = await db
     .from('bookings')
     .insert(row)
@@ -231,7 +301,7 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ error: insertError.message }), { status: 500, headers: CORS })
   }
 
-  console.log(`[bokun-webhook] INSERTED | ${confirmationCode} | ${row.tour_name} | ${row.date} | pax:${row.pax} | ${newStatus}`)
+  console.log(`[bokun-webhook] INSERTED | ${confirmationCode} | ${row.tour_name} | ${row.date} | pax:${row.pax} | total:${row.total} | ${newStatus}`)
   return new Response(
     JSON.stringify({ ok: true, action: 'inserted', confirmationCode, newStatus, id: inserted?.[0]?.id }),
     { headers: { ...CORS, 'Content-Type': 'application/json' } }

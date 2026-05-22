@@ -2186,7 +2186,7 @@ tailwind.config = {
         id: b.id, displayId: b.bokun_confirmation_code || b.id, tour: b.tour, guest: b.guest, email: b.email, phone: b.phone,
         hotel: partner?.name || '—', date: dateFormatted, time: b.time, pickup: b.pickup,
         language: b.language || '',
-        pax: b.pax, total: b.total || 0, comm: b.comm, source, status: b.status, notes: b.notes || '',
+        pax: b.pax, total: b.total || 0, currency: b.currency || 'PLN', comm: b.comm, source, status: b.status, notes: b.notes || '',
         _dbBooking: true, _stripeSessionId: b.stripe_session_id, _bokunCode: b.bokun_confirmation_code,
         _creationTs: b.created_at ? new Date(b.created_at).getTime() : 0,
         _startTs: b.date ? new Date(b.date).getTime() : 0,
@@ -3149,7 +3149,7 @@ tailwind.config = {
           <td class="px-4 py-3 text-gray-500 whitespace-nowrap">${b.date}</td>
           <td class="px-4 py-3 text-gray-500">${b.language ? `<span class="inline-flex items-center gap-1"><i class="fa-solid fa-language text-brand/60 text-xs"></i>${b.language}</span>` : '<span class="text-gray-300">—</span>'}</td>
           <td class="px-4 py-3 text-center text-dark">${b.pax}</td>
-          <td class="px-4 py-3 text-right font-semibold text-dark whitespace-nowrap">${b.total} zł</td>
+          <td class="px-4 py-3 text-right font-semibold text-dark whitespace-nowrap">${b.total} ${b.currency === 'PLN' ? 'zł' : (b.currency || 'zł')}</td>
           <td class="px-4 py-3 text-slate-300 text-xs">${b.source}</td>
           <td class="px-4 py-3 text-center">${statusBadge(b.status)}</td>
           <td class="px-4 py-3 text-right whitespace-nowrap">
