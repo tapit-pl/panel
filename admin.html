@@ -2222,9 +2222,10 @@ tailwind.config = {
         items.forEach(item => {
           const mapped = mapBokunBooking(item);
           if (!mapped) return;
-          if (bokunCodeIndex.has(mapped.id) && mapped._creationTs) {
-            // Fix creation date for DB booking that was bulk-imported with wrong created_at
-            allBookings[bokunCodeIndex.get(mapped.id)]._creationTs = mapped._creationTs;
+          if (bokunCodeIndex.has(mapped.id)) {
+            const idx = bokunCodeIndex.get(mapped.id);
+            if (mapped._creationTs) allBookings[idx]._creationTs = mapped._creationTs;
+            if (allBookings[idx].source === 'bokun_ota') allBookings[idx].source = mapped.source;
             return;
           }
           if (!seenIds.has(mapped.id)) {

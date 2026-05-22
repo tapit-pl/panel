@@ -140,6 +140,13 @@ function extractBookingRow(body: Record<string, unknown>, confirmationCode: stri
 
   const currency = String(body.currency ?? 'PLN')
 
+  const codePrefix = confirmationCode.split('-')[0].toUpperCase()
+  const sourceMap: Record<string, string> = {
+    VIA: 'Viator', GET: 'GYG', GYG: 'GYG', HEA: 'Headout',
+    MUS: 'Musement', KLO: 'Klook', EXP: 'Expedia',
+  }
+  const source = sourceMap[codePrefix] ?? 'bokun_ota'
+
   return {
     bokun_confirmation_code: confirmationCode,
     tour:        tourName || 'Bokun OTA',
@@ -152,7 +159,7 @@ function extractBookingRow(body: Record<string, unknown>, confirmationCode: stri
     pax:         pax,
     total:       total,
     currency:    currency,
-    source:      'bokun_ota',
+    source:      source,
     status:      status,
     partner_id:  null,
   }
