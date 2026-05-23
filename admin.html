@@ -2238,7 +2238,7 @@ tailwind.config = {
             added++;
           }
         });
-        if (items.length < 500 || added === 0) break;
+        if (items.length < 500) break;
         page++;
       }
     } catch(e) { console.warn('Bokun load error:', e); }
