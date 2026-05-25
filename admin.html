@@ -2044,7 +2044,7 @@ tailwind.config = {
     const tbody = el('dash-recent-tbody');
     if (tbody) tbody.innerHTML = recentMapped.map(b => {
       const sc = b.source==='Viator'?'source-viator':b.source==='GYG'?'source-gyg':b.source==='Klook'?'source-klook':b.source==='Website'?'source-website':b.source==='Bokun'?'source-bokun':'source-manual';
-      const st = b.status==='Paid'?'status-paid':b.status==='Pending'?'status-pending':'status-cancelled';
+      const st = b.status==='Paid'?'status-paid':b.status==='Confirmed'?'status-confirmed':b.status==='Pending'?'status-pending':'status-cancelled';
       return `<tr class="hover:bg-gray-50 transition-colors">
         <td class="px-5 py-3 text-slate-500 font-mono text-xs">#${b.id}</td>
         <td class="px-4 py-3 font-medium text-slate-100 text-xs max-w-[120px] truncate">${b.tour}</td>
