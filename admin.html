@@ -2193,12 +2193,12 @@ tailwind.config = {
     allBookings.length = 0;
 
     const { data: dbRows } = await db.from('bookings').select('*').order('created_at', { ascending: false }).limit(50000);
+    const eurOnlyPrefixes = ['HEA'];
     (dbRows || []).forEach(b => {
       const partner = allPartners.find(p => p.id === b.partner_id);
       const dateFormatted = b.date ? new Date(b.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
       const source = partner ? 'Partner Panel' : (b.source || 'TM Panel');
       const codeP = (b.bokun_confirmation_code || '').split('-')[0].toUpperCase();
-      const eurOnlyPrefixes = ['HEA'];
       const dbCurrency = eurOnlyPrefixes.includes(codeP) ? 'EUR' : (b.currency || 'PLN');
       allBookings.push({
         id: b.id, displayId: b.bokun_confirmation_code || b.id, tour: b.tour, guest: b.guest, email: b.email, phone: b.phone,
@@ -2247,7 +2247,8 @@ tailwind.config = {
             // Partner Panel bookings use their own PLN amount from DB; all OTA sources use API
             if (allBookings[idx].source !== 'Partner Panel') {
               if (mapped.total > 0) allBookings[idx].total = mapped.total;
-              allBookings[idx].currency = mapped.totalCurrency || 'PLN';
+              const pfx = (allBookings[idx]._bokunCode || mapped.id || '').split('-')[0].toUpperCase();
+              allBookings[idx].currency = eurOnlyPrefixes.includes(pfx) ? 'EUR' : (mapped.totalCurrency || 'PLN');
             }
             return;
           }
