@@ -1966,6 +1966,7 @@ tailwind.config = {
   }
 
   async function updateDashboardKPIs() {
+    await getEurPlnRate();
     const { start: monthStart, end: monthEnd, prevStart, prevEnd } = getSelectedMonthRange();
     const now = new Date();
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
@@ -1979,8 +1980,8 @@ tailwind.config = {
     const prevMonthB= allBookings.filter(b => active(b) && b._creationTs >= prevStart && b._creationTs < prevEnd);
     const recentMapped = [...allBookings].filter(b => b._creationTs > 0).sort((a,b) => b._creationTs - a._creationTs).slice(0, 5);
 
-    const monthRev  = monthB.reduce((s,b) => s+(b.total||0), 0);
-    const prevRev   = prevMonthB.reduce((s,b) => s+(b.total||0), 0);
+    const monthRev  = monthB.reduce((s,b) => s+toPlnAmount(b), 0);
+    const prevRev   = prevMonthB.reduce((s,b) => s+toPlnAmount(b), 0);
     const monthPax  = monthB.reduce((s,b) => s+(Number(b.pax)||0), 0);
     const prevPax   = prevMonthB.reduce((s,b) => s+(Number(b.pax)||0), 0);
 
@@ -3000,7 +3001,7 @@ tailwind.config = {
     const dayStart = new Date(dateStr + 'T00:00:00').getTime();
     const dayEnd   = dayStart + 86400000;
     const items = allBookings.filter(b => b._creationTs >= dayStart && b._creationTs < dayEnd && b.status !== 'Cancelled');
-    return { b: items.length, r: items.reduce((s, x) => s + (x.total || 0), 0) };
+    return { b: items.length, r: items.reduce((s, x) => s + toPlnAmount(x), 0) };
   }
 
   function fmtDateLabel(d) {
@@ -3119,6 +3120,23 @@ tailwind.config = {
 
   const allBookings = [];
   let supaDash = [];
+  let _eurPlnRate = null;
+
+  async function getEurPlnRate() {
+    if (_eurPlnRate) return _eurPlnRate;
+    try {
+      const res = await fetch('https://api.nbp.pl/api/exchangerates/rates/a/eur/?format=json');
+      const data = await res.json();
+      _eurPlnRate = data?.rates?.[0]?.mid || 4.25;
+    } catch { _eurPlnRate = 4.25; }
+    return _eurPlnRate;
+  }
+
+  function toPlnAmount(b) {
+    const amt = b.total || 0;
+    if (!b.currency || b.currency === 'PLN') return amt;
+    return amt * (_eurPlnRate || 4.25);
+  }
 
   function statusBadge(status) {
     const s = (status || '').toLowerCase();
