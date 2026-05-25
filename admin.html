@@ -2159,8 +2159,7 @@ tailwind.config = {
     const statusMap = { CONFIRMED: 'Paid', CANCELLED: 'Cancelled', PENDING: 'Pending' };
     const codePrefix = (item.confirmationCode || '').split('-')[0].toUpperCase();
     const isOtaPln = ['VIA', 'GET', 'GYG', 'HEA', 'MUS', 'KLO', 'EXP'].includes(codePrefix);
-    // OTA-PLN channels: customerInvoice = TM net revenue in PLN (mislabeled EUR by Bokun)
-    // Other channels (HOT etc.): resellerInvoice = what TM invoices to the channel (net EUR)
+    if (codePrefix === 'HOT') console.log('[HOT-debug]', item.confirmationCode, JSON.stringify({ customerInvoice: pb.customerInvoice, resellerInvoice: pb.resellerInvoice, totalPrice: item.totalPrice, totalPriceConverted: item.totalPriceConverted, currency: item.currency }));
     const total = isOtaPln
       ? (pb.customerInvoice?.total || 0)
       : (pb.resellerInvoice?.total || pb.customerInvoice?.total || 0);
