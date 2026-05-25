@@ -2159,7 +2159,7 @@ tailwind.config = {
     const statusMap = { CONFIRMED: 'Paid', CANCELLED: 'Cancelled', PENDING: 'Pending' };
     const codePrefix = (item.confirmationCode || '').split('-')[0].toUpperCase();
     const isOtaPln = ['VIA', 'GET', 'GYG', 'HEA', 'MUS', 'KLO', 'EXP'].includes(codePrefix);
-    if (codePrefix === 'HOT') console.log('[HOT-debug]', item.confirmationCode, JSON.stringify({ customerInvoice: pb.customerInvoice, resellerInvoice: pb.resellerInvoice, totalPrice: item.totalPrice, totalPriceConverted: item.totalPriceConverted, currency: item.currency }));
+    if (codePrefix === 'HOT') { window._hotDebug = window._hotDebug || []; window._hotDebug.push({ code: item.confirmationCode, cI: pb.customerInvoice, rI: pb.resellerInvoice, tP: item.totalPrice, tPC: item.totalPriceConverted, cur: item.currency }); }
     const total = isOtaPln
       ? (pb.customerInvoice?.total || 0)
       : (pb.resellerInvoice?.total || pb.customerInvoice?.total || 0);
