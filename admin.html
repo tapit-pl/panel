@@ -2157,9 +2157,10 @@ tailwind.config = {
       : channel.includes('Expedia') ? 'Expedia'
       : 'Bokun';
     const statusMap = { CONFIRMED: 'Paid', CANCELLED: 'Cancelled', PENDING: 'Pending' };
-    const inv = pb.resellerInvoice?.total ? pb.resellerInvoice : pb.customerInvoice;
-    const total = inv?.total || 0;
-    const currency = inv?.currency || 'PLN';
+    const total = pb.customerInvoice?.total || pb.resellerInvoice?.total || 0;
+    const codePrefix = (item.confirmationCode || '').split('-')[0].toUpperCase();
+    const isOtaPln = ['VIA', 'GET', 'GYG', 'HEA', 'MUS', 'KLO', 'EXP'].includes(codePrefix);
+    const currency = isOtaPln ? 'PLN' : (pb.customerInvoice?.currency || 'EUR');
     return {
       id: item.confirmationCode || String(item.id),
       tour: pb.product?.title?.trim() || '—',
