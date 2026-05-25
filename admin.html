@@ -2197,11 +2197,14 @@ tailwind.config = {
       const partner = allPartners.find(p => p.id === b.partner_id);
       const dateFormatted = b.date ? new Date(b.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
       const source = partner ? 'Partner Panel' : (b.source || 'TM Panel');
+      const codeP = (b.bokun_confirmation_code || '').split('-')[0].toUpperCase();
+      const eurOnlyPrefixes = ['HEA'];
+      const dbCurrency = eurOnlyPrefixes.includes(codeP) ? 'EUR' : (b.currency || 'PLN');
       allBookings.push({
         id: b.id, displayId: b.bokun_confirmation_code || b.id, tour: b.tour, guest: b.guest, email: b.email, phone: b.phone,
         hotel: partner?.name || '—', date: dateFormatted, time: b.time, pickup: b.pickup,
         language: b.language || '',
-        pax: b.pax, total: b.total || 0, currency: b.currency || 'PLN', comm: b.comm, source, status: b.status, notes: b.notes || '',
+        pax: b.pax, total: b.total || 0, currency: dbCurrency, comm: b.comm, source, status: b.status, notes: b.notes || '',
         _dbBooking: true, _stripeSessionId: b.stripe_session_id, _bokunCode: b.bokun_confirmation_code,
         _creationTs: b.created_at ? new Date(b.created_at).getTime() : 0,
         _startTs: b.date ? new Date(b.date).getTime() : 0,
