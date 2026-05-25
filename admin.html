@@ -2158,8 +2158,8 @@ tailwind.config = {
       : 'Bokun';
     const statusMap = { CONFIRMED: 'Paid', CANCELLED: 'Cancelled', PENDING: 'Pending' };
     const codePrefix = (item.confirmationCode || '').split('-')[0].toUpperCase();
-    const isOtaPln = ['VIA', 'GET', 'GYG', 'HEA', 'MUS', 'KLO', 'EXP'].includes(codePrefix);
-    if (codePrefix === 'HOT') { window._hotDebug = window._hotDebug || []; window._hotDebug.push({ code: item.confirmationCode, cI: pb.customerInvoice, rI: pb.resellerInvoice, tP: item.totalPrice, tPC: item.totalPriceConverted, cur: item.currency }); }
+    const isOtaPln = ['VIA', 'GET', 'GYG', 'MUS', 'KLO', 'EXP'].includes(codePrefix);
+
     const total = isOtaPln
       ? (pb.customerInvoice?.total || 0)
       : (pb.resellerInvoice?.total || pb.customerInvoice?.total || 0);
@@ -2187,14 +2187,6 @@ tailwind.config = {
       _bokun: true
     };
   }
-
-  window.debugBooking = async (code) => {
-    const { data } = await db.functions.invoke('bokun-sync', { body: { path: `/booking.json/confirmation-code/${code}`, method: 'GET' } });
-    const pb = data?.body?.productBookings?.[0];
-    const result = { cI: pb?.customerInvoice, rI: pb?.resellerInvoice, tP: data?.body?.totalPrice, tPC: data?.body?.totalPriceConverted, cur: data?.body?.currency };
-    console.log('DEBUG', code, JSON.stringify(result));
-    return result;
-  };
 
   async function loadBookings() {
     await getEurPlnRate();
