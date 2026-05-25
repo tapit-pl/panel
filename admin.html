@@ -2214,7 +2214,7 @@ tailwind.config = {
     try {
       const today = new Date();
       const past = new Date('2026-01-01');
-      const future = new Date(today); future.setDate(future.getDate() + 90);
+      const future = new Date(today); future.setDate(future.getDate() + 360);
       const fmt = d => d.toISOString().slice(0, 10);
 
       // Map confirmation code → index in allBookings for DB bookings (to fix creation date)
