@@ -2051,7 +2051,7 @@ tailwind.config = {
         <td class="px-4 py-3 text-slate-300 text-xs">${b.guest}</td>
         <td class="px-4 py-3 text-slate-400 text-xs">${b.hotel}</td>
         <td class="px-4 py-3 text-slate-400 text-xs whitespace-nowrap">${b.date}</td>
-        <td class="px-4 py-3 text-right font-semibold text-white text-xs whitespace-nowrap">${(b.total||0).toLocaleString('pl')} zł</td>
+        <td class="px-4 py-3 text-right font-semibold text-white text-xs whitespace-nowrap">${(b.total||0).toLocaleString('pl')} ${b.currency === 'PLN' || !b.currency ? 'zł' : b.currency}</td>
         <td class="px-4 py-3 text-center"><span class="${sc} text-xs font-semibold px-2 py-0.5 rounded-full">${b.source}</span></td>
         <td class="px-4 py-3 text-center"><span class="${st} text-xs font-semibold px-2 py-0.5 rounded-full">${b.status}</span></td>
       </tr>`;
