@@ -2240,8 +2240,9 @@ tailwind.config = {
           if (bokunCodeIndex.has(mapped.id)) {
             const idx = bokunCodeIndex.get(mapped.id);
             if (mapped._creationTs) allBookings[idx]._creationTs = mapped._creationTs;
-            if (allBookings[idx].source === 'bokun_ota') {
-              allBookings[idx].source = mapped.source;
+            if (allBookings[idx].source === 'bokun_ota') allBookings[idx].source = mapped.source;
+            // Partner Panel bookings use their own PLN amount from DB; all OTA sources use API
+            if (allBookings[idx].source !== 'Partner Panel' && mapped.total > 0) {
               allBookings[idx].total = mapped.total;
               allBookings[idx].currency = mapped.totalCurrency || 'PLN';
             }
