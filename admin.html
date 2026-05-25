@@ -2188,6 +2188,14 @@ tailwind.config = {
     };
   }
 
+  window.debugBooking = async (code) => {
+    const { data } = await db.functions.invoke('bokun-sync', { body: { path: `/booking.json/confirmation-code/${code}`, method: 'GET' } });
+    const pb = data?.body?.productBookings?.[0];
+    const result = { cI: pb?.customerInvoice, rI: pb?.resellerInvoice, tP: data?.body?.totalPrice, tPC: data?.body?.totalPriceConverted, cur: data?.body?.currency };
+    console.log('DEBUG', code, JSON.stringify(result));
+    return result;
+  };
+
   async function loadBookings() {
     await getEurPlnRate();
     allBookings.length = 0;
@@ -2259,14 +2267,6 @@ tailwind.config = {
         page++;
       }
     } catch(e) { console.warn('Bokun load error:', e); }
-
-    // Temporary debug helper — usage: await debugBooking('HOT-92694923')
-    window.debugBooking = async (code) => {
-      const { data } = await db.functions.invoke('bokun-sync', { body: { path: `/booking.json/confirmation-code/${code}`, method: 'GET' } });
-      const pb = data?.body?.productBookings?.[0];
-      console.log('DEBUG booking', code, JSON.stringify({ cI: pb?.customerInvoice, rI: pb?.resellerInvoice, tP: data?.body?.totalPrice, tPC: data?.body?.totalPriceConverted, cur: data?.body?.currency }));
-      return { cI: pb?.customerInvoice, rI: pb?.resellerInvoice, tP: data?.body?.totalPrice, tPC: data?.body?.totalPriceConverted, cur: data?.body?.currency };
-    };
 
     const tourSel = document.getElementById('booking-filter-tour');
     if (tourSel) {
