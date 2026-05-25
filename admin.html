@@ -2200,6 +2200,7 @@ tailwind.config = {
       const source = partner ? 'Partner Panel' : (b.source || 'TM Panel');
       const codeP = (b.bokun_confirmation_code || '').split('-')[0].toUpperCase();
       const dbCurrency = eurOnlyPrefixes.includes(codeP) ? 'EUR' : (b.currency || 'PLN');
+      if (codeP === 'HEA') console.log('[HEA-debug] DB row:', b.bokun_confirmation_code, 'b.currency:', b.currency, 'dbCurrency:', dbCurrency, 'total:', b.total);
       allBookings.push({
         id: b.id, displayId: b.bokun_confirmation_code || b.id, tour: b.tour, guest: b.guest, email: b.email, phone: b.phone,
         hotel: partner?.name || '—', date: dateFormatted, time: b.time, pickup: b.pickup,
@@ -2240,6 +2241,8 @@ tailwind.config = {
         items.forEach(item => {
           const mapped = mapBokunBooking(item);
           if (!mapped) return;
+          const isHea = (mapped.id || '').startsWith('HEA-');
+          if (isHea) console.log('[HEA-debug] API mapped:', mapped.id, 'total:', mapped.total, 'totalCurrency:', mapped.totalCurrency, 'bokunCodeIndex.has:', bokunCodeIndex.has(mapped.id));
           if (bokunCodeIndex.has(mapped.id)) {
             const idx = bokunCodeIndex.get(mapped.id);
             if (mapped._creationTs) allBookings[idx]._creationTs = mapped._creationTs;
@@ -2249,6 +2252,7 @@ tailwind.config = {
               if (mapped.total > 0) allBookings[idx].total = mapped.total;
               const pfx = (allBookings[idx]._bokunCode || mapped.id || '').split('-')[0].toUpperCase();
               allBookings[idx].currency = eurOnlyPrefixes.includes(pfx) ? 'EUR' : (mapped.totalCurrency || 'PLN');
+              if (isHea) console.log('[HEA-debug] after dedup: idx:', idx, 'total:', allBookings[idx].total, 'currency:', allBookings[idx].currency, 'pfx:', pfx, 'eurForced:', eurOnlyPrefixes.includes(pfx));
             }
             return;
           }
