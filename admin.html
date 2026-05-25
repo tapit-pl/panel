@@ -2007,7 +2007,7 @@ tailwind.config = {
     const tB = trend(monthB.length, prevMonthB.length);
     if (el('kpi-month-vs-prev')) { el('kpi-month-vs-prev').innerHTML = tB.html; el('kpi-month-vs-prev').className = `text-xs mt-1 font-medium ${tB.color}`; }
 
-    if (el('kpi-month-revenue')) el('kpi-month-revenue').innerHTML = monthRev.toLocaleString('pl') + ' <span class="text-sm font-normal text-gray-400">zł</span>';
+    if (el('kpi-month-revenue')) el('kpi-month-revenue').innerHTML = Math.round(monthRev).toLocaleString('pl') + ' <span class="text-sm font-normal text-gray-400">zł</span>';
     const tR = trend(Math.round(monthRev), Math.round(prevRev), ' zł');
     if (el('kpi-revenue-vs-prev')) { el('kpi-revenue-vs-prev').innerHTML = tR.html; el('kpi-revenue-vs-prev').className = `text-xs mt-1 font-medium ${tR.color}`; }
 
@@ -3094,7 +3094,7 @@ tailwind.config = {
             callbacks: {
               label: item => item.dataset.label === 'Bookings'
                 ? 'Bookings: ' + item.parsed.y
-                : 'Revenue: ' + item.parsed.y + ' zł'
+                : 'Revenue: ' + Math.round(item.parsed.y).toLocaleString('pl') + ' zł'
             }
           }
         },
