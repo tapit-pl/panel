@@ -569,6 +569,14 @@ tailwind.config = {
               <i class="fa-solid fa-magnifying-glass text-2xl text-gray-300 block mb-2"></i>
               No bookings match your filters.
             </div>
+            <div id="bookings-pagination" class="hidden flex items-center justify-between px-4 py-3 border-t border-gray-100 text-xs text-gray-500">
+              <span id="bookings-page-info"></span>
+              <div class="flex items-center gap-2">
+                <button id="bookings-prev-btn" onclick="changeBookingsPage(-1)" class="px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">← Prev</button>
+                <span id="bookings-page-num" class="font-medium text-dark"></span>
+                <button id="bookings-next-btn" onclick="changeBookingsPage(1)" class="px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Next →</button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -3149,11 +3157,31 @@ tailwind.config = {
   }
 
   function renderBookingsTable(data) {
-    const rows = data || allBookings;
+    _filteredBookings = data || allBookings;
+    _bookingsPage = 0;
+    renderBookingsPage();
+  }
+
+  let currentBookingView = 'recent';
+  let _filteredBookings = [];
+  let _bookingsPage = 0;
+  const BOOKINGS_PER_PAGE = 50;
+
+  function changeBookingsPage(delta) {
+    const maxPage = Math.ceil(_filteredBookings.length / BOOKINGS_PER_PAGE) - 1;
+    _bookingsPage = Math.max(0, Math.min(_bookingsPage + delta, maxPage));
+    renderBookingsPage();
+  }
+
+  function renderBookingsPage() {
+    const start = _bookingsPage * BOOKINGS_PER_PAGE;
+    const page  = _filteredBookings.slice(start, start + BOOKINGS_PER_PAGE);
+    const total = _filteredBookings.length;
+    const totalPages = Math.ceil(total / BOOKINGS_PER_PAGE);
     const tbody = document.getElementById('all-bookings-tbody');
     if (!tbody) return;
     tbody.innerHTML = '';
-    rows.forEach(b => {
+    page.forEach(b => {
       const sourceClass = b.source === 'Viator' ? 'source-viator'
         : b.source === 'GYG' ? 'source-gyg'
         : b.source === 'Klook' ? 'source-klook'
@@ -3182,19 +3210,24 @@ tailwind.config = {
           </td>
         </tr>`);
     });
+
+    const pag = document.getElementById('bookings-pagination');
+    const info = document.getElementById('bookings-page-info');
+    const num  = document.getElementById('bookings-page-num');
+    const prev = document.getElementById('bookings-prev-btn');
+    const next = document.getElementById('bookings-next-btn');
+    if (pag) pag.classList.toggle('hidden', totalPages <= 1);
+    if (info) info.textContent = `${start + 1}–${Math.min(start + BOOKINGS_PER_PAGE, total)} of ${total.toLocaleString('pl')} bookings`;
+    if (num)  num.textContent  = `${_bookingsPage + 1} / ${totalPages}`;
+    if (prev) prev.disabled = _bookingsPage === 0;
+    if (next) next.disabled = _bookingsPage >= totalPages - 1;
+
+    document.getElementById('bookings-no-results').classList.toggle('hidden', total > 0);
     const label = document.getElementById('booking-count-label');
-    if (label) label.textContent = rows.length + ' result' + (rows.length !== 1 ? 's' : '');
-    document.getElementById('bookings-no-results').classList.toggle('hidden', rows.length > 0);
-
+    if (label) label.textContent = total + ' result' + (total !== 1 ? 's' : '');
     const subtitle = document.getElementById('bookings-subtitle');
-    if (subtitle) {
-      subtitle.textContent = rows.length > 0
-        ? rows.length + ' booking' + (rows.length !== 1 ? 's' : '')
-        : 'No bookings match filters';
-    }
+    if (subtitle) subtitle.textContent = total > 0 ? total + ' booking' + (total !== 1 ? 's' : '') : 'No bookings match filters';
   }
-
-  let currentBookingView = 'recent';
 
   function setBookingView(view) {
     currentBookingView = view;
