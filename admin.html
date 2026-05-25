@@ -518,7 +518,7 @@ tailwind.config = {
                 <option value="Klook">Klook</option>
                 <option value="Expedia">Expedia</option>
                 <option value="Website">Website</option>
-                <option value="Manual">Manual</option>
+                <option value="TM Panel">TM Panel</option>
               </select>
               <select id="booking-filter-status" onchange="filterAllBookings()" class="text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 text-gray-600">
                 <option value="">All statuses</option>
@@ -2042,7 +2042,7 @@ tailwind.config = {
     const channelCounts = {};
     monthB.forEach(b => { channelCounts[b.source] = (channelCounts[b.source]||0)+1; });
     const totalCh = monthB.length || 1;
-    const channelColors = { Viator:'bg-pink-400', GYG:'bg-yellow-400', Klook:'bg-red-400', Expedia:'bg-blue-400', Website:'bg-sky-400', Manual:'bg-gray-400' };
+    const channelColors = { Viator:'bg-pink-400', GYG:'bg-yellow-400', Klook:'bg-red-400', Expedia:'bg-blue-400', Website:'bg-sky-400', 'TM Panel':'bg-gray-400' };
     const chEl = el('dash-channels');
     if (chEl) chEl.innerHTML = Object.entries(channelCounts).sort((a,b)=>b[1]-a[1]).map(([ch,cnt]) => `
       <div class="flex items-center justify-between text-xs text-slate-300">
@@ -2096,6 +2096,7 @@ tailwind.config = {
 
     initDashMonthSelector();
     initSettleMonthDropdown();
+    await loadPartners();
     await loadBookings();
     await updateDashboardKPIs();
 
@@ -2105,7 +2106,6 @@ tailwind.config = {
         await updateDashboardKPIs();
       })
       .subscribe();
-    await loadPartners();
     await loadTickets();
     await loadPrintOrders();
     await loadNotifications();
@@ -2193,7 +2193,7 @@ tailwind.config = {
     (dbRows || []).forEach(b => {
       const partner = allPartners.find(p => p.id === b.partner_id);
       const dateFormatted = b.date ? new Date(b.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
-      const source = partner ? 'Partner Panel' : (b.source || 'Manual');
+      const source = partner ? 'Partner Panel' : (b.source || 'TM Panel');
       allBookings.push({
         id: b.id, displayId: b.bokun_confirmation_code || b.id, tour: b.tour, guest: b.guest, email: b.email, phone: b.phone,
         hotel: partner?.name || '—', date: dateFormatted, time: b.time, pickup: b.pickup,
