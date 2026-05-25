@@ -2240,8 +2240,8 @@ tailwind.config = {
             if (allBookings[idx].source === 'bokun_ota') {
               allBookings[idx].source = mapped.source;
               allBookings[idx].total = mapped.total;
-              allBookings[idx].currency = mapped.totalCurrency || 'PLN';
             }
+            allBookings[idx].currency = mapped.totalCurrency || 'PLN';
             return;
           }
           if (!seenIds.has(mapped.id)) {
