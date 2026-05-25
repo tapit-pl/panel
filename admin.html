@@ -2241,7 +2241,9 @@ tailwind.config = {
               allBookings[idx].source = mapped.source;
               allBookings[idx].total = mapped.total;
             }
-            allBookings[idx].currency = mapped.totalCurrency || 'PLN';
+            if (mapped.totalCurrency === 'PLN') {
+              allBookings[idx].currency = 'PLN';
+            }
             return;
           }
           if (!seenIds.has(mapped.id)) {
