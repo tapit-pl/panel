@@ -2156,15 +2156,18 @@ tailwind.config = {
       : channel.includes('GetYourGuide') ? 'GYG'
       : channel.includes('Klook') ? 'Klook'
       : channel.includes('Expedia') ? 'Expedia'
-      : 'Bokun';
+      : (channel !== 'Bokun' ? channel : 'Bokun');
     const statusMap = { CONFIRMED: 'Confirmed', CANCELLED: 'Cancelled', PENDING: 'Pending' };
     const codePrefix = (item.confirmationCode || '').split('-')[0].toUpperCase();
     const isOtaPln = ['VIA', 'GET', 'GYG', 'MUS', 'KLO', 'EXP'].includes(codePrefix);
 
     const riTotal = pb.resellerInvoice?.total;
-    const total = isOtaPln
-      ? (pb.customerInvoice?.total || 0)
-      : ((typeof riTotal === 'number' && riTotal > 0) ? riTotal : (pb.customerInvoice?.total || 0));
+    const ciTotal = pb.customerInvoice?.total;
+    const rawTotal = isOtaPln
+      ? (ciTotal || item.totalPriceConverted || item.totalPrice || pb.totalPrice || 0)
+      : ((typeof riTotal === 'number' && riTotal > 0) ? riTotal
+          : (ciTotal || item.totalPriceConverted || item.totalPrice || pb.totalPrice || 0));
+    const total = typeof rawTotal === 'number' ? rawTotal : (Number(rawTotal) || 0);
     const currency = isOtaPln ? 'PLN' : 'EUR';
     return {
       id: item.confirmationCode || String(item.id),
