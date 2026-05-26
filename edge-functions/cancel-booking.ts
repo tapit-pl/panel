@@ -103,10 +103,20 @@ async function stripeRefund(stripeSessionId: string | null, bookingId: string): 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
 
-  const { booking_id } = await req.json()
-  if (!booking_id) return new Response(JSON.stringify({ error: 'Missing booking_id' }), { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } })
+  const { booking_id, bokun_confirmation_code } = await req.json()
 
   const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
+
+  // Bokun-API-only bookings (not in DB): cancel directly in Bokun
+  if (!booking_id && bokun_confirmation_code) {
+    const cancel = await bokunCancel(bokun_confirmation_code)
+    if (!cancel.ok) {
+      return new Response(JSON.stringify({ success: false, error: cancel.error }), { status: 502, headers: { ...CORS, 'Content-Type': 'application/json' } })
+    }
+    return new Response(JSON.stringify({ success: true, bokun: { ok: true } }), { headers: { ...CORS, 'Content-Type': 'application/json' } })
+  }
+
+  if (!booking_id) return new Response(JSON.stringify({ error: 'Missing booking_id' }), { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } })
 
   const { data: booking, error: fetchErr } = await db.from('bookings').select('*').eq('id', booking_id).single()
   if (fetchErr || !booking) {

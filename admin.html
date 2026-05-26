@@ -2157,7 +2157,7 @@ tailwind.config = {
       : channel.includes('Klook') ? 'Klook'
       : channel.includes('Expedia') ? 'Expedia'
       : 'Bokun';
-    const statusMap = { CONFIRMED: 'Paid', CANCELLED: 'Cancelled', PENDING: 'Pending' };
+    const statusMap = { CONFIRMED: 'Confirmed', CANCELLED: 'Cancelled', PENDING: 'Pending' };
     const codePrefix = (item.confirmationCode || '').split('-')[0].toUpperCase();
     const isOtaPln = ['VIA', 'GET', 'GYG', 'MUS', 'KLO', 'EXP'].includes(codePrefix);
 
@@ -3226,7 +3226,7 @@ tailwind.config = {
           <td class="px-4 py-3 text-right whitespace-nowrap">
             <button onclick="openVoucher('${b.id}')" title="View voucher" class="text-gray-300 hover:text-brand transition-colors ml-1"><i class="fa-solid fa-file-pdf text-xs"></i></button>
             <button onclick="openEditBooking('${b.id}')" title="Edit booking" class="text-gray-300 hover:text-brand transition-colors ml-2"><i class="fa-solid fa-pen text-xs"></i></button>
-            ${b._dbBooking && (b.status||'').toLowerCase() !== 'cancelled' ? `<button onclick="cancelBooking('${b.id}', '${(b.guest||'').replace(/'/g,"\\'")}', ${!!b._stripeSessionId})" title="Cancel booking" class="text-gray-300 hover:text-red-500 transition-colors ml-2"><i class="fa-solid fa-xmark text-xs"></i></button>` : ''}
+            ${(b._dbBooking || b._bokun) && (b.status||'').toLowerCase() !== 'cancelled' ? `<button onclick="cancelBooking('${b.id}', '${(b.guest||'').replace(/'/g,"\\'")}', ${!!b._stripeSessionId}, ${!!b._dbBooking})" title="Cancel booking" class="text-gray-300 hover:text-red-500 transition-colors ml-2"><i class="fa-solid fa-xmark text-xs"></i></button>` : ''}
           </td>
         </tr>`);
     });
@@ -3299,13 +3299,14 @@ tailwind.config = {
     filterAllBookings();
   }
 
-  async function cancelBooking(id, guestName, hasStripe) {
+  async function cancelBooking(id, guestName, hasStripe, isDbBooking = true) {
     const refundMsg = hasStripe ? ' and refund the Stripe payment' : '';
     if (!confirm(`Cancel booking for ${guestName}${refundMsg}?\n\nThis cannot be undone.`)) return;
     const btn = document.querySelector(`[onclick*="cancelBooking('${id}'"]`);
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-xs"></i>'; }
     try {
-      const { data, error } = await db.functions.invoke('cancel-booking', { body: { booking_id: id } });
+      const body = isDbBooking ? { booking_id: id } : { bokun_confirmation_code: id };
+      const { data, error } = await db.functions.invoke('cancel-booking', { body });
       if (error || !data?.success) {
         alert('Error: ' + (error?.message || data?.error || 'Unknown error'));
         if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-xmark text-xs"></i>'; }
