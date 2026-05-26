@@ -2436,6 +2436,14 @@ tailwind.config = {
   async function initPartnerDashboard() {
     const p = currentPartner;
 
+    // Watch for partner deletion — sign out immediately when admin removes this partner
+    db.channel('partner-account-watch')
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'partners', filter: `id=eq.${p.id}` }, async () => {
+        await db.auth.signOut()
+        window.location.reload()
+      })
+      .subscribe()
+
     const staffInitials = p._staffName ? p._staffName.split(' ').filter(Boolean).map(w=>w[0]).join('').substring(0,2).toUpperCase() : null;
     document.querySelectorAll('.partner-initials').forEach(el => el.textContent = p.initials || (p.name ? p.name.substring(0,2).toUpperCase() : null) || staffInitials || '??');
     document.querySelectorAll('.partner-name').forEach(el => el.textContent = p._isStaff ? (p._staffName || p.name || '—') : (p.name || '—'));
