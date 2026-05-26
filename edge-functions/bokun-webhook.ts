@@ -129,18 +129,30 @@ function extractBookingRow(body: Record<string, unknown>, confirmationCode: stri
   const passengerPax = passengers.reduce((sum, p) => sum + (Number(p.count ?? p.quantity ?? 1)), 0)
   const pax = abPax || passengerPax || Number(booking.paxCount ?? body.paxCount ?? 0) || null
 
-  // Price: prefer totalPriceConverted (seller currency = PLN), fall back to totalPrice
-  const tpc = body.totalPriceConverted ?? body.totalPrice ?? booking.totalPrice
-  const total = typeof tpc === 'number' && tpc > 0
-    ? tpc
-    : (Number(tpc) > 0 ? Number(tpc) : null)
-
   const guestEmail = String(customer.email ?? '')
   const phone      = String(customer.phoneNumber ?? customer.phone ?? '')
 
-  const currency = String(body.currency ?? 'PLN')
-
   const codePrefix = confirmationCode.split('-')[0].toUpperCase()
+  const isOtaPln = ['VIA', 'GET', 'GYG', 'MUS', 'KLO', 'EXP'].includes(codePrefix)
+
+  // Price: for OTA-PLN channels use customerInvoice (PLN); for others use resellerInvoice (TM net) if available
+  const ri = (pb.resellerInvoice ?? ab.resellerInvoice) as Record<string, unknown> | undefined
+  const ci = (pb.customerInvoice ?? ab.customerInvoice) as Record<string, unknown> | undefined
+  let rawTotal: unknown
+  let currency: string
+  if (isOtaPln) {
+    rawTotal = ci?.total ?? body.totalPriceConverted ?? body.totalPrice ?? booking.totalPrice
+    currency = 'PLN'
+  } else {
+    const riTotal = ri?.total
+    rawTotal = (typeof riTotal === 'number' && riTotal > 0)
+      ? riTotal
+      : (ci?.total ?? body.totalPriceConverted ?? body.totalPrice ?? booking.totalPrice)
+    currency = String(ri?.currency ?? ci?.currency ?? body.currency ?? 'EUR')
+  }
+  const total = typeof rawTotal === 'number' && rawTotal > 0
+    ? rawTotal
+    : (Number(rawTotal) > 0 ? Number(rawTotal) : null)
   const sourceMap: Record<string, string> = {
     VIA: 'Viator', GET: 'GYG', GYG: 'GYG', HEA: 'Headout',
     MUS: 'Musement', KLO: 'Klook', EXP: 'Expedia',
@@ -297,6 +309,8 @@ Deno.serve(async (req) => {
     totalPrice: fullBooking.totalPrice,
     pbTotalPrice: pb0.totalPrice,
   }))
+  console.log('[bokun-webhook] invoice:', JSON.stringify(fullBooking.invoice))
+  console.log('[bokun-webhook] pb0 invoices:', JSON.stringify({ customerInvoice: pb0.customerInvoice, resellerInvoice: pb0.resellerInvoice }))
 
   const { data: inserted, error: insertError } = await db
     .from('bookings')

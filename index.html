@@ -2991,9 +2991,14 @@ tailwind.config = {
         : cnt <= 4
           ? `<span class="text-xs font-normal text-orange-500">Only ${cnt} left</span>`
           : `<span class="text-xs font-normal text-gray-400">${cnt} seats</span>`;
+      const slotUniqueRates = (s.rates || []).filter((r, idx, a) => a.findIndex(x => x.id === r.id) === idx);
+      const slotLang = slotUniqueRates.length === 1
+        ? LANGUAGE_KEYWORDS.find(l => slotUniqueRates[0].title.includes(l))
+        : null;
       return `<button onclick="selectTimeSlot('${dateStr}', ${i}, '${s.startTime || ''}')" ${cnt === 0 ? 'disabled' : ''}
         class="px-4 py-2.5 rounded-xl border-2 ${cnt === 0 ? 'border-gray-100 opacity-40 cursor-not-allowed' : 'border-gray-200 hover:border-brand hover:bg-brand/5 cursor-pointer'} text-sm font-semibold text-dark transition-all flex flex-col items-center gap-0.5">
         <span>${s.startTime || 'Departure'}</span>
+        ${slotLang ? `<span class="text-xs font-normal text-gray-400">${slotLang}</span>` : ''}
         ${seatLabel}
       </button>`;
     }).join('');
@@ -3049,7 +3054,8 @@ tailwind.config = {
 
     const section = document.getElementById('td-category-section');
     const timeLabel = (tdSelectedTimeSlot?._displayTime || tdSelectedTimeSlot?.startTime) ? ' · ' + (tdSelectedTimeSlot._displayTime || tdSelectedTimeSlot.startTime) : '';
-    document.getElementById('td-category-subtitle').textContent = formatDate(dateStr) + timeLabel;
+    const catLang = LANGUAGE_KEYWORDS.find(l => tdSelectedRate?.title?.includes(l));
+    document.getElementById('td-category-subtitle').textContent = formatDate(dateStr) + timeLabel + (catLang ? ' · ' + catLang : '');
     document.getElementById('td-category-list').innerHTML = tdCategorySelections.map((s, i) => {
       const ageRange = s.category.ageQualified ? ` (${s.category.minAge}–${s.category.maxAge})` : '';
       let priceStr = '';
@@ -3245,8 +3251,9 @@ tailwind.config = {
     const form = document.getElementById('td-booking-form');
     form.classList.remove('hidden');
     document.getElementById('td-booking-success').classList.add('hidden');
-    const timePart = tdSelectedTimeSlot?.startTime ? ' · ' + tdSelectedTimeSlot.startTime : '';
-    document.getElementById('td-selected-date').textContent = formatDate(dateStr) + timePart;
+    const timePart = (tdSelectedTimeSlot?._displayTime || tdSelectedTimeSlot?.startTime) ? ' · ' + (tdSelectedTimeSlot._displayTime || tdSelectedTimeSlot.startTime) : '';
+    const bookingLang = LANGUAGE_KEYWORDS.find(l => tdSelectedRate?.title?.includes(l));
+    document.getElementById('td-selected-date').textContent = formatDate(dateStr) + timePart + (bookingLang ? ' · ' + bookingLang : '');
     document.getElementById('td-booking-error').classList.add('hidden');
 
     // Show appropriate guest section
