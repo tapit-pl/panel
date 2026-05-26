@@ -34,6 +34,13 @@ Deno.serve(async (req) => {
   const partnerId = partner?.id
 
   if (partnerId) {
+    // Nullify staff_id in bookings before deleting staff (FK: bookings.staff_id → staff.id)
+    const { data: staffRows } = await adminClient.from('staff').select('id').eq('partner_id', partnerId)
+    const staffIds = (staffRows ?? []).map((s: { id: string }) => s.id)
+    if (staffIds.length > 0) {
+      await adminClient.from('bookings').update({ staff_id: null }).in('staff_id', staffIds)
+    }
+
     // Cascade: nullify partner_id in bookings, print_orders, tickets (keep historical data)
     await adminClient.from('bookings').update({ partner_id: null }).eq('partner_id', partnerId)
     await adminClient.from('print_orders').update({ partner_id: null }).eq('partner_id', partnerId)
