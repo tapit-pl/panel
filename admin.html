@@ -4045,11 +4045,9 @@ tailwind.config = {
     closePartnerDetail();
     showToast('Partner deleted.');
 
-    // Async cleanup w tle
+    // Async cleanup w tle (cascade przez edge function)
     const { data: { session } } = await db.auth.getSession();
     const token = session?.access_token;
-
-    await db.from('partners').delete().eq('id', editingPartnerId);
 
     if (p.email) {
       const res = await fetch('https://jzsiuvcgpwukxpcjxcsg.supabase.co/functions/v1/delete-partner', {
