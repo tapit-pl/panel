@@ -2162,20 +2162,24 @@ tailwind.config = {
     const isOtaPln = ['VIA', 'GET', 'GYG', 'MUS', 'KLO', 'EXP'].includes(codePrefix);
 
     const riTotal = pb.resellerInvoice?.total;
+    const riCurrency = pb.resellerInvoice?.currency;
     const ciTotal = pb.customerInvoice?.total;
-    if (['TMK','POL','EUA'].includes(codePrefix)) {
-      console.log('[price-debug]', item.confirmationCode, JSON.stringify({
-        ri: pb.resellerInvoice, ci: pb.customerInvoice,
-        itotalPrice: item.totalPrice, itotalPriceConv: item.totalPriceConverted, icurrency: item.currency,
-        pbTotalPrice: pb.totalPrice, pbPrice: pb.price, pbNetPrice: pb.netPrice, pbAmount: pb.amount,
-      }));
+    const ciCurrency = pb.customerInvoice?.currency;
+    let total, currency;
+    if (isOtaPln) {
+      total = (typeof ciTotal === 'number' && ciTotal > 0) ? ciTotal
+            : (item.totalPriceConverted || item.totalPrice || pb.totalPrice || 0);
+      currency = 'PLN';
+    } else if (typeof riTotal === 'number' && riTotal > 0) {
+      total = riTotal;
+      currency = riCurrency || 'EUR';
+    } else if (typeof ciTotal === 'number' && ciTotal > 0) {
+      total = ciTotal;
+      currency = ciCurrency || 'EUR';
+    } else {
+      total = item.totalPriceConverted || item.totalPrice || pb.totalPrice || 0;
+      currency = item.currency || 'EUR';
     }
-    const rawTotal = isOtaPln
-      ? (ciTotal || item.totalPriceConverted || item.totalPrice || pb.totalPrice || 0)
-      : ((typeof riTotal === 'number' && riTotal > 0) ? riTotal
-          : (ciTotal || item.totalPriceConverted || item.totalPrice || pb.totalPrice || 0));
-    const total = typeof rawTotal === 'number' ? rawTotal : (Number(rawTotal) || 0);
-    const currency = isOtaPln ? 'PLN' : 'EUR';
     return {
       id: item.confirmationCode || String(item.id),
       tour: pb.product?.title?.trim() || '—',
@@ -2230,12 +2234,19 @@ tailwind.config = {
       const fmt = d => d.toISOString().slice(0, 10);
 
       // Map confirmation code → index in allBookings for DB bookings (to fix creation date)
+      // Index both '#TMK-xxx' and 'TMK-xxx' since webhook stores with # but search API returns without
       const bokunCodeIndex = new Map();
-      allBookings.forEach((b, i) => { if (b._bokunCode) bokunCodeIndex.set(b._bokunCode, i); });
+      allBookings.forEach((b, i) => {
+        if (b._bokunCode) {
+          bokunCodeIndex.set(b._bokunCode, i);
+          bokunCodeIndex.set(b._bokunCode.replace(/^#/, ''), i);
+        }
+      });
 
       const seenIds = new Set([
         ...allBookings.map(b => b.id),
         ...allBookings.filter(b => b._bokunCode).map(b => b._bokunCode),
+        ...allBookings.filter(b => b._bokunCode).map(b => b._bokunCode.replace(/^#/, '')),
       ]);
       let page = 0;
       while (true) {
