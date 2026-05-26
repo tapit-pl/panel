@@ -3453,6 +3453,17 @@ tailwind.config = {
     let bokunConfirmationCode = null;
     let bokunReservationCode = null;
     let bokunBookingId = null;
+
+    // Verify partner account still exists before calling Bokun
+    const { data: partnerCheck } = await db.from('partners').select('id').eq('id', currentPartner.id).maybeSingle()
+    if (!partnerCheck) {
+      errEl.textContent = 'Your account has been deactivated. Please contact support.'
+      errEl.classList.remove('hidden')
+      btn.disabled = false
+      setTimeout(async () => { await db.auth.signOut(); window.location.reload() }, 2000)
+      return
+    }
+
     if (tdCurrentTour?.bokunId && tdSelectedTimeSlot?.startTimeId) {
       try {
         const buildPassengers = () => {
@@ -3619,9 +3630,15 @@ tailwind.config = {
 
     if (error) {
       console.error('[Booking] DB insert error:', JSON.stringify(error));
-      errEl.textContent = 'Error saving booking: ' + error.message;
-      errEl.classList.remove('hidden');
-      return;
+      if (error.message?.includes('partner_id')) {
+        errEl.textContent = 'Your account has been deactivated. Please contact support.'
+        setTimeout(async () => { await db.auth.signOut(); window.location.reload() }, 2000)
+      } else {
+        errEl.textContent = 'Error saving booking: ' + error.message
+      }
+      errEl.classList.remove('hidden')
+      btn.disabled = false
+      return
     }
 
     form.classList.add('hidden');
