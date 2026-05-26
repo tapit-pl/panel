@@ -2241,6 +2241,7 @@ tailwind.config = {
           bokunCodeIndex.set(b._bokunCode, i);
           bokunCodeIndex.set(b._bokunCode.replace(/^#/, ''), i);
         }
+        if ((b._bokunCode||'').replace(/^#/,'').startsWith('TMK')) console.log('[tmk-db]', JSON.stringify({_bokunCode: b._bokunCode, id: b.id, total: b.total, currency: b.currency}));
       });
 
       const seenIds = new Set([
