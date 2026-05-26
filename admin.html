@@ -2158,7 +2158,7 @@ tailwind.config = {
       : channel.includes('Expedia') ? 'Expedia'
       : (channel !== 'Bokun' ? channel : 'Bokun');
     const statusMap = { CONFIRMED: 'Confirmed', CANCELLED: 'Cancelled', PENDING: 'Pending' };
-    const codePrefix = (item.confirmationCode || '').split('-')[0].toUpperCase();
+    const codePrefix = (item.confirmationCode || '').replace(/^#/, '').split('-')[0].toUpperCase();
     const isOtaPln = ['VIA', 'GET', 'GYG', 'MUS', 'KLO', 'EXP'].includes(codePrefix);
 
     const riTotal = pb.resellerInvoice?.total;
@@ -2203,7 +2203,7 @@ tailwind.config = {
       const partner = allPartners.find(p => p.id === b.partner_id);
       const dateFormatted = b.date ? new Date(b.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
       const source = partner ? 'Partner Panel' : (b.source || 'TM Panel');
-      const codeP = (b.bokun_confirmation_code || '').split('-')[0].toUpperCase();
+      const codeP = (b.bokun_confirmation_code || '').replace(/^#/, '').split('-')[0].toUpperCase();
       const dbCurrency = otaPlnPrefixes.includes(codeP) ? 'PLN' : (b.currency || 'EUR');
       allBookings.push({
         id: b.id, displayId: b.bokun_confirmation_code || b.id, tour: b.tour, guest: b.guest, email: b.email, phone: b.phone,
@@ -2252,7 +2252,7 @@ tailwind.config = {
             // Partner Panel bookings use their own PLN amount from DB; all OTA sources use API
             if (allBookings[idx].source !== 'Partner Panel') {
               if (mapped.total > 0) allBookings[idx].total = mapped.total;
-              const pfx = (allBookings[idx]._bokunCode || mapped.id || '').split('-')[0].toUpperCase();
+              const pfx = (allBookings[idx]._bokunCode || mapped.id || '').replace(/^#/, '').split('-')[0].toUpperCase();
               allBookings[idx].currency = otaPlnPrefixes.includes(pfx) ? 'PLN' : (mapped.totalCurrency || 'EUR');
             }
             return;
