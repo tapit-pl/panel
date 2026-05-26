@@ -2263,6 +2263,8 @@ tailwind.config = {
         items.forEach(item => {
           const mapped = mapBokunBooking(item);
           if (!mapped) return;
+          const _pfxDbg = (mapped.id||'').replace(/^#/,'').split('-')[0].toUpperCase();
+          if (['TMK','POL'].includes(_pfxDbg)) console.log('[tmk-dedup]', mapped.id, 'inIndex:', bokunCodeIndex.has(mapped.id), 'total:', mapped.total, 'curr:', mapped.totalCurrency);
           if (bokunCodeIndex.has(mapped.id)) {
             const idx = bokunCodeIndex.get(mapped.id);
             if (mapped._creationTs) allBookings[idx]._creationTs = mapped._creationTs;
@@ -2272,6 +2274,7 @@ tailwind.config = {
               if (mapped.total > 0) allBookings[idx].total = mapped.total;
               const pfx = (allBookings[idx]._bokunCode || mapped.id || '').replace(/^#/, '').split('-')[0].toUpperCase();
               allBookings[idx].currency = otaPlnPrefixes.includes(pfx) ? 'PLN' : (mapped.totalCurrency || 'EUR');
+              if (['TMK','POL'].includes(pfx)) console.log('[tmk-dedup] SET', mapped.id, '→ total:', allBookings[idx].total, 'curr:', allBookings[idx].currency);
             }
             return;
           }
