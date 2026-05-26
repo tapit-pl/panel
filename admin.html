@@ -2072,7 +2072,7 @@ tailwind.config = {
     const toEl   = el('chart-date-to');
     if (fromEl) fromEl.value = `${y}-${String(m).padStart(2,'0')}-01`;
     if (toEl)   toEl.value   = `${y}-${String(m).padStart(2,'0')}-${String(new Date(y, m, 0).getDate()).padStart(2,'0')}`;
-    renderDashboardChart();
+    renderDashboardChart({ b: monthB.length, r: monthRev });
   }
 
   function globalSearch(q) {
@@ -3066,7 +3066,7 @@ tailwind.config = {
     return MONTH_SHORT[d.getMonth()] + ' ' + d.getDate();
   }
 
-  function renderDashboardChart() {
+  function renderDashboardChart(kpiTotals) {
     const ctx = document.getElementById('dashboard-chart');
     if (!ctx) return;
     if (dashChart) dashChart.destroy();
@@ -3094,8 +3094,8 @@ tailwind.config = {
     const pl = document.getElementById('chart-period-label');
     if (pl) pl.textContent = periodLabel;
 
-    const totalB = bookings.reduce((a,b)=>a+b,0);
-    const totalR = revenue.reduce((a,b)=>a+b,0);
+    const totalB = kpiTotals ? kpiTotals.b : bookings.reduce((a,b)=>a+b,0);
+    const totalR = kpiTotals ? kpiTotals.r : revenue.reduce((a,b)=>a+b,0);
     const avgB   = (totalB / labels.length).toFixed(1);
     const maxB   = Math.max(...bookings);
     const bestIdx = bookings.indexOf(maxB);
