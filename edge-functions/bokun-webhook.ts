@@ -133,7 +133,7 @@ function extractBookingRow(body: Record<string, unknown>, confirmationCode: stri
   const phone      = String(customer.phoneNumber ?? customer.phone ?? '')
 
   const codePrefix = confirmationCode.replace(/^#/, '').split('-')[0].toUpperCase()
-  const isOtaPln = ['VIA', 'GET', 'GYG', 'MUS', 'KLO', 'EXP'].includes(codePrefix)
+  const isOtaPln = ['VIA', 'GET', 'GYG', 'KLO', 'EXP'].includes(codePrefix)
 
   // Price: for OTA-PLN channels use customerInvoice (PLN); for others use resellerInvoice (TM net) if available
   const ri = (pb.resellerInvoice ?? ab.resellerInvoice) as Record<string, unknown> | undefined
