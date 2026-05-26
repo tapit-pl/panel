@@ -4038,25 +4038,30 @@ tailwind.config = {
     if (!p) return;
     if (!confirm(`Are you sure you want to permanently delete "${p.name}"? This cannot be undone.`)) return;
 
+    // Optimistic update — natychmiast usuń z UI
+    const idx = allPartners.findIndex(x => x.id === editingPartnerId);
+    if (idx !== -1) allPartners.splice(idx, 1);
+    renderPartnersTable();
+    closePartnerDetail();
+    showToast('Partner deleted.');
+
+    // Async cleanup w tle
     const { data: { session } } = await db.auth.getSession();
     const token = session?.access_token;
 
-    // Delete from partners table
     await db.from('partners').delete().eq('id', editingPartnerId);
 
-    // Delete auth account (requires service role — done via edge function)
     if (p.email) {
-      await fetch('https://jzsiuvcgpwukxpcjxcsg.supabase.co/functions/v1/delete-partner', {
+      const res = await fetch('https://jzsiuvcgpwukxpcjxcsg.supabase.co/functions/v1/delete-partner', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ email: p.email })
       });
+      if (!res.ok) console.error('[deletePartner] edge function error:', res.status, await res.text());
     }
 
     await logActivity('partner_deleted', `Partner "${p.name}" (${p.email}) permanently deleted`, editingPartnerId);
     await loadPartners();
-    closePartnerDetail();
-    showToast('Partner deleted.');
   }
 
   function renderContractStatus(expiryStr) {
