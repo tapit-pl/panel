@@ -781,6 +781,7 @@ tailwind.config = {
                     <th class="text-center px-2 py-3 text-gray-400 font-semibold w-20">Adult</th>
                     <th class="text-center px-2 py-3 text-gray-400 font-semibold w-20">Student</th>
                     <th class="text-center px-2 py-3 text-gray-400 font-semibold w-20">Child</th>
+                    <th class="text-center px-2 py-3 text-gray-400 font-semibold w-20">Senior</th>
                     <th class="text-center px-2 py-3 text-gray-400 font-semibold w-20">Infant</th>
                     <th class="text-center px-2 py-3 text-gray-400 font-semibold w-28 text-brand">Commission</th>
                     <th class="text-center px-3 py-3 text-gray-400 font-semibold w-20">Active</th>
@@ -2582,7 +2583,7 @@ tailwind.config = {
         tbody.insertAdjacentHTML('beforeend', `
           <tr class="bg-gray-50 border-b border-gray-100 ${pkg.active ? '' : 'opacity-50'}">
             <td class="pl-5 py-2.5 text-gray-300 text-sm">└</td>
-            <td class="pl-2 pr-3 py-2.5 text-xs font-medium text-gray-700">${pkg.title}</td>
+            <td class="pl-2 pr-1 py-1.5"><input type="text" value="${pkg.title.replace(/"/g, '&quot;')}" ${locked ? 'disabled' : ''} class="w-full text-xs font-medium text-gray-700 bg-transparent border border-transparent rounded px-1.5 py-1 hover:border-gray-300 focus:border-brand/40 focus:outline-none focus:ring-1 focus:ring-brand/40 focus:bg-white ${locked ? 'cursor-default' : ''}" onchange="quickSavePkg('${pkg.id}', 'title', this.value.trim())" onblur="quickSavePkg('${pkg.id}', 'title', this.value.trim())"></td>
             <td class="px-3 py-2.5 text-gray-300 text-xs">—</td>
             <td class="px-3 py-2.5 text-gray-300 text-xs">—</td>
             <td class="px-2 py-2.5 text-center">
@@ -2604,6 +2605,14 @@ tailwind.config = {
                   class="w-16 text-center text-xs border border-gray-300 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 text-gray-800 font-medium placeholder-gray-400 ${locked ? 'bg-gray-100' : 'bg-white'}"
                   onchange="quickSavePkg('${pkg.id}', 'price_child', this.value === '' ? null : parseInt(this.value)||0)">
                 ${pkg.price_child !== null && pkg.price_child !== undefined ? catWarning(t.id, 'child', 'Child') : ''}
+              </div>
+            </td>
+            <td class="px-2 py-2.5 text-center">
+              <div class="inline-flex items-center gap-0.5">
+                <input type="number" value="${pkg.price_senior ?? ''}" min="0" placeholder="off" ${locked ? 'disabled' : ''}
+                  class="w-16 text-center text-xs border border-gray-300 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 text-gray-800 font-medium placeholder-gray-400 ${locked ? 'bg-gray-100' : 'bg-white'}"
+                  onchange="quickSavePkg('${pkg.id}', 'price_senior', this.value === '' ? null : parseInt(this.value)||0)">
+                ${pkg.price_senior !== null && pkg.price_senior !== undefined ? catWarning(t.id, 'senior', 'Senior') : ''}
               </div>
             </td>
             <td class="px-2 py-2.5 text-center">

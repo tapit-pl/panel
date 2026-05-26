@@ -2027,17 +2027,17 @@ tailwind.config = {
       const { data, error } = await db.from('tour_commissions').select('*').eq('active', true).order('sort_order');
       if (!error && data && data.length > 0) {
         data.forEach(c => {
-          const entry = { pricePln: c.price_pln ?? null, priceStudent: c.price_student ?? null, priceChild: c.price_child ?? null, priceInfant: c.price_infant ?? null, commPln: c.commission_pln || 0, cat: c.category || '', originalName: c.title, tourConfigId: c.tour_config_id || null };
+          const entry = { pricePln: c.price_pln ?? null, priceStudent: c.price_student ?? null, priceChild: c.price_child ?? null, priceInfant: c.price_infant ?? null, priceSenior: c.price_senior ?? null, commPln: c.commission_pln || 0, cat: c.category || '', originalName: c.title, tourConfigId: c.tour_config_id || null };
           const key = _normComm(c.title);
           // For name-based map: prefer entry with more configured category prices
           const existing = COMM_MAP[key];
-          const countNew = [entry.priceStudent, entry.priceChild, entry.priceInfant].filter(p => p !== null && p !== undefined).length;
-          const countExisting = existing ? [existing.priceStudent, existing.priceChild, existing.priceInfant].filter(p => p !== null && p !== undefined).length : -1;
+          const countNew = [entry.priceStudent, entry.priceChild, entry.priceInfant, entry.priceSenior].filter(p => p !== null && p !== undefined).length;
+          const countExisting = existing ? [existing.priceStudent, existing.priceChild, existing.priceInfant, existing.priceSenior].filter(p => p !== null && p !== undefined).length : -1;
           if (countNew >= countExisting) COMM_MAP[key] = entry;
           // For ID-based map: also prefer entry with more configured prices
           if (c.tour_config_id) {
             const existingById = COMM_MAP_BY_TOUR[c.tour_config_id];
-            const countExistingById = existingById ? [existingById.priceStudent, existingById.priceChild, existingById.priceInfant].filter(p => p !== null && p !== undefined).length : -1;
+            const countExistingById = existingById ? [existingById.priceStudent, existingById.priceChild, existingById.priceInfant, existingById.priceSenior].filter(p => p !== null && p !== undefined).length : -1;
             if (countNew >= countExistingById) COMM_MAP_BY_TOUR[c.tour_config_id] = entry;
           }
         });
@@ -2162,10 +2162,11 @@ tailwind.config = {
     })();
     if (!entry) return undefined; // no config — fall back to Bokun price
     const t = (categoryTitle || '').toLowerCase();
-    if (t.includes('student')) return entry.priceStudent;
-    if (t.includes('child') || t.includes('kid')) return entry.priceChild;
-    if (t.includes('infant') || t.includes('baby')) return entry.priceInfant;
-    return entry.pricePln; // adult / default
+    if (t.includes('student')) return entry.priceStudent ?? null;
+    if (t.includes('child') || t.includes('kid')) return entry.priceChild ?? null;
+    if (t.includes('infant') || t.includes('baby')) return entry.priceInfant ?? null;
+    if (t.includes('senior') || t.includes('elder')) return entry.priceSenior ?? null;
+    return entry.pricePln ?? null; // adult / default
   }
 
   document.addEventListener('DOMContentLoaded', async function() {
@@ -2990,7 +2991,7 @@ tailwind.config = {
         : cnt <= 4
           ? `<span class="text-xs font-normal text-orange-500">Only ${cnt} left</span>`
           : `<span class="text-xs font-normal text-gray-400">${cnt} seats</span>`;
-      return `<button onclick="selectTimeSlot('${dateStr}', ${i})" ${cnt === 0 ? 'disabled' : ''}
+      return `<button onclick="selectTimeSlot('${dateStr}', ${i}, '${s.startTime || ''}')" ${cnt === 0 ? 'disabled' : ''}
         class="px-4 py-2.5 rounded-xl border-2 ${cnt === 0 ? 'border-gray-100 opacity-40 cursor-not-allowed' : 'border-gray-200 hover:border-brand hover:bg-brand/5 cursor-pointer'} text-sm font-semibold text-dark transition-all flex flex-col items-center gap-0.5">
         <span>${s.startTime || 'Departure'}</span>
         ${seatLabel}
@@ -3001,8 +3002,9 @@ tailwind.config = {
     section.dataset.date = dateStr;
   }
 
-  function selectTimeSlot(dateStr, slotIdx) {
-    tdSelectedTimeSlot = (currentTourAvailability[dateStr] || [])[slotIdx];
+  function selectTimeSlot(dateStr, slotIdx, displayTime) {
+    tdSelectedTimeSlot = { ...(currentTourAvailability[dateStr] || [])[slotIdx] };
+    if (displayTime) tdSelectedTimeSlot._displayTime = displayTime;
     tdSelectedRate = null;
     tdRateSelections = [];
     tdCategorySelections = [];
@@ -3046,7 +3048,7 @@ tailwind.config = {
     tdCategorySelections = allCats.filter(s => s.configPln !== null);
 
     const section = document.getElementById('td-category-section');
-    const timeLabel = tdSelectedTimeSlot?.startTime ? ' · ' + tdSelectedTimeSlot.startTime : '';
+    const timeLabel = (tdSelectedTimeSlot?._displayTime || tdSelectedTimeSlot?.startTime) ? ' · ' + (tdSelectedTimeSlot._displayTime || tdSelectedTimeSlot.startTime) : '';
     document.getElementById('td-category-subtitle').textContent = formatDate(dateStr) + timeLabel;
     document.getElementById('td-category-list').innerHTML = tdCategorySelections.map((s, i) => {
       const ageRange = s.category.ageQualified ? ` (${s.category.minAge}–${s.category.maxAge})` : '';
@@ -3123,7 +3125,7 @@ tailwind.config = {
 
   function showLanguagePicker(dateStr, rates) {
     const section = document.getElementById('td-language-section');
-    const timeLabel = tdSelectedTimeSlot?.startTime ? ' · ' + tdSelectedTimeSlot.startTime : '';
+    const timeLabel = (tdSelectedTimeSlot?._displayTime || tdSelectedTimeSlot?.startTime) ? ' · ' + (tdSelectedTimeSlot._displayTime || tdSelectedTimeSlot.startTime) : '';
     document.getElementById('td-language-subtitle').textContent = formatDate(dateStr) + timeLabel;
     document.getElementById('td-language-list').innerHTML = rates.map((r, i) => {
       const lang = LANGUAGE_KEYWORDS.find(l => r.title.includes(l)) || r.title.trim();
@@ -3142,13 +3144,12 @@ tailwind.config = {
   function _resolveCategoriesToShow(slotCatPrices) {
     const allBokunCats = (tdCurrentTour?.pricing || []).filter(c => !c.internalUseOnly);
     const tourName = tdCurrentTour?.title || '';
-    const hasAdminCatConfig = allBokunCats.some(c => {
+    const configured = allBokunCats.filter(c => {
       const pln = lookupCategoryPricePln(tourName, c.title);
-      return pln !== undefined && pln !== null;
+      return pln != null;
     });
-    return (hasAdminCatConfig && allBokunCats.length > 0)
-      ? allBokunCats
-      : allBokunCats.filter(c => slotCatPrices.some(p => p.id === c.id));
+    // Show only categories with configured PLN price; if none configured fall back to Bokun slot cats
+    return configured.length > 0 ? configured : allBokunCats.filter(c => slotCatPrices.some(p => p.id === c.id));
   }
 
   function selectLanguage(dateStr, rateIdx) {
