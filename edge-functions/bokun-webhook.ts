@@ -145,10 +145,13 @@ function extractBookingRow(body: Record<string, unknown>, confirmationCode: stri
     currency = 'PLN'
   } else {
     const riTotal = ri?.total
-    rawTotal = (typeof riTotal === 'number' && riTotal > 0)
-      ? riTotal
-      : (ci?.total ?? body.totalPriceConverted ?? body.totalPrice ?? booking.totalPrice)
-    currency = String(ri?.currency ?? ci?.currency ?? body.currency ?? 'EUR')
+    if (typeof riTotal === 'number' && riTotal > 0) {
+      rawTotal = riTotal
+      currency = String(ri?.currency ?? 'EUR')
+    } else {
+      rawTotal = ci?.total ?? body.totalPriceConverted ?? body.totalPrice ?? booking.totalPrice
+      currency = String(ci?.currency ?? body.currency ?? 'EUR')
+    }
   }
   const total = typeof rawTotal === 'number' && rawTotal > 0
     ? rawTotal
