@@ -2163,6 +2163,13 @@ tailwind.config = {
 
     const riTotal = pb.resellerInvoice?.total;
     const ciTotal = pb.customerInvoice?.total;
+    if (['TMK','POL','EUA'].includes(codePrefix) && (riTotal == null && ciTotal == null)) {
+      console.log('[price-debug]', item.confirmationCode, JSON.stringify({
+        ri: pb.resellerInvoice, ci: pb.customerInvoice,
+        itotalPrice: item.totalPrice, itotalPriceConv: item.totalPriceConverted, icurrency: item.currency,
+        pbTotalPrice: pb.totalPrice, pbPrice: pb.price, pbNetPrice: pb.netPrice, pbAmount: pb.amount,
+      }));
+    }
     const rawTotal = isOtaPln
       ? (ciTotal || item.totalPriceConverted || item.totalPrice || pb.totalPrice || 0)
       : ((typeof riTotal === 'number' && riTotal > 0) ? riTotal
