@@ -2161,8 +2161,11 @@ tailwind.config = {
     const codePrefix = (item.confirmationCode || '').split('-')[0].toUpperCase();
     const isOtaPln = ['VIA', 'GET', 'GYG', 'MUS', 'KLO', 'EXP'].includes(codePrefix);
 
-    const total = pb.customerInvoice?.total || 0;
-    const currency = isOtaPln ? 'PLN' : (pb.customerInvoice?.currency || 'EUR');
+    const riTotal = pb.resellerInvoice?.total;
+    const total = isOtaPln
+      ? (pb.customerInvoice?.total || 0)
+      : ((typeof riTotal === 'number' && riTotal > 0) ? riTotal : (pb.customerInvoice?.total || 0));
+    const currency = isOtaPln ? 'PLN' : 'EUR';
     return {
       id: item.confirmationCode || String(item.id),
       tour: pb.product?.title?.trim() || '—',

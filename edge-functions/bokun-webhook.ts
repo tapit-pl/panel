@@ -136,6 +136,7 @@ function extractBookingRow(body: Record<string, unknown>, confirmationCode: stri
   const isOtaPln = ['VIA', 'GET', 'GYG', 'MUS', 'KLO', 'EXP'].includes(codePrefix)
 
   // Price: for OTA-PLN channels use customerInvoice (PLN); for others use resellerInvoice (TM net) if available
+  const ri = (pb.resellerInvoice ?? ab.resellerInvoice) as Record<string, unknown> | undefined
   const ci = (pb.customerInvoice ?? ab.customerInvoice) as Record<string, unknown> | undefined
   let rawTotal: unknown
   let currency: string
@@ -143,8 +144,11 @@ function extractBookingRow(body: Record<string, unknown>, confirmationCode: stri
     rawTotal = ci?.total ?? body.totalPriceConverted ?? body.totalPrice ?? booking.totalPrice
     currency = 'PLN'
   } else {
-    rawTotal = ci?.total ?? body.totalPriceConverted ?? body.totalPrice ?? booking.totalPrice
-    currency = String(ci?.currency ?? body.currency ?? 'EUR')
+    const riTotal = ri?.total
+    rawTotal = (typeof riTotal === 'number' && riTotal > 0)
+      ? riTotal
+      : (ci?.total ?? body.totalPriceConverted ?? body.totalPrice ?? booking.totalPrice)
+    currency = 'EUR'
   }
   const total = typeof rawTotal === 'number' && rawTotal > 0
     ? rawTotal
