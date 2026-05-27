@@ -2950,35 +2950,30 @@ tailwind.config = {
     btn.innerHTML = '<i class="fa-solid fa-circle-notch animate-spin"></i> Syncing…';
     btn.disabled = true;
     try {
-      const past   = new Date(); past.setFullYear(past.getFullYear() - 3);
-      const future = new Date(); future.setFullYear(future.getFullYear() + 2);
-      const fmt    = d => d.toISOString().slice(0, 10);
-      const existingIds    = new Set(allTourConfig.map(t => t.bokun_id).filter(Boolean));
-      const existingTitles = new Set(allTourConfig.map(t => t.title.toLowerCase().trim()));
+      const existingIds    = new Set(allTourConfig.map(t => String(t.bokun_id)).filter(Boolean));
+      const existingTitles = new Set(allTourConfig.map(t => (t.title || '').toLowerCase().trim()));
       let page = 0, newCount = 0;
       while (true) {
         const { data: res } = await db.functions.invoke('bokun-sync', {
-          body: { path: '/booking.json/booking-search', method: 'POST',
-            payload: { startDate: fmt(past), endDate: fmt(future), pageSize: 10000, page }}
+          body: { path: `/activity.json/list?pageSize=100&page=${page}`, method: 'GET' }
         });
-        const items = res?.body?.items || [];
-        if (items.length === 0) break;
+        const items = res?.body;
+        if (!Array.isArray(items) || items.length === 0) break;
         for (const item of items) {
-          const pb      = item.productBookings?.[0];
-          const bokunId = pb?.product?.id;
-          const title   = (pb?.product?.title || pb?.product?.name || '').trim();
-          if (!title) continue;
+          const bokunId = String(item.id);
+          const title   = (item.title || item.name || '').trim();
+          if (!title || !bokunId) continue;
           if (existingIds.has(bokunId) || existingTitles.has(title.toLowerCase())) continue;
           const maxOrder = allTourConfig.reduce((m, t) => Math.max(m, t.sort_order || 0), 0);
-          const { data: newT } = await db.from('tour_config').insert({ title, bokun_id: bokunId || null, sort_order: maxOrder + 10, active: true, groups: [] }).select().single();
+          const { data: newT } = await db.from('tour_config').insert({ title, bokun_id: bokunId, sort_order: maxOrder + 10, active: true, groups: [] }).select().single();
           if (newT) {
             allTourConfig.push(newT);
-            if (bokunId) existingIds.add(bokunId);
+            existingIds.add(bokunId);
             existingTitles.add(title.toLowerCase());
             newCount++;
           }
         }
-        if (items.length < 500) break;
+        if (items.length < 100) break;
         page++;
       }
       allTourConfig.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
