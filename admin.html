@@ -2558,8 +2558,10 @@ tailwind.config = {
     const empty    = document.getElementById('tour-config-empty');
     const subtitle = document.getElementById('tours-config-subtitle');
     if (loading) loading.classList.add('hidden');
-    const totalPkgs = allCommissions.filter(c => c.active).length;
-    if (subtitle) subtitle.textContent = `${allTourConfig.length} tour${allTourConfig.length !== 1 ? 's' : ''} · ${totalPkgs} active package${totalPkgs !== 1 ? 's' : ''}`;
+    const totalPkgs    = allCommissions.filter(c => c.active).length;
+    const activeTours  = allTourConfig.filter(t => t.active).length;
+    const inactiveTours = allTourConfig.length - activeTours;
+    if (subtitle) subtitle.textContent = `${activeTours} active · ${inactiveTours} inactive · ${totalPkgs} package${totalPkgs !== 1 ? 's' : ''}`;
     if (allTourConfig.length === 0) {
       if (table) table.classList.add('hidden');
       if (empty) empty.classList.remove('hidden');
