@@ -2955,9 +2955,9 @@ tailwind.config = {
       let page = 0, newCount = 0;
       while (true) {
         const { data: res } = await db.functions.invoke('bokun-sync', {
-          body: { path: `/activity.json/list?pageSize=100&page=${page}`, method: 'GET' }
+          body: { path: '/activity.json/search', method: 'POST', payload: { pageSize: 100, page } }
         });
-        const items = res?.body;
+        const items = res?.body?.items;
         if (!Array.isArray(items) || items.length === 0) break;
         for (const item of items) {
           const bokunId = String(item.id);
