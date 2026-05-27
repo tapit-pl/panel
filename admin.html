@@ -2571,8 +2571,12 @@ tailwind.config = {
     tbody.innerHTML = '';
     const locked = !editingUnlocked;
     const lockCls = locked ? 'opacity-40 pointer-events-none select-none' : '';
-    allTourConfig.forEach((t, idx) => {
-      const last     = idx === allTourConfig.length - 1;
+    const displayTours = [...allTourConfig].sort((a, b) => {
+      if (b.active !== a.active) return b.active ? 1 : -1;
+      return (a.sort_order || 0) - (b.sort_order || 0);
+    });
+    displayTours.forEach((t, idx) => {
+      const last     = idx === displayTours.length - 1;
       const groups   = (t.groups || []).length > 0 ? t.groups.map(groupChip).join('') : '<span class="text-gray-300 text-xs">all partners</span>';
       const packages = allCommissions.filter(c => c.tour_config_id === t.id).sort((a,b) => (a.sort_order||0)-(b.sort_order||0));
       tbody.insertAdjacentHTML('beforeend', `
