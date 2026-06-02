@@ -1837,6 +1837,11 @@ tailwind.config = {
     'sb_publishable_jTg5-5J24uo7BNBVBLTTLA_xAeB9iK4'
   );
 
+  function escapeHtml(str) {
+    if (str == null) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
   function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
@@ -1901,26 +1906,20 @@ tailwind.config = {
     const { data: existing } = await db.auth.mfa.listFactors();
     const allTotpFactors = [...(existing?.totp || []), ...(existing?.all?.filter(f => f.factor_type === 'totp') || [])];
     const uniqueFactors = [...new Map(allTotpFactors.map(f => [f.id, f])).values()];
-    console.log('[2FA] factors before enroll:', uniqueFactors);
     for (const f of uniqueFactors) {
-      const { error: ue } = await db.auth.mfa.unenroll({ factorId: f.id });
-      console.log('[2FA] unenroll', f.id, f.status, ue ? 'ERROR: ' + ue.message : 'OK');
+      await db.auth.mfa.unenroll({ factorId: f.id });
     }
 
     let { data, error } = await db.auth.mfa.enroll({ factorType: 'totp', issuer: 'Thousand Miles Admin' });
-    console.log('[2FA] enroll result:', data ? 'OK id=' + data.id : 'ERROR: ' + error?.message);
 
     if (error && error.message && error.message.includes('already exists')) {
       const { data: retry } = await db.auth.mfa.listFactors();
       const retryFactors = [...(retry?.totp || []), ...(retry?.all?.filter(f => f.factor_type === 'totp') || [])];
       const uniqueRetry = [...new Map(retryFactors.map(f => [f.id, f])).values()];
-      console.log('[2FA] retry factors:', uniqueRetry);
       for (const f of uniqueRetry) {
-        const { error: ue2 } = await db.auth.mfa.unenroll({ factorId: f.id });
-        console.log('[2FA] retry unenroll', f.id, f.status, ue2 ? 'ERROR: ' + ue2.message : 'OK');
+        await db.auth.mfa.unenroll({ factorId: f.id });
       }
       const result = await db.auth.mfa.enroll({ factorType: 'totp', issuer: 'Thousand Miles Admin' });
-      console.log('[2FA] retry enroll result:', result.data ? 'OK' : 'ERROR: ' + result.error?.message);
       data = result.data;
       error = result.error;
     }
@@ -2064,7 +2063,7 @@ tailwind.config = {
     if (toursEl) toursEl.innerHTML = topTours.length ? topTours.map(([name,count]) => `
       <div>
         <div class="flex items-center justify-between text-xs mb-1.5">
-          <span class="font-medium text-white truncate max-w-[140px]" title="${name}">${name}</span>
+          <span class="font-medium text-white truncate max-w-[140px]" title="${escapeHtml(name)}">${escapeHtml(name)}</span>
           <span class="text-slate-400 shrink-0 ml-2">${count} booking${count!==1?'s':''}</span>
         </div>
         <div class="h-2 rounded-full overflow-hidden" style="background:rgba(255,255,255,0.1)">
@@ -2089,9 +2088,9 @@ tailwind.config = {
       const st = b.status==='Paid'?'status-paid':b.status==='Confirmed'?'status-confirmed':b.status==='Pending'?'status-pending':'status-cancelled';
       return `<tr class="hover:bg-gray-50 transition-colors">
         <td class="px-5 py-3 text-slate-500 font-mono text-xs">#${b.id}</td>
-        <td class="px-4 py-3 font-medium text-slate-100 text-xs max-w-[120px] truncate">${b.tour}</td>
-        <td class="px-4 py-3 text-slate-300 text-xs">${b.guest}</td>
-        <td class="px-4 py-3 text-slate-400 text-xs">${b.hotel}</td>
+        <td class="px-4 py-3 font-medium text-slate-100 text-xs max-w-[120px] truncate">${escapeHtml(b.tour)}</td>
+        <td class="px-4 py-3 text-slate-300 text-xs">${escapeHtml(b.guest)}</td>
+        <td class="px-4 py-3 text-slate-400 text-xs">${escapeHtml(b.hotel)}</td>
         <td class="px-4 py-3 text-slate-400 text-xs whitespace-nowrap">${b.date}</td>
         <td class="px-4 py-3 text-right font-semibold text-white text-xs whitespace-nowrap">${Math.round(toPlnAmount(b)).toLocaleString('pl')} zł</td>
         <td class="px-4 py-3 text-center"><span class="${sc} text-xs font-semibold px-2 py-0.5 rounded-full">${b.source}</span></td>
@@ -2492,11 +2491,11 @@ tailwind.config = {
           <span class="text-gray-600">${date}</span>
           <span class="ml-2">${time}</span>
         </div>
-        <div class="col-span-3 text-gray-500 truncate" title="${l.user_email || '—'}">${l.user_email || '—'}</div>
+        <div class="col-span-3 text-gray-500 truncate" title="${escapeHtml(l.user_email || '—')}">${escapeHtml(l.user_email || '—')}</div>
         <div class="col-span-2 ${meta.color} font-medium flex items-center gap-1.5">
-          <i class="fa-solid ${meta.icon} text-xs opacity-70"></i>${meta.label}
+          <i class="fa-solid ${meta.icon} text-xs opacity-70"></i>${escapeHtml(meta.label)}
         </div>
-        <div class="col-span-4 text-gray-500">${l.details || '—'}${l.ref ? `<span class="ml-2 text-gray-300">[${l.ref}]</span>` : ''}</div>
+        <div class="col-span-4 text-gray-500">${escapeHtml(l.details || '—')}${l.ref ? `<span class="ml-2 text-gray-300">[${escapeHtml(l.ref)}]</span>` : ''}</div>
       </div>`;
     }).join('');
   }
@@ -4099,7 +4098,7 @@ tailwind.config = {
     const el = document.getElementById('pd-contract-status');
     if (!expiryStr) { el.classList.add('hidden'); return; }
     const expiry = new Date(expiryStr);
-    const today  = new Date('2026-05-11');
+    const today  = new Date();
     const days   = Math.round((expiry - today) / 86400000);
     el.classList.remove('hidden');
     if (days < 0) {

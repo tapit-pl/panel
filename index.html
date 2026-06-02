@@ -2005,6 +2005,11 @@ tailwind.config = {
 </div>
 
 <script>
+  function escapeHtml(str) {
+    if (str == null) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
   let cart = [];
   let guestCount = 2;
   let helpTicketCounter = 1;
@@ -2749,10 +2754,10 @@ tailwind.config = {
              data-name="${(p.title || '').toLowerCase().replace(/"/g,'')}" data-cat="${p.cat || 'day'}"
              onclick="openTour(${idx})">
           <div class="relative overflow-hidden h-44">
-            <img src="${p.photo}" alt="${p.title}" class="tour-img w-full h-full object-cover">
+            <img src="${escapeHtml(p.photo)}" alt="${escapeHtml(p.title)}" class="tour-img w-full h-full object-cover">
           </div>
           <div class="p-4">
-            <h3 class="font-bold text-dark text-sm leading-snug">${p.title}</h3>
+            <h3 class="font-bold text-dark text-sm leading-snug">${escapeHtml(p.title)}</h3>
             ${!p.hasPackage ? `<div class="mt-2 flex items-center gap-1 text-xs text-amber-600 bg-amber-50 rounded-lg px-2 py-1"><i class="fa-solid fa-triangle-exclamation text-xs"></i> Not available for booking</div>` : ''}
           </div>
         </div>`);
@@ -2795,7 +2800,7 @@ tailwind.config = {
         const pln = ci === 0 || catList.length === 1 ? tourPlnPrice : null;
         const display = pln ? `${pln} pln` : `${c.defaultPrice.amount} zł`;
         return `<div class="bg-gray-50 rounded-xl px-3 py-2.5 text-center">
-          <div class="text-xs text-gray-400 mb-0.5">${c.title || 'Guest'}</div>
+          <div class="text-xs text-gray-400 mb-0.5">${escapeHtml(c.title || 'Guest')}</div>
           <div class="font-bold text-brand text-sm">${display}</div>
         </div>`;
       }).join('');
