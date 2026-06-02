@@ -1899,12 +1899,25 @@ tailwind.config = {
     showScreen('screen-mfa-enroll');
 
     const { data: existing } = await db.auth.mfa.listFactors();
-    const pendingFactors = existing?.totp?.filter(f => f.status === 'unverified') || [];
-    for (const f of pendingFactors) {
+    const allTotpFactors = existing?.totp || [];
+    for (const f of allTotpFactors) {
       await db.auth.mfa.unenroll({ factorId: f.id });
     }
 
-    const { data, error } = await db.auth.mfa.enroll({ factorType: 'totp', issuer: 'Thousand Miles Admin' });
+    let { data, error } = await db.auth.mfa.enroll({ factorType: 'totp', issuer: 'Thousand Miles Admin' });
+
+    // If a factor still exists (e.g. not returned by listFactors), retry after unenrolling by ID from error context
+    if (error && error.message && error.message.includes('already exists')) {
+      const { data: retry } = await db.auth.mfa.listFactors();
+      const retryFactors = retry?.totp || [];
+      for (const f of retryFactors) {
+        await db.auth.mfa.unenroll({ factorId: f.id });
+      }
+      const result = await db.auth.mfa.enroll({ factorType: 'totp', issuer: 'Thousand Miles Admin' });
+      data = result.data;
+      error = result.error;
+    }
+
     if (error) {
       const errEl = document.getElementById('mfa-enroll-error');
       errEl.textContent = error.message || 'Failed to set up 2FA. Please try again.';
