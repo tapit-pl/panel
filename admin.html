@@ -1897,11 +1897,23 @@ tailwind.config = {
 
   async function startMfaEnroll() {
     showScreen('screen-mfa-enroll');
+
+    const { data: existing } = await db.auth.mfa.listFactors();
+    const pendingFactors = existing?.totp?.filter(f => f.status === 'unverified') || [];
+    for (const f of pendingFactors) {
+      await db.auth.mfa.unenroll({ factorId: f.id });
+    }
+
     const { data, error } = await db.auth.mfa.enroll({ factorType: 'totp', issuer: 'Thousand Miles Admin' });
-    if (error) { console.error(error); return; }
+    if (error) {
+      const errEl = document.getElementById('mfa-enroll-error');
+      errEl.textContent = error.message || 'Failed to set up 2FA. Please try again.';
+      errEl.classList.remove('hidden');
+      document.getElementById('mfa-qr').innerHTML = '';
+      return;
+    }
     mfaFactorId = data.id;
     const qrEl = document.getElementById('mfa-qr');
-    // Extract SVG from data URL and inject directly
     if (data.totp.qr_code.startsWith('data:image/svg+xml')) {
       const svgContent = decodeURIComponent(data.totp.qr_code.split(',')[1]);
       qrEl.innerHTML = `<div class="w-48 h-48">${svgContent}</div>`;
