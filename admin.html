@@ -1901,26 +1901,20 @@ tailwind.config = {
     const { data: existing } = await db.auth.mfa.listFactors();
     const allTotpFactors = [...(existing?.totp || []), ...(existing?.all?.filter(f => f.factor_type === 'totp') || [])];
     const uniqueFactors = [...new Map(allTotpFactors.map(f => [f.id, f])).values()];
-    console.log('[2FA] factors before enroll:', uniqueFactors);
     for (const f of uniqueFactors) {
-      const { error: ue } = await db.auth.mfa.unenroll({ factorId: f.id });
-      console.log('[2FA] unenroll', f.id, f.status, ue ? 'ERROR: ' + ue.message : 'OK');
+      await db.auth.mfa.unenroll({ factorId: f.id });
     }
 
     let { data, error } = await db.auth.mfa.enroll({ factorType: 'totp', issuer: 'Thousand Miles Admin' });
-    console.log('[2FA] enroll result:', data ? 'OK id=' + data.id : 'ERROR: ' + error?.message);
 
     if (error && error.message && error.message.includes('already exists')) {
       const { data: retry } = await db.auth.mfa.listFactors();
       const retryFactors = [...(retry?.totp || []), ...(retry?.all?.filter(f => f.factor_type === 'totp') || [])];
       const uniqueRetry = [...new Map(retryFactors.map(f => [f.id, f])).values()];
-      console.log('[2FA] retry factors:', uniqueRetry);
       for (const f of uniqueRetry) {
-        const { error: ue2 } = await db.auth.mfa.unenroll({ factorId: f.id });
-        console.log('[2FA] retry unenroll', f.id, f.status, ue2 ? 'ERROR: ' + ue2.message : 'OK');
+        await db.auth.mfa.unenroll({ factorId: f.id });
       }
       const result = await db.auth.mfa.enroll({ factorType: 'totp', issuer: 'Thousand Miles Admin' });
-      console.log('[2FA] retry enroll result:', result.data ? 'OK' : 'ERROR: ' + result.error?.message);
       data = result.data;
       error = result.error;
     }
