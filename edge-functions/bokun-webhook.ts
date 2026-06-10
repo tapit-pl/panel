@@ -135,13 +135,31 @@ function extractBookingRow(body: Record<string, unknown>, confirmationCode: stri
   const codePrefix = confirmationCode.replace(/^#/, '').split('-')[0].toUpperCase()
   const isOtaPln = ['VIA', 'GET', 'GYG', 'KLO', 'EXP'].includes(codePrefix)
 
-  // Price: for OTA-PLN channels use customerInvoice (PLN); for others use resellerInvoice (TM net) if available
+  // Price: for OTA-PLN channels use customerInvoice if it's in PLN, else convert from EUR via NBP
   const ri = (pb.resellerInvoice ?? ab.resellerInvoice) as Record<string, unknown> | undefined
   const ci = (pb.customerInvoice ?? ab.customerInvoice) as Record<string, unknown> | undefined
   let rawTotal: unknown
   let currency: string
   if (isOtaPln) {
-    rawTotal = ci?.total ?? body.totalPriceConverted ?? body.totalPrice ?? booking.totalPrice
+    const ciCurr = String(ci?.currency ?? '').toUpperCase()
+    const preConverted = typeof body.totalPriceConverted === 'number' && (body.totalPriceConverted as number) > 0
+      ? (body.totalPriceConverted as number) : null
+    if (preConverted) {
+      rawTotal = preConverted                                        // Bokun already converted to PLN
+    } else if (ciCurr === 'PLN' && typeof ci?.total === 'number' && (ci.total as number) > 0) {
+      rawTotal = ci.total                                            // customerInvoice is already PLN (GYG)
+    } else if (typeof ci?.total === 'number' && (ci.total as number) > 0) {
+      // customerInvoice is in EUR (Viator) — convert to PLN via NBP
+      let rate = 4.25
+      try {
+        const r = await fetch('https://api.nbp.pl/api/exchangerates/rates/a/eur/?format=json')
+        const d = await r.json() as { rates?: { mid?: number }[] }
+        rate = d?.rates?.[0]?.mid ?? 4.25
+      } catch { /* use fallback rate */ }
+      rawTotal = Math.round((ci.total as number) * rate * 100) / 100
+    } else {
+      rawTotal = body.totalPriceConverted ?? body.totalPrice ?? booking.totalPrice
+    }
     currency = 'PLN'
   } else {
     const riTotal = ri?.total

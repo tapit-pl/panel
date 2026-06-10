@@ -2198,8 +2198,16 @@ tailwind.config = {
     const ciCurrency = pb.customerInvoice?.currency;
     let total, currency;
     if (isOtaPln) {
-      total = (typeof ciTotal === 'number' && ciTotal > 0) ? ciTotal
-            : (item.totalPriceConverted || item.totalPrice || pb.totalPrice || 0);
+      const ciCurrUp = (ciCurrency || '').toUpperCase();
+      if (item.totalPriceConverted > 0) {
+        total = item.totalPriceConverted;                                      // Bokun already converted to PLN
+      } else if (ciCurrUp === 'PLN' && typeof ciTotal === 'number' && ciTotal > 0) {
+        total = ciTotal;                                                        // customerInvoice is PLN (GYG)
+      } else if (typeof ciTotal === 'number' && ciTotal > 0) {
+        total = Math.round(ciTotal * (_eurPlnRate || 4.25) * 100) / 100;       // Viator: EUR→PLN via NBP rate
+      } else {
+        total = item.totalPrice || pb.totalPrice || 0;
+      }
       currency = 'PLN';
     } else if (typeof riTotal === 'number' && riTotal > 0) {
       total = riTotal;
