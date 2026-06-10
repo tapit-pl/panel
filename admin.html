@@ -2200,7 +2200,7 @@ tailwind.config = {
       ?? item.sellerInvoice?.currency ?? item.resellerInvoice?.currency;
     const ciTotal = pb.customerInvoice?.total;
     const ciCurrency = pb.customerInvoice?.currency;
-    if (codePrefix === 'MUS' && !riTotal) console.debug('[MUS invoice debug]', JSON.stringify({ resellerInvoice: pb.resellerInvoice, sellerInvoice: pb.sellerInvoice, itemSeller: item.sellerInvoice, ciTotal, totalPrice: item.totalPrice, totalPriceConverted: item.totalPriceConverted }));
+    if (codePrefix === 'MUS' && !riTotal) console.warn('[MUS invoice debug]', JSON.stringify({ resellerInvoice: pb.resellerInvoice, sellerInvoice: pb.sellerInvoice, itemSeller: item.sellerInvoice, ciTotal, totalPrice: item.totalPrice, totalPriceConverted: item.totalPriceConverted }));
     let total, currency;
     if (isOtaPln) {
       const ciCurrUp = (ciCurrency || '').toUpperCase();
