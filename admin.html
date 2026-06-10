@@ -2280,6 +2280,9 @@ tailwind.config = {
         if ((b.currency || 'EUR').toUpperCase() === 'EUR' && dbTotal > 0) {
           console.warn('[DBload EUR] id='+b.id+' source='+b.source+' currency='+b.currency+' total='+b.total+' bokun='+b.bokun_confirmation_code);
         }
+        if (Math.abs(dbTotal - 654) < 5 || Math.abs(dbTotal * (_eurPlnRate || 4.25) - 654) < 10) {
+          console.warn('[DBload ~654] id='+b.id+' source='+b.source+' currency='+b.currency+' total='+b.total+' bokun='+b.bokun_confirmation_code);
+        }
         dbCurrency = b.currency || 'EUR';
       }
       allBookings.push({
