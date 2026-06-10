@@ -2274,11 +2274,12 @@ tailwind.config = {
       if (otaPlnPrefixes.includes(codeP)) {
         dbCurrency = 'PLN';
       } else if (isMus && (b.currency || 'EUR').toUpperCase() === 'EUR' && dbTotal > 0) {
-        console.warn('[DBload MUS] id='+b.id+' source='+b.source+' currency='+b.currency+' total='+b.total+' isMus='+isMus+' => applying 0.75×rate');
         dbTotal = Math.round(dbTotal * 0.75 * (_eurPlnRate || 4.25) * 100) / 100;
         dbCurrency = 'PLN';
       } else {
-        if (isMus) console.warn('[DBload MUS skip] id='+b.id+' source='+b.source+' currency='+b.currency+' total='+b.total+' isMus='+isMus);
+        if ((b.currency || 'EUR').toUpperCase() === 'EUR' && dbTotal > 0) {
+          console.warn('[DBload EUR] id='+b.id+' source='+b.source+' currency='+b.currency+' total='+b.total+' bokun='+b.bokun_confirmation_code);
+        }
         dbCurrency = b.currency || 'EUR';
       }
       allBookings.push({
