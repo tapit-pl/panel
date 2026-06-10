@@ -2219,9 +2219,12 @@ tailwind.config = {
       total = riTotal;
       currency = riCurrency || 'EUR';
     } else if (codePrefix === 'MUS' && typeof ciTotal === 'number' && ciTotal > 0) {
-      // Musement: Bokun API sends resellerInvoice with all zeros (unreconciled).
-      // Calculate net payout: gross × (1 - 25% commission) → convert EUR→PLN.
-      total = Math.round(ciTotal * MUSEMENT_NET_RATE * (_eurPlnRate || 4.25) * 100) / 100;
+      // Musement: Bokun returns resellerInvoice.totalSansCommission = 0 until invoice is reconciled.
+      // Use totalSansCommission when available; otherwise fall back to gross × (1 - 25% commission).
+      const netEur = (typeof pb.resellerInvoice?.totalSansCommission === 'number' && pb.resellerInvoice.totalSansCommission > 0)
+        ? pb.resellerInvoice.totalSansCommission
+        : ciTotal * MUSEMENT_NET_RATE;
+      total = Math.round(netEur * (_eurPlnRate || 4.25) * 100) / 100;
       currency = 'PLN';
     } else if (typeof ciTotal === 'number' && ciTotal > 0) {
       total = ciTotal;
