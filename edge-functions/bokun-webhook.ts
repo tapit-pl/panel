@@ -167,6 +167,17 @@ function extractBookingRow(body: Record<string, unknown>, confirmationCode: stri
     if (typeof riTotal === 'number' && riTotal > 0) {
       rawTotal = riTotal
       currency = String(ri?.currency ?? 'EUR')
+    } else if (codePrefix === 'MUS' && typeof ci?.total === 'number' && (ci.total as number) > 0) {
+      // Musement: Bokun API sends resellerInvoice with all zeros (unreconciled).
+      // Net payout = gross × 0.75 (25% Musement commission). Convert EUR→PLN via NBP.
+      let rate = 4.25
+      try {
+        const r = await fetch('https://api.nbp.pl/api/exchangerates/rates/a/eur/?format=json')
+        const d = await r.json() as { rates?: { mid?: number }[] }
+        rate = d?.rates?.[0]?.mid ?? 4.25
+      } catch { /* use fallback rate */ }
+      rawTotal = Math.round((ci.total as number) * 0.75 * rate * 100) / 100
+      currency = 'PLN'
     } else {
       rawTotal = ci?.total ?? body.totalPriceConverted ?? body.totalPrice ?? booking.totalPrice
       currency = String(ci?.currency ?? body.currency ?? 'EUR')

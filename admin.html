@@ -2192,7 +2192,9 @@ tailwind.config = {
     const codePrefix = (item.confirmationCode || '').replace(/^#/, '').split('-')[0].toUpperCase();
     const isOtaPln = ['VIA', 'GET', 'GYG', 'KLO', 'EXP'].includes(codePrefix);
 
-    // resellerInvoice = what operator (TM) invoices TO the OTA; sellerInvoice = Bokun UI "Seller Invoice" alias
+    // Bokun does NOT populate resellerInvoice amounts for Musement (all zeros, unreconciled).
+    // Musement commission rate is 25% — net = customerInvoice.total × 0.75.
+    const MUSEMENT_NET_RATE = 0.75;
     const riTotal = pb.resellerInvoice?.total ?? pb.resellerInvoice?.totalAmount
       ?? pb.sellerInvoice?.total ?? pb.sellerInvoice?.totalAmount
       ?? item.sellerInvoice?.total ?? item.resellerInvoice?.total;
@@ -2200,7 +2202,6 @@ tailwind.config = {
       ?? item.sellerInvoice?.currency ?? item.resellerInvoice?.currency;
     const ciTotal = pb.customerInvoice?.total;
     const ciCurrency = pb.customerInvoice?.currency;
-    if (codePrefix === 'MUS' && !riTotal) console.warn('[MUS invoice debug]', JSON.stringify({ resellerInvoice: pb.resellerInvoice, sellerInvoice: pb.sellerInvoice, itemSeller: item.sellerInvoice, ciTotal, totalPrice: item.totalPrice, totalPriceConverted: item.totalPriceConverted }));
     let total, currency;
     if (isOtaPln) {
       const ciCurrUp = (ciCurrency || '').toUpperCase();
@@ -2217,6 +2218,11 @@ tailwind.config = {
     } else if (typeof riTotal === 'number' && riTotal > 0) {
       total = riTotal;
       currency = riCurrency || 'EUR';
+    } else if (codePrefix === 'MUS' && typeof ciTotal === 'number' && ciTotal > 0) {
+      // Musement: Bokun API sends resellerInvoice with all zeros (unreconciled).
+      // Calculate net payout: gross × (1 - 25% commission) → convert EUR→PLN.
+      total = Math.round(ciTotal * MUSEMENT_NET_RATE * (_eurPlnRate || 4.25) * 100) / 100;
+      currency = 'PLN';
     } else if (typeof ciTotal === 'number' && ciTotal > 0) {
       total = ciTotal;
       currency = ciCurrency || 'EUR';
