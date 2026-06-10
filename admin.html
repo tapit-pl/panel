@@ -2224,7 +2224,6 @@ tailwind.config = {
         : ciTotal * MUSEMENT_NET_RATE;
       total = Math.round(netEur * (_eurPlnRate || 4.25) * 100) / 100;
       currency = 'PLN';
-      console.warn('[MUS branch] ciTotal='+ciTotal+' netEur='+netEur+' total='+total+' rate='+_eurPlnRate);
     } else if (typeof ciTotal === 'number' && ciTotal > 0) {
       total = ciTotal;
       currency = ciCurrency || 'EUR';
@@ -2268,12 +2267,22 @@ tailwind.config = {
       const dateFormatted = b.date ? new Date(b.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
       const source = partner ? 'Partner Panel' : (b.source || 'TM Panel');
       const codeP = (b.bokun_confirmation_code || '').replace(/^#/, '').split('-')[0].toUpperCase();
-      const dbCurrency = otaPlnPrefixes.includes(codeP) ? 'PLN' : (b.currency || 'EUR');
+      const isMus = codeP === 'MUS' || (b.source || '') === 'Musement';
+      let dbTotal = b.total || 0;
+      let dbCurrency;
+      if (otaPlnPrefixes.includes(codeP)) {
+        dbCurrency = 'PLN';
+      } else if (isMus && (b.currency || 'EUR').toUpperCase() === 'EUR' && dbTotal > 0) {
+        dbTotal = Math.round(dbTotal * 0.75 * (_eurPlnRate || 4.25) * 100) / 100;
+        dbCurrency = 'PLN';
+      } else {
+        dbCurrency = b.currency || 'EUR';
+      }
       allBookings.push({
         id: b.id, displayId: b.bokun_confirmation_code || b.id, tour: b.tour, guest: b.guest, email: b.email, phone: b.phone,
         hotel: partner?.name || '—', date: dateFormatted, time: b.time, pickup: b.pickup,
         language: b.language || '',
-        pax: b.pax, total: b.total || 0, currency: dbCurrency, comm: b.comm, source, status: b.status, notes: b.notes || '',
+        pax: b.pax, total: dbTotal, currency: dbCurrency, comm: b.comm, source, status: b.status, notes: b.notes || '',
         _dbBooking: true, _stripeSessionId: b.stripe_session_id, _bokunCode: b.bokun_confirmation_code,
         _creationTs: b.created_at ? new Date(b.created_at).getTime() : 0,
         _startTs: b.date ? new Date(b.date).getTime() : 0,
@@ -2326,13 +2335,9 @@ tailwind.config = {
               if (mapped.total > 0) allBookings[idx].total = mapped.total;
               const pfx = (allBookings[idx]._bokunCode || mapped.id || '').replace(/^#/, '').split('-')[0].toUpperCase();
               allBookings[idx].currency = otaPlnPrefixes.includes(pfx) ? 'PLN' : (mapped.totalCurrency || 'EUR');
-              if (mapped.id.startsWith('MUS')) console.warn('[MUS sync] found in index → total='+allBookings[idx].total+' currency='+allBookings[idx].currency+' source='+allBookings[idx].source);
-            } else if (mapped.id.startsWith('MUS')) {
-              console.warn('[MUS sync] SKIPPED — source=Partner Panel, id='+mapped.id);
             }
             return;
           }
-          if (mapped.id.startsWith('MUS')) console.warn('[MUS sync] NOT in bokunCodeIndex, mapped.id='+mapped.id);
           if (!seenIds.has(mapped.id)) {
             seenIds.add(mapped.id);
             allBookings.push(mapped);
