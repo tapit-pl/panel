@@ -2215,21 +2215,17 @@ tailwind.config = {
         total = item.totalPrice || pb.totalPrice || 0;
       }
       currency = 'PLN';
-    } else if (typeof riTotal === 'number' && riTotal > 0) {
-      total = riTotal;
-      currency = riCurrency || 'EUR';
-      if (codePrefix === 'MUS' && (String(riCurrency || 'EUR')).toUpperCase() === 'EUR') {
-        console.warn('[MUS riTotal→PLN] riTotal='+riTotal+' riCurrency='+riCurrency+' ciTotal='+ciTotal);
-        total = Math.round(riTotal * (_eurPlnRate || 4.25) * 100) / 100;
-        currency = 'PLN';
-      }
     } else if (codePrefix === 'MUS' && typeof ciTotal === 'number' && ciTotal > 0) {
+      // MUS check BEFORE riTotal: Bokun sets resellerInvoice.total = customerInvoice.total (gross),
+      // so riTotal is unreliable for Musement. Always use ciTotal × 0.75 (25% commission).
       const netEur = (typeof pb.resellerInvoice?.totalSansCommission === 'number' && pb.resellerInvoice.totalSansCommission > 0)
         ? pb.resellerInvoice.totalSansCommission
         : ciTotal * MUSEMENT_NET_RATE;
       total = Math.round(netEur * (_eurPlnRate || 4.25) * 100) / 100;
       currency = 'PLN';
-      console.warn('[MUS branch] ciTotal='+ciTotal+' netEur='+netEur+' total='+total);
+    } else if (typeof riTotal === 'number' && riTotal > 0) {
+      total = riTotal;
+      currency = riCurrency || 'EUR';
     } else if (typeof ciTotal === 'number' && ciTotal > 0) {
       total = ciTotal;
       currency = ciCurrency || 'EUR';
@@ -2283,12 +2279,6 @@ tailwind.config = {
         dbTotal = Math.round(dbTotal * 0.75 * (_eurPlnRate || 4.25) * 100) / 100;
         dbCurrency = 'PLN';
       } else {
-        if ((b.currency || 'EUR').toUpperCase() === 'EUR' && dbTotal > 0) {
-          console.warn('[DBload EUR] id='+b.id+' source='+b.source+' currency='+b.currency+' total='+b.total+' bokun='+b.bokun_confirmation_code);
-        }
-        if (Math.abs(dbTotal - 654) < 5 || Math.abs(dbTotal * (_eurPlnRate || 4.25) - 654) < 10) {
-          console.warn('[DBload ~654] id='+b.id+' source='+b.source+' currency='+b.currency+' total='+b.total+' bokun='+b.bokun_confirmation_code);
-        }
         dbCurrency = b.currency || 'EUR';
       }
       allBookings.push({
@@ -2361,7 +2351,6 @@ tailwind.config = {
             seenIds.add(mapped.id);
             const newPfx = (mapped.id || '').replace(/^#/, '').split('-')[0].toUpperCase();
             if (otaPlnPrefixes.includes(newPfx) && (mapped.currency || '').toUpperCase() !== 'PLN') {
-              console.warn('[sync NEW EUR→PLN] id='+mapped.id+' total='+mapped.total+' currency='+mapped.currency);
               mapped.total = Math.round((mapped.total || 0) * (_eurPlnRate || 4.25) * 100) / 100;
               mapped.currency = 'PLN';
             }
