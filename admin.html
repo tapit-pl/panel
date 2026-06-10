@@ -2326,9 +2326,13 @@ tailwind.config = {
               if (mapped.total > 0) allBookings[idx].total = mapped.total;
               const pfx = (allBookings[idx]._bokunCode || mapped.id || '').replace(/^#/, '').split('-')[0].toUpperCase();
               allBookings[idx].currency = otaPlnPrefixes.includes(pfx) ? 'PLN' : (mapped.totalCurrency || 'EUR');
+              if (mapped.id.startsWith('MUS')) console.warn('[MUS sync] found in index → total='+allBookings[idx].total+' currency='+allBookings[idx].currency+' source='+allBookings[idx].source);
+            } else if (mapped.id.startsWith('MUS')) {
+              console.warn('[MUS sync] SKIPPED — source=Partner Panel, id='+mapped.id);
             }
             return;
           }
+          if (mapped.id.startsWith('MUS')) console.warn('[MUS sync] NOT in bokunCodeIndex, mapped.id='+mapped.id);
           if (!seenIds.has(mapped.id)) {
             seenIds.add(mapped.id);
             allBookings.push(mapped);
