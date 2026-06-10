@@ -2192,10 +2192,15 @@ tailwind.config = {
     const codePrefix = (item.confirmationCode || '').replace(/^#/, '').split('-')[0].toUpperCase();
     const isOtaPln = ['VIA', 'GET', 'GYG', 'KLO', 'EXP'].includes(codePrefix);
 
-    const riTotal = pb.resellerInvoice?.total;
-    const riCurrency = pb.resellerInvoice?.currency;
+    // resellerInvoice = what operator (TM) invoices TO the OTA; sellerInvoice = Bokun UI "Seller Invoice" alias
+    const riTotal = pb.resellerInvoice?.total ?? pb.resellerInvoice?.totalAmount
+      ?? pb.sellerInvoice?.total ?? pb.sellerInvoice?.totalAmount
+      ?? item.sellerInvoice?.total ?? item.resellerInvoice?.total;
+    const riCurrency = pb.resellerInvoice?.currency ?? pb.sellerInvoice?.currency
+      ?? item.sellerInvoice?.currency ?? item.resellerInvoice?.currency;
     const ciTotal = pb.customerInvoice?.total;
     const ciCurrency = pb.customerInvoice?.currency;
+    if (codePrefix === 'MUS' && !riTotal) console.debug('[MUS invoice debug]', JSON.stringify({ resellerInvoice: pb.resellerInvoice, sellerInvoice: pb.sellerInvoice, itemSeller: item.sellerInvoice, ciTotal, totalPrice: item.totalPrice, totalPriceConverted: item.totalPriceConverted }));
     let total, currency;
     if (isOtaPln) {
       const ciCurrUp = (ciCurrency || '').toUpperCase();

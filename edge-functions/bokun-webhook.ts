@@ -136,7 +136,8 @@ function extractBookingRow(body: Record<string, unknown>, confirmationCode: stri
   const isOtaPln = ['VIA', 'GET', 'GYG', 'KLO', 'EXP'].includes(codePrefix)
 
   // Price: for OTA-PLN channels use customerInvoice if it's in PLN, else convert from EUR via NBP
-  const ri = (pb.resellerInvoice ?? ab.resellerInvoice) as Record<string, unknown> | undefined
+  // resellerInvoice = TM invoices TO the OTA; sellerInvoice = Bokun UI "Seller Invoice" alias
+  const ri = (pb.resellerInvoice ?? ab.resellerInvoice ?? pb.sellerInvoice ?? ab.sellerInvoice) as Record<string, unknown> | undefined
   const ci = (pb.customerInvoice ?? ab.customerInvoice) as Record<string, unknown> | undefined
   let rawTotal: unknown
   let currency: string
@@ -162,7 +163,7 @@ function extractBookingRow(body: Record<string, unknown>, confirmationCode: stri
     }
     currency = 'PLN'
   } else {
-    const riTotal = ri?.total
+    const riTotal = (ri?.total ?? ri?.totalAmount) as number | undefined
     if (typeof riTotal === 'number' && riTotal > 0) {
       rawTotal = riTotal
       currency = String(ri?.currency ?? 'EUR')
