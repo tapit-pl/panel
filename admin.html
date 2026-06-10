@@ -2267,15 +2267,18 @@ tailwind.config = {
       const dateFormatted = b.date ? new Date(b.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
       const source = partner ? 'Partner Panel' : (b.source || 'TM Panel');
       const codeP = (b.bokun_confirmation_code || '').replace(/^#/, '').split('-')[0].toUpperCase();
-      const isMus = codeP === 'MUS' || (b.source || '') === 'Musement';
+      const idP = String(b.id || '').replace(/^#/, '').split('-')[0].toUpperCase();
+      const isMus = codeP === 'MUS' || idP === 'MUS' || (b.source || '') === 'Musement';
       let dbTotal = b.total || 0;
       let dbCurrency;
       if (otaPlnPrefixes.includes(codeP)) {
         dbCurrency = 'PLN';
       } else if (isMus && (b.currency || 'EUR').toUpperCase() === 'EUR' && dbTotal > 0) {
+        console.warn('[DBload MUS] id='+b.id+' source='+b.source+' currency='+b.currency+' total='+b.total+' isMus='+isMus+' => applying 0.75×rate');
         dbTotal = Math.round(dbTotal * 0.75 * (_eurPlnRate || 4.25) * 100) / 100;
         dbCurrency = 'PLN';
       } else {
+        if (isMus) console.warn('[DBload MUS skip] id='+b.id+' source='+b.source+' currency='+b.currency+' total='+b.total+' isMus='+isMus);
         dbCurrency = b.currency || 'EUR';
       }
       allBookings.push({
