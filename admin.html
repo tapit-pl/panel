@@ -2218,12 +2218,18 @@ tailwind.config = {
     } else if (typeof riTotal === 'number' && riTotal > 0) {
       total = riTotal;
       currency = riCurrency || 'EUR';
+      if (codePrefix === 'MUS' && (String(riCurrency || 'EUR')).toUpperCase() === 'EUR') {
+        console.warn('[MUS riTotal→PLN] riTotal='+riTotal+' riCurrency='+riCurrency+' ciTotal='+ciTotal);
+        total = Math.round(riTotal * (_eurPlnRate || 4.25) * 100) / 100;
+        currency = 'PLN';
+      }
     } else if (codePrefix === 'MUS' && typeof ciTotal === 'number' && ciTotal > 0) {
       const netEur = (typeof pb.resellerInvoice?.totalSansCommission === 'number' && pb.resellerInvoice.totalSansCommission > 0)
         ? pb.resellerInvoice.totalSansCommission
         : ciTotal * MUSEMENT_NET_RATE;
       total = Math.round(netEur * (_eurPlnRate || 4.25) * 100) / 100;
       currency = 'PLN';
+      console.warn('[MUS branch] ciTotal='+ciTotal+' netEur='+netEur+' total='+total);
     } else if (typeof ciTotal === 'number' && ciTotal > 0) {
       total = ciTotal;
       currency = ciCurrency || 'EUR';
@@ -2339,14 +2345,26 @@ tailwind.config = {
             if (allBookings[idx].source === 'bokun_ota') allBookings[idx].source = mapped.source;
             // Partner Panel bookings use their own PLN amount from DB; all OTA sources use API
             if (allBookings[idx].source !== 'Partner Panel') {
-              if (mapped.total > 0) allBookings[idx].total = mapped.total;
               const pfx = (allBookings[idx]._bokunCode || mapped.id || '').replace(/^#/, '').split('-')[0].toUpperCase();
-              allBookings[idx].currency = otaPlnPrefixes.includes(pfx) ? 'PLN' : (mapped.totalCurrency || 'EUR');
+              const forcePln = otaPlnPrefixes.includes(pfx);
+              if (mapped.total > 0) {
+                const mappedIsEur = (mapped.currency || '').toUpperCase() !== 'PLN';
+                allBookings[idx].total = (forcePln && mappedIsEur)
+                  ? Math.round(mapped.total * (_eurPlnRate || 4.25) * 100) / 100
+                  : mapped.total;
+              }
+              allBookings[idx].currency = forcePln ? 'PLN' : (mapped.totalCurrency || 'EUR');
             }
             return;
           }
           if (!seenIds.has(mapped.id)) {
             seenIds.add(mapped.id);
+            const newPfx = (mapped.id || '').replace(/^#/, '').split('-')[0].toUpperCase();
+            if (otaPlnPrefixes.includes(newPfx) && (mapped.currency || '').toUpperCase() !== 'PLN') {
+              console.warn('[sync NEW EUR→PLN] id='+mapped.id+' total='+mapped.total+' currency='+mapped.currency);
+              mapped.total = Math.round((mapped.total || 0) * (_eurPlnRate || 4.25) * 100) / 100;
+              mapped.currency = 'PLN';
+            }
             allBookings.push(mapped);
             added++;
           }
