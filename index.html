@@ -3021,6 +3021,7 @@ tailwind.config = {
       staff_id: currentPartner?._staffId || null,
       bokun_confirmation_code: payment === 'link' ? (bokunReservationCode || null) : (bokunConfirmationCode || null),
       bokun_booking_id: bokunBookingId,
+      notes: notes || null,
     });
 
     btn.disabled = false;
