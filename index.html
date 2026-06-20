@@ -1391,19 +1391,29 @@ tailwind.config = {
         <div id="edit-tour-name" class="px-3 py-2.5 bg-gray-50 rounded-xl text-sm text-gray-500 border border-gray-100"></div>
       </div>
 
-      <!-- Date -->
-      <div>
-        <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Date</label>
-        <input id="edit-date" type="date" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+      <!-- Booking info (read-only) -->
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Date</label>
+          <div id="edit-date" class="px-3 py-2.5 bg-gray-50 rounded-xl text-sm text-gray-600 border border-gray-100"></div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Time</label>
+          <div id="edit-time" class="px-3 py-2.5 bg-gray-50 rounded-xl text-sm text-gray-600 border border-gray-100"></div>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Pax</label>
+          <div id="edit-pax" class="px-3 py-2.5 bg-gray-50 rounded-xl text-sm text-gray-600 border border-gray-100"></div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Status</label>
+          <div id="edit-status-display" class="px-3 py-2.5 bg-gray-50 rounded-xl text-sm text-gray-600 border border-gray-100"></div>
+        </div>
       </div>
 
-      <!-- Time -->
-      <div>
-        <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Departure time (optional)</label>
-        <input id="edit-time" type="text" placeholder="e.g. 08:30" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-      </div>
-
-      <!-- Guest name -->
+      <!-- Guest name (editable) -->
       <div class="grid grid-cols-2 gap-3">
         <div>
           <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">First name</label>
@@ -1415,7 +1425,7 @@ tailwind.config = {
         </div>
       </div>
 
-      <!-- Email + Phone -->
+      <!-- Email + Phone (editable) -->
       <div class="grid grid-cols-2 gap-3">
         <div>
           <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Email</label>
@@ -1425,12 +1435,6 @@ tailwind.config = {
           <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Phone</label>
           <input id="edit-phone" type="tel" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
         </div>
-      </div>
-
-      <!-- Pax -->
-      <div>
-        <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Number of guests (pax)</label>
-        <input id="edit-pax" type="number" min="1" max="50" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
       </div>
 
       <!-- Notes -->
@@ -3898,14 +3902,15 @@ tailwind.config = {
 
     document.getElementById('edit-booking-subtitle').textContent = `#${b.id} · ${b.tour || ''}`;
     document.getElementById('edit-tour-name').textContent = b.tour || '—';
-    document.getElementById('edit-date').value = b.date || '';
-    document.getElementById('edit-time').value = b.time || '';
+    document.getElementById('edit-date').textContent = b.date || '—';
+    document.getElementById('edit-time').textContent = b.time || '—';
+    document.getElementById('edit-pax').textContent = b.pax ? `${b.pax} guest${b.pax > 1 ? 's' : ''}` : '—';
+    document.getElementById('edit-status-display').textContent = b.status || '—';
     const nameParts = (b.guest || '').split(' ');
     document.getElementById('edit-first').value = nameParts[0] || '';
     document.getElementById('edit-last').value = nameParts.slice(1).join(' ') || '';
     document.getElementById('edit-email').value = b.email || '';
     document.getElementById('edit-phone').value = b.phone || '';
-    document.getElementById('edit-pax').value = b.pax || 1;
     document.getElementById('edit-notes').value = b.notes || '';
     document.getElementById('edit-confirm-check').checked = false;
     document.getElementById('edit-booking-error').classList.add('hidden');
@@ -3939,15 +3944,9 @@ tailwind.config = {
 
     const firstName = document.getElementById('edit-first').value.trim();
     const lastName  = document.getElementById('edit-last').value.trim();
-    const date      = document.getElementById('edit-date').value;
 
     if (!firstName || !lastName) {
       errEl.textContent = 'First and last name are required.';
-      errEl.classList.remove('hidden');
-      return;
-    }
-    if (!date) {
-      errEl.textContent = 'Please select a date.';
       errEl.classList.remove('hidden');
       return;
     }
@@ -3956,14 +3955,15 @@ tailwind.config = {
     btn.disabled = true;
     btn.textContent = 'Saving...';
 
+    const email = document.getElementById('edit-email').value.trim();
+    const phone = document.getElementById('edit-phone').value.trim();
+    const notes = document.getElementById('edit-notes').value.trim();
+
     const updates = {
       guest: `${firstName} ${lastName}`,
-      email: document.getElementById('edit-email').value.trim(),
-      phone: document.getElementById('edit-phone').value.trim(),
-      date,
-      time:  document.getElementById('edit-time').value.trim(),
-      pax:   parseInt(document.getElementById('edit-pax').value) || 1,
-      notes: document.getElementById('edit-notes').value.trim()
+      email: email || null,
+      phone: phone || null,
+      notes: notes || null,
     };
 
     const { error } = await db.from('bookings').update(updates).eq('id', editingBookingId);
@@ -3974,6 +3974,20 @@ tailwind.config = {
       btn.textContent = 'Save changes';
       toggleEditSaveBtn();
       return;
+    }
+
+    // Sync guest details to Bokun (best-effort)
+    const b = partnerBookings.find(x => String(x.id) === String(editingBookingId));
+    if (b?.bokun_booking_id) {
+      try {
+        await db.functions.invoke('bokun-sync', {
+          body: {
+            path: `/booking.json/${b.bokun_booking_id}/customer`,
+            method: 'PUT',
+            payload: { firstName, lastName, email: email || undefined, phoneNumber: phone || undefined },
+          }
+        });
+      } catch(e) { console.warn('[Bokun] customer update failed:', e?.message); }
     }
 
     closeEditBooking();

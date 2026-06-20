@@ -2199,6 +2199,7 @@ tailwind.config = {
         language: b.language || '',
         pax: b.pax, total: dbTotal, currency: dbCurrency, comm: b.comm, source, status: b.status, notes: b.notes || '',
         _dbBooking: true, _stripeSessionId: b.stripe_session_id, _bokunCode: b.bokun_confirmation_code,
+        _bokunBookingId: b.bokun_booking_id || null,
         _creationTs: b.created_at ? new Date(b.created_at).getTime() : 0,
         _startTs: b.date ? new Date(b.date).getTime() : 0,
       });
@@ -3398,7 +3399,7 @@ tailwind.config = {
     document.getElementById('edit-booking-drawer').classList.remove('open');
     setTimeout(() => document.getElementById('edit-booking-panel').classList.add('hidden'), 280);
   }
-  function saveEditBooking() {
+  async function saveEditBooking() {
     if (!document.getElementById('edit-confirm-check').checked) {
       document.getElementById('edit-confirm-check').closest('label').style.outline = '2px solid #ef4444';
       document.getElementById('edit-confirm-check').closest('label').style.borderRadius = '8px';
@@ -3406,27 +3407,57 @@ tailwind.config = {
       return;
     }
     const b = allBookings.find(x => x.id === editingBookingId);
-    if (b) {
-      b.tour   = document.getElementById('edit-tour').value;
-      b.date   = document.getElementById('edit-date').value;
-      b.time   = document.getElementById('edit-time').value;
-      const fn = document.getElementById('edit-firstname').value;
-      const ln = document.getElementById('edit-lastname').value;
-      b.guest  = (fn + ' ' + ln).trim();
-      b.email  = document.getElementById('edit-email').value;
-      b.phone  = document.getElementById('edit-phone').value;
-      b.pax    = document.getElementById('edit-pax').value;
-      b.pickup = document.getElementById('edit-pickup').value;
-      b.total  = parseFloat(document.getElementById('edit-total').value) || b.total;
-      b.comm   = parseFloat(document.getElementById('edit-comm').value) || b.comm;
-      b.notes  = document.getElementById('edit-notes').value;
-      b.status = document.getElementById('edit-status').value;
+    if (!b) return;
+
+    const fn    = document.getElementById('edit-firstname').value.trim();
+    const ln    = document.getElementById('edit-lastname').value.trim();
+    const guest = (fn + ' ' + ln).trim();
+    const email = document.getElementById('edit-email').value.trim();
+    const phone = document.getElementById('edit-phone').value.trim();
+    const dbUpdates = {
+      tour:   document.getElementById('edit-tour').value.trim(),
+      date:   document.getElementById('edit-date').value.trim(),
+      time:   document.getElementById('edit-time').value.trim(),
+      guest,
+      email:  email || null,
+      phone:  phone || null,
+      pax:    parseInt(document.getElementById('edit-pax').value) || null,
+      pickup: document.getElementById('edit-pickup').value.trim() || null,
+      total:  parseFloat(document.getElementById('edit-total').value) || null,
+      comm:   parseFloat(document.getElementById('edit-comm').value) || null,
+      notes:  document.getElementById('edit-notes').value.trim() || null,
+      status: document.getElementById('edit-status').value,
+    };
+
+    const { error } = await db.from('bookings').update(dbUpdates).eq('id', editingBookingId);
+    if (error) {
+      console.error('[Admin] booking update failed:', error.message);
+    } else {
+      // Update in-memory cache
+      Object.assign(b, { ...dbUpdates, guest, email, phone });
       renderBookingsTable();
+
+      // Sync guest details to Bokun (best-effort)
+      if (b._bokunBookingId) {
+        try {
+          await db.functions.invoke('bokun-sync', {
+            body: {
+              path: `/booking.json/${b._bokunBookingId}/customer`,
+              method: 'PUT',
+              payload: { firstName: fn, lastName: ln, email: email || undefined, phoneNumber: phone || undefined },
+            }
+          });
+        } catch(e) { console.warn('[Bokun] customer update failed:', e?.message); }
+      }
     }
+
     closeEditBooking();
     const toast = document.createElement('div');
-    toast.className = 'fixed bottom-6 right-6 z-50 bg-green-500 text-white text-sm font-semibold px-5 py-3.5 rounded-xl shadow-xl flex items-center gap-2 fade-in';
-    toast.innerHTML = '<i class="fa-solid fa-check"></i> Booking updated successfully!';
+    const toastOk = !error;
+    toast.className = `fixed bottom-6 right-6 z-50 ${toastOk ? 'bg-green-500' : 'bg-red-500'} text-white text-sm font-semibold px-5 py-3.5 rounded-xl shadow-xl flex items-center gap-2 fade-in`;
+    toast.innerHTML = toastOk
+      ? '<i class="fa-solid fa-check"></i> Booking updated successfully!'
+      : '<i class="fa-solid fa-xmark"></i> Save failed — check console.';
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3500);
   }
