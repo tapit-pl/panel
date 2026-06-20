@@ -37,8 +37,7 @@ tailwind.config = {
   .package-card.selected { border-color: #E8751A; background: #FFF3E8; }
   .package-card.selected .pkg-check { display: flex; }
   .pkg-check { display: none; }
-  .cart-badge { min-width: 20px; height: 20px; }
-  .marketing-banner { background: linear-gradient(135deg, #1e3a5f 0%, #2d5282 100%); }
+.marketing-banner { background: linear-gradient(135deg, #1e3a5f 0%, #2d5282 100%); }
   .pickup-option.selected-pickup { border-color: #E8751A; background: #FFF3E8; }
   .scrollbar-hide::-webkit-scrollbar { display: none; }
   .calendar-day:hover { background: #FFF3E8; }
@@ -188,11 +187,6 @@ tailwind.config = {
       </div>
 
       <div class="flex items-center gap-3">
-        <!-- Cart button -->
-        <button onclick="toggleCart()" class="relative p-2.5 bg-brand-light rounded-xl hover:bg-orange-100 transition-colors">
-          <i class="fa-solid fa-cart-shopping text-brand text-base"></i>
-          <span id="cart-badge" class="cart-badge absolute -top-1 -right-1 bg-brand text-white text-xs font-bold rounded-full flex items-center justify-center hidden">0</span>
-        </button>
         <!-- Notifications -->
         <button onclick="goToUpdates()" class="relative p-2.5 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">
           <i class="fa-solid fa-bell text-gray-500 text-base"></i>
@@ -204,14 +198,7 @@ tailwind.config = {
         </button>
         <!-- User -->
         <div class="flex items-center gap-2 pl-3 border-l border-gray-200">
-          <button onclick="openAccountPanel()" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div class="w-8 h-8 bg-brand rounded-lg flex items-center justify-center text-white text-xs font-bold partner-initials">TM</div>
-            <div class="hidden sm:block text-left">
-              <div class="text-xs font-semibold text-dark partner-name">Loading...</div>
-              <div class="text-xs text-gray-400 partner-type"></div>
-            </div>
-          </button>
-          <button onclick="doPartnerLogout()" class="ml-2 text-gray-400 hover:text-gray-600" title="Log out">
+          <button onclick="doPartnerLogout()" class="text-gray-400 hover:text-gray-600" title="Log out">
             <i class="fa-solid fa-right-from-bracket text-sm"></i>
           </button>
         </div>
@@ -242,7 +229,6 @@ tailwind.config = {
     <!-- Tabs -->
     <div class="flex gap-0 border-b border-gray-200 mb-6 overflow-x-auto scrollbar-hide">
       <button class="tab-btn active whitespace-nowrap px-4 py-2.5 text-xs font-medium text-gray-600 hover:text-brand transition-colors" onclick="setTab(this, 'tab-tours')">Tours</button>
-      <button class="tab-btn whitespace-nowrap px-4 py-2.5 text-xs font-medium text-gray-600 hover:text-brand transition-colors" onclick="setTab(this, 'tab-transfers')">Transfers</button>
       <button class="tab-btn whitespace-nowrap px-4 py-2.5 text-xs font-medium text-gray-600 hover:text-brand transition-colors" onclick="setTab(this, 'tab-bookings')">My bookings</button>
       <button class="tab-btn whitespace-nowrap px-4 py-2.5 text-xs font-medium text-gray-600 hover:text-brand transition-colors" onclick="setTab(this, 'tab-vouchers')">Guest vouchers</button>
       <button class="tab-btn whitespace-nowrap px-4 py-2.5 text-xs font-medium text-gray-600 hover:text-brand transition-colors" onclick="setTab(this, 'tab-departures')">Today's departures</button>
@@ -305,124 +291,6 @@ tailwind.config = {
       </div>
     </div>
 
-    <!-- TAB: TRANSFERS -->
-    <div id="tab-transfers" class="hidden fade-in">
-
-      <div class="flex items-center justify-between mb-5">
-        <h2 class="text-base font-semibold text-dark">Airport Transfers</h2>
-        <span class="text-xs text-gray-400">Price per vehicle · 24/7 availability</span>
-      </div>
-
-      <!-- Direction toggle -->
-      <div class="flex gap-2 mb-6">
-        <button onclick="setTransferDir(this,'to')" class="transfer-dir-btn flex-1 py-2.5 text-sm font-semibold rounded-xl bg-brand text-white transition-colors">
-          <i class="fa-solid fa-plane-arrival mr-2"></i>From airport → Hotel
-        </button>
-        <button onclick="setTransferDir(this,'from')" class="transfer-dir-btn flex-1 py-2.5 text-sm font-semibold rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
-          <i class="fa-solid fa-plane-departure mr-2"></i>Hotel → Airport
-        </button>
-      </div>
-
-      <!-- Transfer cards grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-
-        <!-- Kraków Airport -->
-        <div class="bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-          <div class="relative h-36 overflow-hidden">
-            <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=600&q=80" alt="Kraków Airport" class="w-full h-full object-cover">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-            <div class="absolute bottom-3 left-4 text-white">
-              <div class="text-xs font-semibold opacity-80">KRK · Kraków</div>
-              <div class="text-base font-bold">Kraków Airport</div>
-            </div>
-            <div class="absolute top-3 right-3">
-              <span class="bg-green-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full">~20 min</span>
-            </div>
-          </div>
-          <div class="p-4">
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-sm text-gray-500">Number of passengers</span>
-              <div class="flex items-center gap-2">
-                <button onclick="changeTransferPax('krk',-1)" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-sm font-bold">−</button>
-                <span id="pax-krk" class="text-sm font-bold text-dark w-4 text-center">2</span>
-                <button onclick="changeTransferPax('krk',1)" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-sm font-bold">+</button>
-              </div>
-            </div>
-            <div class="flex items-center justify-between">
-              <span id="price-krk" class="font-bold text-brand text-base">99 pln</span>
-              <button onclick="bookTransfer('Kraków Airport','',document.getElementById('price-krk').textContent.replace(' pln',''))" class="px-5 py-2 bg-brand text-white text-sm font-semibold rounded-xl hover:bg-brand-dark transition-colors">Book</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Katowice Airport -->
-        <div class="bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-          <div class="relative h-36 overflow-hidden">
-            <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&q=80" alt="Katowice Airport" class="w-full h-full object-cover">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-            <div class="absolute bottom-3 left-4 text-white">
-              <div class="text-xs font-semibold opacity-80">KTW · Katowice</div>
-              <div class="text-base font-bold">Katowice Airport</div>
-            </div>
-            <div class="absolute top-3 right-3">
-              <span class="bg-green-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full">~80 min</span>
-            </div>
-          </div>
-          <div class="p-4">
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-sm text-gray-500">Number of passengers</span>
-              <div class="flex items-center gap-2">
-                <button onclick="changeTransferPax('ktw',-1)" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-sm font-bold">−</button>
-                <span id="pax-ktw" class="text-sm font-bold text-dark w-4 text-center">2</span>
-                <button onclick="changeTransferPax('ktw',1)" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-sm font-bold">+</button>
-              </div>
-            </div>
-            <div class="flex items-center justify-between">
-              <span id="price-ktw" class="font-bold text-brand text-base">249 pln</span>
-              <button onclick="bookTransfer('Katowice Airport','',document.getElementById('price-ktw').textContent.replace(' pln',''))" class="px-5 py-2 bg-brand text-white text-sm font-semibold rounded-xl hover:bg-brand-dark transition-colors">Book</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Zakopane -->
-        <div class="bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-          <div class="relative h-36 overflow-hidden">
-            <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80" alt="Zakopane" class="w-full h-full object-cover">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-            <div class="absolute bottom-3 left-4 text-white">
-              <div class="text-xs font-semibold opacity-80">KRK / KTW · Tatry</div>
-              <div class="text-base font-bold">Airport ↔ Zakopane</div>
-            </div>
-            <div class="absolute top-3 right-3">
-              <span class="bg-green-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full">~2 h</span>
-            </div>
-          </div>
-          <div class="p-4">
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-sm text-gray-500">Number of passengers</span>
-              <div class="flex items-center gap-2">
-                <button onclick="changeTransferPax('zak',-1)" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-sm font-bold">−</button>
-                <span id="pax-zak" class="text-sm font-bold text-dark w-4 text-center">2</span>
-                <button onclick="changeTransferPax('zak',1)" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-sm font-bold">+</button>
-              </div>
-            </div>
-            <div class="flex items-center justify-between">
-              <span id="price-zak" class="font-bold text-brand text-base">349 pln</span>
-              <button onclick="bookTransfer('Airport–Zakopane','',document.getElementById('price-zak').textContent.replace(' pln',''))" class="px-5 py-2 bg-brand text-white text-sm font-semibold rounded-xl hover:bg-brand-dark transition-colors">Book</button>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Info note -->
-      <div class="mt-5 bg-blue-50 border border-blue-100 rounded-2xl p-4 flex gap-3 text-sm text-blue-700">
-        <i class="fa-solid fa-circle-info text-blue-400 mt-0.5 shrink-0"></i>
-        <span>All transfers include <strong>flight monitoring</strong> — the driver adjusts pick-up time to actual arrival. Child seats available on request. Price is per vehicle, not per person.</span>
-      </div>
-
-    </div>
-
     <!-- TAB: TOURS -->
     <div id="tab-tours" class="fade-in">
       <!-- Search + filters row -->
@@ -435,6 +303,7 @@ tailwind.config = {
           <button onclick="filterTourCat(this,'all')" class="tour-cat-btn text-xs px-3 py-2 bg-brand text-white rounded-lg font-medium">All</button>
           <button onclick="filterTourCat(this,'day')" class="tour-cat-btn text-xs px-3 py-2 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">Day trips</button>
           <button onclick="filterTourCat(this,'attraction')" class="tour-cat-btn text-xs px-3 py-2 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">Attractions</button>
+          <button onclick="filterTourCat(this,'transfer')" class="tour-cat-btn text-xs px-3 py-2 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">Transfers</button>
         </div>
         <span id="tour-count" class="text-xs text-gray-400 ml-auto">0 tours</span>
       </div>
@@ -1370,116 +1239,6 @@ tailwind.config = {
   </div>
 </div>
 
-<!-- ===================== CART PANEL ===================== -->
-<!-- ===================== PANEL: ACCOUNT ===================== -->
-<div id="panel-account-backdrop" class="fixed inset-0 z-40 hidden bg-black/40 modal-bg" onclick="closeAccountPanel()"></div>
-<div id="panel-account" class="fixed inset-y-0 right-0 z-50 hidden w-full sm:w-96 bg-white shadow-2xl flex-col overflow-y-auto">
-  <div class="slide-in flex flex-col h-full">
-    <!-- Header -->
-    <div class="p-5 border-b border-gray-100 flex items-center justify-between shrink-0">
-      <h3 class="font-bold text-dark text-base">Hotel Profile</h3>
-      <button onclick="closeAccountPanel()" class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-gray-200 transition-colors">
-        <i class="fa-solid fa-xmark text-sm"></i>
-      </button>
-    </div>
-
-    <div class="p-5 space-y-5 flex-1 overflow-y-auto">
-
-      <!-- Hotel info card -->
-      <div class="bg-brand-light rounded-2xl p-5">
-        <div class="flex items-center gap-4 mb-4">
-          <div id="acct-avatar" class="w-16 h-16 bg-brand rounded-2xl flex items-center justify-center text-white text-2xl font-bold shrink-0 overflow-hidden">—</div>
-          <div>
-            <div class="font-bold text-dark text-lg" id="acct-name">—</div>
-            <div class="text-sm text-gray-500" id="acct-type">—</div>
-            <div id="acct-stars" class="flex items-center gap-1 mt-1 hidden"></div>
-          </div>
-        </div>
-        <div class="space-y-2 text-sm text-gray-600">
-          <div id="acct-address-row" class="hidden">
-            <div class="flex items-start gap-2">
-              <i class="fa-solid fa-location-dot text-brand w-4 mt-0.5 shrink-0"></i>
-              <span class="text-gray-400 shrink-0">Address:</span>
-              <div>
-                <div id="acct-address-line1" class="text-dark font-medium"></div>
-                <div id="acct-address-line2" class="text-gray-400"></div>
-              </div>
-            </div>
-          </div>
-          <div id="acct-since-row" class="flex items-center gap-2">
-            <i class="fa-solid fa-calendar text-brand w-4 shrink-0"></i>
-            <span class="text-gray-400 shrink-0">Partner since:</span>
-            <span id="acct-since">—</span>
-          </div>
-          <div id="acct-id-row" class="flex items-center gap-2">
-            <i class="fa-solid fa-id-badge text-brand w-4 shrink-0"></i>
-            <span class="text-gray-400 shrink-0">Partner ID:</span>
-            <span id="acct-id" class="font-mono text-xs truncate">—</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Account manager -->
-      <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
-        <div class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Your Account Manager</div>
-        <div class="flex items-center gap-3 mb-4">
-          <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-lg shrink-0">KC</div>
-          <div>
-            <div class="font-semibold text-dark">Karolina Ciastoń</div>
-            <div class="text-xs text-gray-500">Thousand Miles Manager</div>
-          </div>
-        </div>
-        <div class="space-y-2 text-sm text-gray-600 mb-4">
-          <div class="flex items-center gap-2"><i class="fa-solid fa-phone text-gray-400 w-4"></i>+48 601 295 505</div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-envelope text-gray-400 w-4"></i>director@thousandmiles.pl</div>
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div class="flex items-center gap-2 px-3 py-2.5 bg-gray-50 rounded-xl">
-            <i class="fa-brands fa-whatsapp text-green-500 shrink-0"></i>
-            <span class="text-xs text-gray-600">+48 601 295 505</span>
-          </div>
-          <div class="flex items-center gap-2 px-3 py-2.5 bg-gray-50 rounded-xl">
-            <i class="fa-solid fa-phone text-brand shrink-0"></i>
-            <span class="text-xs text-gray-600">+48 601 295 505</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Commission summary -->
-      <div id="acct-commission" class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
-        <div class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Commission Summary</div>
-        <div id="acct-comm-loading" class="text-xs text-gray-400 text-center py-3">Loading...</div>
-        <div id="acct-comm-data" class="hidden space-y-2">
-          <div class="flex items-center justify-between py-2">
-            <span class="text-sm text-gray-600">This month</span>
-            <span class="font-bold text-brand" id="acct-comm-this-month">—</span>
-          </div>
-          <div class="flex items-center justify-between py-2 border-t border-gray-100">
-            <span class="text-sm text-gray-600">Year to date</span>
-            <span class="font-bold text-dark" id="acct-comm-ytd">—</span>
-          </div>
-          <div class="border-t border-gray-100 pt-2">
-            <div class="flex items-center justify-between py-2">
-              <span class="text-sm font-semibold text-dark">Pending settlement</span>
-              <span class="font-bold text-brand text-base" id="acct-comm-pending">—</span>
-            </div>
-            <div class="text-xs text-gray-400" id="acct-comm-pending-label">Unsettled commission</div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Footer logout -->
-    <div class="p-5 border-t border-gray-100 shrink-0">
-      <button onclick="goTo('screen-login')" class="w-full border-2 border-red-400 text-red-500 hover:bg-red-50 font-semibold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm">
-        <i class="fa-solid fa-right-from-bracket"></i> Log out
-      </button>
-    </div>
-
-  </div>
-</div>
-
 <!-- ===================== PANEL: HELP & SUPPORT ===================== -->
 <div id="panel-help-backdrop" class="fixed inset-0 z-40 hidden bg-black/40 modal-bg" onclick="closeHelpPanel()"></div>
 <div id="panel-help" class="fixed inset-y-0 right-0 z-50 hidden w-full sm:w-96 bg-white shadow-2xl flex-col overflow-y-auto">
@@ -1599,32 +1358,6 @@ tailwind.config = {
         </div>
       </div>
 
-    </div>
-  </div>
-</div>
-
-<div id="cart-panel" class="fixed inset-y-0 right-0 z-50 hidden w-full sm:w-96 bg-white shadow-2xl flex-col">
-  <div class="slide-in flex flex-col h-full">
-    <div class="p-4 border-b border-gray-100 flex items-center justify-between">
-      <h3 class="font-bold text-dark">Cart <span id="cart-count-label" class="text-brand">(0)</span></h3>
-      <button onclick="toggleCart()" class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-gray-200"><i class="fa-solid fa-xmark text-sm"></i></button>
-    </div>
-    <div id="cart-items" class="flex-1 overflow-y-auto p-4 space-y-3">
-      <div id="cart-empty" class="text-center text-gray-400 py-12">
-        <i class="fa-solid fa-cart-shopping text-3xl mb-3 text-gray-300"></i>
-        <p class="text-sm">Your cart is empty.<br>Add tours from the list.</p>
-      </div>
-    </div>
-    <div id="cart-footer" class="hidden p-4 border-t border-gray-100">
-      <div class="flex items-center justify-between mb-4">
-        <span class="text-sm text-gray-500">Total:</span>
-        <span id="cart-total" class="text-xl font-bold text-brand">0 zł</span>
-      </div>
-      <button onclick="openBookingForm()" class="w-full bg-brand hover:bg-brand-dark text-white font-bold py-3.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
-        <i class="fa-solid fa-check"></i>
-        Complete booking
-      </button>
-      <button onclick="toggleCart()" class="w-full mt-2 text-sm text-gray-500 hover:text-gray-700 py-2">Continue browsing</button>
     </div>
   </div>
 </div>
@@ -3385,76 +3118,7 @@ tailwind.config = {
     document.querySelectorAll('#guest-count, #guest-count-2, #guest-count-3, #guest-count-4').forEach(el => el.textContent = guestCount);
   }
 
-  function addToCart(name, price, time, pkg, guests) {
-    cart.push({ name, price, time, pkg, guests, total: price * guests });
-    updateCartUI();
-  }
-
-  function removeFromCart(idx) {
-    cart.splice(idx, 1);
-    updateCartUI();
-  }
-
-  function updateCartUI() {
-    const badge = document.getElementById('cart-badge');
-    const empty = document.getElementById('cart-empty');
-    const footer = document.getElementById('cart-footer');
-    const label = document.getElementById('cart-count-label');
-    const totalEl = document.getElementById('cart-total');
-    const itemsEl = document.getElementById('cart-items');
-
-    badge.textContent = cart.length;
-    label.textContent = '(' + cart.length + ')';
-
-    if (cart.length > 0) {
-      badge.classList.remove('hidden');
-      empty.classList.add('hidden');
-      footer.classList.remove('hidden');
-      footer.classList.add('flex', 'flex-col');
-
-      const total = cart.reduce((sum, item) => sum + item.total, 0);
-      totalEl.textContent = total + ' zł';
-
-      const existing = itemsEl.querySelectorAll('.cart-item');
-      existing.forEach(e => e.remove());
-
-      cart.forEach((item, idx) => {
-        const div = document.createElement('div');
-        div.className = 'cart-item bg-gray-50 rounded-xl p-3.5 fade-in';
-        div.innerHTML = `
-          <div class="flex items-start justify-between gap-2">
-            <div class="flex-1 min-w-0">
-              <div class="font-semibold text-sm text-dark leading-snug">${item.name}</div>
-              <div class="text-xs text-gray-500 mt-1">${item.pkg} • ${item.time} • ${item.guests} pax</div>
-            </div>
-            <div class="text-right shrink-0">
-              <div class="font-bold text-brand text-sm">${item.total} zł</div>
-              <button onclick="removeFromCart(${idx})" class="text-xs text-red-400 hover:text-red-600 mt-0.5">remove</button>
-            </div>
-          </div>`;
-        itemsEl.appendChild(div);
-      });
-    } else {
-      badge.classList.add('hidden');
-      empty.classList.remove('hidden');
-      footer.classList.add('hidden');
-    }
-  }
-
-  function toggleCart() {
-    const panel = document.getElementById('cart-panel');
-    if (panel.classList.contains('hidden')) {
-      panel.classList.remove('hidden');
-      panel.classList.add('flex');
-    } else {
-      panel.classList.add('hidden');
-      panel.classList.remove('flex');
-    }
-  }
-
   function openBookingForm() {
-    const panel = document.getElementById('cart-panel');
-    if (panel && !panel.classList.contains('hidden')) toggleCart();
     const modal = document.getElementById('modal-booking');
     modal.classList.remove('hidden');
     modal.classList.add('flex');
@@ -4370,115 +4034,7 @@ tailwind.config = {
     if (list) list.classList.toggle('hidden', visible === 0);
   }
 
-  function openAccountPanel() {
-    // Populate hotel info from currentPartner
-    if (currentPartner) {
-      const isStaff = !!currentPartner._isStaff;
-      const staffInitials = currentPartner._staffName ? currentPartner._staffName.split(' ').filter(Boolean).map(w=>w[0]).join('').substring(0,2).toUpperCase() : null;
-      const av = document.getElementById('acct-avatar');
-      if (currentPartner.logo) {
-        av.innerHTML = `<img src="${currentPartner.logo}" class="w-full h-full object-cover">`;
-      } else {
-        av.style.background = currentPartner.color || '#E8751A';
-        av.textContent = currentPartner.initials || (currentPartner.name ? currentPartner.name.substring(0,2).toUpperCase() : null) || staffInitials || '??';
-      }
-      document.getElementById('acct-name').textContent = isStaff ? (currentPartner._staffName || '—') : (currentPartner.name || '—');
-      document.getElementById('acct-type').textContent = isStaff ? (currentPartner.name || '') : (currentPartner.type || '');
-      // Hide partner-specific rows for staff
-      const sinceRow = document.getElementById('acct-since-row');
-      const idRow = document.getElementById('acct-id-row');
-      if (sinceRow) sinceRow.classList.toggle('hidden', isStaff);
-      if (idRow) idRow.classList.toggle('hidden', isStaff);
-      // Commission summary — hide for staff
-      const commEl = document.getElementById('acct-commission');
-      if (commEl) commEl.classList.toggle('hidden', isStaff);
-      const starsEl = document.getElementById('acct-stars');
-      if (currentPartner.stars) {
-        starsEl.innerHTML = Array(currentPartner.stars).fill('<i class="fa-solid fa-star text-amber-400 text-xs"></i>').join('') + `<span class="text-xs text-gray-500 ml-1">${currentPartner.stars}-star hotel</span>`;
-        starsEl.classList.remove('hidden');
-      } else { starsEl.classList.add('hidden'); }
-      const addr = currentPartner.address && !currentPartner.address.includes('@') ? currentPartner.address : null;
-      if (addr) {
-        const commaIdx = addr.lastIndexOf(',');
-        const line1 = commaIdx > -1 ? addr.substring(0, commaIdx).trim() : addr;
-        const line2 = commaIdx > -1 ? addr.substring(commaIdx + 1).trim() : '';
-        document.getElementById('acct-address-line1').textContent = line1;
-        document.getElementById('acct-address-line2').textContent = line2;
-        document.getElementById('acct-address-row').classList.remove('hidden');
-      } else { document.getElementById('acct-address-row').classList.add('hidden'); }
-      const sinceVal = currentPartner.since || (currentPartner.created_at ? new Date(currentPartner.created_at).toLocaleDateString('en', {month:'long', year:'numeric'}) : '—');
-      document.getElementById('acct-since').textContent = sinceVal;
-      document.getElementById('acct-id').textContent = currentPartner.id || '—';
-      const phn = document.getElementById('printorder-hotel-name');
-      if (phn) phn.textContent = currentPartner.name || 'your hotel';
-    }
-    loadCommissionSummary();
-    document.body.style.overflow = 'hidden'; document.documentElement.style.overflow = 'hidden';
-    document.getElementById('panel-account').classList.remove('hidden');
-    document.getElementById('panel-account').classList.add('flex');
-    document.getElementById('panel-account-backdrop').classList.remove('hidden');
-  }
 
-  async function loadCommissionSummary() {
-    const commEl = document.getElementById('acct-commission');
-    if (!commEl || commEl.classList.contains('hidden')) return;
-    const partnerId = currentPartner?.id;
-    if (!partnerId) return;
-
-    const now = new Date();
-    const yr = now.getFullYear();
-    const mo = String(now.getMonth()+1).padStart(2,'0');
-    const monthFrom = `${yr}-${mo}-01`;
-    const monthTo   = `${yr}-${mo}-${new Date(yr, now.getMonth()+1, 0).getDate()}`;
-    const yearFrom  = `${yr}-01-01`;
-
-    const { data: bookings } = await db.from('bookings')
-      .select('comm, total, date, status, payment_method')
-      .eq('partner_id', partnerId)
-      .gte('date', yearFrom)
-      .eq('status', 'confirmed');
-
-    const { data: settlements } = await db.from('settlements')
-      .select('amount, period')
-      .eq('partner_id', partnerId);
-
-    function calcNet(rows) {
-      let tmOwesPartner = 0, partnerOwesTM = 0;
-      for (const b of rows) {
-        const comm = parseFloat(b.comm||0), total = parseFloat(b.total||0);
-        if (b.payment_method === 'hotel') partnerOwesTM += total - comm;
-        else if (b.payment_method) tmOwesPartner += comm;
-      }
-      return tmOwesPartner - partnerOwesTM; // positive = TM owes partner, negative = partner owes TM
-    }
-
-    const rows = bookings || [];
-    const thisMonthRows = rows.filter(b => b.date >= monthFrom && b.date <= monthTo);
-    const thisMonthNet = calcNet(thisMonthRows);
-    const ytdNet = calcNet(rows);
-
-    const settledTotal = (settlements||[]).reduce((s, x) => s + (parseFloat(x.amount)||0), 0);
-    const pending = ytdNet - settledTotal;
-
-    const fmt = v => v >= 0 ? `${v} pln` : `−${Math.abs(v)} pln`;
-    document.getElementById('acct-comm-this-month').textContent = fmt(Math.round(thisMonthNet));
-    document.getElementById('acct-comm-ytd').textContent = fmt(Math.round(ytdNet));
-    document.getElementById('acct-comm-pending').textContent = fmt(Math.round(pending));
-    document.getElementById('acct-comm-pending').style.color = pending < 0 ? '#3b82f6' : '';
-    document.getElementById('acct-comm-pending-label').textContent = pending < 0
-      ? 'You owe Thousand Miles'
-      : pending > 0 ? 'Not yet settled with Thousand Miles' : 'All settled';
-
-    document.getElementById('acct-comm-loading').classList.add('hidden');
-    document.getElementById('acct-comm-data').classList.remove('hidden');
-  }
-
-  function closeAccountPanel() {
-    document.body.style.overflow = ''; document.documentElement.style.overflow = '';
-    document.getElementById('panel-account').classList.add('hidden');
-    document.getElementById('panel-account').classList.remove('flex');
-    document.getElementById('panel-account-backdrop').classList.add('hidden');
-  }
 
   function openHelpPanel() {
     document.getElementById('panel-help').classList.remove('hidden');
