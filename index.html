@@ -2194,11 +2194,6 @@ tailwind.config = {
           <div class="font-bold text-brand text-sm">${display}</div>
         </div>`;
       }).join('');
-    } else if (tourPlnPrice) {
-      pricingEl.innerHTML = `<div class="bg-gray-50 rounded-xl px-3 py-2.5 text-center">
-        <div class="text-xs text-gray-400 mb-0.5">per person</div>
-        <div class="font-bold text-brand text-sm">${tourPlnPrice} pln</div>
-      </div>`;
     } else {
       pricingEl.innerHTML = '';
     }
