@@ -1234,94 +1234,29 @@ tailwind.config = {
     </div>
     <div class="px-6 py-5 space-y-5 max-h-[78vh] overflow-y-auto">
 
-      <!-- ── INVOICE DATA ─────────────────────────── -->
+      <!-- ── HOTEL DETAILS ───────────────────────── -->
       <div>
-        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Invoice data</div>
-        <div class="grid grid-cols-6 gap-3">
-          <!-- NIP + button -->
-          <div class="col-span-6">
-            <label class="block text-xs font-semibold text-gray-600 mb-1.5">NIP</label>
-            <div class="flex gap-2">
-              <input id="ap-nip" type="text" placeholder="000-000-00-00" class="flex-1 text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-              <button type="button" onclick="lookupNIP()" class="px-4 py-2.5 bg-brand/10 hover:bg-brand/20 text-brand text-xs font-semibold rounded-xl transition-colors whitespace-nowrap flex items-center gap-1.5">
-                <i class="fa-solid fa-magnifying-glass text-xs"></i> Look up
-              </button>
-            </div>
-            <div id="ap-nip-status" class="text-xs mt-1.5 hidden"></div>
+        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Hotel details</div>
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Hotel name <span class="text-red-400">*</span></label>
+            <input id="ap-name" type="text" placeholder="e.g. Hotel Wawel Kraków" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           </div>
-          <!-- Company name -->
-          <div class="col-span-5">
-            <label class="block text-xs text-gray-500 mb-1.5">Company name</label>
-            <input id="ap-invoice-company" type="text" placeholder="Hotel Wawel Sp. z o.o." class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-            <p class="text-xs text-gray-400 mt-1">Please verify the company name is correct.</p>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Email <span class="text-red-400">*</span></label>
+            <input id="ap-email" type="email" placeholder="partner@hotel.pl" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           </div>
-          <!-- VAT badge -->
-          <div class="col-span-1 flex flex-col items-center justify-center pt-1">
-            <div id="ap-vat-badge" class="hidden text-center"></div>
-          </div>
-          <!-- Invoice address: street + house + apt -->
-          <div class="col-span-4">
-            <label class="block text-xs text-gray-500 mb-1.5">Street</label>
-            <input id="ap-inv-street" type="text" placeholder="ul. Sławkowska" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-          </div>
-          <div class="col-span-1">
-            <label class="block text-xs text-gray-500 mb-1.5">House no.</label>
-            <input id="ap-inv-house" type="text" placeholder="12" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-          </div>
-          <div class="col-span-1">
-            <label class="block text-xs text-gray-500 mb-1.5">Apt no.</label>
-            <input id="ap-inv-apt" type="text" placeholder="—" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-          </div>
-          <div class="col-span-2">
-            <label class="block text-xs text-gray-500 mb-1.5">Postal code</label>
-            <input id="ap-inv-postal" type="text" placeholder="30-001" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-          </div>
-          <div class="col-span-3">
-            <label class="block text-xs text-gray-500 mb-1.5">City</label>
-            <input id="ap-inv-city" type="text" placeholder="Kraków" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-          </div>
-          <!-- Invoice email -->
-          <div class="col-span-6">
-            <label class="block text-xs text-gray-500 mb-1.5">Invoice email</label>
-            <input id="ap-invoice-email" type="email" placeholder="faktury@hotel.pl" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Phone</label>
+            <input id="ap-phone" type="text" placeholder="+48 12 000 00 00" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           </div>
         </div>
       </div>
 
-      <!-- ── PROPERTY ─────────────────────────────── -->
+      <!-- ── ADDRESS ─────────────────────────────── -->
       <div class="border-t border-gray-100 pt-5">
-        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Property</div>
+        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Address</div>
         <div class="grid grid-cols-2 gap-3">
-          <div class="col-span-2">
-            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Property name <span class="text-red-400">*</span></label>
-            <input id="ap-name" type="text" placeholder="e.g. Hotel Wawel Kraków" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Type</label>
-            <select id="ap-type" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 text-dark">
-              <option value="Hotel">Hotel</option>
-              <option value="Apartment">Apartment</option>
-              <option value="Hostel">Hostel</option>
-              <option value="Guesthouse">Guesthouse</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Panel role</label>
-            <select id="ap-role" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 text-dark">
-              <option value="manager">Manager (pełny dostęp)</option>
-              <option value="reception">Recepcja (bez prowizji i broszur)</option>
-            </select>
-          </div>
-          <!-- Copy address button -->
-          <div class="col-span-2">
-            <div class="flex items-center justify-between mb-1.5">
-              <label class="text-xs font-semibold text-gray-600">Property address</label>
-              <button type="button" onclick="copyInvoiceAddressToProperty()" class="text-xs text-brand hover:underline flex items-center gap-1">
-                <i class="fa-solid fa-copy text-xs"></i> Copy from invoice address
-              </button>
-            </div>
-          </div>
           <div class="col-span-2">
             <label class="block text-xs text-gray-500 mb-1.5">Street</label>
             <input id="ap-street" type="text" placeholder="ul. Sławkowska" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
@@ -1345,46 +1280,28 @@ tailwind.config = {
         </div>
       </div>
 
-      <!-- ── CONTACT ──────────────────────────────── -->
+      <!-- ── ACCESS ──────────────────────────────── -->
       <div class="border-t border-gray-100 pt-5">
-        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Contact person</div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1.5">First name <span class="text-red-400">*</span></label>
-            <input id="ap-contact-first" type="text" placeholder="Anna" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Panel access</div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Password <span class="text-red-400">*</span></label>
+          <div class="flex gap-2">
+            <div class="relative flex-1">
+              <input id="ap-password" type="text" placeholder="Set partner password…" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 pr-9 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand font-mono">
+              <button type="button" onclick="generatePassword('ap-password')" title="Generate password" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand"><i class="fa-solid fa-arrows-rotate text-xs"></i></button>
+            </div>
+            <button type="button" onclick="copyPasswordFrom('ap-password')" class="px-3 py-2.5 border border-gray-200 rounded-xl text-gray-500 hover:text-brand hover:border-brand text-xs font-semibold transition-colors whitespace-nowrap">
+              <i class="fa-solid fa-copy mr-1"></i>Copy
+            </button>
           </div>
-          <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Last name <span class="text-red-400">*</span></label>
-            <input id="ap-contact-last" type="text" placeholder="Kowalska" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Phone</label>
-            <input id="ap-phone" type="text" placeholder="+48 12 000 00 00" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Email <span class="text-red-400">*</span></label>
-            <input id="ap-email" type="email" placeholder="partner@hotel.pl" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-          </div>
-        </div>
-      </div>
-
-      <!-- ── NOTES ───────────────────────────────── -->
-      <div class="border-t border-gray-100 pt-5">
-        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Internal notes</label>
-        <textarea id="ap-notes" rows="2" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 resize-none" placeholder="Visible to TM staff only…"></textarea>
-      </div>
-
-      <div class="border-t border-gray-100 pt-4">
-        <div class="flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3">
-          <i class="fa-solid fa-envelope text-blue-400 mt-0.5 text-sm"></i>
-          <p class="text-xs text-blue-600">An invitation email will be sent to the partner's address. They will set their password via the link.</p>
+          <div class="text-xs text-gray-400 mt-1.5">Share this password with the partner. They log in with their email and this password.</div>
         </div>
       </div>
 
     </div>
     <div class="px-6 py-4 border-t border-gray-100 bg-opacity-0 flex gap-2">
       <button id="btn-save-partner" onclick="saveAddPartner()" class="flex-1 bg-brand hover:bg-brand-dark text-white text-sm font-semibold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2">
-        <i class="fa-solid fa-paper-plane"></i> Add partner & send invite
+        <i class="fa-solid fa-plus"></i> Add partner
       </button>
       <button onclick="closeAddPartner()" class="px-5 py-2.5 border border-gray-200 text-gray-500 text-sm font-semibold rounded-xl hover:bg-white transition-colors">Cancel</button>
     </div>
@@ -1441,13 +1358,6 @@ tailwind.config = {
               <option value="Hostel">Hostel</option>
               <option value="Guesthouse">Guesthouse</option>
               <option value="Other">Other</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs text-gray-400 mb-1">Panel role</label>
-            <select id="pd-edit-role" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 text-dark">
-              <option value="manager">Manager</option>
-              <option value="reception">Recepcja</option>
             </select>
           </div>
           <div>
@@ -1606,8 +1516,10 @@ tailwind.config = {
             <button onclick="copyPassword()" class="px-3 py-2 border border-gray-200 rounded-xl text-gray-500 hover:text-brand hover:border-brand text-xs font-semibold transition-colors whitespace-nowrap">
               <i class="fa-solid fa-copy mr-1"></i>Copy
             </button>
+            <button onclick="setPartnerPassword()" class="px-3 py-2 bg-brand hover:bg-brand-dark text-white rounded-xl text-xs font-semibold transition-colors whitespace-nowrap">
+              Set
+            </button>
           </div>
-          <div class="text-xs text-gray-400 mt-1.5"><i class="fa-solid fa-circle-info mr-1"></i>After backend: password reset link will be sent to partner's email automatically.</div>
         </div>
       </div>
 
@@ -3898,19 +3810,21 @@ tailwind.config = {
     m.classList.add('hidden'); m.classList.remove('flex');
   }
   async function saveAddPartner() {
-    const name = document.getElementById('ap-name').value.trim();
-    const email = document.getElementById('ap-email').value.trim();
-    if (!name) { document.getElementById('ap-name').focus(); return; }
-    if (!email) { document.getElementById('ap-email').focus(); return; }
+    const name     = document.getElementById('ap-name').value.trim();
+    const email    = document.getElementById('ap-email').value.trim();
+    const password = document.getElementById('ap-password').value.trim();
+    if (!name)     { document.getElementById('ap-name').focus(); return; }
+    if (!email)    { document.getElementById('ap-email').focus(); return; }
+    if (!password) { document.getElementById('ap-password').focus(); return; }
 
     const btn = document.getElementById('btn-save-partner');
     btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Sending...';
+    btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Adding...';
 
     const { data: { session } } = await db.auth.getSession();
     const token = session?.access_token;
 
-    const res = await fetch('https://jzsiuvcgpwukxpcjxcsg.supabase.co/functions/v1/super-api', {
+    const res = await fetch('https://jzsiuvcgpwukxpcjxcsg.supabase.co/functions/v1/create-partner', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -3919,31 +3833,20 @@ tailwind.config = {
       body: JSON.stringify({
         email,
         name,
-        type:    document.getElementById('ap-type').value,
-        street:  document.getElementById('ap-street').value,
-        house:   document.getElementById('ap-house').value,
-        apt:     document.getElementById('ap-apt').value,
-        postal:  document.getElementById('ap-postal').value,
-        city:    document.getElementById('ap-city').value,
-        contact: [document.getElementById('ap-contact-first').value.trim(), document.getElementById('ap-contact-last').value.trim()].filter(Boolean).join(' '),
-        contact_first: document.getElementById('ap-contact-first').value.trim(),
-        contact_last:  document.getElementById('ap-contact-last').value.trim(),
-        phone:   document.getElementById('ap-phone').value,
-        commRate: 10,
-        notes:           document.getElementById('ap-notes').value,
-        nip:             document.getElementById('ap-nip').value,
-        invoice_email:   document.getElementById('ap-invoice-email').value,
-        invoice_company: document.getElementById('ap-invoice-company').value,
-        inv_street:  document.getElementById('ap-inv-street').value,
-        inv_house:   document.getElementById('ap-inv-house').value,
-        inv_apt:     document.getElementById('ap-inv-apt').value,
-        inv_postal:  document.getElementById('ap-inv-postal').value,
-        inv_city:    document.getElementById('ap-inv-city').value
+        phone: document.getElementById('ap-phone').value.trim(),
+        password,
+        address: {
+          street: document.getElementById('ap-street').value.trim(),
+          house:  document.getElementById('ap-house').value.trim(),
+          apt:    document.getElementById('ap-apt').value.trim(),
+          postal: document.getElementById('ap-postal').value.trim(),
+          city:   document.getElementById('ap-city').value.trim(),
+        }
       })
     });
 
     btn.disabled = false;
-    btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Add partner & send invite';
+    btn.innerHTML = '<i class="fa-solid fa-plus"></i> Add partner';
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -3951,26 +3854,10 @@ tailwind.config = {
       return;
     }
 
-    const contactFull = [document.getElementById('ap-contact-first').value.trim(), document.getElementById('ap-contact-last').value.trim()].filter(Boolean).join(' ');
-    const street  = document.getElementById('ap-street').value.trim();
-    const house   = document.getElementById('ap-house').value.trim();
-    const apt     = document.getElementById('ap-apt').value.trim();
-    const postal  = document.getElementById('ap-postal').value.trim();
-    const city    = document.getElementById('ap-city').value.trim();
-    const addressFull = [street + (house ? ' ' + house : '') + (apt ? '/' + apt : ''), postal + (city ? ' ' + city : '')].filter(Boolean).join(', ');
-    const invStreet = document.getElementById('ap-inv-street').value.trim();
-    const invHouse  = document.getElementById('ap-inv-house').value.trim();
-    const invApt    = document.getElementById('ap-inv-apt').value.trim();
-    const invPostal = document.getElementById('ap-inv-postal').value.trim();
-    const invCity   = document.getElementById('ap-inv-city').value.trim();
-    const invoiceAddressFull = [invStreet + (invHouse ? ' ' + invHouse : '') + (invApt ? '/' + invApt : ''), invPostal + (invCity ? ' ' + invCity : '')].filter(Boolean).join(', ');
-    const partnerRole = document.getElementById('ap-role').value;
-    await db.from('partners').update({ contact: contactFull, address: addressFull, invoice_address: invoiceAddressFull || null, role: partnerRole }).eq('email', email);
-
     await loadPartners();
     closeAddPartner();
-    logActivity('partner_invited', `Invited partner: ${name} (${email})`, email);
-    showToast('Partner added and invite sent to ' + email);
+    logActivity('partner_added', `Partner added: ${name} (${email})`, email);
+    showToast('Partner added.');
   }
 
   let editingPartnerId = null;
@@ -3990,7 +3877,6 @@ tailwind.config = {
     document.getElementById('pd-comm').textContent = p.comm > 0 ? p.comm + ' zł' : '—';
     document.getElementById('pd-edit-name').value     = p.name;
     document.getElementById('pd-edit-type').value     = p.type;
-    document.getElementById('pd-edit-role').value     = p.role || 'manager';
     document.getElementById('pd-edit-contact').value  = p.contact;
     document.getElementById('pd-edit-phone').value    = p.phone;
     document.getElementById('pd-edit-email').value    = p.email;
@@ -4064,7 +3950,6 @@ tailwind.config = {
     if (!p) return;
     p.name           = document.getElementById('pd-edit-name').value;
     p.type           = document.getElementById('pd-edit-type').value;
-    p.role           = document.getElementById('pd-edit-role').value;
     p.contact        = document.getElementById('pd-edit-contact').value;
     p.phone          = document.getElementById('pd-edit-phone').value;
     p.email          = document.getElementById('pd-edit-email').value;
@@ -4084,7 +3969,7 @@ tailwind.config = {
     if (document.getElementById('pd-pay-link').checked)   payOpts.push('link');
     p.paymentOptions = payOpts;
     await db.from('partners').update({
-      name: p.name, type: p.type, role: p.role, contact: p.contact, phone: p.phone,
+      name: p.name, type: p.type, contact: p.contact, phone: p.phone,
       email: p.email, address: p.address, notes: p.notes,
       contract_signed: p.contractSigned || null, contract_expiry: p.contractExpiry || null,
       notify_email: p.notifyEmail,
@@ -4213,10 +4098,36 @@ tailwind.config = {
     for (let i = 0; i < 12; i++) pw += chars[Math.floor(Math.random() * chars.length)];
     document.getElementById(inputId).value = pw;
   }
-  function copyPassword() {
-    const val = document.getElementById('pd-new-password').value;
+  function copyPasswordFrom(inputId) {
+    const val = document.getElementById(inputId).value;
     if (!val) return;
     navigator.clipboard.writeText(val).then(() => showToast('Password copied to clipboard!'));
+  }
+  function copyPassword() {
+    copyPasswordFrom('pd-new-password');
+  }
+  async function setPartnerPassword() {
+    const p = allPartners.find(x => x.id === editingPartnerId);
+    if (!p) return;
+    const newPw = document.getElementById('pd-new-password').value.trim();
+    if (!newPw) { document.getElementById('pd-new-password').focus(); return; }
+
+    const { data: { session } } = await db.auth.getSession();
+    const token = session?.access_token;
+
+    const res = await fetch('https://jzsiuvcgpwukxpcjxcsg.supabase.co/functions/v1/create-partner', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ action: 'set_password', partner_email: p.email, new_password: newPw })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      showToast('Error: ' + (err.error || res.statusText), 'error');
+      return;
+    }
+    document.getElementById('pd-new-password').value = '';
+    showToast('Password updated.');
   }
 
   function showToast(msg) {
