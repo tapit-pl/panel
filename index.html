@@ -2439,7 +2439,9 @@ tailwind.config = {
       btn.classList.toggle('bg-brand/5', i === slotIdx);
     });
     const rates = tdSelectedTimeSlot?.rates || [];
-    const uniqueRates = rates.filter((r, i, a) => a.findIndex(x => x.id === r.id) === i);
+    const uniqueRates = rates
+      .filter((r, i, a) => a.findIndex(x => x.id === r.id) === i)
+      .filter(r => !r.title.toLowerCase().includes('meeting point'));
     if (uniqueRates.length > 1) {
       if (areLanguageRates(uniqueRates)) {
         showLanguagePicker(dateStr, uniqueRates);
