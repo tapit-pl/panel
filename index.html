@@ -3039,6 +3039,12 @@ tailwind.config = {
       id: bookingId,
       tour,
       date: dateStr,
+      time: tdSelectedTimeSlot?._displayTime || tdSelectedTimeSlot?.startTime || null,
+      language: (() => {
+        const rateTitle = tdSelectedRate?.title || '';
+        const lang = LANGUAGE_KEYWORDS.find(l => rateTitle.toLowerCase().includes(l.toLowerCase()));
+        return lang || null;
+      })(),
       guest,
       email: email || null,
       phone: phone || null,
