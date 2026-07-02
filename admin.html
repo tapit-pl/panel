@@ -2603,24 +2603,47 @@
 
     const slotsSection = document.getElementById('edit-tour-slots-section');
     const slotsList    = document.getElementById('edit-tour-slots-list');
-    const hiddenIds    = (t.hidden_slot_ids || []).map(String);
-    if (t.start_times && t.start_times.length > 0) {
+    if (t.bokun_id) {
       slotsSection.classList.remove('hidden');
-      slotsList.innerHTML = t.start_times.map(s => {
-        const isHidden = hiddenIds.includes(String(s.id));
-        const timeText = s.time || s.label || String(s.id);
-        const langLabel = (s.label && s.label !== s.time && s.time) ? `<span class="text-xs text-gray-400 ml-1">${s.label}</span>` : '';
-        return `<label class="flex items-center gap-2 py-0.5 cursor-pointer select-none">
-          <input type="checkbox" value="${s.id}" ${!isHidden ? 'checked' : ''} class="edit-tour-slot-cb accent-brand">
-          <span class="text-sm font-semibold text-gray-800">${timeText}</span>${langLabel}
-        </label>`;
-      }).join('');
+      slotsList.innerHTML = '<span class="text-xs text-gray-400">Loading slots…</span>';
+      loadEditTourSlots(t);
     } else {
       slotsSection.classList.add('hidden');
     }
 
     document.getElementById('modal-edit-tour').classList.remove('hidden');
     setTimeout(() => document.getElementById('edit-tour-title').focus(), 50);
+  }
+
+  async function loadEditTourSlots(t) {
+    const slotsList = document.getElementById('edit-tour-slots-list');
+    const hiddenIds = (t.hidden_slot_ids || []).map(String);
+    try {
+      const today  = new Date().toISOString().slice(0, 10);
+      const inWeek = new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10);
+      const { data } = await db.functions.invoke('bokun-sync', {
+        body: { path: `/activity.json/${t.bokun_id}/availabilities?start=${today}&end=${inWeek}`, method: 'GET' }
+      });
+      const items = data?.body || [];
+      const seen  = new Map();
+      items.forEach(entry => {
+        if (!entry.startTimeId || seen.has(entry.startTimeId)) return;
+        seen.set(entry.startTimeId, entry.startTime || String(entry.startTimeId));
+      });
+      if (seen.size === 0) {
+        slotsList.innerHTML = '<span class="text-xs text-gray-400">No slots in next 14 days</span>';
+        return;
+      }
+      slotsList.innerHTML = Array.from(seen.entries()).map(([sid, stime]) => {
+        const isHidden = hiddenIds.includes(String(sid));
+        return `<label class="flex items-center gap-2 py-0.5 cursor-pointer select-none">
+          <input type="checkbox" value="${sid}" ${!isHidden ? 'checked' : ''} class="edit-tour-slot-cb accent-brand">
+          <span class="text-sm font-semibold text-gray-800">${stime}</span>
+        </label>`;
+      }).join('');
+    } catch(e) {
+      slotsList.innerHTML = '<span class="text-xs text-red-400">Failed to load slots</span>';
+    }
   }
 
   async function saveEditTour() {
