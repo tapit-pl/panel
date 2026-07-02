@@ -2887,6 +2887,7 @@ tailwind.config = {
         const optionsPayload = {
           activityId: parseInt(tdCurrentTour.bokunId),
           startTimeId: tdSelectedTimeSlot.startTimeId,
+          ...(tdSelectedRate?.id ? { rateId: tdSelectedRate.id } : {}),
           date: dateStr,
           passengers: buildPassengers(),
         };
@@ -2930,6 +2931,7 @@ tailwind.config = {
             activityBookings: [{
               activityId: parseInt(tdCurrentTour.bokunId),
               startTimeId: tdSelectedTimeSlot.startTimeId,
+              ...(tdSelectedRate?.id ? { rateId: tdSelectedRate.id } : {}),
               date: dateStr,
               passengers: buildPassengers(),
               note: bookingNote || undefined,
