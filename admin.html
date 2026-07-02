@@ -1300,7 +1300,7 @@ tailwind.config = {
         <div id="pd-avatar" class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0">HW</div>
         <div>
           <div class="font-bold text-dark text-sm" id="pd-name">—</div>
-          <div class="text-xs text-gray-400" id="pd-type-since">—</div>
+          <div class="text-xs text-gray-400" id="pd-type">—</div>
         </div>
       </div>
       <button onclick="closePartnerDetail()" class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-gray-100 text-gray-400"><i class="fa-solid fa-xmark"></i></button>
@@ -3810,9 +3810,9 @@ tailwind.config = {
     editingPartnerId = id;
     const av = document.getElementById('pd-avatar');
     av.style.background = p.color;
-    av.textContent = p.initials;
+    av.textContent = p.initials || (p.name ? p.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase() : '?');
     document.getElementById('pd-name').textContent = p.name;
-    document.getElementById('pd-type-since').textContent = p.type + ' · Partner since ' + p.since;
+    document.getElementById('pd-type').textContent = p.type;
     const sb = document.getElementById('pd-status-badge');
     sb.textContent = p.active ? 'Active' : 'Inactive';
     sb.className = p.active ? 'text-xs font-semibold px-2.5 py-1 rounded-full bg-green-100 text-green-700' : 'text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-500';
