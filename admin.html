@@ -4050,7 +4050,7 @@
     const periodLabel = new Date(yr, mo-1).toLocaleDateString('en', { month: 'long', year: 'numeric' });
 
     const { data: bookings } = await db.from('bookings')
-      .select('*, staff(first_name, last_name)')
+      .select('*')
       .eq('partner_id', partnerId)
       .gte('date', from).lte('date', to)
       .order('date');
@@ -4115,7 +4115,7 @@
       : rows.map(b => {
           const cancelled = (b.status||'').toLowerCase() === 'cancelled';
           const dateStr = b.date ? new Date(b.date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : '—';
-          const staffName = b.staff ? `${b.staff.first_name||''} ${b.staff.last_name||''}`.trim() : '—';
+          const staffName = '—';
           const total = parseFloat(b.total||0), comm = parseFloat(b.comm||0);
           const isHotel = b.payment_method === 'hotel';
           const settlementAmt = isHotel ? (total - comm) : comm;
