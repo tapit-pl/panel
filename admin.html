@@ -2106,8 +2106,20 @@ tailwind.config = {
     }
   }
 
+  // Handle password recovery link from email
+  db.auth.onAuthStateChange((event) => {
+    if (event === 'PASSWORD_RECOVERY') {
+      openChangePasswordModal();
+    }
+  });
+
   document.addEventListener('DOMContentLoaded', async function() {
     const { data: { session } } = await db.auth.getSession();
+    // Recovery link from email — session exists but user must set new password
+    if (session && window.location.hash.includes('type=recovery')) {
+      openChangePasswordModal();
+      return;
+    }
     if (!session) { window.location.href = 'index.html'; return; }
 
     const { data: mfaData } = await db.auth.mfa.listFactors();
