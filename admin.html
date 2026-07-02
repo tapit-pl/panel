@@ -596,15 +596,7 @@ tailwind.config = {
           </div>
 
           <!-- Partners list -->
-          <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-xs">
-                <tbody id="partners-tbody" class="divide-y divide-gray-50">
-                  <!-- injected by JS -->
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <div id="partners-tbody" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
         </div>
 
         <!-- ===== SECTION: COMMISSION SETTLEMENT ===== -->
@@ -3746,27 +3738,20 @@ tailwind.config = {
     const editHotel = document.getElementById('edit-hotel');
     if (editHotel) { const cur = editHotel.value; editHotel.innerHTML = `<option value="—">— direct —</option>${partnerOpts}`; editHotel.value = cur; }
     rows.forEach(p => {
-      const statusDot = p.active
-        ? `<span class="w-2 h-2 rounded-full bg-green-500 inline-block shrink-0"></span>`
-        : `<span class="w-2 h-2 rounded-full bg-gray-300 inline-block shrink-0"></span>`;
-      const starsStr = p.stars ? ' · ' + '★'.repeat(p.stars) : '';
-      const meta = [p.type, starsStr ? starsStr.trim() : ''].filter(Boolean).join(' ');
+      const starsStr = p.stars ? '★'.repeat(p.stars) : '';
+      const meta = [p.type, starsStr].filter(Boolean).join(' · ');
       tbody.insertAdjacentHTML('beforeend', `
-        <tr class="hover:bg-gray-50 transition-colors cursor-pointer" onclick="openPartnerDetail('${p.id}')">
-          <td class="pl-4 pr-2 py-2">
-            <div class="w-6 h-6 rounded-md flex items-center justify-center text-white font-bold text-xs shrink-0" style="background:${p.color}">${p.initials}</div>
-          </td>
-          <td class="px-2 py-2 flex-1">
-            <span class="font-semibold text-dark text-xs">${p.name}</span>
-            <span class="text-gray-400 text-xs"> · ${meta}</span>
-          </td>
-          <td class="px-4 py-2 text-right">
-            <div class="flex items-center justify-end gap-3">
-              <div class="flex items-center gap-1.5">${statusDot}<span class="text-xs ${p.active ? 'text-green-600' : 'text-gray-400'}">${p.active ? 'Active' : 'Inactive'}</span></div>
-              <button onclick="event.stopPropagation();openPartnerDetail('${p.id}')" class="text-gray-300 hover:text-brand transition-colors"><i class="fa-solid fa-pen text-xs"></i></button>
-            </div>
-          </td>
-        </tr>`);
+        <div class="bg-white rounded-xl shadow-sm border-l-4 flex items-center gap-3 px-4 py-3 cursor-pointer hover:shadow-md transition-shadow" style="border-left-color:${p.color}" onclick="openPartnerDetail('${p.id}')">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs shrink-0" style="background:${p.color}">${p.initials}</div>
+          <div class="flex-1 min-w-0">
+            <div class="font-semibold text-dark text-sm truncate">${p.name}</div>
+            <div class="text-xs text-gray-400 mt-0.5">${meta}</div>
+          </div>
+          <div class="flex items-center gap-2.5 shrink-0">
+            <span class="w-2 h-2 rounded-full ${p.active ? 'bg-green-500' : 'bg-gray-300'}"></span>
+            <button onclick="event.stopPropagation();openPartnerDetail('${p.id}')" class="text-gray-300 hover:text-brand transition-colors"><i class="fa-solid fa-pen text-xs"></i></button>
+          </div>
+        </div>`);
     });
   }
 
