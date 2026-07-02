@@ -2608,10 +2608,11 @@
       slotsSection.classList.remove('hidden');
       slotsList.innerHTML = t.start_times.map(s => {
         const isHidden = hiddenIds.includes(String(s.id));
-        const langLabel = (s.label && s.label !== s.time) ? `<span class="text-gray-400 ml-1">${s.label}</span>` : '';
+        const timeText = s.time || s.label || String(s.id);
+        const langLabel = (s.label && s.label !== s.time && s.time) ? `<span class="text-xs text-gray-400 ml-1">${s.label}</span>` : '';
         return `<label class="flex items-center gap-2 py-0.5 cursor-pointer select-none">
           <input type="checkbox" value="${s.id}" ${!isHidden ? 'checked' : ''} class="edit-tour-slot-cb accent-brand">
-          <span class="text-sm font-medium text-dark">${s.time}</span>${langLabel}
+          <span class="text-sm font-semibold text-gray-800">${timeText}</span>${langLabel}
         </label>`;
       }).join('');
     } else {
