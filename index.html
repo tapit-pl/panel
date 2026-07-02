@@ -2891,11 +2891,17 @@ tailwind.config = {
           if (hasCategories) {
             return tdCategorySelections
               .filter(x => x.count > 0)
-              .map(x => ({ pricingCategoryId: x.category.id, groupSize: x.count, passengerDetails: mainPassengerDetails, answers: [], extras: [] }));
+              .flatMap(x => Array.from({ length: x.count }, () => ({
+                pricingCategoryId: x.category.id, groupSize: 1,
+                passengerDetails: mainPassengerDetails, answers: [], extras: []
+              })));
           }
           const pricingCat = tdCurrentTour.pricing?.[0];
           return pricingCat
-            ? [{ pricingCategoryId: pricingCat.id, groupSize: tdGuestCount, passengerDetails: mainPassengerDetails, answers: [], extras: [] }]
+            ? Array.from({ length: tdGuestCount }, () => ({
+                pricingCategoryId: pricingCat.id, groupSize: 1,
+                passengerDetails: mainPassengerDetails, answers: [], extras: []
+              }))
             : [];
         };
 
