@@ -2450,7 +2450,7 @@ tailwind.config = {
       tdSelectedRate = uniqueRates[0] || null;
       const slotCatPrices = uniqueRates[0]?.pricesByCategory || [];
       const categoriesToShow = _resolveCategoriesToShow(slotCatPrices);
-      if (categoriesToShow.length > 1) {
+      if (categoriesToShow.length > 0) {
         showCategoryPicker(dateStr, categoriesToShow, slotCatPrices);
       } else {
         showBookingForm(dateStr);
