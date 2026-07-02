@@ -1323,16 +1323,6 @@ tailwind.config = {
             <input id="pd-edit-name" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           </div>
           <div>
-            <label class="block text-xs text-gray-400 mb-1">Type</label>
-            <select id="pd-edit-type" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 text-dark">
-              <option value="Hotel">Hotel</option>
-              <option value="Apartment">Apartment</option>
-              <option value="Hostel">Hostel</option>
-              <option value="Guesthouse">Guesthouse</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-          <div>
             <label class="block text-xs text-gray-400 mb-1">Phone</label>
             <input id="pd-edit-phone" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           </div>
@@ -3817,7 +3807,6 @@ tailwind.config = {
     sb.textContent = p.active ? 'Active' : 'Inactive';
     sb.className = p.active ? 'text-xs font-semibold px-2.5 py-1 rounded-full bg-green-100 text-green-700' : 'text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-500';
     document.getElementById('pd-edit-name').value     = p.name;
-    document.getElementById('pd-edit-type').value     = p.type;
     document.getElementById('pd-edit-phone').value    = p.phone;
     document.getElementById('pd-edit-email').value    = p.email;
     document.getElementById('pd-edit-address').value  = p.address;
@@ -3871,7 +3860,6 @@ tailwind.config = {
     const p = allPartners.find(x => x.id === editingPartnerId);
     if (!p) return;
     p.name           = document.getElementById('pd-edit-name').value;
-    p.type           = document.getElementById('pd-edit-type').value;
     p.phone          = document.getElementById('pd-edit-phone').value;
     p.email          = document.getElementById('pd-edit-email').value;
     p.address        = document.getElementById('pd-edit-address').value;
@@ -3883,7 +3871,7 @@ tailwind.config = {
     if (document.getElementById('pd-pay-link').checked)   payOpts.push('link');
     p.paymentOptions = payOpts;
     await db.from('partners').update({
-      name: p.name, type: p.type, phone: p.phone,
+      name: p.name, phone: p.phone,
       email: p.email, address: p.address, notes: p.notes,
       tour_groups: p.tourGroups,
       payment_options: payOpts
