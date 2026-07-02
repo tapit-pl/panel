@@ -4196,7 +4196,10 @@
                 <div class="text-xs font-semibold text-dark">${p}</div>
                 <div class="text-xs text-gray-400">${d}</div>
               </div>
-              <div class="text-sm font-bold text-brand">${s.amount||0} pln</div>
+              <div class="flex items-center gap-2">
+                <div class="text-sm font-bold text-brand">${s.amount||0} pln</div>
+                <button onclick="deleteSettlement('${s.id}')" title="Delete" class="w-5 h-5 flex items-center justify-center rounded hover:bg-red-50 text-gray-300 hover:text-red-400 transition-colors"><i class="fa-solid fa-trash text-xs"></i></button>
+              </div>
             </div>`;
           }).join('');
     }
@@ -4204,6 +4207,13 @@
     document.getElementById('settlement-empty').classList.add('hidden');
     document.getElementById('settlement-result').classList.remove('hidden');
     document.getElementById('settlement-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  async function deleteSettlement(id) {
+    if (!confirm('Delete this settlement record?')) return;
+    const { error } = await db.from('settlements').delete().eq('id', id);
+    if (error) { alert('Error: ' + error.message); return; }
+    if (currentSettlement) calculateSettlement();
   }
 
   async function markSettled() {
