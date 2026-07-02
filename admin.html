@@ -2472,8 +2472,14 @@
       const groups   = (t.groups || []).length > 0 ? t.groups.map(groupChip).join('') : '<span class="text-gray-300 text-xs">all partners</span>';
       const packages = allCommissions.filter(c => c.tour_config_id === t.id).sort((a,b) => (a.sort_order||0)-(b.sort_order||0));
       tbody.insertAdjacentHTML('beforeend', `
-        <tr class="hover:bg-gray-50/60 transition-colors border-t border-gray-100 ${t.active ? '' : 'opacity-50'}">
-          <td class="px-3 py-2.5 text-gray-300 font-mono text-xs">${idx + 1}</td>
+        <tr draggable="${!locked}" data-tour-id="${t.id}"
+            ondragstart="tourDragStart(event,'${t.id}')"
+            ondragover="tourDragOver(event,'${t.id}')"
+            ondragleave="tourDragLeave(event,'${t.id}')"
+            ondrop="tourDrop(event,'${t.id}')"
+            ondragend="tourDragEnd(event)"
+            class="hover:bg-gray-50/60 transition-colors border-t border-gray-100 ${t.active ? '' : 'opacity-50'}">
+          <td class="px-3 py-2.5 text-gray-300 ${!locked ? 'cursor-grab' : ''}"><i class="fa-solid fa-grip-vertical text-xs ${locked ? 'opacity-0' : ''}"></i></td>
           <td class="px-3 py-2.5 font-semibold text-dark text-xs">${t.title}</td>
           <td class="px-3 py-2.5 font-mono text-xs text-gray-400">${t.bokun_id || '<span class="text-red-300">no id</span>'}</td>
           <td class="px-3 py-2.5"><div class="flex flex-wrap gap-1">${groups}</div></td>
@@ -2493,8 +2499,7 @@
           <td class="px-3 py-2.5 text-right">
             <div class="flex items-center justify-end gap-0.5">
               <button onclick="openAddPackageModal('${t.id}')" title="Add package" class="text-xs px-2 py-1 rounded-lg border border-dashed border-brand/40 text-brand hover:bg-brand/5 transition-colors ${lockCls}">+ pkg</button>
-              <button onclick="moveTour('${t.id}',-1)" ${idx===0||locked?'disabled':''} title="Move up" class="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 ${idx===0?'opacity-20 cursor-not-allowed':''} ${lockCls}"><i class="fa-solid fa-chevron-up text-xs"></i></button>
-              <button onclick="moveTour('${t.id}',1)" ${last||locked?'disabled':''} title="Move down" class="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 ${last?'opacity-20 cursor-not-allowed':''} ${lockCls}"><i class="fa-solid fa-chevron-down text-xs"></i></button>
+
               <button onclick="openEditTour('${t.id}')" title="Edit tour" class="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 ${lockCls}"><i class="fa-solid fa-pen text-xs"></i></button>
               <button onclick="deleteTour('${t.id}')" title="Delete" class="w-6 h-6 flex items-center justify-center rounded hover:bg-red-50 text-gray-300 hover:text-red-400 ${lockCls}"><i class="fa-solid fa-trash text-xs"></i></button>
             </div>
@@ -2673,20 +2678,46 @@
     renderTourConfigTable();
   }
 
-  async function moveTour(id, delta) {
-    const idx   = allTourConfig.findIndex(t => t.id === id);
-    const other = allTourConfig[idx + delta];
-    if (!other) return;
-    const a = allTourConfig[idx], b = other;
-    const tempOrder = a.sort_order;
-    a.sort_order = b.sort_order;
-    b.sort_order = tempOrder;
-    await Promise.all([
-      db.from('tour_config').update({ sort_order: a.sort_order }).eq('id', a.id),
-      db.from('tour_config').update({ sort_order: b.sort_order }).eq('id', b.id),
-    ]);
-    allTourConfig.sort((x, y) => (x.sort_order || 0) - (y.sort_order || 0));
+  function tourDragStart(e, id) {
+    if (!editingUnlocked) { e.preventDefault(); return; }
+    _dragTourId = id;
+    e.dataTransfer.effectAllowed = 'move';
+    e.currentTarget.style.opacity = '0.4';
+  }
+
+  function tourDragOver(e, id) {
+    if (!_dragTourId || id === _dragTourId) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    document.querySelectorAll('#tour-config-tbody tr[data-tour-id]').forEach(r => r.style.borderTop = '');
+    e.currentTarget.style.borderTop = '2px solid #E8751A';
+  }
+
+  function tourDragLeave(e, id) {
+    if (e.relatedTarget && e.currentTarget.contains(e.relatedTarget)) return;
+    e.currentTarget.style.borderTop = '';
+  }
+
+  async function tourDrop(e, id) {
+    e.preventDefault();
+    document.querySelectorAll('#tour-config-tbody tr[data-tour-id]').forEach(r => r.style.borderTop = '');
+    if (!_dragTourId || _dragTourId === id) { _dragTourId = null; return; }
+    const fromIdx = allTourConfig.findIndex(t => t.id === _dragTourId);
+    const toIdx   = allTourConfig.findIndex(t => t.id === id);
+    if (fromIdx === -1 || toIdx === -1) { _dragTourId = null; return; }
+    const [moved] = allTourConfig.splice(fromIdx, 1);
+    const newTo   = allTourConfig.findIndex(t => t.id === id);
+    allTourConfig.splice(fromIdx < toIdx ? newTo + 1 : newTo, 0, moved);
+    allTourConfig.forEach((t, i) => { t.sort_order = (i + 1) * 10; });
+    await Promise.all(allTourConfig.map(t => db.from('tour_config').update({ sort_order: t.sort_order }).eq('id', t.id)));
+    _dragTourId = null;
     renderTourConfigTable();
+  }
+
+  function tourDragEnd(e) {
+    e.currentTarget.style.opacity = '';
+    document.querySelectorAll('#tour-config-tbody tr[data-tour-id]').forEach(r => r.style.borderTop = '');
+    _dragTourId = null;
   }
 
   async function deleteTour(id) {
@@ -2703,6 +2734,7 @@
   let editingPkgId    = null;
   let addPkgTourId    = null;
   let editingUnlocked = false;
+  let _dragTourId = null;
   let unlockTimer     = null;
   let unlockSecondsLeft = 0;
 
