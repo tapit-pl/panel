@@ -2365,8 +2365,16 @@ tailwind.config = {
     document.getElementById('td-category-section').classList.add('hidden');
     document.getElementById('td-language-section').classList.add('hidden');
 
-    const slots = (currentTourAvailability[dateStr] || [])
-      .filter(s => !(tdCurrentTour?.hiddenSlotIds || []).includes(String(s.startTimeId)));
+    const hiddenIds = (tdCurrentTour?.hiddenSlotIds || []);
+    const allSlots = (currentTourAvailability[dateStr] || [])
+      .filter(s => !hiddenIds.includes(String(s.startTimeId)));
+    // Deduplicate by startTime — keep entry with highest availability
+    const slotMap = new Map();
+    allSlots.forEach(s => {
+      const existing = slotMap.get(s.startTime);
+      if (!existing || (s.availabilityCount || 0) > (existing.availabilityCount || 0)) slotMap.set(s.startTime, s);
+    });
+    const slots = Array.from(slotMap.values());
 
     // If only one slot and no startTime label, skip picker and go straight to form
     if (slots.length === 1 && !slots[0].startTime) {
