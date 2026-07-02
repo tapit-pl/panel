@@ -3921,12 +3921,6 @@ tailwind.config = {
     document.getElementById('pd-lastlogin').textContent = p.lastLogin && p.lastLogin !== 'Never' ? p.lastLogin : '—';
     document.getElementById('pd-new-password').value    = '';
 
-    const logoEl = document.getElementById('pd-logo-preview');
-    if (p.logo) {
-      logoEl.innerHTML = `<img src="${p.logo}" class="w-full h-full object-cover">`;
-    } else {
-      logoEl.innerHTML = `<div class="w-full h-full flex items-center justify-center text-white font-bold text-lg rounded-xl" style="background:${p.color}">${p.initials}</div>`;
-    }
 
     document.getElementById('pd-contract-signed').value = p.contractSigned || '';
     document.getElementById('pd-contract-expiry').value = p.contractExpiry || '';
