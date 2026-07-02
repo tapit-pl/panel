@@ -604,7 +604,6 @@ tailwind.config = {
                     <th class="text-left px-5 py-3 text-gray-400 font-semibold w-8"></th>
                     <th class="text-left px-4 py-3 text-gray-400 font-semibold">Name</th>
                     <th class="text-left px-4 py-3 text-gray-400 font-semibold">Type</th>
-                    <th class="text-left px-4 py-3 text-gray-400 font-semibold">Contact</th>
                     <th class="text-center px-4 py-3 text-gray-400 font-semibold">Bookings/mo</th>
                     <th class="text-right px-4 py-3 text-gray-400 font-semibold">Comm. this month</th>
                     <th class="text-center px-4 py-3 text-gray-400 font-semibold">Status</th>
@@ -3772,7 +3771,6 @@ tailwind.config = {
             <div class="text-gray-400 mt-0.5">${p.address}</div>
           </td>
           <td class="px-4 py-3 text-gray-500">${p.type}${starsStr ? ' · ' + starsStr : ''}</td>
-          <td class="px-4 py-3 text-gray-500">${p.contact}</td>
           <td class="px-4 py-3 text-center font-semibold text-dark">${p.bookings || '—'}</td>
           <td class="px-4 py-3 text-right font-semibold ${p.comm > 0 ? 'text-brand' : 'text-gray-400'}">${p.comm > 0 ? p.comm + ' zł' : '—'}</td>
           <td class="px-4 py-3 text-center">${statusBadge}</td>
