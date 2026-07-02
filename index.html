@@ -2105,6 +2105,7 @@ tailwind.config = {
           description: '', photo: getTourPhoto(t.title), cat: getTourCat(t.title),
           durationMins: null, maxPax: null, pricing: [],
           hasPackage: commConfigIds.has(t.id),
+          hiddenSlotIds: (t.hidden_slot_ids || []).map(String),
         };
         if (!t.bokun_id) return base;
         try {
@@ -2374,7 +2375,8 @@ tailwind.config = {
     document.getElementById('td-category-section').classList.add('hidden');
     document.getElementById('td-language-section').classList.add('hidden');
 
-    const slots = currentTourAvailability[dateStr] || [];
+    const slots = (currentTourAvailability[dateStr] || [])
+      .filter(s => !(tdCurrentTour?.hiddenSlotIds || []).includes(String(s.startTimeId)));
 
     // If only one slot and no startTime label, skip picker and go straight to form
     if (slots.length === 1 && !slots[0].startTime) {
