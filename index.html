@@ -2877,7 +2877,7 @@ tailwind.config = {
     if (!dd) return;
     const s = (q || '').toLowerCase().replace(/\s/g, '');
     const matches = PHONE_PREFIXES.filter(p =>
-      p.c.toLowerCase().includes(s) || p.d.replace('+','').includes(s) || p.n.toLowerCase().includes(s)
+      p.c.toLowerCase().includes(s) || p.d.includes(s) || p.d.replace('+','').includes(s.replace('+','')) || p.n.toLowerCase().includes(s)
     );
     dd.innerHTML = matches.map(p =>
       `<div onmousedown="selectPhonePrefix('${p.c}','${p.d}')"
