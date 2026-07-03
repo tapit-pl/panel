@@ -2121,7 +2121,7 @@ tailwind.config = {
       bokunProducts = await Promise.all(visible.map(async (t, idx) => {
         const base = {
           id: idx, configId: t.id, bokunId: t.bokun_id || null, title: t.title,
-          description: '', photo: getTourPhoto(t.title), cat: t.category || getTourCat(t.title),
+          description: '', photo: getTourPhoto(t.title), cat: t.category || '',
           durationMins: null, maxPax: null, pricing: [],
           hasPackage: commConfigIds.has(t.id),
           hiddenSlotIds: (t.hidden_slot_ids || []).map(String),
