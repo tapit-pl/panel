@@ -55,6 +55,19 @@ Deno.serve(async (req) => {
               Pay now — ${amount_pln} PLN
             </a>
             <p style="color:#999;font-size:12px;margin-top:24px">This link expires in 24 hours. Questions? Reply to this email.</p>
+
+            <div style="margin-top:36px;border-top:2px solid #eee;padding-top:28px">
+              <div style="display:inline-block;background:#DC2626;color:#fff;font-size:11px;font-weight:700;letter-spacing:1px;padding:4px 12px;border-radius:6px;margin-bottom:20px">PAYMENT PENDING</div>
+              <table style="width:100%;border-collapse:collapse;font-size:14px">
+                <tr><td style="padding:8px 0;color:#999;width:40%">Booking ref</td><td style="padding:8px 0;color:#3A3A3A;font-weight:600">#TM-${booking_id}</td></tr>
+                <tr style="border-top:1px solid #f0f0f0"><td style="padding:8px 0;color:#999">Guest</td><td style="padding:8px 0;color:#3A3A3A">${guest_name}</td></tr>
+                <tr style="border-top:1px solid #f0f0f0"><td style="padding:8px 0;color:#999">Tour</td><td style="padding:8px 0;color:#3A3A3A">${tour_name}</td></tr>
+                <tr style="border-top:1px solid #f0f0f0"><td style="padding:8px 0;color:#999">Date</td><td style="padding:8px 0;color:#3A3A3A">${date}</td></tr>
+                <tr style="border-top:1px solid #f0f0f0"><td style="padding:8px 0;color:#999">Guests</td><td style="padding:8px 0;color:#3A3A3A">${pax}</td></tr>
+                <tr style="border-top:1px solid #f0f0f0"><td style="padding:8px 0;color:#999">Amount</td><td style="padding:8px 0;color:#3A3A3A;font-weight:600">${amount_pln} PLN</td></tr>
+              </table>
+              <p style="color:#999;font-size:12px;margin-top:16px;font-style:italic">This voucher will be updated once payment is complete.</p>
+            </div>
           </div>
         `,
       }),

@@ -1146,7 +1146,7 @@ tailwind.config = {
               <input id="td-last" type="text" placeholder="Kowalska" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
             </div>
             <div>
-              <label class="block text-xs font-semibold text-gray-600 mb-1.5">Email</label>
+              <label class="block text-xs font-semibold text-gray-600 mb-1.5">Guest e-mail</label>
               <input id="td-email" type="email" placeholder="guest@email.com" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
             </div>
             <div>
@@ -3165,6 +3165,7 @@ tailwind.config = {
       payment_method: payment || null,
       status: insertStatus,
       stripe_session_id: stripeSessionId,
+      stripe_session_url: stripeSessionUrl || null,
       partner_id: currentPartner?.id,
       staff_id: currentPartner?._staffId || null,
       bokun_confirmation_code: payment === 'link' ? (bokunReservationCode || null) : (bokunConfirmationCode || null),
@@ -3186,6 +3187,12 @@ tailwind.config = {
       errEl.classList.remove('hidden')
       btn.disabled = false
       return
+    }
+
+    if (payment === 'driver' && email) {
+      db.functions.invoke('send-booking-confirmation', {
+        body: { booking_id: bookingId, tour_name: tour, date: dateStr, time: tdSelectedTimeSlot?._displayTime || tdSelectedTimeSlot?.startTime || null, guest_name: guest, guest_email: email, pax: tdGuestCount, total: insertTotal || null }
+      }).catch(e => console.warn('[driver confirmation email] error:', e.message));
     }
 
     form.classList.add('hidden');

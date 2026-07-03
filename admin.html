@@ -541,6 +541,7 @@
                     <th class="text-left px-4 py-3 text-gray-400 font-semibold">Tour date</th>
                     <th class="text-left px-4 py-3 text-gray-400 font-semibold">Time</th>
                     <th class="text-left px-4 py-3 text-gray-400 font-semibold">Language</th>
+                    <th class="text-left px-4 py-3 text-gray-400 font-semibold">Phone</th>
                     <th class="text-center px-4 py-3 text-gray-400 font-semibold">Pax</th>
                     <th class="text-right px-4 py-3 text-gray-400 font-semibold">Total</th>
                     <th class="text-center px-4 py-3 text-gray-400 font-semibold">Source</th>
@@ -3227,6 +3228,7 @@
           <td class="px-4 py-3 text-gray-500 whitespace-nowrap">${b.date}</td>
           <td class="px-4 py-3 text-gray-500 whitespace-nowrap">${b.time || '<span class="text-gray-300">—</span>'}</td>
           <td class="px-4 py-3 text-gray-500">${b.language ? `<span class="inline-flex items-center gap-1"><i class="fa-solid fa-language text-brand/60 text-xs"></i>${b.language}</span>` : '<span class="text-gray-300">—</span>'}</td>
+          <td class="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">${b.phone || '<span class="text-gray-300">—</span>'}</td>
           <td class="px-4 py-3 text-center text-dark">${b.pax}</td>
           <td class="px-4 py-3 text-right font-semibold text-dark whitespace-nowrap">${Math.round(toPlnAmount(b)).toLocaleString('pl')} zł</td>
           <td class="px-4 py-3 text-slate-300 text-xs">${b.source}</td>

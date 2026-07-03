@@ -91,6 +91,49 @@ Deno.serve(async (req) => {
       if (bokunInternalId) updatePayload.bokun_booking_id = bokunInternalId
       const { error } = await db.from('bookings').update(updatePayload).eq('id', bookingId)
       console.log('[Webhook] db update error:', error)
+
+      const { data: booking } = await db
+        .from('bookings')
+        .select('tour, date, time, guest, email, pax, total')
+        .eq('id', bookingId)
+        .single()
+
+      if (booking?.email) {
+        const guestPax = booking.pax ?? 1
+        const emailRes = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${Deno.env.get('RESEND_API_KEY')}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: 'Thousand Miles <rezerwacje@thousandmiles.pl>',
+            to: booking.email,
+            subject: `Booking confirmed: ${booking.tour}`,
+            html: `
+              <div style="font-family:Inter,sans-serif;max-width:520px;margin:0 auto;padding:32px 24px">
+                <h2 style="color:#3A3A3A;margin-bottom:8px">Your tour is confirmed!</h2>
+                <p style="color:#666;margin-bottom:24px">Payment received. We look forward to seeing you!</p>
+
+                <div style="margin-top:8px">
+                  <div style="display:inline-block;background:#16A34A;color:#fff;font-size:11px;font-weight:700;letter-spacing:1px;padding:4px 12px;border-radius:6px;margin-bottom:20px">CONFIRMED &amp; PAID</div>
+                  <table style="width:100%;border-collapse:collapse;font-size:14px">
+                    <tr><td style="padding:8px 0;color:#999;width:40%">Booking ref</td><td style="padding:8px 0;color:#3A3A3A;font-weight:600">#TM-${bookingId}</td></tr>
+                    <tr style="border-top:1px solid #f0f0f0"><td style="padding:8px 0;color:#999">Guest</td><td style="padding:8px 0;color:#3A3A3A">${booking.guest || ''}</td></tr>
+                    <tr style="border-top:1px solid #f0f0f0"><td style="padding:8px 0;color:#999">Tour</td><td style="padding:8px 0;color:#3A3A3A">${booking.tour}</td></tr>
+                    <tr style="border-top:1px solid #f0f0f0"><td style="padding:8px 0;color:#999">Date</td><td style="padding:8px 0;color:#3A3A3A">${booking.date || ''}</td></tr>
+                    ${booking.time ? `<tr style="border-top:1px solid #f0f0f0"><td style="padding:8px 0;color:#999">Time</td><td style="padding:8px 0;color:#3A3A3A">${booking.time}</td></tr>` : ''}
+                    <tr style="border-top:1px solid #f0f0f0"><td style="padding:8px 0;color:#999">Guests</td><td style="padding:8px 0;color:#3A3A3A">${guestPax}</td></tr>
+                    <tr style="border-top:1px solid #f0f0f0"><td style="padding:8px 0;color:#999">Total paid</td><td style="padding:8px 0;color:#3A3A3A;font-weight:600">${booking.total ? booking.total + ' PLN' : ''}</td></tr>
+                  </table>
+                  <p style="color:#999;font-size:12px;margin-top:16px">Questions? Reply to this email or contact us at rezerwacje@thousandmiles.pl</p>
+                </div>
+              </div>
+            `,
+          }),
+        })
+        console.log('[Webhook] PAID voucher email status:', emailRes.status)
+      }
     }
   }
 
