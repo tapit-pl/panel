@@ -301,9 +301,11 @@ tailwind.config = {
         </div>
         <div class="flex gap-2 flex-wrap">
           <button onclick="filterTourCat(this,'all')" class="tour-cat-btn text-xs px-3 py-2 bg-brand text-white rounded-lg font-medium">All</button>
-          <button onclick="filterTourCat(this,'day')" class="tour-cat-btn text-xs px-3 py-2 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">Day trips</button>
-          <button onclick="filterTourCat(this,'attraction')" class="tour-cat-btn text-xs px-3 py-2 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">Attractions</button>
-          <button onclick="filterTourCat(this,'transfer')" class="tour-cat-btn text-xs px-3 py-2 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">Transfers</button>
+          <button onclick="filterTourCat(this,'mountains')" class="tour-cat-btn text-xs px-3 py-2 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">🏔 Mountains</button>
+          <button onclick="filterTourCat(this,'museums')" class="tour-cat-btn text-xs px-3 py-2 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">🏛 Museums</button>
+          <button onclick="filterTourCat(this,'transfers')" class="tour-cat-btn text-xs px-3 py-2 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">🚐 Transfers</button>
+          <button onclick="filterTourCat(this,'attractions')" class="tour-cat-btn text-xs px-3 py-2 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">🎯 Attractions</button>
+          <button onclick="filterTourCat(this,'zakopane')" class="tour-cat-btn text-xs px-3 py-2 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">⛷ From Zakopane</button>
         </div>
         <span id="tour-count" class="text-xs text-gray-400 ml-auto">0 tours</span>
       </div>
@@ -2082,9 +2084,11 @@ tailwind.config = {
 
   function getTourCat(name) {
     const n = (name || '').toLowerCase();
-    if (n.includes('transfer')) return 'transfer';
-    if (n.includes('shooting') || n.includes('strzelni') || n.includes('paintball') || n.includes('escape') || n.includes('axe')) return 'attraction';
-    return 'day';
+    if (n.includes('transfer')) return 'transfers';
+    if (n.includes('museum') || n.includes('underground') || n.includes('castle') || n.includes('cathedral') || n.includes('schindler') || n.includes('ghetto') || n.includes('jewish') || n.includes('auschwitz') || n.includes('wieliczka') || n.includes('bochnia') || n.includes('kazimierz') || n.includes('plaszow') || n.includes('rynek') || n.includes('wawel')) return 'museums';
+    if (n.includes('shooting') || n.includes('paintball') || n.includes('escape') || n.includes('axe') || n.includes('quad') || n.includes('scooter') || n.includes('rafting') || n.includes('zoo') || n.includes('energylandia')) return 'attractions';
+    if (n.includes('zakopane') || n.includes('dunajec') || n.includes('bath') || n.includes('gubalowka') || n.includes('snowmobile') || n.includes('skiing')) return 'mountains';
+    return 'mountains';
   }
 
   async function loadToursFromBokun() {
@@ -2117,7 +2121,7 @@ tailwind.config = {
       bokunProducts = await Promise.all(visible.map(async (t, idx) => {
         const base = {
           id: idx, configId: t.id, bokunId: t.bokun_id || null, title: t.title,
-          description: '', photo: getTourPhoto(t.title), cat: getTourCat(t.title),
+          description: '', photo: getTourPhoto(t.title), cat: t.category || getTourCat(t.title),
           durationMins: null, maxPax: null, pricing: [],
           hasPackage: commConfigIds.has(t.id),
           hiddenSlotIds: (t.hidden_slot_ids || []).map(String),

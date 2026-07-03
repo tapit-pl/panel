@@ -2483,12 +2483,17 @@
           <td class="px-3 py-3 font-bold text-dark text-sm">${t.title}</td>
           <td class="px-3 py-2.5 font-mono text-xs text-gray-400">${t.bokun_id || '<span class="text-red-300">no id</span>'}</td>
           <td class="px-3 py-2.5"><div class="flex flex-wrap gap-1">${groups}</div></td>
-          <td class="px-2 py-2.5 text-center text-gray-300 text-xs">—</td>
-          <td class="px-2 py-2.5 text-center text-gray-300 text-xs">—</td>
-          <td class="px-2 py-2.5 text-center text-gray-300 text-xs">—</td>
-          <td class="px-2 py-2.5 text-center text-gray-300 text-xs">—</td>
-          <td class="px-2 py-2.5 text-center text-gray-300 text-xs">—</td>
-          <td class="px-2 py-2.5 text-center text-gray-300 text-xs">—</td>
+          <td colspan="6" class="px-2 py-2.5">
+            <select onchange="quickSaveTourCat('${t.id}', this.value)" ${locked ? 'disabled' : ''}
+              class="text-xs border border-gray-200 rounded-lg px-2 py-1 text-gray-600 focus:outline-none focus:ring-1 focus:ring-brand/40 ${locked ? 'bg-gray-100 cursor-default' : 'bg-white'}">
+              <option value="" ${!t.category ? 'selected' : ''}>— assign category —</option>
+              <option value="mountains" ${t.category === 'mountains' ? 'selected' : ''}>🏔 Mountains</option>
+              <option value="museums" ${t.category === 'museums' ? 'selected' : ''}>🏛 Museums</option>
+              <option value="transfers" ${t.category === 'transfers' ? 'selected' : ''}>🚐 Transfers</option>
+              <option value="attractions" ${t.category === 'attractions' ? 'selected' : ''}>🎯 Attractions</option>
+              <option value="zakopane" ${t.category === 'zakopane' ? 'selected' : ''}>⛷ From Zakopane</option>
+            </select>
+          </td>
           <td class="px-2 py-2.5 text-center">
             <label class="relative inline-flex ${lockCls} cursor-pointer">
               <input type="checkbox" class="sr-only peer" ${t.active ? 'checked' : ''} ${locked ? 'disabled' : ''} onchange="toggleTourActive('${t.id}', this.checked)">
@@ -2727,6 +2732,13 @@
     allTourConfig = allTourConfig.filter(x => x.id !== id);
     renderTourConfigTable();
     showToast('Tour removed.');
+  }
+
+  async function quickSaveTourCat(id, val) {
+    const t = allTourConfig.find(x => x.id === id);
+    if (!t) return;
+    t.category = val || null;
+    await db.from('tour_config').update({ category: val || null }).eq('id', id);
   }
 
   let allCommissions  = [];
