@@ -1165,6 +1165,12 @@ tailwind.config = {
               </div>
             </div>
           </div>
+          <div class="mt-3">
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Nationality <span class="text-red-400">*</span></label>
+            <select id="td-nationality" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand bg-white">
+              <option value="">— select —</option>
+            </select>
+          </div>
         </div>
 
         <!-- Additional guests — rendered dynamically -->
@@ -2714,6 +2720,7 @@ tailwind.config = {
     document.getElementById('td-email').value = '';
     document.getElementById('td-phone-number').value = '';
     document.getElementById('td-phone-prefix').value = '+48';
+    document.getElementById('td-nationality').value = '';
     document.getElementById('td-notes').value = '';
     renderAdditionalGuestFields(tdGuestCount);
     selectTdPayment('driver');
@@ -2927,6 +2934,7 @@ tailwind.config = {
     const phonePrefix = document.getElementById('td-phone-prefix')?.value || '+48';
     const phoneNumber = document.getElementById('td-phone-number')?.value?.trim() || '';
     const phone = phoneNumber ? phonePrefix + ' ' + phoneNumber : '';
+    const nationality = document.getElementById('td-nationality').value.trim();
     const notes     = document.getElementById('td-notes').value.trim();
     const payment   = tdPayment || 'driver';
     const errEl     = document.getElementById('td-booking-error');
@@ -2943,6 +2951,11 @@ tailwind.config = {
     }
     if (!phone) {
       errEl.textContent = 'Guest phone number is required by the booking system.';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    if (!nationality) {
+      errEl.textContent = 'Please select guest nationality.';
       errEl.classList.remove('hidden');
       return;
     }
@@ -3056,6 +3069,7 @@ tailwind.config = {
           { questionId: 'lastName',  values: [lastName] },
           email && { questionId: 'email', values: [email] },
           phone && { questionId: 'phoneNumber', values: [phone] },
+          nationality && { questionId: 'nationality', values: [nationality] },
         ].filter(Boolean);
 
         const bookingNote = [payLabel, packageLines || categoryLines,
@@ -3065,7 +3079,7 @@ tailwind.config = {
         const pickupDesc = tdGetPickupDescription() || currentPartner?.name || 'Hotel pickup';
         const submitPayload = {
           source: 'DIRECT_REQUEST',
-          checkoutOption: 'CUSTOMER_FULL_PAYMENT',
+          checkoutOption: checkoutOptionType,
           paymentMethod: 'RESERVE_FOR_EXTERNAL_PAYMENT',
           sendNotificationToMainContact: false,
           directBooking: {
@@ -3708,6 +3722,15 @@ tailwind.config = {
 
 
   const origSetTab = window.setTab;
+  document.addEventListener('DOMContentLoaded', () => {
+    const natSel = document.getElementById('td-nationality');
+    if (natSel) {
+      const sorted = [...PHONE_PREFIXES].sort((a, b) => a.n.localeCompare(b.n));
+      natSel.innerHTML = '<option value="">— select —</option>' +
+        sorted.map(p => `<option value="${p.c}">${p.n}</option>`).join('');
+    }
+  });
+
   document.addEventListener('DOMContentLoaded', () => {
     const tabBtns = document.querySelectorAll('.tab-btn');
     tabBtns.forEach(btn => {
