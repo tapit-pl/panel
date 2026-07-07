@@ -2609,9 +2609,10 @@
     const t = allTourConfig.find(x => x.id === id);
     if (!t) return;
     editingTourId = id;
-    document.getElementById('edit-tour-title').value    = t.title;
-    document.getElementById('edit-tour-bokun-id').value = t.bokun_id || '';
-    document.getElementById('edit-tour-groups').value   = (t.groups || []).join(', ');
+    document.getElementById('edit-tour-title').value      = t.title;
+    document.getElementById('edit-tour-bokun-id').value   = t.bokun_id || '';
+    document.getElementById('edit-tour-groups').value     = (t.groups || []).join(', ');
+    document.getElementById('edit-tour-email-notes').value = t.email_notes || '';
 
     const slotsSection = document.getElementById('edit-tour-slots-section');
     const slotsList    = document.getElementById('edit-tour-slots-list');
@@ -2659,19 +2660,20 @@
   }
 
   async function saveEditTour() {
-    const title   = document.getElementById('edit-tour-title').value.trim();
-    const bokunId = parseInt(document.getElementById('edit-tour-bokun-id').value) || null;
-    const groups  = document.getElementById('edit-tour-groups').value.split(',').map(g => g.trim().toLowerCase()).filter(Boolean);
+    const title      = document.getElementById('edit-tour-title').value.trim();
+    const bokunId    = parseInt(document.getElementById('edit-tour-bokun-id').value) || null;
+    const groups     = document.getElementById('edit-tour-groups').value.split(',').map(g => g.trim().toLowerCase()).filter(Boolean);
+    const emailNotes = document.getElementById('edit-tour-email-notes').value.trim() || null;
     if (!title) { alert('Tour name is required.'); return; }
 
     const slotCbs     = document.querySelectorAll('.edit-tour-slot-cb');
     const hiddenSlots = Array.from(slotCbs).filter(cb => !cb.checked).map(cb => cb.value);
     const hiddenSlotIds = hiddenSlots.length ? hiddenSlots : null;
 
-    const { error } = await db.from('tour_config').update({ title, bokun_id: bokunId, groups, hidden_slot_ids: hiddenSlotIds }).eq('id', editingTourId);
+    const { error } = await db.from('tour_config').update({ title, bokun_id: bokunId, groups, hidden_slot_ids: hiddenSlotIds, email_notes: emailNotes }).eq('id', editingTourId);
     if (error) { alert('Error: ' + error.message); return; }
     const t = allTourConfig.find(x => x.id === editingTourId);
-    if (t) { t.title = title; t.bokun_id = bokunId; t.groups = groups; t.hidden_slot_ids = hiddenSlotIds; }
+    if (t) { t.title = title; t.bokun_id = bokunId; t.groups = groups; t.hidden_slot_ids = hiddenSlotIds; t.email_notes = emailNotes; }
     renderTourConfigTable();
     document.getElementById('modal-edit-tour').classList.add('hidden');
     showToast('Tour updated.');
@@ -4322,6 +4324,10 @@
         <label class="block text-xs text-gray-400 mb-1">Groups <span class="text-gray-300">(comma-separated)</span></label>
         <input id="edit-tour-groups" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="e.g. krakow, zakopane, shooting">
         <div class="text-xs text-gray-400 mt-1">Partners with matching groups will see this tour. Leave empty = visible to all.</div>
+      </div>
+      <div>
+        <label class="block text-xs text-gray-400 mb-1">Email notes <span class="text-gray-300">(shown in voucher sent to guest)</span></label>
+        <textarea id="edit-tour-email-notes" rows="3" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand resize-none" placeholder="e.g. Please bring your ID. Minimum age 18."></textarea>
       </div>
       <div id="edit-tour-slots-section" class="hidden">
         <label class="block text-xs text-gray-400 mb-1.5">Time slots <span class="text-gray-300">— uncheck to hide from partners</span></label>

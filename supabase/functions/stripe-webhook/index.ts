@@ -98,6 +98,12 @@ Deno.serve(async (req) => {
         .eq('id', bookingId)
         .single()
 
+      let tourEmailNotes: string | null = null
+      if (booking?.tour) {
+        const { data: tourCfg } = await db.from('tour_config').select('email_notes').eq('title', booking.tour).maybeSingle()
+        tourEmailNotes = tourCfg?.email_notes || null
+      }
+
       if (booking?.email) {
         const now = new Date()
         const pad = (n: number) => String(n).padStart(2, '0')
@@ -138,6 +144,7 @@ Deno.serve(async (req) => {
               <p style="font-weight:bold;margin:0 0 4px">Pick up information:</p>
               <p style="color:#E8751A;margin:0">Please keep in mind that the pick-up time is estimated and may vary by approximately 30 minutes. The exact pick-up time will be confirmed by our driver via WhatsApp the evening before the tour.</p>
             </div>
+            ${tourEmailNotes ? `<div style="margin-bottom:28px;padding:14px 16px;background:#F8F8F8;border-radius:8px;border-left:3px solid #333;font-size:12px"><p style="font-weight:bold;margin:0 0 6px">Additional information</p><p style="margin:0;white-space:pre-line">${tourEmailNotes}</p></div>` : ''}
             <p style="text-align:center;font-weight:bold;font-size:15px;letter-spacing:2px;margin:28px 0;padding:14px 20px;border:2px solid #16A34A;color:#16A34A">PAID BY GUEST</p>
             <div style="border-top:1px solid #eee;padding-top:14px;text-align:center;font-size:11px;color:#888">
               <p style="margin:0">How was your visit? Please review us on <strong>TripAdvisor</strong>: <strong>Thousand Miles Krakow</strong></p>
