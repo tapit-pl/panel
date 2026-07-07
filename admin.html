@@ -2363,6 +2363,7 @@
   let allTourConfig = [];
   let tourConfigLoaded = false;
   let editingTourId = null;
+  let editingEmailBlocks = [];
 
   const GROUP_PALETTE = ['bg-blue-100 text-blue-700','bg-green-100 text-green-700','bg-red-100 text-red-700','bg-yellow-100 text-yellow-700','bg-purple-100 text-purple-700','bg-pink-100 text-pink-700','bg-indigo-100 text-indigo-700','bg-orange-100 text-orange-700'];
   const groupColor = (() => { const map = {}; let i = 0; return g => { if (!map[g]) map[g] = GROUP_PALETTE[i++ % GROUP_PALETTE.length]; return map[g]; }; })();
@@ -2613,6 +2614,8 @@
     document.getElementById('edit-tour-bokun-id').value   = t.bokun_id || '';
     document.getElementById('edit-tour-groups').value     = (t.groups || []).join(', ');
     document.getElementById('edit-tour-email-notes').value = t.email_notes || '';
+    editingEmailBlocks = JSON.parse(JSON.stringify(t.email_blocks || []));
+    renderEmailBlocks();
 
     const slotsSection = document.getElementById('edit-tour-slots-section');
     const slotsList    = document.getElementById('edit-tour-slots-list');
@@ -2670,13 +2673,46 @@
     const hiddenSlots = Array.from(slotCbs).filter(cb => !cb.checked).map(cb => cb.value);
     const hiddenSlotIds = hiddenSlots.length ? hiddenSlots : null;
 
-    const { error } = await db.from('tour_config').update({ title, bokun_id: bokunId, groups, hidden_slot_ids: hiddenSlotIds, email_notes: emailNotes }).eq('id', editingTourId);
+    const emailBlocks = editingEmailBlocks.filter(b => b.name || b.info);
+    const { error } = await db.from('tour_config').update({ title, bokun_id: bokunId, groups, hidden_slot_ids: hiddenSlotIds, email_notes: emailNotes, email_blocks: emailBlocks }).eq('id', editingTourId);
     if (error) { alert('Error: ' + error.message); return; }
     const t = allTourConfig.find(x => x.id === editingTourId);
-    if (t) { t.title = title; t.bokun_id = bokunId; t.groups = groups; t.hidden_slot_ids = hiddenSlotIds; t.email_notes = emailNotes; }
+    if (t) { t.title = title; t.bokun_id = bokunId; t.groups = groups; t.hidden_slot_ids = hiddenSlotIds; t.email_notes = emailNotes; t.email_blocks = emailBlocks; }
     renderTourConfigTable();
     document.getElementById('modal-edit-tour').classList.add('hidden');
     showToast('Tour updated.');
+  }
+
+  function renderEmailBlocks() {
+    const container = document.getElementById('email-blocks-list');
+    if (!container) return;
+    if (editingEmailBlocks.length === 0) {
+      container.innerHTML = '<p class="text-xs text-gray-400 py-1">No blocks yet.</p>';
+      return;
+    }
+    container.innerHTML = editingEmailBlocks.map((b, i) => `
+      <div class="border border-gray-200 rounded-xl p-3 space-y-2">
+        <div class="flex items-center gap-2">
+          <input type="text" value="${(b.name||'').replace(/"/g,'&quot;')}" placeholder="Header (e.g. Cancellation)"
+            oninput="editingEmailBlocks[${i}].name=this.value"
+            class="flex-1 text-xs font-semibold border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand/30">
+          <button onclick="removeEmailBlock(${i})" class="text-gray-300 hover:text-red-400 transition-colors text-sm leading-none">✕</button>
+        </div>
+        <textarea rows="2" placeholder="Text (shown in orange in email)"
+          oninput="editingEmailBlocks[${i}].info=this.value"
+          class="w-full text-xs border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand/30 resize-none">${(b.info||'').replace(/</g,'&lt;')}</textarea>
+      </div>
+    `).join('');
+  }
+
+  function addEmailBlock() {
+    editingEmailBlocks.push({ name: '', info: '' });
+    renderEmailBlocks();
+  }
+
+  function removeEmailBlock(i) {
+    editingEmailBlocks.splice(i, 1);
+    renderEmailBlocks();
   }
 
   async function toggleTourActive(id, newActive) {
@@ -4308,8 +4344,8 @@
 </div>
 
 <!-- Modal: Edit tour -->
-<div id="modal-edit-tour" class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+<div id="modal-edit-tour" class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 overflow-y-auto">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 my-4">
     <h3 class="font-bold text-dark text-base mb-4">Edit tour</h3>
     <div class="space-y-3">
       <div>
@@ -4326,8 +4362,15 @@
         <div class="text-xs text-gray-400 mt-1">Partners with matching groups will see this tour. Leave empty = visible to all.</div>
       </div>
       <div>
-        <label class="block text-xs text-gray-400 mb-1">Email notes <span class="text-gray-300">(shown in voucher sent to guest)</span></label>
-        <textarea id="edit-tour-email-notes" rows="3" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand resize-none" placeholder="e.g. Please bring your ID. Minimum age 18."></textarea>
+        <label class="block text-xs text-gray-400 mb-1">Email notes <span class="text-gray-300">(free text, shown below info blocks)</span></label>
+        <textarea id="edit-tour-email-notes" rows="2" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand resize-none" placeholder="e.g. Any extra info for this tour…"></textarea>
+      </div>
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <label class="block text-xs text-gray-400">Info blocks <span class="text-gray-300">(shown in voucher email)</span></label>
+          <button onclick="addEmailBlock()" class="text-xs text-brand hover:text-brand-dark font-semibold transition-colors">+ Add block</button>
+        </div>
+        <div id="email-blocks-list" class="space-y-2"></div>
       </div>
       <div id="edit-tour-slots-section" class="hidden">
         <label class="block text-xs text-gray-400 mb-1.5">Time slots <span class="text-gray-300">— uncheck to hide from partners</span></label>
