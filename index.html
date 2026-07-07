@@ -1531,102 +1531,8 @@ tailwind.config = {
   <div class="hidden">
   <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden">
 
-    <!-- Voucher document -->
-    <div id="voucher-printable" class="p-8">
-
-      <!-- Header: company left, hotel right -->
-      <div class="flex items-start justify-between mb-6 pb-6 border-b-2 border-brand">
-        <div class="flex items-start gap-3">
-          <img src="assets/logo.png" alt="Thousand Miles" class="h-10 object-contain">
-          <div class="text-xs text-gray-500 leading-relaxed mt-0.5">
-            <div class="font-bold text-dark text-sm">Thousand Miles Kraków sp. z o.o.</div>
-            <div>Szczepański Square 8/101</div>
-            <div>31-011 Kraków</div>
-            <div>tel. +48 607 896 523</div>
-            <div>www.thousandmiles.pl</div>
-          </div>
-        </div>
-        <div class="text-right text-xs text-gray-500 leading-relaxed">
-          <div class="font-bold text-dark text-sm" id="voucher-hotel-name">—</div>
-          <div id="voucher-hotel-address"></div>
-          <div id="voucher-hotel-phone"></div>
-          <div class="mt-2 text-gray-400">Kraków, April 8, 2026</div>
-        </div>
-      </div>
-
-      <!-- Title -->
-      <div class="text-center mb-6">
-        <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Document</div>
-        <h2 class="text-2xl font-black text-dark uppercase tracking-wide">Reservation Confirmation</h2>
-        <div class="text-sm text-gray-400 mt-1">Booking No. <span class="font-bold text-brand">#TM-2026-0847</span></div>
-      </div>
-
-      <!-- Tour + guest details -->
-      <div class="bg-gray-50 rounded-2xl p-5 mb-5">
-        <div class="text-lg font-black text-dark mb-4">Trip to Zakopane</div>
-        <div class="grid grid-cols-2 gap-x-8 gap-y-2.5 text-sm">
-          <div class="flex items-center gap-2"><i class="fa-regular fa-calendar text-brand w-4"></i><span class="text-gray-500">Date:</span> <span class="font-semibold ml-1">Monday, April 8, 2026</span></div>
-          <div class="flex items-center gap-2"><i class="fa-regular fa-clock text-brand w-4"></i><span class="text-gray-500">Departure:</span> <span class="font-semibold ml-1">07:00</span></div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-users text-brand w-4"></i><span class="text-gray-500">Participants:</span> <span class="font-semibold ml-1">2 persons</span></div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-tag text-brand w-4"></i><span class="text-gray-500">Package:</span> <span class="font-semibold ml-1">Standard</span></div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-coins text-brand w-4"></i><span class="text-gray-500">Total price:</span> <span class="font-bold text-brand ml-1">300 zł</span></div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-location-dot text-brand w-4"></i><span class="text-gray-500">Pick-up:</span> <span class="font-semibold ml-1">Hotel Wawel Kraków</span></div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-user text-brand w-4"></i><span class="text-gray-500">Guest:</span> <span class="font-semibold ml-1">Jan Kowalski</span></div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-phone text-brand w-4"></i><span class="text-gray-500">Phone:</span> <span class="font-semibold ml-1">+48 600 123 456</span></div>
-          <div class="flex items-center gap-2 col-span-2"><i class="fa-solid fa-envelope text-brand w-4"></i><span class="text-gray-500">Email:</span> <span class="font-semibold ml-1">jan.kowalski@email.com</span></div>
-        </div>
-      </div>
-
-      <!-- Pick-up confirmation -->
-      <div class="bg-green-50 border border-green-200 rounded-xl p-3.5 mb-5 flex items-center gap-3 text-sm text-green-800">
-        <i class="fa-brands fa-whatsapp text-green-500 text-xl shrink-0"></i>
-        <strong>The exact pick-up time will be confirmed via WhatsApp/SMS the evening before the tour.</strong>
-      </div>
-
-      <!-- Tour details from Bokun -->
-      <div class="space-y-3 text-sm">
-
-        <div class="border border-gray-200 rounded-xl overflow-hidden">
-          <div class="bg-gray-50 px-4 py-2.5 font-bold text-dark text-xs uppercase tracking-wide border-b border-gray-200">Tour duration</div>
-          <div class="px-4 py-3 text-gray-600">Full day — approximately <strong>10 hours</strong> (departure 07:00, return ~17:00)</div>
-        </div>
-
-        <div class="border border-gray-200 rounded-xl overflow-hidden">
-          <div class="bg-gray-50 px-4 py-2.5 font-bold text-dark text-xs uppercase tracking-wide border-b border-gray-200">What's included</div>
-          <div class="px-4 py-3 text-gray-600">
-            <ul class="space-y-1">
-              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs w-3"></i>Return transport from Kraków</li>
-              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs w-3"></i>Licensed English-speaking guide</li>
-              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs w-3"></i>Cable car ticket to Kasprowy Wierch (Standard package)</li>
-              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs w-3"></i>Free time in Zakopane town centre</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="border border-gray-200 rounded-xl overflow-hidden">
-          <div class="bg-gray-50 px-4 py-2.5 font-bold text-dark text-xs uppercase tracking-wide border-b border-gray-200">What's not included</div>
-          <div class="px-4 py-3 text-gray-600">
-            <ul class="space-y-1">
-              <li class="flex items-center gap-2"><i class="fa-solid fa-xmark text-red-400 text-xs w-3"></i>Meals and drinks</li>
-              <li class="flex items-center gap-2"><i class="fa-solid fa-xmark text-red-400 text-xs w-3"></i>Personal travel insurance</li>
-              <li class="flex items-center gap-2"><i class="fa-solid fa-xmark text-red-400 text-xs w-3"></i>Tips for the guide (optional)</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="border border-gray-200 rounded-xl overflow-hidden">
-          <div class="bg-gray-50 px-4 py-2.5 font-bold text-dark text-xs uppercase tracking-wide border-b border-gray-200">What to bring</div>
-          <div class="px-4 py-3 text-gray-600">Comfortable walking shoes, weather-appropriate clothing (layers recommended), water, sunscreen. This voucher or booking confirmation on your phone.</div>
-        </div>
-
-        <div class="border-2 border-red-200 rounded-xl overflow-hidden">
-          <div class="bg-red-50 px-4 py-2.5 font-bold text-red-700 text-xs uppercase tracking-wide border-b border-red-200">Cancellation policy</div>
-          <div class="px-4 py-3 text-gray-600"><strong class="text-red-600">Free cancellation</strong> up to 24 hours before departure. Cancellations within 24 hours are non-refundable. To cancel, contact us at <span class="text-brand font-semibold">+48 607 896 523</span>.</div>
-        </div>
-
-      </div>
-
-    </div>
+    <!-- Voucher document — populated dynamically by fillAndShowVoucher() -->
+    <div id="voucher-printable" style="padding:32px;font-family:Arial,sans-serif;font-size:13px;color:#333"></div>
 
   </div>
   </div>
@@ -3215,10 +3121,23 @@ tailwind.config = {
       return
     }
 
-    if ((payment === 'driver' || payment === 'hotel') && email) {
-      db.functions.invoke('send-booking-confirmation', {
-        body: { booking_id: bookingId, bokun_booking_id: bokunBookingId || null, bokun_confirmation_code: bokunConfirmationCode || null, tour_name: tour, date: dateStr, time: tdSelectedTimeSlot?._displayTime || tdSelectedTimeSlot?.startTime || null, guest_name: guest, extra_guests: extraGuests.length ? extraGuests : null, guest_email: email, phone: phone || null, pax: tdGuestCount, total: insertTotal || null, pickup: tdGetPickupDescription() || null, payment_type: payment, email_blocks: tdCurrentTour?.emailBlocks || [] }
-      }).catch(e => console.warn('[booking confirmation email] error:', e.message));
+    if (payment === 'driver' || payment === 'hotel') {
+      fillAndShowVoucher({
+        bookingId,
+        bokunBookingId,
+        bokunConfirmationCode,
+        tourName: tour,
+        date: dateStr,
+        time: tdSelectedTimeSlot?._displayTime || tdSelectedTimeSlot?.startTime || null,
+        guestName: guest,
+        extraGuests: extraGuests.length ? extraGuests : null,
+        email,
+        phone: phone || null,
+        pax: tdGuestCount,
+        total: insertTotal || null,
+        pickup: tdGetPickupDescription() || null,
+        emailBlocks: tdCurrentTour?.emailBlocks || [],
+      });
     }
 
     form.classList.add('hidden');
@@ -3606,12 +3525,110 @@ tailwind.config = {
 
   function printVoucher() {
     closeConfirm();
-    if (currentPartner) {
-      document.getElementById('voucher-hotel-name').textContent = currentPartner.name || '—';
-      const addr = currentPartner.address && !currentPartner.address.includes('@') ? currentPartner.address : '';
-      document.getElementById('voucher-hotel-address').textContent = addr;
-      document.getElementById('voucher-hotel-phone').textContent = currentPartner.phone ? 'tel. ' + currentPartner.phone : '';
+    fillAndShowVoucher(null);
+  }
+
+  function fillAndShowVoucher(data) {
+    const pad = n => String(n).padStart(2, '0');
+    const now = new Date();
+    const todayStr = `Kraków, ${pad(now.getDate())}.${pad(now.getMonth()+1)}.${now.getFullYear()}`;
+
+    const hotelName = currentPartner?.name || '—';
+    const hotelAddr = (currentPartner?.address && !currentPartner.address.includes('@')) ? currentPartner.address : '';
+    const hotelPhone = currentPartner?.phone ? 'tel. ' + currentPartner.phone : '';
+
+    let bookingNr = '—';
+    if (data) {
+      if (data.bokunConfirmationCode) bookingNr = data.bokunConfirmationCode;
+      else if (data.bokunBookingId) bookingNr = 'TM-' + data.bokunBookingId;
+      else if (data.bookingId) bookingNr = '#' + data.bookingId.split('-')[0].toUpperCase();
     }
+
+    const guestsList = data?.guestName
+      ? [data.guestName, ...(data.extraGuests || [])].map(g => escapeHtml(g)).join('<br>')
+      : null;
+
+    const timePart = escapeHtml(data?.time || '');
+    const pickupPart = escapeHtml(data?.pickup || '');
+    const timePickup = [timePart, pickupPart].filter(Boolean).join('<br>');
+
+    const rows = [
+      ['Offer name', escapeHtml(data?.tourName || '—')],
+      ['Number of participants', String(data?.pax ?? '—')],
+      ...(data?.total ? [['Price', data.total + ' PLN']] : []),
+      ...(guestsList ? [['Participants', guestsList]] : []),
+      ...(data?.phone ? [['Contact number', escapeHtml(data.phone)]] : []),
+      ...(data?.email ? [['Email', escapeHtml(data.email)]] : []),
+      ['Selected date', escapeHtml(data?.date || '—')],
+      ...(timePickup ? [['Time and place of meeting', timePickup]] : []),
+    ];
+
+    const tableRows = rows.map(([label, value]) =>
+      `<tr style="border-bottom:1px solid #e0e0e0">
+        <td style="padding:8px 6px;font-weight:bold;width:44%;vertical-align:top">${label}:</td>
+        <td style="padding:8px 6px;vertical-align:top">${value}</td>
+      </tr>`
+    ).join('');
+
+    const infoBlocks = (data?.emailBlocks || []).map(b =>
+      `<div style="border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;margin-bottom:10px">
+        <div style="background:#f9f9f9;padding:8px 14px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid #e0e0e0">${escapeHtml(b.name)}</div>
+        <div style="padding:10px 14px;color:#555">${escapeHtml(b.info)}</div>
+      </div>`
+    ).join('');
+
+    const html = `
+      <table style="width:100%;border-bottom:2px solid #ddd;padding-bottom:16px;margin-bottom:20px;border-collapse:collapse">
+        <tr>
+          <td style="vertical-align:top;width:33%;line-height:1.8">
+            <strong style="font-size:13px">Thousand Miles Kraków sp. z o.o.</strong><br>
+            <span style="font-size:11px;color:#666">
+              Szczepański Square 8/101<br>
+              31-011 Kraków<br>
+              tel. +48 607 896 523
+            </span>
+          </td>
+          <td style="text-align:center;vertical-align:middle;width:34%">
+            <img src="assets/logo.png" style="height:52px;display:inline-block">
+          </td>
+          <td style="text-align:right;vertical-align:top;width:33%;line-height:1.8">
+            <strong style="font-size:13px">${escapeHtml(hotelName)}</strong><br>
+            <span style="font-size:11px;color:#666">
+              ${escapeHtml(hotelAddr)}${hotelAddr ? '<br>' : ''}
+              ${escapeHtml(hotelPhone)}${hotelPhone ? '<br>' : ''}
+              ${escapeHtml(todayStr)}
+            </span>
+          </td>
+        </tr>
+      </table>
+
+      <div style="text-align:center;margin-bottom:24px">
+        <h2 style="margin:0 0 6px;font-size:18px;font-weight:900;text-transform:uppercase;letter-spacing:3px;color:#3A3A3A">Reservation Confirmation</h2>
+        <p style="margin:0;font-size:12px;color:#999">Nr: <strong style="color:#3A3A3A">${escapeHtml(bookingNr)}</strong></p>
+      </div>
+
+      <table style="width:100%;border-collapse:collapse;margin-bottom:24px;font-size:13px">
+        ${tableRows}
+      </table>
+
+      ${infoBlocks ? `
+        <div style="margin-bottom:20px">
+          <p style="font-weight:bold;font-size:13px;margin:0 0 10px">Additional information</p>
+          ${infoBlocks}
+        </div>` : ''}
+
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:12px;font-size:13px;color:#166534">
+        <i class="fa-brands fa-whatsapp" style="font-size:20px;color:#22c55e;flex-shrink:0"></i>
+        <strong>The exact pick-up time will be confirmed via WhatsApp/SMS the evening before the tour.</strong>
+      </div>
+
+      <div style="border-top:1px solid #e0e0e0;padding-top:14px;text-align:center;font-size:11px;color:#999">
+        <p style="margin:0">How was your visit? Please review us on <strong style="color:#3A3A3A">TripAdvisor</strong>: <strong style="color:#3A3A3A">Thousand Miles Krakow</strong></p>
+        <p style="margin:6px 0 0">Instagram: /thousandmiles.pl &nbsp;·&nbsp; Facebook: /ThousandMilesPL</p>
+      </div>
+    `;
+
+    document.getElementById('voucher-printable').innerHTML = html;
     document.getElementById('modal-voucher').classList.remove('hidden');
     document.getElementById('modal-voucher').classList.add('flex');
   }
