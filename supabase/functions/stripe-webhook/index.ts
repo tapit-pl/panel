@@ -94,12 +94,58 @@ Deno.serve(async (req) => {
 
       const { data: booking } = await db
         .from('bookings')
-        .select('tour, date, time, guest, email, pax, total')
+        .select('tour, date, time, guest, email, phone, pax, total, pickup')
         .eq('id', bookingId)
         .single()
 
       if (booking?.email) {
-        const guestPax = booking.pax ?? 1
+        const now = new Date()
+        const pad = (n: number) => String(n).padStart(2, '0')
+        const today = `${pad(now.getDate())}.${pad(now.getMonth()+1)}.${now.getFullYear()}`
+        const pax = booking.pax ?? 1
+
+        const html = `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#333;font-size:13px">
+            <table style="width:100%;padding-bottom:16px;border-bottom:2px solid #333;margin-bottom:20px">
+              <tr>
+                <td style="vertical-align:top;font-size:11px;line-height:1.7">
+                  THOUSAND MILES SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ<br>
+                  NIP: 6762709355<br>
+                  ul. PLAC SZCZEPAŃSKI 8/207<br>
+                  31-011 KRAKÓW
+                </td>
+                <td style="text-align:right;vertical-align:top">
+                  <img src="https://panel.thousandmiles.pl/assets/logo.png" style="height:50px;display:block;margin-left:auto;margin-bottom:6px">
+                  <span style="font-size:11px">Kraków, ${today}</span>
+                </td>
+              </tr>
+            </table>
+            <h2 style="text-align:center;letter-spacing:2px;font-size:17px;margin:20px 0 6px;text-transform:uppercase">Reservation Confirmation</h2>
+            <p style="text-align:center;color:#888;font-size:12px;margin-bottom:28px">Nr: #TM-${bookingId}</p>
+            <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
+              <tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold;width:45%">Offer name:</td><td style="padding:8px 4px">${booking.tour}</td></tr>
+              <tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold">Number of participants:</td><td style="padding:8px 4px">${pax}</td></tr>
+              ${booking.total ? `<tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold">Price:</td><td style="padding:8px 4px">${booking.total} PLN</td></tr>` : ''}
+              ${booking.guest ? `<tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold">Participants:</td><td style="padding:8px 4px">${booking.guest}</td></tr>` : ''}
+              ${booking.phone ? `<tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold">Contact number:</td><td style="padding:8px 4px">${booking.phone}</td></tr>` : ''}
+              <tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold">Email:</td><td style="padding:8px 4px">${booking.email}</td></tr>
+              <tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold">Selected date:</td><td style="padding:8px 4px">${booking.date || ''}</td></tr>
+              ${booking.time || booking.pickup ? `<tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold">Time and place of meeting:</td><td style="padding:8px 4px">${booking.time || ''}${booking.time && booking.pickup ? '<br>' : ''}${booking.pickup || ''}</td></tr>` : ''}
+            </table>
+            <div style="margin-bottom:28px;font-size:12px">
+              <p style="font-weight:bold;margin:0 0 4px">Cancellation</p>
+              <p style="color:#E8751A;margin:0 0 14px">Please notice that cancellations may be made up to 24 hours before the start of the trip. In case of later cancellations, the client will be charged 100% cost of the trip.</p>
+              <p style="font-weight:bold;margin:0 0 4px">Pick up information:</p>
+              <p style="color:#E8751A;margin:0">Please keep in mind that the pick-up time is estimated and may vary by approximately 30 minutes. The exact pick-up time will be confirmed by our driver via WhatsApp the evening before the tour.</p>
+            </div>
+            <p style="text-align:center;font-weight:bold;font-size:15px;letter-spacing:2px;margin:28px 0;padding:14px 20px;border:2px solid #16A34A;color:#16A34A">PAID BY GUEST</p>
+            <div style="border-top:1px solid #eee;padding-top:14px;text-align:center;font-size:11px;color:#888">
+              <p style="margin:0">How was your visit? Please review us on <strong>TripAdvisor</strong>: <strong>Thousand Miles Krakow</strong></p>
+              <p style="margin:6px 0 0">Instagram: /thousandmiles.pl &nbsp;·&nbsp; Facebook: /ThousandMilesPL</p>
+            </div>
+          </div>
+        `
+
         const emailRes = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
@@ -110,29 +156,10 @@ Deno.serve(async (req) => {
             from: 'Thousand Miles <rezerwacje@thousandmiles.pl>',
             to: booking.email,
             subject: `Booking confirmed: ${booking.tour}`,
-            html: `
-              <div style="font-family:Inter,sans-serif;max-width:520px;margin:0 auto;padding:32px 24px">
-                <h2 style="color:#3A3A3A;margin-bottom:8px">Your tour is confirmed!</h2>
-                <p style="color:#666;margin-bottom:24px">Payment received. We look forward to seeing you!</p>
-
-                <div style="margin-top:8px">
-                  <div style="display:inline-block;background:#16A34A;color:#fff;font-size:11px;font-weight:700;letter-spacing:1px;padding:4px 12px;border-radius:6px;margin-bottom:20px">CONFIRMED &amp; PAID</div>
-                  <table style="width:100%;border-collapse:collapse;font-size:14px">
-                    <tr><td style="padding:8px 0;color:#999;width:40%">Booking ref</td><td style="padding:8px 0;color:#3A3A3A;font-weight:600">#TM-${bookingId}</td></tr>
-                    <tr style="border-top:1px solid #f0f0f0"><td style="padding:8px 0;color:#999">Guest</td><td style="padding:8px 0;color:#3A3A3A">${booking.guest || ''}</td></tr>
-                    <tr style="border-top:1px solid #f0f0f0"><td style="padding:8px 0;color:#999">Tour</td><td style="padding:8px 0;color:#3A3A3A">${booking.tour}</td></tr>
-                    <tr style="border-top:1px solid #f0f0f0"><td style="padding:8px 0;color:#999">Date</td><td style="padding:8px 0;color:#3A3A3A">${booking.date || ''}</td></tr>
-                    ${booking.time ? `<tr style="border-top:1px solid #f0f0f0"><td style="padding:8px 0;color:#999">Time</td><td style="padding:8px 0;color:#3A3A3A">${booking.time}</td></tr>` : ''}
-                    <tr style="border-top:1px solid #f0f0f0"><td style="padding:8px 0;color:#999">Guests</td><td style="padding:8px 0;color:#3A3A3A">${guestPax}</td></tr>
-                    <tr style="border-top:1px solid #f0f0f0"><td style="padding:8px 0;color:#999">Total paid</td><td style="padding:8px 0;color:#3A3A3A;font-weight:600">${booking.total ? booking.total + ' PLN' : ''}</td></tr>
-                  </table>
-                  <p style="color:#999;font-size:12px;margin-top:16px">Questions? Reply to this email or contact us at rezerwacje@thousandmiles.pl</p>
-                </div>
-              </div>
-            `,
+            html,
           }),
         })
-        console.log('[Webhook] PAID voucher email status:', emailRes.status)
+        console.log('[Webhook] PAID BY GUEST voucher email status:', emailRes.status)
       }
     }
   }

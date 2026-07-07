@@ -3166,6 +3166,7 @@ tailwind.config = {
       status: insertStatus,
       stripe_session_id: stripeSessionId,
       stripe_session_url: stripeSessionUrl || null,
+      pickup: tdGetPickupDescription() || null,
       partner_id: currentPartner?.id,
       staff_id: currentPartner?._staffId || null,
       bokun_confirmation_code: payment === 'link' ? (bokunReservationCode || null) : (bokunConfirmationCode || null),
@@ -3189,10 +3190,10 @@ tailwind.config = {
       return
     }
 
-    if (payment === 'driver' && email) {
+    if ((payment === 'driver' || payment === 'hotel') && email) {
       db.functions.invoke('send-booking-confirmation', {
-        body: { booking_id: bookingId, tour_name: tour, date: dateStr, time: tdSelectedTimeSlot?._displayTime || tdSelectedTimeSlot?.startTime || null, guest_name: guest, guest_email: email, pax: tdGuestCount, total: insertTotal || null }
-      }).catch(e => console.warn('[driver confirmation email] error:', e.message));
+        body: { booking_id: bookingId, tour_name: tour, date: dateStr, time: tdSelectedTimeSlot?._displayTime || tdSelectedTimeSlot?.startTime || null, guest_name: guest, guest_email: email, phone: phone || null, pax: tdGuestCount, total: insertTotal || null, pickup: tdGetPickupDescription() || null, payment_type: payment }
+      }).catch(e => console.warn('[booking confirmation email] error:', e.message));
     }
 
     form.classList.add('hidden');
