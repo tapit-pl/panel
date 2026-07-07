@@ -3,7 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const CORS = { 'Access-Control-Allow-Origin': 'https://panel.thousandmiles.pl', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type' }
 
 function voucherHtml(p: {
-  booking_id: string, tour_name: string, date: string, time?: string | null,
+  booking_id: string, bokun_booking_id?: number | null, tour_name: string, date: string, time?: string | null,
   guest_name?: string | null, guest_email?: string | null, phone?: string | null,
   pax: number, total?: number | null, pickup?: string | null,
   email_blocks?: Array<{name: string, info: string}> | null,
@@ -31,7 +31,7 @@ function voucherHtml(p: {
       </table>
 
       <h2 style="text-align:center;letter-spacing:2px;font-size:17px;margin:20px 0 6px;text-transform:uppercase">Reservation Confirmation</h2>
-      <p style="text-align:center;color:#888;font-size:12px;margin-bottom:28px">Nr: #TM-${p.booking_id}</p>
+      <p style="text-align:center;color:#888;font-size:12px;margin-bottom:28px">Nr: TM-${p.bokun_booking_id || p.booking_id}</p>
 
       <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
         <tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold;width:45%">Offer name:</td><td style="padding:8px 4px">${p.tour_name}</td></tr>
@@ -59,7 +59,7 @@ function voucherHtml(p: {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
 
-  const { booking_id, tour_name, date, time, guest_name, guest_email, phone, pax, total, pickup, payment_type, email_blocks } = await req.json()
+  const { booking_id, bokun_booking_id, tour_name, date, time, guest_name, guest_email, phone, pax, total, pickup, payment_type, email_blocks } = await req.json()
 
   if (!guest_email) {
     return new Response(JSON.stringify({ error: 'guest_email required' }), { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } })
@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
   const subject = isHotel ? `Booking confirmed: ${tour_name}` : `Tour booking: ${tour_name}`
 
   const html = voucherHtml({
-    booking_id, tour_name, date, time, guest_name, guest_email, phone,
+    booking_id, bokun_booking_id: bokun_booking_id || null, tour_name, date, time, guest_name, guest_email, phone,
     pax: pax ?? 1, total, pickup, email_blocks: email_blocks || null, badge, badge_color,
   })
 

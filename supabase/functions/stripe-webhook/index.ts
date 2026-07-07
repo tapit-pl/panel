@@ -141,7 +141,7 @@ Deno.serve(async (req) => {
               </tr>
             </table>
             <h2 style="text-align:center;letter-spacing:2px;font-size:17px;margin:20px 0 6px;text-transform:uppercase">Reservation Confirmation</h2>
-            <p style="text-align:center;color:#888;font-size:12px;margin-bottom:28px">Nr: #TM-${bookingId}</p>
+            <p style="text-align:center;color:#888;font-size:12px;margin-bottom:28px">Nr: TM-${bokunInternalId || bookingId}</p>
             <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
               <tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold;width:45%">Offer name:</td><td style="padding:8px 4px">${booking.tour}</td></tr>
               <tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold">Number of participants:</td><td style="padding:8px 4px">${pax}</td></tr>

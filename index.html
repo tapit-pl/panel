@@ -3193,7 +3193,7 @@ tailwind.config = {
 
     if ((payment === 'driver' || payment === 'hotel') && email) {
       db.functions.invoke('send-booking-confirmation', {
-        body: { booking_id: bookingId, tour_name: tour, date: dateStr, time: tdSelectedTimeSlot?._displayTime || tdSelectedTimeSlot?.startTime || null, guest_name: guest, guest_email: email, phone: phone || null, pax: tdGuestCount, total: insertTotal || null, pickup: tdGetPickupDescription() || null, payment_type: payment, email_blocks: tdCurrentTour?.emailBlocks || [] }
+        body: { booking_id: bookingId, bokun_booking_id: bokunBookingId || null, tour_name: tour, date: dateStr, time: tdSelectedTimeSlot?._displayTime || tdSelectedTimeSlot?.startTime || null, guest_name: guest, guest_email: email, phone: phone || null, pax: tdGuestCount, total: insertTotal || null, pickup: tdGetPickupDescription() || null, payment_type: payment, email_blocks: tdCurrentTour?.emailBlocks || [] }
       }).catch(e => console.warn('[booking confirmation email] error:', e.message));
     }
 
