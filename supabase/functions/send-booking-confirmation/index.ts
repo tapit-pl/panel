@@ -3,7 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const CORS = { 'Access-Control-Allow-Origin': 'https://panel.thousandmiles.pl', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type' }
 
 function voucherHtml(p: {
-  booking_id: string, bokun_booking_id?: number | null, tour_name: string, date: string, time?: string | null,
+  booking_id: string, bokun_booking_id?: number | string | null, tour_name: string, date: string, time?: string | null,
   guest_name?: string | null, guest_email?: string | null, phone?: string | null,
   pax: number, total?: number | null, pickup?: string | null,
   email_blocks?: Array<{name: string, info: string}> | null,
@@ -59,10 +59,16 @@ function voucherHtml(p: {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
 
-  const { booking_id, bokun_booking_id, tour_name, date, time, guest_name, guest_email, phone, pax, total, pickup, payment_type, email_blocks } = await req.json()
+  const { booking_id, bokun_booking_id, bokun_confirmation_code, tour_name, date, time, guest_name, guest_email, phone, pax, total, pickup, payment_type, email_blocks } = await req.json()
 
   if (!guest_email) {
     return new Response(JSON.stringify({ error: 'guest_email required' }), { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } })
+  }
+
+  // Prefer numeric bokun_booking_id; fallback to stripping "TM-" prefix from confirmation code
+  let resolvedBokunId: number | string | null = bokun_booking_id || null
+  if (!resolvedBokunId && bokun_confirmation_code) {
+    resolvedBokunId = String(bokun_confirmation_code).replace(/^TM-/i, '')
   }
 
   const isHotel = payment_type === 'hotel'
@@ -71,7 +77,7 @@ Deno.serve(async (req) => {
   const subject = isHotel ? `Booking confirmed: ${tour_name}` : `Tour booking: ${tour_name}`
 
   const html = voucherHtml({
-    booking_id, bokun_booking_id: bokun_booking_id || null, tour_name, date, time, guest_name, guest_email, phone,
+    booking_id, bokun_booking_id: resolvedBokunId as number | null, tour_name, date, time, guest_name, guest_email, phone,
     pax: pax ?? 1, total, pickup, email_blocks: email_blocks || null, badge, badge_color,
   })
 
