@@ -6,7 +6,6 @@ function voucherHtml(p: {
   booking_id: string, tour_name: string, date: string, time?: string | null,
   guest_name?: string | null, guest_email?: string | null, phone?: string | null,
   pax: number, total?: number | null, pickup?: string | null,
-  email_notes?: string | null,
   email_blocks?: Array<{name: string, info: string}> | null,
   badge: string, badge_color: string,
 }) {
@@ -47,8 +46,6 @@ function voucherHtml(p: {
 
       ${(p.email_blocks && p.email_blocks.length > 0) ? `<div style="margin-bottom:28px;font-size:12px">${p.email_blocks.map(b => `<p style="font-weight:bold;margin:0 0 4px">${b.name}</p><p style="color:#E8751A;margin:0 0 14px">${b.info}</p>`).join('')}</div>` : ''}
 
-      ${p.email_notes ? `<div style="margin-bottom:28px;padding:14px 16px;background:#F8F8F8;border-radius:8px;border-left:3px solid #333;font-size:12px"><p style="margin:0;white-space:pre-line">${p.email_notes}</p></div>` : ''}
-
       <p style="text-align:center;font-weight:bold;font-size:15px;letter-spacing:2px;margin:28px 0;padding:14px 20px;border:2px solid ${p.badge_color};color:${p.badge_color}">${p.badge}</p>
 
       <div style="border-top:1px solid #eee;padding-top:14px;text-align:center;font-size:11px;color:#888">
@@ -62,7 +59,7 @@ function voucherHtml(p: {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
 
-  const { booking_id, tour_name, date, time, guest_name, guest_email, phone, pax, total, pickup, payment_type, email_notes, email_blocks } = await req.json()
+  const { booking_id, tour_name, date, time, guest_name, guest_email, phone, pax, total, pickup, payment_type, email_blocks } = await req.json()
 
   if (!guest_email) {
     return new Response(JSON.stringify({ error: 'guest_email required' }), { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } })
@@ -75,7 +72,7 @@ Deno.serve(async (req) => {
 
   const html = voucherHtml({
     booking_id, tour_name, date, time, guest_name, guest_email, phone,
-    pax: pax ?? 1, total, pickup, email_notes: email_notes || null, email_blocks: email_blocks || null, badge, badge_color,
+    pax: pax ?? 1, total, pickup, email_blocks: email_blocks || null, badge, badge_color,
   })
 
   const emailRes = await fetch('https://api.resend.com/emails', {

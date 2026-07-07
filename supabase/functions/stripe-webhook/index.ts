@@ -35,6 +35,20 @@ async function verifyStripeSignature(body: string, sigHeader: string, secret: st
   return signatures.some(s => s === expected)
 }
 
+function renderEmailBlocks(blocks: Array<{name: string, info: string}>): string {
+  if (!blocks || blocks.length === 0) return ''
+  const inner = blocks.map(b =>
+    '<p style="font-weight:bold;margin:0 0 4px">' + b.name + '</p>' +
+    '<p style="color:#E8751A;margin:0 0 14px">' + b.info + '</p>'
+  ).join('')
+  return '<div style="margin-bottom:28px;font-size:12px">' + inner + '</div>'
+}
+
+function renderEmailNotes(notes: string | null): string {
+  if (!notes) return ''
+  return '<div style="margin-bottom:28px;padding:14px 16px;background:#F8F8F8;border-radius:8px;border-left:3px solid #333;font-size:12px"><p style="margin:0;white-space:pre-line">' + notes + '</p></div>'
+}
+
 async function bokunConfirm(confirmationCode: string) {
   const accessKey = Deno.env.get('BOKUN_ACCESS_KEY')!
   const secretKey = Deno.env.get('BOKUN_SECRET_KEY')!
@@ -98,11 +112,9 @@ Deno.serve(async (req) => {
         .eq('id', bookingId)
         .single()
 
-      let tourEmailNotes: string | null = null
       let tourEmailBlocks: Array<{name: string, info: string}> = []
       if (booking?.tour) {
-        const { data: tourCfg } = await db.from('tour_config').select('email_notes, email_blocks').eq('title', booking.tour).maybeSingle()
-        tourEmailNotes = tourCfg?.email_notes || null
+        const { data: tourCfg } = await db.from('tour_config').select('email_blocks').eq('title', booking.tour).maybeSingle()
         tourEmailBlocks = tourCfg?.email_blocks || []
       }
 
@@ -141,7 +153,6 @@ Deno.serve(async (req) => {
               ${booking.time || booking.pickup ? `<tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold">Time and place of meeting:</td><td style="padding:8px 4px">${booking.time || ''}${booking.time && booking.pickup ? '<br>' : ''}${booking.pickup || ''}</td></tr>` : ''}
             </table>
             ${tourEmailBlocks.length > 0 ? `<div style="margin-bottom:28px;font-size:12px">${tourEmailBlocks.map((b: {name: string, info: string}) => `<p style="font-weight:bold;margin:0 0 4px">${b.name}</p><p style="color:#E8751A;margin:0 0 14px">${b.info}</p>`).join('')}</div>` : ''}
-            ${tourEmailNotes ? `<div style="margin-bottom:28px;padding:14px 16px;background:#F8F8F8;border-radius:8px;border-left:3px solid #333;font-size:12px"><p style="margin:0;white-space:pre-line">${tourEmailNotes}</p></div>` : ''}
             <p style="text-align:center;font-weight:bold;font-size:15px;letter-spacing:2px;margin:28px 0;padding:14px 20px;border:2px solid #16A34A;color:#16A34A">PAID BY GUEST</p>
             <div style="border-top:1px solid #eee;padding-top:14px;text-align:center;font-size:11px;color:#888">
               <p style="margin:0">How was your visit? Please review us on <strong>TripAdvisor</strong>: <strong>Thousand Miles Krakow</strong></p>
