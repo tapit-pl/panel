@@ -2952,6 +2952,16 @@ tailwind.config = {
       return;
     }
 
+    for (let i = 0; i < tdGuestCount - 1; i++) {
+      const ef = document.getElementById(`td-extra-first-${i}`)?.value.trim();
+      const el = document.getElementById(`td-extra-last-${i}`)?.value.trim();
+      if (!ef || !el) {
+        errEl.textContent = `Please enter first and last name for Guest ${i + 2}.`;
+        errEl.classList.remove('hidden');
+        return;
+      }
+    }
+
     const btn = document.getElementById('td-submit-btn');
     btn.disabled = true;
     btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Saving...';
