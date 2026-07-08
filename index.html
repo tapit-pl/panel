@@ -3165,6 +3165,7 @@ tailwind.config = {
         total: insertTotal || null,
         pickup: tdGetPickupDescription() || null,
         emailBlocks: tdCurrentTour?.emailBlocks || [],
+        paymentMethod: payment,
       });
     }
 
@@ -3616,6 +3617,17 @@ tailwind.config = {
       </div>`
     ).join('');
 
+    const paymentBadgeMap = {
+      hotel:  { text: 'PAID AT HOTEL', color: '#16A34A' },
+      driver: { text: 'PAY TO DRIVER', color: '#E8751A' },
+      link:   { text: 'PAID BY GUEST', color: '#16A34A' },
+    };
+    const payBadge = paymentBadgeMap[data?.paymentMethod] || paymentBadgeMap.driver;
+    const paymentBadgeHtml = `
+      <div style="text-align:center;padding:0 32px 20px;">
+        <div style="display:inline-block;border:2px solid ${payBadge.color};color:${payBadge.color};font-weight:800;font-size:13px;letter-spacing:2px;padding:11px 28px;border-radius:6px;">${payBadge.text}</div>
+      </div>`;
+
     const hotelRight = [
       `<div style="font-weight:700;color:#1A1714;margin-bottom:2px;">${escapeHtml(hotelName)}</div>`,
       hotelAddr ? escapeHtml(hotelAddr) + '<br>' : '',
@@ -3650,8 +3662,10 @@ tailwind.config = {
         <table style="width:100%;border-collapse:collapse;">${tableRows.join('')}</table>
       </div>
 
+      ${paymentBadgeHtml}
+
       ${infoBlocks ? `
-      <div style="padding:16px 32px 22px;">
+      <div style="padding:0 32px 22px;">
         <div style="font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#B09B8F;font-weight:700;margin-bottom:16px;">Additional information</div>
         ${infoBlocks}
       </div>` : ''}
