@@ -4360,8 +4360,9 @@
     });
     const headerRowNum = headerRow.number;
 
-    // Only confirmed bookings
-    const rows = (currentSettlement.rows || []).filter(b => (b.status||'').toLowerCase() === 'confirmed');
+    // Confirmed, paid and arrived bookings
+    const ACTIVE_STATUSES = ['confirmed', 'paid', 'arrived'];
+    const rows = (currentSettlement.rows || []).filter(b => ACTIVE_STATUSES.includes((b.status||'').toLowerCase()));
     let totalComm = 0, totalDoOdbioru = 0;
 
     for (const b of rows) {
