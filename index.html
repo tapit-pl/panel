@@ -2059,6 +2059,7 @@ tailwind.config = {
           hasPackage: commConfigIds.has(t.id),
           hiddenSlotIds: (t.hidden_slot_ids || []).map(String),
           emailBlocks: t.email_blocks || [],
+          bokun_force_rate_id: t.bokun_force_rate_id || null,
         };
         if (!t.bokun_id) return base;
         try {
