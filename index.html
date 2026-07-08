@@ -3138,6 +3138,20 @@ tailwind.config = {
       return
     }
 
+    // If the tour has Bokun integration, require a successful Bokun booking
+    const hasBokun = !!tdCurrentTour?.bokunId;
+    const bokunOk = !hasBokun
+      || (payment === 'link' ? !!bokunReservationCode : !!bokunConfirmationCode);
+
+    if (!bokunOk) {
+      errEl.textContent = 'Bokun booking failed — the reservation was not created. Please try again or contact Thousand Miles support.';
+      errEl.classList.remove('hidden');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> Confirm booking';
+      await loadPartnerBookings();
+      return;
+    }
+
     if (payment === 'driver' || payment === 'hotel') {
       fillAndShowVoucher({
         bookingId,
@@ -3164,9 +3178,9 @@ tailwind.config = {
     if (payment === 'link') {
       statusLine = stripeSessionUrl
         ? ` · Payment link sent to ${email}`
-        : (bokunReservationCode ? ` · Bokun reserved #${bokunReservationCode} · Payment link failed` : ' · Payment link pending');
+        : ` · Bokun reserved #${bokunReservationCode} · Payment link failed`;
     } else {
-      statusLine = bokunConfirmationCode ? ` · Bokun #${bokunConfirmationCode}` : ' · Pending confirmation';
+      statusLine = ` · Bokun #${bokunConfirmationCode}`;
     }
     document.getElementById('td-success-msg').textContent =
       `${tour} · ${formatDate(dateStr)} · ${tdGuestCount} guest${tdGuestCount > 1 ? 's' : ''} · ${payLabel}${statusLine}`;
