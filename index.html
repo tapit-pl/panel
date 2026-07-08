@@ -2946,10 +2946,13 @@ tailwind.config = {
             : [];
         };
 
+        // Activity 431283 uses Meeting Point rate (889922) — no custom pickup allowed in Bokun
+        const isMeetingPointTour = parseInt(tdCurrentTour.bokunId) === 431283;
+        const effectiveRateId = isMeetingPointTour ? 889922 : (tdSelectedRate?.id || null);
         const optionsPayload = {
           activityId: parseInt(tdCurrentTour.bokunId),
           startTimeId: tdSelectedTimeSlot.startTimeId,
-          ...(tdSelectedRate?.id ? { rateId: tdSelectedRate.id } : {}),
+          ...(effectiveRateId ? { rateId: effectiveRateId } : {}),
           date: dateStr,
           passengers: buildPassengers(),
         };
@@ -2994,12 +2997,12 @@ tailwind.config = {
             activityBookings: [{
               activityId: parseInt(tdCurrentTour.bokunId),
               startTimeId: tdSelectedTimeSlot.startTimeId,
-              ...(tdSelectedRate?.id ? { rateId: tdSelectedRate.id } : {}),
+              ...(effectiveRateId ? { rateId: effectiveRateId } : {}),
               date: dateStr,
               passengers: buildPassengers(),
               note: bookingNote || undefined,
               answers: [],
-              pickupAnswers: [{ questionId: 'pickupPlaceDescription', values: [pickupDesc] }],
+              pickupAnswers: isMeetingPointTour ? [] : [{ questionId: 'pickupPlaceDescription', values: [pickupDesc] }],
               dropoffAnswers: [],
             }],
           },
