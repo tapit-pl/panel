@@ -4714,13 +4714,13 @@
     // Confirmed, paid and arrived bookings
     const ACTIVE_STATUSES = ['confirmed', 'paid', 'arrived'];
     const rows = (currentSettlement.rows || []).filter(b => ACTIVE_STATUSES.includes((b.status||'').toLowerCase()));
-    let totalComm = 0, totalDoOdbioru = 0;
+    let totalComm = 0, hotelOwesTM = 0, tmOwesHotel = 0;
     let nextRow = headerRowNum + 1;
 
     for (const b of rows) {
       const day = b.date ? new Date(b.date + 'T12:00:00').getDate() : '';
       const pkg = allCommissions.find(c => c.title === b.tour);
-      const pricePerPerson = pkg?.price_pln ?? (b.pax ? Math.round(parseFloat(b.total||0) / b.pax) : 0);
+      const pricePerPerson = pkg?.price_pln ?? '';
       const commPerPerson  = pkg?.commission_pln ?? (b.pax ? Math.round(parseFloat(b.comm||0) / b.pax) : 0);
       const total = parseFloat(b.total || 0);
       const comm  = parseFloat(b.comm  || 0);
@@ -4728,7 +4728,8 @@
       const pmLabel = isHotel ? 'pay at hotel' : b.payment_method === 'driver' ? 'pay at driver' : 'online';
       const doOdbioru = isHotel ? Math.round(total - comm) : 0;
       totalComm += comm;
-      totalDoOdbioru += doOdbioru;
+      if (isHotel) hotelOwesTM += Math.round(total - comm);
+      else tmOwesHotel += Math.round(comm);
 
       // Use letter+row notation to avoid ExcelJS 1-indexed array ambiguity
       const vals = [day, b.tour||'', pricePerPerson, b.pax||'', total, commPerPerson, comm, pmLabel, doOdbioru];
@@ -4746,26 +4747,31 @@
       nextRow++;
     }
 
-    // Empty separator
-    nextRow++;
+    // Settlement summary table
+    nextRow += 2;
+    const netSettlement = hotelOwesTM - tmOwesHotel;
 
-    // Totals row
-    ws.getCell(`G${nextRow}`).value = totalComm;
-    ws.getCell(`G${nextRow}`).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF70AD47' } };
-    ws.getCell(`G${nextRow}`).font = { bold: true, color: { argb: 'FFFFFFFF' } };
-    ws.getCell(`G${nextRow}`).border = border;
-    ws.getCell(`I${nextRow}`).value = totalDoOdbioru;
-    ws.getCell(`I${nextRow}`).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFCC99' } };
-    ws.getCell(`I${nextRow}`).font = { bold: true };
-    ws.getCell(`I${nextRow}`).border = border;
-    nextRow++;
-
-    // ROZLICZENIE row
-    ws.getCell(`A${nextRow}`).value = 'ROZLICZENIE:';
-    ws.mergeCells(`A${nextRow}:I${nextRow}`);
-    ws.getCell(`A${nextRow}`).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFC0CB' } };
-    ws.getCell(`A${nextRow}`).font = { bold: true };
-    ws.getCell(`A${nextRow}`).border = border;
+    const summaryRows = [
+      { label: 'Zarobek hotelu (prowizja):', value: Math.round(totalComm), fill: 'FFE2EFDA', color: 'FF375623' },
+      { label: 'Hotel płaci TM (z recepcji):', value: hotelOwesTM, fill: 'FFDAE3F3', color: 'FF1F3864' },
+      { label: 'TM płaci hotelowi:', value: tmOwesHotel, fill: 'FFFCE4D6', color: 'FF833C00' },
+      { label: netSettlement >= 0 ? 'ROZLICZENIE NETTO (hotel → TM):' : 'ROZLICZENIE NETTO (TM → hotel):', value: Math.abs(netSettlement), fill: netSettlement >= 0 ? 'FF70AD47' : 'FF4472C4', color: 'FFFFFFFF' },
+    ];
+    for (const sr of summaryRows) {
+      ws.getCell(`B${nextRow}`).value = sr.label;
+      ws.getCell(`B${nextRow}`).font = { bold: true };
+      ws.getCell(`B${nextRow}`).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: sr.fill } };
+      ws.getCell(`G${nextRow}`).value = sr.value;
+      ws.getCell(`G${nextRow}`).font = { bold: true, color: { argb: sr.color } };
+      ws.getCell(`G${nextRow}`).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: sr.fill } };
+      ws.getCell(`G${nextRow}`).numFmt = '#,##0 "PLN"';
+      ['B','C','D','E','F','G','H','I'].forEach(c => {
+        const cell = ws.getCell(`${c}${nextRow}`);
+        if (!cell.value) cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: sr.fill } };
+        cell.border = border;
+      });
+      nextRow++;
+    }
 
     // Legend items below the header
     [LEGEND[1], LEGEND[2]].forEach((txt, i) => {
