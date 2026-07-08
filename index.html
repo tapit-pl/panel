@@ -3138,10 +3138,7 @@ tailwind.config = {
       return
     }
 
-    // If the tour has Bokun integration, require a successful Bokun booking
-    const hasBokun = !!tdCurrentTour?.bokunId;
-    const bokunOk = !hasBokun
-      || (payment === 'link' ? !!bokunReservationCode : !!bokunConfirmationCode);
+    const bokunOk = payment === 'link' ? !!bokunReservationCode : !!bokunConfirmationCode;
 
     if (!bokunOk) {
       errEl.textContent = 'Bokun booking failed — the reservation was not created. Please try again or contact Thousand Miles support.';
