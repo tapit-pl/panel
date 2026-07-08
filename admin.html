@@ -4344,7 +4344,7 @@
 
     // Row 7: headers
     const HEADERS = ['Data', 'Pakiet', 'Cena', 'Ilość os.', 'Total cena', 'Prowizja za os.', 'Prowizja total', 'Forma płatności', 'Do odbioru z recepcji'];
-    const LEGEND = ['paid = płatność na recepcji', 'not paid = zapłacone u kierowcy', 'online = płatność online'];
+    const LEGEND = ['pay at hotel = płatność na recepcji', 'pay at driver = zapłacone u kierowcy', 'online = płatność online'];
     const headerRow = ws.addRow([...HEADERS, '', LEGEND[0]]);
     headerRow.height = 28;
     headerRow.eachCell((cell, col) => {
@@ -4360,36 +4360,43 @@
     });
     const headerRowNum = headerRow.number;
 
-    // Data rows
-    const rows = currentSettlement.rows || [];
+    // Only confirmed bookings
+    const rows = (currentSettlement.rows || []).filter(b => (b.status||'').toLowerCase() === 'confirmed');
     let totalComm = 0, totalDoOdbioru = 0;
 
     for (const b of rows) {
-      const cancelled = (b.status||'').toLowerCase() === 'cancelled';
-      const day = b.date ? new Date(b.date + 'T12:00:00').getDate() : '';
+      const day = b.date ? new Date(b.date + 'T12:00:00').getDate() : null;
       const pkg = allCommissions.find(c => c.title === b.tour);
       const pricePerPerson = pkg?.price_pln ?? (b.pax ? Math.round(parseFloat(b.total||0) / b.pax) : 0);
       const commPerPerson  = pkg?.commission_pln ?? (b.pax ? Math.round(parseFloat(b.comm||0) / b.pax) : 0);
       const total = parseFloat(b.total || 0);
       const comm  = parseFloat(b.comm  || 0);
       const isHotel = b.payment_method === 'hotel';
-      const pmLabel = isHotel ? 'paid' : b.payment_method === 'driver' ? 'not paid' : 'online';
+      const pmLabel = isHotel ? 'pay at hotel' : b.payment_method === 'driver' ? 'pay at driver' : 'online';
       const doOdbioru = isHotel ? Math.round(total - comm) : 0;
-      if (!cancelled) { totalComm += comm; totalDoOdbioru += doOdbioru; }
+      totalComm += comm;
+      totalDoOdbioru += doOdbioru;
 
-      const dr = ws.addRow([day, b.tour, pricePerPerson, b.pax, total, commPerPerson, comm, pmLabel, doOdbioru]);
-      dr.eachCell((cell, col) => {
-        if (col <= 9) {
-          cell.border = border;
-          if (cancelled) cell.font = { color: { argb: 'FFAAAAAA' }, strike: true };
-        }
-      });
+      // Use explicit cell assignment to avoid column-shift issues
+      const dr = ws.getRow(ws.rowCount + 1);
+      dr.getCell(1).value = day;
+      dr.getCell(2).value = b.tour || '';
+      dr.getCell(3).value = pricePerPerson;
+      dr.getCell(4).value = b.pax || null;
+      dr.getCell(5).value = total;
+      dr.getCell(6).value = commPerPerson;
+      dr.getCell(7).value = comm;
+      dr.getCell(8).value = pmLabel;
+      dr.getCell(9).value = doOdbioru;
+      dr.commit();
+      for (let col = 1; col <= 9; col++) dr.getCell(col).border = border;
     }
 
     // Pad to at least 10 data rows for readability
     for (let i = rows.length; i < 10; i++) {
-      const pr = ws.addRow(['', '', '', '', '', '', '', '', '']);
-      pr.eachCell((cell, col) => { if (col <= 9) cell.border = border; });
+      const pr = ws.getRow(ws.rowCount + 1);
+      pr.commit();
+      for (let col = 1; col <= 9; col++) pr.getCell(col).border = border;
     }
 
     // Empty separator
