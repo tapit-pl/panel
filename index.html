@@ -1165,12 +1165,7 @@ tailwind.config = {
               </div>
             </div>
           </div>
-          <div class="mt-3">
-            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Nationality <span class="text-red-400">*</span></label>
-            <select id="td-nationality" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand bg-white">
-              <option value="">— select —</option>
-            </select>
-          </div>
+          <input type="hidden" id="td-nationality" value="GB">
         </div>
 
         <!-- Additional guests — rendered dynamically -->
@@ -2640,7 +2635,7 @@ tailwind.config = {
     document.getElementById('td-email').value = '';
     document.getElementById('td-phone-number').value = '';
     document.getElementById('td-phone-prefix').value = '+48';
-    document.getElementById('td-nationality').value = '';
+
     document.getElementById('td-notes').value = '';
     renderAdditionalGuestFields(tdGuestCount);
     selectTdPayment('driver');
@@ -2871,11 +2866,6 @@ tailwind.config = {
     }
     if (!phone) {
       errEl.textContent = 'Guest phone number is required by the booking system.';
-      errEl.classList.remove('hidden');
-      return;
-    }
-    if (!nationality) {
-      errEl.textContent = 'Please select guest nationality.';
       errEl.classList.remove('hidden');
       return;
     }
@@ -3781,14 +3771,6 @@ tailwind.config = {
 
 
   const origSetTab = window.setTab;
-  document.addEventListener('DOMContentLoaded', () => {
-    const natSel = document.getElementById('td-nationality');
-    if (natSel) {
-      const sorted = [...PHONE_PREFIXES].sort((a, b) => a.n.localeCompare(b.n));
-      natSel.innerHTML = '<option value="">— select —</option>' +
-        sorted.map(p => `<option value="${p.c}">${p.n}</option>`).join('');
-    }
-  });
 
   document.addEventListener('DOMContentLoaded', () => {
     const tabBtns = document.querySelectorAll('.tab-btn');
