@@ -5234,7 +5234,10 @@ function renderSellerOrders() {
       <td class="px-4 py-3 text-right font-mono font-semibold text-dark text-xs">${b.total ? fmtPln(b.total) : '—'}</td>
       <td class="px-4 py-3 text-center">${statusBadge(b.status)}</td>
       <td class="px-4 py-3 text-right">
-        ${b.stripe_session_url ? `<a href="${b.stripe_session_url}" target="_blank" class="text-xs px-2 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 text-brand transition-colors" title="Open payment link"><i class="fa-solid fa-link text-xs"></i></a>` : ''}
+        <div class="flex items-center justify-end gap-1.5">
+          ${b.stripe_session_url ? `<a href="${b.stripe_session_url}" target="_blank" class="text-xs px-2 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 text-brand transition-colors" title="Open payment link"><i class="fa-solid fa-link text-xs"></i></a>` : ''}
+          <button onclick="deleteSellerOrder('${b.id}', '${(b.guest || '').replace(/'/g, "\\'")}')" class="text-xs px-2 py-1.5 border border-red-100 rounded-lg hover:bg-red-50 text-red-400 hover:text-red-600 transition-colors" title="Delete order"><i class="fa-solid fa-trash text-xs"></i></button>
+        </div>
       </td>
     </tr>
   `).join('');
@@ -5249,6 +5252,13 @@ async function loadSellerOrders() {
   if (error) { console.error('loadSellerOrders:', error); return; }
   sellerOrdersData = data || [];
   renderSellerOrders();
+}
+
+async function deleteSellerOrder(id, guestName) {
+  if (!confirm(`Delete order for "${guestName || 'this guest'}"? This cannot be undone.`)) return;
+  const { error } = await db.from('bookings').delete().eq('id', id);
+  if (error) { alert('Error: ' + error.message); return; }
+  await loadSellerOrders();
 }
 
 async function loadSellerPanel() {
