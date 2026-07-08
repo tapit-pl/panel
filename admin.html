@@ -607,7 +607,7 @@
             <div class="lg:col-span-2">
               <div class="bg-white rounded-2xl shadow-sm p-6 mb-4">
                 <div class="text-sm font-semibold text-dark mb-4">Select partner & period</div>
-                <div class="grid grid-cols-2 gap-4 mb-5">
+                <div class="grid grid-cols-2 gap-4 mb-4">
                   <div>
                     <label class="block text-xs text-gray-500 mb-1.5">Partner</label>
                     <select id="settle-hotel" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-dark">
@@ -615,13 +615,32 @@
                     </select>
                   </div>
                   <div>
-                    <label class="block text-xs text-gray-500 mb-1.5">Month</label>
-                    <select id="settle-month" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-dark">
-                      <option value="2026-04" selected>April 2026</option>
-                      <option value="2026-03">March 2026</option>
-                      <option value="2026-02">February 2026</option>
-                      <option value="2026-01">January 2026</option>
-                    </select>
+                    <label class="block text-xs text-gray-500 mb-1.5">Period type</label>
+                    <div class="flex rounded-xl overflow-hidden border border-gray-200 text-xs font-semibold" style="height:42px">
+                      <button id="settle-btn-month" onclick="setSettleMode('month')" class="flex-1 bg-brand text-white transition-colors">By month</button>
+                      <button id="settle-btn-range" onclick="setSettleMode('range')" class="flex-1 text-gray-500 hover:bg-gray-50 transition-colors">Custom range</button>
+                    </div>
+                  </div>
+                </div>
+                <div id="settle-month-row" class="mb-5">
+                  <label class="block text-xs text-gray-500 mb-1.5">Month</label>
+                  <select id="settle-month" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-dark">
+                    <option value="2026-04" selected>April 2026</option>
+                    <option value="2026-03">March 2026</option>
+                    <option value="2026-02">February 2026</option>
+                    <option value="2026-01">January 2026</option>
+                  </select>
+                </div>
+                <div id="settle-range-row" class="hidden mb-5">
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-xs text-gray-500 mb-1.5">From</label>
+                      <input type="date" id="settle-date-from" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-dark">
+                    </div>
+                    <div>
+                      <label class="block text-xs text-gray-500 mb-1.5">To</label>
+                      <input type="date" id="settle-date-to" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-dark">
+                    </div>
                   </div>
                 </div>
                 <button onclick="calculateSettlement()" class="w-full bg-brand hover:bg-brand-dark text-white font-semibold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
@@ -3948,7 +3967,7 @@
     const hotelFilter = document.getElementById('booking-filter-hotel');
     if (hotelFilter) hotelFilter.innerHTML = `<option value="">All partners</option>${partnerOpts}<option value="none">No partner (direct)</option>`;
     const settleHotel = document.getElementById('settle-hotel');
-    if (settleHotel) settleHotel.innerHTML = `<option value="">— select partner —</option>${partnerOpts}`;
+    if (settleHotel) settleHotel.innerHTML = `<option value="">— select partner —</option><option value="all">All partners</option>${partnerOpts}`;
     const notifTarget = document.getElementById('notif-target');
     if (notifTarget) notifTarget.innerHTML = `<option value="all">All partners</option>${partnerOpts}`;
     const manualPartner = document.getElementById('manual-booking-partner');
@@ -4367,6 +4386,34 @@
     setTimeout(() => t.remove(), 3500);
   }
 
+  let settleMode = 'month';
+
+  function setSettleMode(mode) {
+    settleMode = mode;
+    const monthRow = document.getElementById('settle-month-row');
+    const rangeRow = document.getElementById('settle-range-row');
+    const btnMonth = document.getElementById('settle-btn-month');
+    const btnRange = document.getElementById('settle-btn-range');
+    if (mode === 'month') {
+      monthRow.classList.remove('hidden');
+      rangeRow.classList.add('hidden');
+      btnMonth.className = 'flex-1 bg-brand text-white transition-colors';
+      btnRange.className = 'flex-1 text-gray-500 hover:bg-gray-50 transition-colors';
+    } else {
+      monthRow.classList.add('hidden');
+      rangeRow.classList.remove('hidden');
+      btnMonth.className = 'flex-1 text-gray-500 hover:bg-gray-50 transition-colors';
+      btnRange.className = 'flex-1 bg-brand text-white transition-colors';
+      const toField = document.getElementById('settle-date-to');
+      const fromField = document.getElementById('settle-date-from');
+      if (!toField.value) toField.value = new Date().toISOString().slice(0,10);
+      if (!fromField.value) {
+        const d = new Date(); d.setMonth(d.getMonth() - 1);
+        fromField.value = d.toISOString().slice(0,10);
+      }
+    }
+  }
+
   // Populate month dropdown with last 18 months
   function initSettleMonthDropdown() {
     const sel = document.getElementById('settle-month');
@@ -4385,25 +4432,54 @@
 
   async function calculateSettlement() {
     const partnerId = document.getElementById('settle-hotel').value;
-    const period    = document.getElementById('settle-month').value;
     if (!partnerId) { alert('Please select a partner first.'); return; }
 
-    const partner = allPartners.find(p => p.id === partnerId);
-    const [yr, mo] = period.split('-').map(Number);
-    const from = `${yr}-${String(mo).padStart(2,'0')}-01`;
-    const lastDay = new Date(yr, mo, 0).getDate();
-    const to = `${yr}-${String(mo).padStart(2,'0')}-${lastDay}`;
-    const periodLabel = new Date(yr, mo-1).toLocaleDateString('en', { month: 'long', year: 'numeric' });
+    const isAllPartners = partnerId === 'all';
+    const isMonthMode = settleMode === 'month';
 
-    const { data: bookings } = await db.from('bookings')
-      .select('*')
-      .eq('partner_id', partnerId)
-      .gte('date', from).lte('date', to)
-      .order('date');
+    let from, to, periodLabel, period;
+    if (isMonthMode) {
+      period = document.getElementById('settle-month').value;
+      const [yr, mo] = period.split('-').map(Number);
+      from = `${yr}-${String(mo).padStart(2,'0')}-01`;
+      const lastDay = new Date(yr, mo, 0).getDate();
+      to = `${yr}-${String(mo).padStart(2,'0')}-${lastDay}`;
+      periodLabel = new Date(yr, mo-1).toLocaleDateString('en', { month: 'long', year: 'numeric' });
+    } else {
+      from = document.getElementById('settle-date-from').value;
+      to = document.getElementById('settle-date-to').value;
+      if (!from || !to) { alert('Please select a date range.'); return; }
+      if (from > to) { alert('"From" date must be before "To" date.'); return; }
+      const fmtDate = d => new Date(d+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+      periodLabel = `${fmtDate(from)} – ${fmtDate(to)}`;
+    }
 
-    const { data: history } = await db.from('settlements')
-      .select('*').eq('partner_id', partnerId)
-      .order('created_at', { ascending: false });
+    const partner = isAllPartners ? null : allPartners.find(p => p.id === partnerId);
+
+    // Mark as settled: only available for specific partner + month mode
+    const canSettle = !isAllPartners && isMonthMode;
+    const btnSettle = document.getElementById('btn-mark-settled');
+    if (btnSettle) btnSettle.classList.toggle('hidden', !canSettle);
+
+    // Query bookings
+    let query = db.from('bookings').select('*').gte('date', from).lte('date', to).order('date');
+    if (isAllPartners) {
+      query = query.not('partner_id', 'is', null);
+    } else {
+      query = query.eq('partner_id', partnerId);
+    }
+    const { data: bookings } = await query;
+
+    // Settlement history only for specific partner + month mode
+    let history = [];
+    let settledAmount = 0;
+    if (!isAllPartners && isMonthMode) {
+      const { data: hist } = await db.from('settlements')
+        .select('*').eq('partner_id', partnerId)
+        .order('created_at', { ascending: false });
+      history = hist || [];
+      settledAmount = history.filter(s => s.period === period).reduce((s, r) => s + parseFloat(r.amount||0), 0);
+    }
 
     const rows = bookings || [];
     const confirmedRows = rows.filter(b => (b.status||'').toLowerCase() === 'confirmed');
@@ -4416,25 +4492,41 @@
       if (b.payment_method === 'hotel') hotelOwesTM += total - comm;
       else tmOwesHotel += comm;
     }
-    const netToSettle = hotelOwesTM - tmOwesHotel; // positive = hotel pays TM, negative = TM pays hotel
-
-    const settledAmount = (history||[]).filter(s => s.period === period).reduce((s, r) => s + parseFloat(r.amount||0), 0);
+    const netToSettle = hotelOwesTM - tmOwesHotel;
     const toSettle = netToSettle - settledAmount;
-    const alreadySettled = Math.abs(toSettle) < 0.01;
+    const alreadySettled = canSettle && Math.abs(toSettle) < 0.01;
 
-    currentSettlement = { partnerId, partnerName: partner?.name||'', partnerAddress: partner?.address||'', period, periodLabel, total: toSettle, rows };
+    currentSettlement = {
+      partnerId: isAllPartners ? null : partnerId,
+      partnerName: isAllPartners ? 'All partners' : (partner?.name||''),
+      partnerAddress: partner?.address||'',
+      period: isMonthMode ? period : null,
+      periodLabel,
+      total: toSettle,
+      rows
+    };
 
-    document.getElementById('btn-mark-settled').disabled = alreadySettled;
-    document.getElementById('btn-mark-settled').innerHTML = alreadySettled
-      ? '<i class="fa-solid fa-check"></i>Already settled'
-      : '<i class="fa-solid fa-check"></i>Mark as settled';
+    if (btnSettle && canSettle) {
+      btnSettle.disabled = alreadySettled;
+      btnSettle.innerHTML = alreadySettled
+        ? '<i class="fa-solid fa-check"></i>Already settled'
+        : '<i class="fa-solid fa-check"></i>Mark as settled';
+    }
 
-    document.getElementById('settlement-result-title').textContent = `${partner?.name||''} · ${periodLabel}`;
+    const titleName = isAllPartners ? 'All partners' : (partner?.name||'');
+    document.getElementById('settlement-result-title').textContent = `${titleName} · ${periodLabel}`;
+
     const direction = toSettle > 0 ? 'Hotel pays TM' : toSettle < 0 ? 'TM pays hotel' : 'Settled';
-    const subtitle = settledAmount !== 0
-      ? `${confirmedRows.length} booking${confirmedRows.length!==1?'s':''} · ${Math.abs(settledAmount)} pln already settled`
-      : `${confirmedRows.length} booking${confirmedRows.length!==1?'s':''} · ${direction}`;
+    let subtitle;
+    if (isAllPartners) {
+      subtitle = `${confirmedRows.length} confirmed booking${confirmedRows.length!==1?'s':''} · ${rows.length} total`;
+    } else if (settledAmount !== 0) {
+      subtitle = `${confirmedRows.length} booking${confirmedRows.length!==1?'s':''} · ${Math.abs(settledAmount)} pln already settled`;
+    } else {
+      subtitle = `${confirmedRows.length} booking${confirmedRows.length!==1?'s':''} · ${direction}`;
+    }
     document.getElementById('settlement-result-subtitle').textContent = subtitle;
+
     const totalEl = document.getElementById('settlement-total');
     const dirEl = document.getElementById('settlement-direction');
     const absAmt = Math.abs(toSettle);
@@ -4449,10 +4541,38 @@
       dirEl.textContent = 'TM → Hotel';
       dirEl.className = 'ml-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400';
     } else {
-      totalEl.textContent = '0 pln';
+      totalEl.textContent = isAllPartners ? '—' : '0 pln';
       totalEl.className = 'px-5 py-3.5 text-right font-bold text-lg text-gray-400';
-      dirEl.textContent = 'Settled';
+      dirEl.textContent = isAllPartners ? '' : 'Settled';
       dirEl.className = 'ml-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-500/20 text-gray-400';
+    }
+
+    // Update table header (Partner column only in all-partners mode)
+    const theadRow = document.querySelector('#settlement-result thead tr');
+    if (theadRow) {
+      if (isAllPartners) {
+        theadRow.innerHTML = `
+          <th class="text-left px-5 py-3 text-gray-400 font-semibold">Tour</th>
+          <th class="text-left px-4 py-3 text-gray-400 font-semibold">Partner</th>
+          <th class="text-left px-4 py-3 text-gray-400 font-semibold">Guest</th>
+          <th class="text-left px-4 py-3 text-gray-400 font-semibold">Date</th>
+          <th class="text-center px-4 py-3 text-gray-400 font-semibold">Pax</th>
+          <th class="text-right px-4 py-3 text-gray-400 font-semibold">Total</th>
+          <th class="text-right px-5 py-3 text-gray-400 font-semibold">Settlement</th>
+          <th class="text-left px-4 py-3 text-gray-400 font-semibold">Payment</th>
+          <th class="text-left px-4 py-3 text-gray-400 font-semibold">Status</th>`;
+      } else {
+        theadRow.innerHTML = `
+          <th class="text-left px-5 py-3 text-gray-400 font-semibold">Tour</th>
+          <th class="text-left px-4 py-3 text-gray-400 font-semibold">Guest</th>
+          <th class="text-left px-4 py-3 text-gray-400 font-semibold">Staff</th>
+          <th class="text-left px-4 py-3 text-gray-400 font-semibold">Date</th>
+          <th class="text-center px-4 py-3 text-gray-400 font-semibold">Pax</th>
+          <th class="text-right px-4 py-3 text-gray-400 font-semibold">Total</th>
+          <th class="text-right px-5 py-3 text-gray-400 font-semibold">Settlement</th>
+          <th class="text-left px-4 py-3 text-gray-400 font-semibold">Payment</th>
+          <th class="text-left px-4 py-3 text-gray-400 font-semibold">Status</th>`;
+      }
     }
 
     const tbody = document.getElementById('settlement-tbody');
@@ -4461,7 +4581,6 @@
       : rows.map(b => {
           const cancelled = (b.status||'').toLowerCase() === 'cancelled';
           const dateStr = b.date ? new Date(b.date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : '—';
-          const staffName = '—';
           const total = parseFloat(b.total||0), comm = parseFloat(b.comm||0);
           const isHotel = b.payment_method === 'hotel';
           const settlementAmt = isHotel ? (total - comm) : comm;
@@ -4469,38 +4588,57 @@
           const commCell = cancelled
             ? `<td class="px-5 py-3 text-right font-bold text-gray-300 line-through">${settlementAmt||'—'} pln</td>`
             : `<td class="px-5 py-3 text-right font-bold text-dark">${settlementAmt||'—'} pln</td>`;
-          return `<tr class="hover:bg-gray-50${cancelled?' opacity-50':''}">
-            <td class="px-5 py-3 font-medium text-dark text-xs">${b.tour||'—'}</td>
-            <td class="px-4 py-3 text-gray-600">${b.guest||'—'}</td>
-            <td class="px-4 py-3 text-gray-500">${staffName}</td>
-            <td class="px-4 py-3 text-gray-500 whitespace-nowrap">${dateStr}</td>
-            <td class="px-4 py-3 text-center text-dark">${b.pax||'—'}</td>
-            <td class="px-4 py-3 text-right text-gray-600">${b.total ? b.total+' pln' : '—'}</td>
-            ${commCell}
-            <td class="px-4 py-3 text-xs text-gray-400">${pmLabel}</td>
-            <td class="px-4 py-3">${statusBadge(b.status)}</td>
-          </tr>`;
+          if (isAllPartners) {
+            const partnerName = allPartners.find(p => p.id === b.partner_id)?.name || '—';
+            return `<tr class="hover:bg-gray-50${cancelled?' opacity-50':''}">
+              <td class="px-5 py-3 font-medium text-dark text-xs">${b.tour||'—'}</td>
+              <td class="px-4 py-3 text-gray-500 text-xs">${partnerName}</td>
+              <td class="px-4 py-3 text-gray-600">${b.guest||'—'}</td>
+              <td class="px-4 py-3 text-gray-500 whitespace-nowrap">${dateStr}</td>
+              <td class="px-4 py-3 text-center text-dark">${b.pax||'—'}</td>
+              <td class="px-4 py-3 text-right text-gray-600">${b.total ? b.total+' pln' : '—'}</td>
+              ${commCell}
+              <td class="px-4 py-3 text-xs text-gray-400">${pmLabel}</td>
+              <td class="px-4 py-3">${statusBadge(b.status)}</td>
+            </tr>`;
+          } else {
+            return `<tr class="hover:bg-gray-50${cancelled?' opacity-50':''}">
+              <td class="px-5 py-3 font-medium text-dark text-xs">${b.tour||'—'}</td>
+              <td class="px-4 py-3 text-gray-600">${b.guest||'—'}</td>
+              <td class="px-4 py-3 text-gray-500">—</td>
+              <td class="px-4 py-3 text-gray-500 whitespace-nowrap">${dateStr}</td>
+              <td class="px-4 py-3 text-center text-dark">${b.pax||'—'}</td>
+              <td class="px-4 py-3 text-right text-gray-600">${b.total ? b.total+' pln' : '—'}</td>
+              ${commCell}
+              <td class="px-4 py-3 text-xs text-gray-400">${pmLabel}</td>
+              <td class="px-4 py-3">${statusBadge(b.status)}</td>
+            </tr>`;
+          }
         }).join('');
 
     // Settlement history sidebar
     const histList = document.getElementById('settlement-history-list');
     if (histList) {
-      histList.innerHTML = (history||[]).length === 0
-        ? '<p class="text-xs text-gray-400 text-center py-4">No settlements yet.</p>'
-        : (history||[]).map(s => {
-            const d = s.settled_date ? new Date(s.settled_date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—';
-            const p = s.period ? new Date(s.period+'-01').toLocaleDateString('en',{month:'long',year:'numeric'}) : s.period;
-            return `<div class="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
-              <div>
-                <div class="text-xs font-semibold text-dark">${p}</div>
-                <div class="text-xs text-gray-400">${d}</div>
-              </div>
-              <div class="flex items-center gap-2">
-                <div class="text-sm font-bold text-brand">${s.amount||0} pln</div>
-                <button onclick="deleteSettlement('${s.id}')" title="Delete" class="w-5 h-5 flex items-center justify-center rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"><i class="fa-solid fa-trash text-xs"></i></button>
-              </div>
-            </div>`;
-          }).join('');
+      if (isAllPartners || !isMonthMode) {
+        histList.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">Settlement history is available for specific partner · monthly view only.</p>';
+      } else {
+        histList.innerHTML = history.length === 0
+          ? '<p class="text-xs text-gray-400 text-center py-4">No settlements yet.</p>'
+          : history.map(s => {
+              const d = s.settled_date ? new Date(s.settled_date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—';
+              const p = s.period ? new Date(s.period+'-01').toLocaleDateString('en',{month:'long',year:'numeric'}) : s.period;
+              return `<div class="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
+                <div>
+                  <div class="text-xs font-semibold text-dark">${p}</div>
+                  <div class="text-xs text-gray-400">${d}</div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <div class="text-sm font-bold text-brand">${s.amount||0} pln</div>
+                  <button onclick="deleteSettlement('${s.id}')" title="Delete" class="w-5 h-5 flex items-center justify-center rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"><i class="fa-solid fa-trash text-xs"></i></button>
+                </div>
+              </div>`;
+            }).join('');
+      }
     }
 
     document.getElementById('settlement-empty').classList.add('hidden');
@@ -4642,7 +4780,7 @@
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `rozliczenie_${(currentSettlement.partnerName||'partner').replace(/\s+/g,'_')}_${currentSettlement.period}.xlsx`;
+    a.download = `rozliczenie_${(currentSettlement.partnerName||'partner').replace(/\s+/g,'_')}_${(currentSettlement.period||currentSettlement.periodLabel).replace(/[^a-zA-Z0-9]/g,'_')}.xlsx`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
