@@ -4,7 +4,7 @@ const CORS = { 'Access-Control-Allow-Origin': 'https://panel.thousandmiles.pl', 
 
 function voucherHtml(p: {
   booking_id: string, bokun_booking_id?: number | string | null, tour_name: string, date: string, time?: string | null,
-  guest_name?: string | null, extra_guests?: string[] | null, guest_email?: string | null, phone?: string | null,
+  guest_name?: string | null, guest_email?: string | null, phone?: string | null,
   pax: number, total?: number | null, pickup?: string | null,
   email_blocks?: Array<{name: string, info: string}> | null,
   badge: string, badge_color: string,
@@ -37,7 +37,7 @@ function voucherHtml(p: {
         <tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold;width:45%">Offer name:</td><td style="padding:8px 4px">${p.tour_name}</td></tr>
         <tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold">Number of participants:</td><td style="padding:8px 4px">${p.pax}</td></tr>
         ${p.total ? `<tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold">Price:</td><td style="padding:8px 4px">${p.total} PLN</td></tr>` : ''}
-        ${p.guest_name ? `<tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold">Participants:</td><td style="padding:8px 4px">${[p.guest_name, ...(p.extra_guests || [])].join('<br>')}</td></tr>` : ''}
+        ${p.guest_name ? `<tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold">Participants:</td><td style="padding:8px 4px">${p.guest_name}</td></tr>` : ''}
         ${p.phone ? `<tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold">Contact number:</td><td style="padding:8px 4px">${p.phone}</td></tr>` : ''}
         ${p.guest_email ? `<tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold">Email:</td><td style="padding:8px 4px">${p.guest_email}</td></tr>` : ''}
         <tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold">Selected date:</td><td style="padding:8px 4px">${p.date}</td></tr>
@@ -59,7 +59,7 @@ function voucherHtml(p: {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
 
-  const { booking_id, bokun_booking_id, bokun_confirmation_code, tour_name, date, time, guest_name, extra_guests, guest_email, phone, pax, total, pickup, payment_type, email_blocks } = await req.json()
+  const { booking_id, bokun_booking_id, bokun_confirmation_code, tour_name, date, time, guest_name, guest_email, phone, pax, total, pickup, payment_type, email_blocks } = await req.json()
 
   if (!guest_email) {
     return new Response(JSON.stringify({ error: 'guest_email required' }), { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } })
@@ -72,13 +72,12 @@ Deno.serve(async (req) => {
   }
 
   const isHotel = payment_type === 'hotel'
-  const isLink  = payment_type === 'link'
-  const badge = isHotel ? 'PAID AT HOTEL' : isLink ? 'PAID BY GUEST' : 'PAY TO DRIVER'
-  const badge_color = (isHotel || isLink) ? '#16A34A' : '#E8751A'
-  const subject = (isHotel || isLink) ? `Booking confirmed: ${tour_name}` : `Tour booking: ${tour_name}`
+  const badge = isHotel ? 'PAID AT HOTEL' : 'PAY TO DRIVER'
+  const badge_color = isHotel ? '#16A34A' : '#E8751A'
+  const subject = isHotel ? `Booking confirmed: ${tour_name}` : `Tour booking: ${tour_name}`
 
   const html = voucherHtml({
-    booking_id, bokun_booking_id: resolvedBokunId as number | null, tour_name, date, time, guest_name, extra_guests: extra_guests || null, guest_email, phone,
+    booking_id, bokun_booking_id: resolvedBokunId as number | null, tour_name, date, time, guest_name, guest_email, phone,
     pax: pax ?? 1, total, pickup, email_blocks: email_blocks || null, badge, badge_color,
   })
 
