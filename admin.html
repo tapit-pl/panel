@@ -4359,14 +4359,16 @@
       }
     });
     const headerRowNum = headerRow.number;
+    const COLS = ['A','B','C','D','E','F','G','H','I'];
 
     // Confirmed, paid and arrived bookings
     const ACTIVE_STATUSES = ['confirmed', 'paid', 'arrived'];
     const rows = (currentSettlement.rows || []).filter(b => ACTIVE_STATUSES.includes((b.status||'').toLowerCase()));
     let totalComm = 0, totalDoOdbioru = 0;
+    let nextRow = headerRowNum + 1;
 
     for (const b of rows) {
-      const day = b.date ? new Date(b.date + 'T12:00:00').getDate() : null;
+      const day = b.date ? new Date(b.date + 'T12:00:00').getDate() : '';
       const pkg = allCommissions.find(c => c.title === b.tour);
       const pricePerPerson = pkg?.price_pln ?? (b.pax ? Math.round(parseFloat(b.total||0) / b.pax) : 0);
       const commPerPerson  = pkg?.commission_pln ?? (b.pax ? Math.round(parseFloat(b.comm||0) / b.pax) : 0);
@@ -4378,55 +4380,48 @@
       totalComm += comm;
       totalDoOdbioru += doOdbioru;
 
-      // Use explicit cell assignment to avoid column-shift issues
-      const dr = ws.getRow(ws.rowCount + 1);
-      dr.getCell(1).value = day;
-      dr.getCell(2).value = b.tour || '';
-      dr.getCell(3).value = pricePerPerson;
-      dr.getCell(4).value = b.pax || null;
-      dr.getCell(5).value = total;
-      dr.getCell(6).value = commPerPerson;
-      dr.getCell(7).value = comm;
-      dr.getCell(8).value = pmLabel;
-      dr.getCell(9).value = doOdbioru;
-      dr.commit();
-      for (let col = 1; col <= 9; col++) dr.getCell(col).border = border;
+      // Use letter+row notation to avoid ExcelJS 1-indexed array ambiguity
+      const vals = [day, b.tour||'', pricePerPerson, b.pax||'', total, commPerPerson, comm, pmLabel, doOdbioru];
+      COLS.forEach((col, i) => {
+        const cell = ws.getCell(`${col}${nextRow}`);
+        cell.value = vals[i];
+        cell.border = border;
+      });
+      nextRow++;
     }
 
-    // Pad to at least 10 data rows for readability
+    // Pad to at least 10 data rows
     for (let i = rows.length; i < 10; i++) {
-      const pr = ws.getRow(ws.rowCount + 1);
-      pr.commit();
-      for (let col = 1; col <= 9; col++) pr.getCell(col).border = border;
+      COLS.forEach(col => { ws.getCell(`${col}${nextRow}`).border = border; });
+      nextRow++;
     }
 
     // Empty separator
-    ws.addRow([]);
+    nextRow++;
 
     // Totals row
-    const totalsRow = ws.addRow(['', '', '', '', '', '', totalComm, '', totalDoOdbioru]);
-    const commCell = totalsRow.getCell(7);
-    commCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF70AD47' } };
-    commCell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-    commCell.border = border;
-    const odbioruCell = totalsRow.getCell(9);
-    odbioruCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFCC99' } };
-    odbioruCell.font = { bold: true };
-    odbioruCell.border = border;
+    ws.getCell(`G${nextRow}`).value = totalComm;
+    ws.getCell(`G${nextRow}`).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF70AD47' } };
+    ws.getCell(`G${nextRow}`).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    ws.getCell(`G${nextRow}`).border = border;
+    ws.getCell(`I${nextRow}`).value = totalDoOdbioru;
+    ws.getCell(`I${nextRow}`).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFCC99' } };
+    ws.getCell(`I${nextRow}`).font = { bold: true };
+    ws.getCell(`I${nextRow}`).border = border;
+    nextRow++;
 
     // ROZLICZENIE row
-    const rzRow = ws.addRow(['ROZLICZENIE:']);
-    ws.mergeCells(`A${rzRow.number}:I${rzRow.number}`);
-    rzRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFC0CB' } };
-    rzRow.getCell(1).font = { bold: true };
-    rzRow.getCell(1).border = border;
+    ws.getCell(`A${nextRow}`).value = 'ROZLICZENIE:';
+    ws.mergeCells(`A${nextRow}:I${nextRow}`);
+    ws.getCell(`A${nextRow}`).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFC0CB' } };
+    ws.getCell(`A${nextRow}`).font = { bold: true };
+    ws.getCell(`A${nextRow}`).border = border;
 
-    // Add remaining legend items at rows header+1 and header+2
+    // Legend items below the header
     [LEGEND[1], LEGEND[2]].forEach((txt, i) => {
-      const r = ws.getRow(headerRowNum + 1 + i);
-      const c = r.getCell(11);
-      c.value = txt;
-      c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFF99' } };
+      const cell = ws.getCell(`K${headerRowNum + 1 + i}`);
+      cell.value = txt;
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFF99' } };
     });
 
     // Download
