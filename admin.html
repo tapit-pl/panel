@@ -3600,7 +3600,7 @@
             ${b.notes ? `<span title="${(b.notes||'').replace(/"/g,'&quot;')}" class="text-amber-400 cursor-default ml-1"><i class="fa-solid fa-note-sticky text-xs"></i></span>` : ''}
             ${b._dbBooking ? `<button onclick="openVoucher('${b.id}')" title="View voucher" class="text-gray-300 hover:text-brand transition-colors ml-1"><i class="fa-solid fa-file-pdf text-xs"></i></button>` : ''}
             ${b._dbBooking ? `<button onclick="openContactEdit('${b.id}')" title="Edit guest details" class="text-gray-300 hover:text-brand transition-colors ml-2"><i class="fa-solid fa-pen text-xs"></i></button>` : ''}
-            ${(b._dbBooking || b._bokun) && (b.status||'').toLowerCase() !== 'cancelled' ? `<button onclick="cancelBooking('${b.id}', '${(b.guest||'').replace(/'/g,"\\'")}', ${!!b._stripeSessionId}, ${!!b._dbBooking})" title="Cancel booking" class="text-gray-300 hover:text-red-500 transition-colors ml-2"><i class="fa-solid fa-xmark text-xs"></i></button>` : ''}
+            ${b._dbBooking && (b.status||'').toLowerCase() !== 'cancelled' ? `<button onclick="cancelBooking('${b.id}', '${(b.guest||'').replace(/'/g,"\\'")}', ${!!b._stripeSessionId}, true)" title="Cancel booking" class="text-gray-300 hover:text-red-500 transition-colors ml-2"><i class="fa-solid fa-xmark text-xs"></i></button>` : ''}
           </td>
         </tr>`);
     });
