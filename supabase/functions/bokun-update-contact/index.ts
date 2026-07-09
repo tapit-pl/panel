@@ -45,28 +45,35 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ error: 'bookingId required' }), { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } })
   }
 
-  // Step 1: GET full booking
-  const { status: getStatus, data: booking } = await bokunFetch('GET', `/booking.json/${bookingId}`)
-  console.log('[bokun-update-contact] GET /booking.json/' + bookingId + ' →', getStatus)
+  // Step 1: find the full booking via search (GET /booking.json/{id} doesn't exist in Bokun API)
+  const { status: searchStatus, data: searchData } = await bokunFetch('POST', '/booking.json/booking-search', {
+    bookingIdList: [bookingId],
+    pageSize: 1,
+    page: 0,
+  })
+  console.log('[bokun-update-contact] search status:', searchStatus, JSON.stringify(searchData).slice(0, 300))
 
-  if (getStatus !== 200 || typeof booking !== 'object' || booking === null) {
-    return new Response(JSON.stringify({ error: 'Failed to fetch booking from Bokun', getStatus, booking }), {
-      status: 502, headers: { ...CORS, 'Content-Type': 'application/json' },
+  const items = (searchData as Record<string, unknown>)?.items
+  const booking = Array.isArray(items) && items.length > 0 ? items[0] : null
+
+  if (!booking) {
+    return new Response(JSON.stringify({ error: 'Booking not found via search', searchStatus, searchData }), {
+      status: 404, headers: { ...CORS, 'Content-Type': 'application/json' },
     })
   }
 
-  // Step 2: Patch customer fields
+  // Step 2: patch customer fields on the retrieved object
   const bk = booking as Record<string, unknown>
   const customer = (bk.customer && typeof bk.customer === 'object' ? { ...(bk.customer as object) } : {}) as Record<string, unknown>
-  if (firstName !== undefined) customer.firstName   = firstName
-  if (lastName  !== undefined) customer.lastName    = lastName
-  if (email     !== undefined) customer.email       = email
+  if (firstName   !== undefined) customer.firstName   = firstName
+  if (lastName    !== undefined) customer.lastName    = lastName
+  if (email       !== undefined) customer.email       = email
   if (phoneNumber !== undefined) customer.phoneNumber = phoneNumber
   bk.customer = customer
 
   // Step 3: PUT booking back
   const { status: putStatus, data: putData } = await bokunFetch('PUT', `/booking.json/${bookingId}`, bk)
-  console.log('[bokun-update-contact] PUT /booking.json/' + bookingId + ' →', putStatus, JSON.stringify(putData).slice(0, 300))
+  console.log('[bokun-update-contact] PUT status:', putStatus, JSON.stringify(putData).slice(0, 300))
 
   return new Response(JSON.stringify({ putStatus, putData }), {
     headers: { ...CORS, 'Content-Type': 'application/json' },
