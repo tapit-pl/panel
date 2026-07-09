@@ -2609,8 +2609,10 @@ tailwind.config = {
     const meetingRadio = document.querySelector('input[name="td-pickup"][value="meeting"]');
     if (!hotelEnabled) {
       if (meetingRadio) meetingRadio.checked = true;
-    } else if (hotelRadio && !hotelRadio.checked && !meetingRadio?.checked) {
-      hotelRadio.checked = true;
+      if (hotelRadio) hotelRadio.checked = false;
+    } else {
+      if (hotelRadio) hotelRadio.checked = true;
+      if (meetingRadio) meetingRadio.checked = false;
     }
 
     // Update hotel address label
@@ -2647,8 +2649,6 @@ tailwind.config = {
     document.getElementById('td-notes').value = '';
     renderAdditionalGuestFields(tdGuestCount);
     selectTdPayment('driver');
-    const hotelRadioReset = document.querySelector('input[name="td-pickup"][value="hotel"]');
-    if (hotelRadioReset) hotelRadioReset.checked = true;
     tdUpdatePickup();
     scrollModalTo(form);
     form.dataset.date = dateStr;
