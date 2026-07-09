@@ -3599,7 +3599,7 @@ tailwind.config = {
       hotelPhone ? escapeHtml(hotelPhone) + '<br>' : '',
     ].join('');
 
-    const html = `
+    const headerHtml = `
       <div style="padding:24px 32px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #E8751A;">
         <div style="font-size:10px;color:#7A6A62;line-height:1.85;width:33%;">
           <div style="font-weight:700;color:#1A1714;margin-bottom:2px;">Thousand Miles Kraków sp. z o.o.</div>
@@ -3612,7 +3612,12 @@ tailwind.config = {
         <div style="text-align:right;font-size:10px;color:#7A6A62;line-height:1.85;width:33%;">
           ${hotelRight}
         </div>
-      </div>
+      </div>`;
+
+    const html = `
+      <table style="width:100%;border-collapse:collapse;">
+        <thead><tr><td style="padding:0;">${headerHtml}</td></tr></thead>
+        <tbody><tr><td style="padding:0;">
 
       <div style="text-align:center;padding:28px 32px 24px;">
         <div style="font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:#B09B8F;font-weight:700;margin-bottom:10px;">Reservation Confirmation</div>
@@ -3648,6 +3653,9 @@ tailwind.config = {
           <span style="color:#C4A898;">Instagram: /thousandmiles.pl &nbsp;·&nbsp; Facebook: /ThousandMilesPL</span>
         </div>
       </div>
+
+        </td></tr></tbody>
+      </table>
     `;
 
     document.getElementById('voucher-printable').innerHTML = html;
