@@ -3803,6 +3803,7 @@
 
   async function saveContactEdit() {
     const b = allBookings.find(x => x.id === editingContactId);
+    console.log('[ContactEdit] save called, editingContactId:', editingContactId, '| b found:', !!b, '| _bokunBookingId:', b?._bokunBookingId, '| _dbBooking:', b?._dbBooking);
     if (!b) return;
     const fn    = document.getElementById('cem-firstname').value.trim();
     const ln    = document.getElementById('cem-lastname').value.trim();
@@ -3815,12 +3816,13 @@
     btn.textContent = 'Saving…';
 
     const { error } = await db.from('bookings').update({ guest, email: email || null, phone: phone || null }).eq('id', editingContactId);
+    console.log('[ContactEdit] Supabase update error:', error);
 
     if (!error) {
       Object.assign(b, { guest, email, phone });
       renderBookingsTable();
       const bokunId = b._bokunBookingId;
-      console.log('[ContactEdit] _bokunBookingId:', bokunId, '| _bokunCode:', b._bokunCode);
+      console.log('[ContactEdit] Bokun sync — bokunId:', bokunId);
       if (bokunId) {
         try {
           const { data: bRes, error: bErr } = await db.functions.invoke('bokun-sync', {
