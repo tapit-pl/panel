@@ -2628,9 +2628,10 @@
     const list = document.getElementById('categories-list');
     if (!list) return;
     list.innerHTML = allCategories.map(c => `
-      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${c.is_default ? 'bg-gray-100 text-gray-500' : 'bg-brand/10 text-brand'}">
+      <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${c.is_default ? 'bg-gray-100 text-gray-500' : 'bg-brand/10 text-brand'}">
         ${c.label}
-        ${!c.is_default ? `<button onclick="deleteCategory('${c.id}','${c.slug}')" class="hover:text-red-500 font-bold leading-none ml-0.5">×</button>` : ''}
+        <button onclick="editCategory('${c.id}','${c.label}')" title="Rename" class="opacity-40 hover:opacity-100 ml-0.5 leading-none">✏</button>
+        ${!c.is_default ? `<button onclick="deleteCategory('${c.id}','${c.slug}')" class="hover:text-red-500 font-bold leading-none">×</button>` : ''}
       </span>`).join('');
   }
 
@@ -2655,6 +2656,15 @@
     allCategories = allCategories.filter(c => c.id !== id);
     renderCategories();
     renderTourConfigTable();
+  }
+
+  async function editCategory(id, currentLabel) {
+    const newLabel = prompt('Category name:', currentLabel);
+    if (!newLabel || newLabel.trim() === currentLabel) return;
+    const label = newLabel.trim();
+    await db.from('tour_categories').update({ label }).eq('id', id);
+    const cat = allCategories.find(c => c.id === id);
+    if (cat) { cat.label = label; renderCategories(); renderTourConfigTable(); }
   }
 
   async function loadTourConfig() {
