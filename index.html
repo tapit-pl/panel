@@ -3008,7 +3008,7 @@ tailwind.config = {
           if (payment !== 'link') {
             console.log('[Booking] confirming reserved booking:', reservedCode);
             const { data: confirmRes } = await db.functions.invoke('bokun-sync', {
-              body: { path: `/checkout.json/confirm-reserved/${reservedCode}`, method: 'POST', payload: {} }
+              body: { path: `/checkout.json/confirm-reserved/${reservedCode}`, method: 'POST', payload: { sendNotificationToMainContact: false } }
             });
             const confirmBody = confirmRes?.body;
             console.log('[Booking] confirm response:', JSON.stringify(confirmBody));
