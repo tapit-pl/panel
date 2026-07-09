@@ -3587,7 +3587,7 @@ tailwind.config = {
     }
 
     const infoBlocks = (data?.emailBlocks || []).map(b =>
-      `<div style="border-left:3px solid #E8751A;padding:0 0 0 14px;margin-bottom:16px;">
+      `<div style="border-left:3px solid #E8751A;padding:0 0 0 14px;margin-bottom:16px;page-break-inside:avoid;break-inside:avoid;">
         <div style="font-size:11px;font-weight:700;color:#1A1714;margin-bottom:4px;">${escapeHtml(b.name)}</div>
         <div style="font-size:12px;color:#7A6A62;line-height:1.65;">${escapeHtml(b.info)}</div>
       </div>`
@@ -3626,16 +3626,16 @@ tailwind.config = {
         <table style="width:100%;border-collapse:collapse;">${tableRows.join('')}</table>
       </div>
 
-      ${infoBlocks ? `
-      <div style="padding:16px 32px 22px;">
-        <div style="font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#B09B8F;font-weight:700;margin-bottom:16px;">Additional information</div>
-        ${infoBlocks}
-      </div>` : ''}
-
-      <div style="margin:0 32px 16px;padding:14px 18px;border-left:4px solid #CC0000;background:#FFF5F5;border-radius:0 6px 6px 0;">
+      <div style="margin:0 32px 16px;padding:14px 18px;border-left:4px solid #CC0000;background:#FFF5F5;border-radius:0 6px 6px 0;page-break-inside:avoid;break-inside:avoid;">
         <div style="font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#CC0000;font-weight:700;margin-bottom:5px;">Cancellation</div>
         <div style="font-size:11px;color:#333;line-height:1.6;">Please notice that cancellations may be made up to 24 hours before the start of the trip. In case of later cancellations, the client will be charged 100% cost of the trip.</div>
       </div>
+
+      ${infoBlocks ? `
+      <div style="padding:4px 32px 22px;">
+        <div style="font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#B09B8F;font-weight:700;margin-bottom:16px;">Additional information</div>
+        ${infoBlocks}
+      </div>` : ''}
 
       <div style="margin:0 32px 26px;text-align:center;padding:13px 16px;border:2px solid ${data?.payment === 'hotel' ? '#16A34A' : '#E8751A'};border-radius:8px;">
         <div style="font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:${data?.payment === 'hotel' ? '#16A34A' : '#E8751A'};">${data?.payment === 'hotel' ? 'Reservation Paid' : 'To Be Paid at Driver'}</div>
