@@ -300,13 +300,8 @@ tailwind.config = {
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
           <input id="tour-search" type="text" placeholder="Search tours..." oninput="filterTours()" class="w-full pl-8 pr-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand bg-white">
         </div>
-        <div class="flex gap-2 flex-wrap">
+        <div id="tour-cat-filters" class="flex gap-2 flex-wrap">
           <button onclick="filterTourCat(this,'all')" class="tour-cat-btn text-xs px-3 py-2 bg-brand text-white rounded-lg font-medium">All</button>
-          <button onclick="filterTourCat(this,'mountains')" class="tour-cat-btn text-xs px-3 py-2 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">Mountains</button>
-          <button onclick="filterTourCat(this,'museums')" class="tour-cat-btn text-xs px-3 py-2 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">Museums</button>
-          <button onclick="filterTourCat(this,'transfers')" class="tour-cat-btn text-xs px-3 py-2 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">Transfers</button>
-          <button onclick="filterTourCat(this,'attractions')" class="tour-cat-btn text-xs px-3 py-2 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">Attractions</button>
-          <button onclick="filterTourCat(this,'zakopane')" class="tour-cat-btn text-xs px-3 py-2 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">From Zakopane</button>
         </div>
         <span id="tour-count" class="text-xs text-gray-400 ml-auto">0 tours</span>
       </div>
@@ -1806,6 +1801,7 @@ tailwind.config = {
 
     // Prefetch tours in background (no await — doesn't block dashboard load)
     loadToursFromBokun();
+    loadAndRenderCatFilters();
 
     await loadPartnerBookings();
 
@@ -3789,6 +3785,17 @@ tailwind.config = {
   });
 
   let tourActiveCat = 'all';
+
+  async function loadAndRenderCatFilters() {
+    const { data } = await db.from('tour_categories').select('slug, label').order('sort_order');
+    const container = document.getElementById('tour-cat-filters');
+    if (!container) return;
+    container.innerHTML =
+      `<button onclick="filterTourCat(this,'all')" class="tour-cat-btn text-xs px-3 py-2 bg-brand text-white rounded-lg font-medium">All</button>` +
+      (data || []).map(c =>
+        `<button onclick="filterTourCat(this,'${c.slug}')" class="tour-cat-btn text-xs px-3 py-2 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">${c.label}</button>`
+      ).join('');
+  }
 
   function filterTours() {
     const q = document.getElementById('tour-search').value.toLowerCase();

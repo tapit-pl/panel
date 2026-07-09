@@ -764,6 +764,17 @@
             </div>
           </div>
 
+          <div class="mb-4 p-4 bg-white border border-gray-200 rounded-2xl">
+            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Tour Categories</div>
+            <div id="categories-list" class="flex flex-wrap gap-2 mb-3"></div>
+            <div class="flex items-center gap-2">
+              <input id="new-cat-input" type="text" placeholder="New category name…"
+                class="text-sm border border-gray-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+              <button onclick="addCustomCategory()"
+                class="text-xs px-3 py-1.5 bg-brand text-white rounded-xl font-medium hover:bg-brand/90">+ Add</button>
+            </div>
+          </div>
+
           <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
             <div id="tour-config-loading" class="py-12 text-center text-gray-400 text-sm">
               <i class="fa-solid fa-circle-notch animate-spin text-xl block mb-3 text-brand"></i>Loading...
@@ -2604,6 +2615,7 @@
   }
 
   let allTourConfig = [];
+  let allCategories = [];
   let tourConfigLoaded = false;
   let editingTourId = null;
   let editingEmailBlocks = [];
@@ -2612,15 +2624,51 @@
   const groupColor = (() => { const map = {}; let i = 0; return g => { if (!map[g]) map[g] = GROUP_PALETTE[i++ % GROUP_PALETTE.length]; return map[g]; }; })();
   const groupChip = g => `<span class="px-2 py-0.5 rounded-full text-xs font-medium ${groupColor(g)}">${g}</span>`;
 
+  function renderCategories() {
+    const list = document.getElementById('categories-list');
+    if (!list) return;
+    list.innerHTML = allCategories.map(c => `
+      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${c.is_default ? 'bg-gray-100 text-gray-500' : 'bg-brand/10 text-brand'}">
+        ${c.label}
+        ${!c.is_default ? `<button onclick="deleteCategory('${c.id}','${c.slug}')" class="hover:text-red-500 font-bold leading-none ml-0.5">×</button>` : ''}
+      </span>`).join('');
+  }
+
+  async function addCustomCategory() {
+    const input = document.getElementById('new-cat-input');
+    const label = input.value.trim();
+    if (!label) return;
+    const slug = label.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    if (allCategories.some(c => c.slug === slug)) { alert('Category already exists.'); return; }
+    const maxOrder = Math.max(...allCategories.map(c => c.sort_order || 0), 0);
+    const { data } = await db.from('tour_categories')
+      .insert({ slug, label, sort_order: maxOrder + 10, is_default: false })
+      .select().single();
+    if (data) { allCategories.push(data); renderCategories(); renderTourConfigTable(); }
+    input.value = '';
+  }
+
+  async function deleteCategory(id, slug) {
+    const inUse = allTourConfig.some(t => t.category === slug);
+    if (inUse && !confirm(`Some tours use "${slug}". Delete anyway?`)) return;
+    await db.from('tour_categories').delete().eq('id', id);
+    allCategories = allCategories.filter(c => c.id !== id);
+    renderCategories();
+    renderTourConfigTable();
+  }
+
   async function loadTourConfig() {
-    const [tourRes, commRes] = await Promise.all([
+    const [tourRes, commRes, catRes] = await Promise.all([
       db.from('tour_config').select('*').order('sort_order'),
       db.from('tour_commissions').select('*').order('sort_order'),
+      db.from('tour_categories').select('*').order('sort_order'),
     ]);
     if (tourRes.error) { console.error('tour_config:', tourRes.error); }
     allTourConfig   = tourRes.data || [];
     allCommissions  = commRes.data || [];
+    allCategories   = catRes.data || [];
     tourConfigLoaded = true;
+    renderCategories();
     renderTourConfigTable();
     // Fetch missing Bokun pricing categories in background
     refreshBokunPricingCategories();
@@ -2732,11 +2780,7 @@
             <select onchange="quickSaveTourCat('${t.id}', this.value)"
               class="text-xs border border-gray-200 rounded-lg px-2 py-1 text-gray-600 focus:outline-none focus:ring-1 focus:ring-brand/40 bg-white">
               <option value="" ${!t.category ? 'selected' : ''}>— assign category —</option>
-              <option value="mountains" ${t.category === 'mountains' ? 'selected' : ''}>Mountains</option>
-              <option value="museums" ${t.category === 'museums' ? 'selected' : ''}>Museums</option>
-              <option value="transfers" ${t.category === 'transfers' ? 'selected' : ''}>Transfers</option>
-              <option value="attractions" ${t.category === 'attractions' ? 'selected' : ''}>Attractions</option>
-              <option value="zakopane" ${t.category === 'zakopane' ? 'selected' : ''}>From Zakopane</option>
+              ${allCategories.map(c => `<option value="${c.slug}" ${t.category === c.slug ? 'selected' : ''}>${c.label}</option>`).join('')}
             </select>
           </td>
           <td class="px-2 py-2.5 text-center">
