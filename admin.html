@@ -3825,14 +3825,10 @@
       console.log('[ContactEdit] Bokun sync — bokunId:', bokunId);
       if (bokunId) {
         try {
-          const { data: bRes, error: bErr } = await db.functions.invoke('bokun-sync', {
-            body: {
-              path: `/booking.json/${bokunId}/customer`,
-              method: 'PUT',
-              payload: { firstName: fn, lastName: ln, email: email || undefined, phoneNumber: phone || undefined },
-            }
+          const { data: bRes, error: bErr } = await db.functions.invoke('bokun-update-contact', {
+            body: { bookingId: bokunId, firstName: fn, lastName: ln, email: email || undefined, phoneNumber: phone || undefined },
           });
-          console.log('[Bokun] customer update response:', JSON.stringify(bRes), 'error:', bErr);
+          console.log('[Bokun] contact update response:', JSON.stringify(bRes), 'error:', bErr);
         } catch(e) { console.warn('[Bokun] contact sync failed:', e?.message); }
       } else {
         console.warn('[Bokun] skipped — no _bokunBookingId for booking', b.id);
