@@ -2647,11 +2647,8 @@ tailwind.config = {
     document.getElementById('td-notes').value = '';
     renderAdditionalGuestFields(tdGuestCount);
     selectTdPayment('driver');
-    document.querySelector('input[name="td-pickup"][value="hotel"]').checked = true;
-    document.getElementById('td-pickup-other-wrap').classList.add('hidden');
-    document.getElementById('td-pickup-other-check').checked = false;
-    document.getElementById('td-pickup-other-input').classList.add('hidden');
-    document.getElementById('td-pickup-other-input').value = '';
+    const hotelRadioReset = document.querySelector('input[name="td-pickup"][value="hotel"]');
+    if (hotelRadioReset) hotelRadioReset.checked = true;
     tdUpdatePickup();
     scrollModalTo(form);
     form.dataset.date = dateStr;
