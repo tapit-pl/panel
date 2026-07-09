@@ -1754,9 +1754,6 @@
         <input id="cem-phone" type="tel" class="w-full text-sm rounded-xl px-3 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-brand/40" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12)">
       </div>
     </div>
-    <div id="cem-bokun-note" class="hidden mt-3 text-xs text-slate-500 flex items-center gap-1.5">
-      <i class="fa-solid fa-rotate text-xs"></i> Will also sync to Bokun
-    </div>
     <div class="flex gap-2 mt-5">
       <button onclick="closeContactEdit()" class="flex-1 text-sm py-2.5 rounded-xl text-slate-300 hover:text-white transition-colors" style="border:1px solid rgba(255,255,255,0.12)">Cancel</button>
       <button onclick="saveContactEdit()" id="cem-save-btn" class="flex-1 text-sm py-2.5 rounded-xl font-semibold text-white transition-colors" style="background:var(--brand,#E8751A)">Save changes</button>
@@ -3790,8 +3787,6 @@
     document.getElementById('cem-lastname').value  = rest.join(' ');
     document.getElementById('cem-email').value     = b.email || '';
     document.getElementById('cem-phone').value     = b.phone || '';
-    const note = document.getElementById('cem-bokun-note');
-    if (note) note.classList.toggle('hidden', !b._bokunBookingId);
     document.getElementById('contact-edit-modal').classList.remove('hidden');
     setTimeout(() => document.getElementById('cem-firstname').focus(), 50);
   }
