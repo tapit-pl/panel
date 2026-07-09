@@ -1202,25 +1202,18 @@ tailwind.config = {
         <div id="td-pickup-section">
           <label class="block text-xs font-semibold text-gray-600 mb-1.5">Pick-up point</label>
           <div class="space-y-2">
-            <label class="flex items-start gap-2.5 cursor-pointer">
+            <label id="td-pickup-hotel-label" class="flex items-start gap-2.5 cursor-pointer">
               <input type="radio" name="td-pickup" value="hotel" checked class="mt-1 accent-brand shrink-0" onchange="tdUpdatePickup()">
               <div class="flex-1 min-w-0">
                 <div class="text-sm font-medium text-dark">Pick-up from Hotel</div>
-                <div class="text-xs text-gray-400 td-pickup-hotel-label truncate">—</div>
-                <div id="td-pickup-other-wrap" class="mt-2 hidden">
-                  <label class="flex items-center gap-1.5 text-xs text-brand cursor-pointer mb-1.5">
-                    <input type="checkbox" id="td-pickup-other-check" onchange="tdTogglePickupOther()" class="accent-brand">
-                    Different address
-                  </label>
-                  <input type="text" id="td-pickup-other-input" placeholder="e.g. ul. Floriańska 12, Kraków" class="hidden w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand/30">
-                </div>
+                <div class="text-xs text-gray-400 td-pickup-hotel-address truncate">—</div>
               </div>
             </label>
             <label class="flex items-start gap-2.5 cursor-pointer">
               <input type="radio" name="td-pickup" value="meeting" class="mt-1 accent-brand shrink-0" onchange="tdUpdatePickup()">
               <div>
-                <div class="text-sm font-medium text-dark">Pick-up from Garbarska Street</div>
-                <div class="text-xs text-gray-400">Meeting point · no hotel transfer</div>
+                <div class="text-sm font-medium text-dark" id="td-pickup-meeting-title">Pick-up from Garbarska Street</div>
+                <div class="text-xs text-gray-400" id="td-pickup-meeting-sub">Meeting point · no hotel transfer</div>
               </div>
             </label>
           </div>
@@ -2045,6 +2038,7 @@ tailwind.config = {
           hasPackage: commConfigIds.has(t.id),
           hiddenSlotIds: (t.hidden_slot_ids || []).map(String),
           emailBlocks: t.email_blocks || [],
+          meetingPoint: t.meeting_point || null,
         };
         if (!t.bokun_id) return base;
         try {
@@ -2600,6 +2594,32 @@ tailwind.config = {
     document.getElementById('td-booking-error').classList.add('hidden');
     document.getElementById('td-pickup-section').classList.remove('hidden');
 
+    // Update meeting point label from tour config
+    const mp = tdCurrentTour?.meetingPoint;
+    const mpTitle = document.getElementById('td-pickup-meeting-title');
+    const mpSub = document.getElementById('td-pickup-meeting-sub');
+    if (mpTitle) mpTitle.textContent = mp || 'Pick-up from Garbarska Street';
+    if (mpSub) mpSub.textContent = 'Meeting point · no hotel transfer';
+
+    // Show/hide hotel pickup option based on partner setting
+    const hotelLabel = document.getElementById('td-pickup-hotel-label');
+    const hotelEnabled = currentPartner?.hotel_pickup_enabled !== false;
+    if (hotelLabel) hotelLabel.classList.toggle('hidden', !hotelEnabled);
+    const hotelRadio = document.querySelector('input[name="td-pickup"][value="hotel"]');
+    const meetingRadio = document.querySelector('input[name="td-pickup"][value="meeting"]');
+    if (!hotelEnabled) {
+      if (meetingRadio) meetingRadio.checked = true;
+    } else if (hotelRadio && !hotelRadio.checked && !meetingRadio?.checked) {
+      hotelRadio.checked = true;
+    }
+
+    // Update hotel address label
+    const addrEl = document.querySelector('.td-pickup-hotel-address');
+    if (addrEl) {
+      const addr = currentPartner?.address && !currentPartner.address.includes('@') ? currentPartner.address : currentPartner?.name || '';
+      addrEl.textContent = addr || '—';
+    }
+
     // Show appropriate guest section
     const hasPackages = tdRateSelections.some(x => x.count > 0);
     const hasCategories = tdCategorySelections.some(x => x.count > 0);
@@ -2637,23 +2657,11 @@ tailwind.config = {
     form.dataset.date = dateStr;
   }
 
-  function tdUpdatePickup() {
-    const val = document.querySelector('input[name="td-pickup"]:checked')?.value;
-    document.getElementById('td-pickup-other-wrap').classList.toggle('hidden', val !== 'hotel');
-  }
-
-  function tdTogglePickupOther() {
-    const checked = document.getElementById('td-pickup-other-check').checked;
-    const input = document.getElementById('td-pickup-other-input');
-    input.classList.toggle('hidden', !checked);
-    if (checked) input.focus();
-  }
+  function tdUpdatePickup() {}
 
   function tdGetPickupDescription() {
     const val = document.querySelector('input[name="td-pickup"]:checked')?.value;
-    if (val === 'meeting') return 'Garbarska Street, Kraków — meeting point';
-    const otherChecked = document.getElementById('td-pickup-other-check')?.checked;
-    if (otherChecked) return document.getElementById('td-pickup-other-input')?.value.trim() || '';
+    if (val === 'meeting') return tdCurrentTour?.meetingPoint || 'Garbarska Street, Kraków — meeting point';
     const addr = currentPartner?.address;
     const validAddr = addr && !addr.includes('@') ? addr : null;
     return validAddr || currentPartner?.name || '';

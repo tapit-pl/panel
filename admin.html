@@ -1585,6 +1585,18 @@
       </div>
 
 
+      <!-- Pickup settings -->
+      <div class="border-t border-gray-100 pt-4">
+        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Pickup settings</div>
+        <label class="flex items-center gap-3 cursor-pointer">
+          <input type="checkbox" id="pd-hotel-pickup-enabled" class="accent-brand w-4 h-4" checked>
+          <div>
+            <div class="text-sm text-dark">Enable pickup from this property</div>
+            <div class="text-xs text-gray-400 mt-0.5">If disabled, partner can only select the tour's meeting point</div>
+          </div>
+        </label>
+      </div>
+
       <!-- Notes -->
       <div class="border-t border-gray-100 pt-4">
         <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Internal notes</label>
@@ -2843,6 +2855,7 @@
     document.getElementById('edit-tour-title').value         = t.title;
     document.getElementById('edit-tour-bokun-id').value      = t.bokun_id || '';
     document.getElementById('edit-tour-force-rate-id').value = t.bokun_force_rate_id || '';
+    document.getElementById('edit-tour-meeting-point').value = t.meeting_point || '';
     document.getElementById('edit-tour-groups').value        = (t.groups || []).join(', ');
     editingEmailBlocks = JSON.parse(JSON.stringify(t.email_blocks || []));
     renderEmailBlocks();
@@ -2903,11 +2916,12 @@
     const hiddenSlots = Array.from(slotCbs).filter(cb => !cb.checked).map(cb => cb.value);
     const hiddenSlotIds = hiddenSlots.length ? hiddenSlots : null;
 
+    const meetingPoint = document.getElementById('edit-tour-meeting-point').value.trim() || null;
     const emailBlocks = editingEmailBlocks.filter(b => b.name || b.info);
-    const { error } = await db.from('tour_config').update({ title, bokun_id: bokunId, bokun_force_rate_id: forceRateId, groups, hidden_slot_ids: hiddenSlotIds, email_blocks: emailBlocks }).eq('id', editingTourId);
+    const { error } = await db.from('tour_config').update({ title, bokun_id: bokunId, bokun_force_rate_id: forceRateId, groups, hidden_slot_ids: hiddenSlotIds, email_blocks: emailBlocks, meeting_point: meetingPoint }).eq('id', editingTourId);
     if (error) { alert('Error: ' + error.message); return; }
     const t = allTourConfig.find(x => x.id === editingTourId);
-    if (t) { t.title = title; t.bokun_id = bokunId; t.bokun_force_rate_id = forceRateId; t.groups = groups; t.hidden_slot_ids = hiddenSlotIds; t.email_blocks = emailBlocks; }
+    if (t) { t.title = title; t.bokun_id = bokunId; t.bokun_force_rate_id = forceRateId; t.groups = groups; t.hidden_slot_ids = hiddenSlotIds; t.email_blocks = emailBlocks; t.meeting_point = meetingPoint; }
     renderTourConfigTable();
     document.getElementById('modal-edit-tour').classList.add('hidden');
     showToast('Tour updated.');
@@ -4169,6 +4183,7 @@
     document.getElementById('pd-pay-driver').checked = opts.includes('driver');
     document.getElementById('pd-pay-hotel').checked  = opts.includes('hotel');
     document.getElementById('pd-pay-link').checked   = opts.includes('link');
+    document.getElementById('pd-hotel-pickup-enabled').checked = p.hotel_pickup_enabled !== false;
 
     if (!tourConfigLoaded) {
       loadTourConfig().then(() => renderPartnerTourGroups(p.tourGroups));
@@ -4220,11 +4235,13 @@
     if (document.getElementById('pd-pay-hotel').checked)  payOpts.push('hotel');
     if (document.getElementById('pd-pay-link').checked)   payOpts.push('link');
     p.paymentOptions = payOpts;
+    p.hotel_pickup_enabled = document.getElementById('pd-hotel-pickup-enabled').checked;
     await db.from('partners').update({
       name: p.name, phone: p.phone,
       email: p.email, address: p.address, notes: p.notes,
       tour_groups: p.tourGroups,
-      payment_options: payOpts
+      payment_options: payOpts,
+      hotel_pickup_enabled: p.hotel_pickup_enabled,
     }).eq('id', editingPartnerId);
     await logActivity('partner_edited', `Partner "${p.name}" details updated`, editingPartnerId);
     renderPartnersTable();
@@ -4856,7 +4873,11 @@
         <input id="edit-tour-bokun-id" type="number" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand font-mono">
       </div>
       <div>
-        <label class="block text-xs text-gray-400 mb-1">Bokun forced rate ID <span class="text-gray-300">(Meeting Point — leave empty for normal hotel pickup)</span></label>
+        <label class="block text-xs text-gray-400 mb-1">Meeting point <span class="text-gray-300">(address shown when hotel pickup is not available)</span></label>
+        <input id="edit-tour-meeting-point" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="e.g. ul. Garbarska 7a, Kraków">
+      </div>
+      <div>
+        <label class="block text-xs text-gray-400 mb-1">Bokun forced rate ID <span class="text-gray-300">(leave empty)</span></label>
         <input id="edit-tour-force-rate-id" type="number" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand font-mono" placeholder="e.g. 889922">
       </div>
       <div>
