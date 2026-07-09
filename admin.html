@@ -3766,7 +3766,7 @@
   function printVoucher() {
     const html = document.getElementById('voucher-content').innerHTML;
     const w = window.open('', '_blank', 'width=700,height=900');
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Voucher TM</title><style>body{margin:0;padding:0;font-family:Arial,sans-serif}</style></head><body>${html}</body></html>`);
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Voucher TM</title><style>@page{size:A4 portrait;margin:15mm}body{margin:0;padding:0;font-family:Arial,sans-serif}</style></head><body>${html}</body></html>`);
     w.document.close();
     w.focus();
     w.print();
