@@ -3819,16 +3819,21 @@
     if (!error) {
       Object.assign(b, { guest, email, phone });
       renderBookingsTable();
-      if (b._bokunBookingId) {
+      const bokunId = b._bokunBookingId;
+      console.log('[ContactEdit] _bokunBookingId:', bokunId, '| _bokunCode:', b._bokunCode);
+      if (bokunId) {
         try {
-          await db.functions.invoke('bokun-sync', {
+          const { data: bRes, error: bErr } = await db.functions.invoke('bokun-sync', {
             body: {
-              path: `/booking.json/${b._bokunBookingId}/customer`,
+              path: `/booking.json/${bokunId}/customer`,
               method: 'PUT',
               payload: { firstName: fn, lastName: ln, email: email || undefined, phoneNumber: phone || undefined },
             }
           });
+          console.log('[Bokun] customer update response:', JSON.stringify(bRes), 'error:', bErr);
         } catch(e) { console.warn('[Bokun] contact sync failed:', e?.message); }
+      } else {
+        console.warn('[Bokun] skipped — no _bokunBookingId for booking', b.id);
       }
     }
 
