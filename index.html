@@ -2219,8 +2219,9 @@ tailwind.config = {
   }
 
   async function fetchAvailabilityForMonth(tour, year, month) {
-    const firstDay = new Date(year, month, 1).toISOString().slice(0, 10);
-    const lastDay  = new Date(year, month + 1, 0).toISOString().slice(0, 10);
+    const firstDay = `${year}-${String(month+1).padStart(2,'0')}-01`;
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const lastDay = `${year}-${String(month+1).padStart(2,'0')}-${String(daysInMonth).padStart(2,'0')}`;
     if (tour.bokunId) {
       try {
         const { data: avail } = await db.functions.invoke('bokun-sync', {
@@ -2230,7 +2231,7 @@ tailwind.config = {
         if (Array.isArray(items) && items.length > 0) {
           items.forEach(entry => {
             if (entry.unavailable || entry.soldOut) return;
-            const d = new Date(entry.date).toISOString().slice(0, 10);
+            const d = entry.date?.slice(0, 10);
             if (!d) return;
             if (!currentTourAvailability[d]) currentTourAvailability[d] = [];
             const rates = (entry.rates || []).map(r => {
