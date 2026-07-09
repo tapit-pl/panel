@@ -2649,7 +2649,7 @@
   }
 
   async function deleteCategory(id, slug) {
-    const inUse = allTourConfig.some(t => t.category === slug);
+    const inUse = allTourConfig.some(t => (t.categories || []).includes(slug));
     if (inUse && !confirm(`Some tours use "${slug}". Delete anyway?`)) return;
     await db.from('tour_categories').delete().eq('id', id);
     allCategories = allCategories.filter(c => c.id !== id);
@@ -2777,11 +2777,14 @@
           <td class="px-3 py-2.5 font-mono text-xs text-gray-400">${t.bokun_id || '<span class="text-red-300">no id</span>'}</td>
           <td class="px-3 py-2.5"><div class="flex flex-wrap gap-1">${groups}</div></td>
           <td colspan="6" class="px-2 py-2.5">
-            <select onchange="quickSaveTourCat('${t.id}', this.value)"
-              class="text-xs border border-gray-200 rounded-lg px-2 py-1 text-gray-600 focus:outline-none focus:ring-1 focus:ring-brand/40 bg-white">
-              <option value="" ${!t.category ? 'selected' : ''}>— assign category —</option>
-              ${allCategories.map(c => `<option value="${c.slug}" ${t.category === c.slug ? 'selected' : ''}>${c.label}</option>`).join('')}
-            </select>
+            <div class="flex flex-wrap gap-1">
+              ${allCategories.map(c => {
+                const active = (t.categories || []).includes(c.slug);
+                return `<button onclick="toggleTourCat('${t.id}','${c.slug}',this)"
+                  class="text-xs px-2 py-0.5 rounded-full font-medium transition-colors ${active ? 'bg-brand text-white' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}">
+                  ${c.label}</button>`;
+              }).join('')}
+            </div>
           </td>
           <td class="px-2 py-2.5 text-center">
             <label class="relative inline-flex ${lockCls} cursor-pointer">
@@ -3061,11 +3064,18 @@
     showToast('Tour removed.');
   }
 
-  async function quickSaveTourCat(id, val) {
+  async function toggleTourCat(id, slug, btn) {
     const t = allTourConfig.find(x => x.id === id);
     if (!t) return;
-    t.category = val || null;
-    await db.from('tour_config').update({ category: val || null }).eq('id', id);
+    t.categories = t.categories || [];
+    if (t.categories.includes(slug)) {
+      t.categories = t.categories.filter(s => s !== slug);
+      btn.className = btn.className.replace('bg-brand text-white', 'bg-gray-100 text-gray-400 hover:bg-gray-200');
+    } else {
+      t.categories.push(slug);
+      btn.className = btn.className.replace('bg-gray-100 text-gray-400 hover:bg-gray-200', 'bg-brand text-white');
+    }
+    await db.from('tour_config').update({ categories: t.categories }).eq('id', id);
   }
 
   let allCommissions  = [];
