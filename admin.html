@@ -2081,8 +2081,10 @@
     const todayStr    = `${now.getFullYear()}-${pad2(now.getMonth()+1)}-${pad2(now.getDate())}`;
     const tomorrow    = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
     const tomorrowStr = `${tomorrow.getFullYear()}-${pad2(tomorrow.getMonth()+1)}-${pad2(tomorrow.getDate())}`;
-    const todayStart  = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-    const todayEnd    = todayStart + 86400000;
+    const todayStart    = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const todayEnd      = todayStart + 86400000;
+    const tomorrowStart = todayEnd;
+    const tomorrowEnd   = tomorrowStart + 86400000;
 
     const active = b => b.status !== 'Cancelled';
     const todayB = allBookings.filter(b => active(b) && b._creationTs >= todayStart && b._creationTs < todayEnd);
@@ -2134,22 +2136,22 @@
         </div>
         <div class="text-xs text-slate-400 shrink-0 ml-2">${b.time||''}</div>
       </div>`;
-    const todayDeps = allBookings.filter(b => active(b) && b.date === todayStr).sort((a,b) => (a.time||'').localeCompare(b.time||''));
+    const todayDeps = allBookings.filter(b => active(b) && b._startTs >= todayStart && b._startTs < todayEnd).sort((a,b) => (a.time||'').localeCompare(b.time||''));
     const todayDepEl = el('dash-today-departures');
     if (todayDepEl) todayDepEl.innerHTML = todayDeps.length
       ? `<div class="text-xs font-semibold text-slate-400 mb-1">${todayDeps.length} tour${todayDeps.length!==1?'s':''}</div>` + todayDeps.map(depRow).join('')
       : '<div class="text-xs text-slate-500">No departures today</div>';
 
     // Tomorrow's departures
-    const tomorrowDeps = allBookings.filter(b => active(b) && b.date === tomorrowStr).sort((a,b) => (a.time||'').localeCompare(b.time||''));
+    const tomorrowDeps = allBookings.filter(b => active(b) && b._startTs >= tomorrowStart && b._startTs < tomorrowEnd).sort((a,b) => (a.time||'').localeCompare(b.time||''));
     const tomorrowDepEl = el('dash-tomorrow-departures');
     if (tomorrowDepEl) tomorrowDepEl.innerHTML = tomorrowDeps.length
       ? `<div class="text-xs font-semibold text-slate-400 mb-1">${tomorrowDeps.length} tour${tomorrowDeps.length!==1?'s':''}</div>` + tomorrowDeps.map(depRow).join('')
       : '<div class="text-xs text-slate-500">No departures tomorrow</div>';
 
     // Upcoming cancellations (cancelled bookings for today or future dates)
-    const upcomingCancelled = allBookings.filter(b => b.status === 'Cancelled' && b.date >= todayStr)
-      .sort((a,b) => (a.date||'').localeCompare(b.date||'')).slice(0, 8);
+    const upcomingCancelled = allBookings.filter(b => b.status === 'Cancelled' && b._startTs >= todayStart)
+      .sort((a,b) => a._startTs - b._startTs).slice(0, 8);
     const cancelEl = el('dash-cancellations');
     if (cancelEl) cancelEl.innerHTML = upcomingCancelled.length
       ? upcomingCancelled.map(b => `
