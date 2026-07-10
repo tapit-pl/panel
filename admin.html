@@ -3898,67 +3898,132 @@
     }
   }
 
-  function buildVoucherHtml(b, emailBlocks = []) {
-    const now = new Date();
+  function buildVoucherHtml(data, partner) {
     const pad = n => String(n).padStart(2, '0');
-    const today = `${pad(now.getDate())}.${pad(now.getMonth()+1)}.${now.getFullYear()}`;
-    const ref = b._bokunBookingId || b.displayId || b.id;
-    const isStripe = !!b._stripeSessionId;
-    const pt = b._paymentType;
-    const st = (b.status || '').toLowerCase();
-    const linkPending = st === 'payment_pending' || st === 'pending_payment';
-    const badge      = linkPending ? 'PAYMENT LINK SENT — AWAITING PAYMENT' : (isStripe ? 'PAID BY GUEST' : (pt === 'hotel' ? 'PAID AT HOTEL' : 'PAY TO DRIVER'));
-    const badgeColor = linkPending ? '#2563EB' : ((isStripe || pt === 'hotel') ? '#16A34A' : '#E8751A');
-    const rows = [
-      ['Offer name', b.tour],
-      ['Number of participants', b.pax ?? '—'],
-      b.total ? ['Price', Math.round(b.total).toLocaleString('pl') + ' PLN'] : null,
-      b.guest ? ['Participants', b.guest] : null,
-      b.phone ? ['Contact number', b.phone] : null,
-      b.email ? ['Email', b.email] : null,
-      ['Selected date', b.date || '—'],
-      (b.time || b.pickup) ? ['Time and place of meeting', [b.time, b.pickup].filter(Boolean).join('<br>')] : null,
-    ].filter(Boolean);
-    const blocksHtml = emailBlocks.length ? `<div style="margin-bottom:28px;font-size:12px">${emailBlocks.map(bl => `<p style="font-weight:bold;margin:0 0 4px">${bl.name}</p><p style="color:#E8751A;margin:0 0 14px">${bl.info}</p>`).join('')}</div>` : '';
-    const cancelledStamp = (b.status||'').toLowerCase() === 'cancelled' ? `
-      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:10">
-        <div style="transform:rotate(-30deg);border:12px solid rgba(180,0,0,0.75);border-radius:8px;padding:14px 32px;color:rgba(180,0,0,0.75);font-size:72px;font-weight:900;font-family:Arial,sans-serif;letter-spacing:6px;text-align:center;line-height:1;white-space:nowrap">CANCELLED</div>
-      </div>` : '';
+    const now = new Date();
+    const todayStr = `Kraków, ${pad(now.getDate())}.${pad(now.getMonth()+1)}.${now.getFullYear()}`;
+
+    const hotelName = partner?.name || '—';
+    const hotelAddr = (partner?.address && !partner.address.includes('@')) ? partner.address : '';
+    const hotelPhone = partner?.phone ? 'tel. ' + partner.phone : '';
+
+    let bookingNr = '—';
+    if (data) {
+      if (data.bokunConfirmationCode) bookingNr = data.bokunConfirmationCode;
+      else if (data.bokunBookingId) bookingNr = 'TM-' + data.bokunBookingId;
+      else if (data.bookingId) bookingNr = '#' + String(data.bookingId).split('-')[0].toUpperCase();
+    }
+
+    const guestsList = data?.guestName
+      ? [data.guestName, ...(data.extraGuests || [])].map(g => escapeHtml(g)).join('<br>')
+      : null;
+
+    const timePart = escapeHtml(data?.time || '');
+    const pickupPart = escapeHtml(data?.pickup || '');
+    const timePickup = [timePart, pickupPart].filter(Boolean).join('<br>');
+
+    const fields = [
+      ['Offer name', escapeHtml(data?.tourName || '—')],
+      ['Number of participants', String(data?.pax ?? '—')],
+      ...(data?.total ? [['Price', data.total + ' PLN']] : []),
+      ['Selected date', escapeHtml(data?.date || '—')],
+      ...(guestsList ? [['Participants', guestsList]] : []),
+      ...(timePickup ? [['Time and place of meeting', timePickup]] : []),
+      ...(data?.phone ? [['Contact number', escapeHtml(data.phone)]] : []),
+      ...(data?.email ? [['Email', escapeHtml(data.email)]] : []),
+    ];
+
+    const mkCell = (label, value, last) =>
+      `<td style="padding:12px 0;${last ? '' : 'border-bottom:1px solid #F0EBE6;'}vertical-align:top;width:48%;">
+        <div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#B09B8F;font-weight:700;margin-bottom:4px;">${label}</div>
+        <div style="font-size:13px;font-weight:600;color:#1A1714;line-height:1.4;">${value}</div>
+      </td>`;
+
+    const tableRows = [];
+    for (let i = 0; i < fields.length; i += 2) {
+      const isLast = i + 2 >= fields.length;
+      const [lLabel, lVal] = fields[i];
+      const right = fields[i + 1];
+      tableRows.push(`<tr>
+        ${mkCell(lLabel, lVal, isLast && !right)}
+        <td style="width:4%;"></td>
+        ${right ? mkCell(right[0], right[1], isLast) : '<td style="width:48%;"></td>'}
+      </tr>`);
+    }
+
+    const infoBlocks = (data?.emailBlocks || []).map(bl =>
+      `<div style="border-left:3px solid #E8751A;padding:0 0 0 14px;margin-bottom:16px;page-break-inside:avoid;break-inside:avoid;">
+        <div style="font-size:11px;font-weight:700;color:#1A1714;margin-bottom:4px;">${escapeHtml(bl.name)}</div>
+        <div style="font-size:12px;color:#7A6A62;line-height:1.65;">${escapeHtml(bl.info)}</div>
+      </div>`
+    ).join('');
+
+    const hotelRight = [
+      `<div style="font-weight:700;color:#1A1714;margin-bottom:2px;">${escapeHtml(hotelName)}</div>`,
+      hotelAddr ? escapeHtml(hotelAddr) + '<br>' : '',
+      hotelPhone ? escapeHtml(hotelPhone) + '<br>' : '',
+    ].join('');
+
     const headerHtml = `
-      <table style="width:100%;padding-bottom:12px;border-bottom:2px solid #333;margin-bottom:0">
-        <tr>
-          <td style="vertical-align:top;font-size:11px;line-height:1.7">
-            THOUSAND MILES SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ<br>
-            NIP: 6762709355<br>
-            ul. PLAC SZCZEPAŃSKI 8/207<br>
-            31-011 KRAKÓW
-          </td>
-          <td style="text-align:right;vertical-align:top">
-            <img src="https://panel.thousandmiles.pl/assets/logo.png" style="height:50px;display:block;margin-left:auto;margin-bottom:6px">
-            <span style="font-size:11px">Kraków, ${today}</span>
-          </td>
-        </tr>
-      </table>`;
+      <div style="padding:24px 32px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #E8751A;">
+        <div style="font-size:10px;color:#7A6A62;line-height:1.85;width:33%;">
+          <div style="font-weight:700;color:#1A1714;margin-bottom:2px;">Thousand Miles Kraków sp. z o.o.</div>
+          Szczepański Square 8/101, 31-011 Kraków<br>
+          tel. +48 607 896 523
+        </div>
+        <div style="text-align:center;width:34%;">
+          <img src="assets/logo.png" style="height:48px;display:inline-block;">
+        </div>
+        <div style="text-align:right;font-size:10px;color:#7A6A62;line-height:1.85;width:33%;">
+          ${hotelRight}
+        </div>
+      </div>`;
+
+    const st = (data?.status || '').toLowerCase();
+    const linkPending = st === 'payment_pending' || st === 'pending_payment';
+    const badgeColor = linkPending ? '#2563EB' : (data?.payment === 'hotel' ? '#16A34A' : '#E8751A');
+    const badgeLabel = linkPending ? 'Payment link sent — awaiting payment' : (data?.payment === 'hotel' ? 'Reservation Paid' : 'To Be Paid at Driver');
+
     return `
-      <table style="width:100%;border-collapse:collapse;position:relative">
-        <thead><tr><td style="padding:24px 24px 12px">${headerHtml}</td></tr></thead>
-        <tbody><tr><td style="padding:0 24px 24px">
-          ${cancelledStamp}
-          <h2 style="text-align:center;letter-spacing:2px;font-size:17px;margin:20px 0 6px;text-transform:uppercase">Reservation Confirmation</h2>
-          <p style="text-align:center;color:#888;font-size:12px;margin-bottom:28px">Nr: TM-${ref}</p>
-          <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
-            ${rows.map(([label, val]) => `<tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold;width:45%">${label}:</td><td style="padding:8px 4px">${val}</td></tr>`).join('')}
-          </table>
-          <div style="margin:0 0 24px;padding:14px 16px;border-left:4px solid #CC0000;background:#FFF5F5;page-break-inside:avoid">
-            <p style="margin:0 0 5px;font-weight:bold;font-size:12px;color:#CC0000;letter-spacing:1px;text-transform:uppercase">Cancellation policy</p>
-            <p style="margin:0;font-size:12px;color:#333;line-height:1.6">Please notice that cancellations may be made up to 24 hours before the start of the trip. In case of later cancellations, the client will be charged 100% cost of the trip.</p>
-          </div>
-          ${blocksHtml}
-          <p style="text-align:center;font-weight:bold;font-size:15px;letter-spacing:2px;margin:28px 0;padding:14px 20px;border:2px solid ${badgeColor};color:${badgeColor};page-break-inside:avoid">${badge}</p>
-          <div style="border-top:1px solid #eee;padding-top:14px;text-align:center;font-size:11px;color:#888">
-            <p style="margin:0">How was your visit? Please review us on <strong>TripAdvisor</strong>: <strong>Thousand Miles Krakow</strong></p>
-            <p style="margin:6px 0 0">Instagram: /thousandmiles.pl &nbsp;·&nbsp; Facebook: /ThousandMilesPL</p>
-          </div>
+      <table style="width:100%;border-collapse:collapse;">
+        <thead><tr><td style="padding:0;">${headerHtml}</td></tr></thead>
+        <tbody><tr><td style="padding:0;">
+
+      <div style="text-align:center;padding:28px 32px 24px;">
+        <div style="font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:#B09B8F;font-weight:700;margin-bottom:10px;">Reservation Confirmation</div>
+        <div style="font-size:38px;font-weight:800;color:#1A1714;letter-spacing:.02em;font-variant-numeric:tabular-nums;line-height:1;">${escapeHtml(bookingNr)}</div>
+        <div style="width:36px;height:3px;background:#E8751A;margin:14px auto 0;border-radius:2px;"></div>
+      </div>
+
+      <div style="height:1px;background:#EDE8E3;margin:0 32px;"></div>
+
+      <div style="padding:20px 32px 12px;">
+        <table style="width:100%;border-collapse:collapse;">${tableRows.join('')}</table>
+      </div>
+
+      <div style="margin:0 32px 16px;padding:14px 18px;border-left:4px solid #CC0000;background:#FFF5F5;border-radius:0 6px 6px 0;page-break-inside:avoid;break-inside:avoid;">
+        <div style="font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#CC0000;font-weight:700;margin-bottom:5px;">Cancellation</div>
+        <div style="font-size:11px;color:#333;line-height:1.6;">Please notice that cancellations may be made up to 24 hours before the start of the trip. In case of later cancellations, the client will be charged 100% cost of the trip.</div>
+      </div>
+
+      ${infoBlocks ? `
+      <div style="padding:4px 32px 22px;">
+        <div style="font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#B09B8F;font-weight:700;margin-bottom:16px;">Additional information</div>
+        ${infoBlocks}
+      </div>` : ''}
+
+      <div style="margin:0 32px 26px;text-align:center;padding:13px 16px;border:2px solid ${badgeColor};border-radius:8px;">
+        <div style="font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:${badgeColor};">${badgeLabel}</div>
+      </div>
+
+      <div style="background:#F7F3EF;padding:18px 32px;text-align:center;">
+        <div style="font-size:10px;color:#B09B8F;line-height:1.8;">
+          Enjoyed your tour? Please review us on
+          <strong style="color:#7A6A62;">TripAdvisor: Thousand Miles Krakow</strong><br>
+          <span style="color:#C4A898;">Instagram: /thousandmiles.pl &nbsp;·&nbsp; Facebook: /ThousandMilesPL</span>
+        </div>
+      </div>
+
         </td></tr></tbody>
       </table>`;
   }
@@ -3968,7 +4033,27 @@
     if (!b) return;
     const tourCfg = allTourConfig.find(t => t.title === (b.tour || '').trim());
     const emailBlocks = tourCfg?.email_blocks || [];
-    document.getElementById('voucher-content').innerHTML = buildVoucherHtml(b, emailBlocks);
+    const partner = allPartners.find(p => p.name === b.hotel);
+    const isStripe = !!b._stripeSessionId;
+    const payment = (isStripe || b._paymentType === 'hotel') ? 'hotel' : 'driver';
+    document.getElementById('voucher-content').innerHTML = buildVoucherHtml({
+      bokunConfirmationCode: b._bokunCode || null,
+      bokunBookingId: b._bokunBookingId || null,
+      bookingId: b.id,
+      tourName: (b.tour || '').trim(),
+      pax: b.pax,
+      total: b.total ? Math.round(b.total) : null,
+      date: b.date,
+      guestName: b.guest || null,
+      extraGuests: b.additional_guests ? b.additional_guests.split(', ').filter(Boolean) : [],
+      time: b.time || null,
+      pickup: b.pickup || null,
+      phone: b.phone || null,
+      email: b.email || null,
+      emailBlocks,
+      payment,
+      status: b.status || null,
+    }, partner);
     const el = document.getElementById('modal-voucher');
     el.style.display = 'block';
     el.classList.remove('hidden');
