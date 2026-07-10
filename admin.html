@@ -3893,13 +3893,11 @@
     }
   }
 
-  function buildVoucherHtml(b) {
+  function buildVoucherHtml(b, emailBlocks = []) {
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
     const today = `${pad(now.getDate())}.${pad(now.getMonth()+1)}.${now.getFullYear()}`;
     const ref = b._bokunBookingId || b.displayId || b.id;
-    const tourCfg = (typeof allTourConfig !== 'undefined' ? allTourConfig : []).find(t => t.title === b.tour);
-    const emailBlocks = tourCfg?.email_blocks || [];
     const isStripe = !!b._stripeSessionId;
     const pt = b._paymentType;
     const badge     = isStripe ? 'PAID BY GUEST' : (pt === 'hotel' ? 'PAID AT HOTEL' : 'PAY TO DRIVER');
@@ -3957,11 +3955,9 @@
   async function openVoucher(id) {
     const b = allBookings.find(x => x.id === id);
     if (!b) return;
-    if (!tourConfigLoaded && allTourConfig.length === 0) {
-      const { data } = await db.from('tour_config').select('title, email_blocks');
-      if (data) allTourConfig = data;
-    }
-    document.getElementById('voucher-content').innerHTML = buildVoucherHtml(b);
+    const { data: cfgRow } = await db.from('tour_config').select('email_blocks').eq('title', b.tour).maybeSingle();
+    const emailBlocks = cfgRow?.email_blocks || [];
+    document.getElementById('voucher-content').innerHTML = buildVoucherHtml(b, emailBlocks);
     const el = document.getElementById('modal-voucher');
     el.style.display = 'block';
     el.classList.remove('hidden');
