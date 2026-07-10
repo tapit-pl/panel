@@ -51,12 +51,11 @@
   #edit-booking-drawer.open { opacity: 1; transform: scale(1) translateY(0); }
   @media print {
     @page { margin: 0; size: A4; }
-    body { background: white !important; }
     body > *:not(#modal-voucher) { display: none !important; }
-    #modal-voucher { display: block !important; position: static !important; background: white !important; padding: 0 !important; overflow: visible !important; }
-    #modal-voucher .flex.flex-col { padding: 0 !important; }
+    #modal-voucher { display: block !important; position: static !important; background: none !important; padding: 0 !important; overflow: visible !important; }
+    #modal-voucher .modal-overlay { display: none !important; }
     #modal-voucher button { display: none !important; }
-    #voucher-content { width: 100% !important; background: white !important; }
+    #voucher-content { width: 100% !important; }
   }
 
   /* ===== GLOBAL DARK THEME ===== */
@@ -1691,8 +1690,9 @@
 <div id="voucher-print-wrap" style="display:none"></div>
 
 <!-- ===================== MODAL: VOUCHER ===================== -->
-<div id="modal-voucher" class="fixed inset-0 z-50 hidden" style="background:rgba(0,0,0,0.75);overflow-y:auto" onclick="if(event.target===this)closeVoucher()">
-  <div class="flex flex-col items-center py-10 px-4">
+<div id="modal-voucher" class="fixed inset-0 z-50 hidden" style="overflow-y:auto">
+  <div class="absolute inset-0 modal-overlay" style="background:rgba(0,0,0,0.75)" onclick="closeVoucher()"></div>
+  <div class="relative flex flex-col items-center py-10 px-4">
     <div id="voucher-content" style="width:600px;max-width:100%;background:#fff;font-family:Arial,sans-serif"></div>
     <div class="flex gap-3 mt-5">
       <button onclick="printVoucher()" class="flex items-center gap-2 text-sm font-semibold text-white px-5 py-2.5 rounded-xl" style="background:#E8751A">
