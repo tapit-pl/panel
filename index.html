@@ -1850,7 +1850,7 @@ tailwind.config = {
       const badge = statusColors[s] || 'bg-gray-100 text-gray-600';
       const statusLabel = b.status ? b.status.charAt(0).toUpperCase() + b.status.slice(1).replace('_', ' ') : '—';
       const displayId = b.bokun_confirmation_code || ('TM-' + b.id.slice(0,8).toUpperCase());
-      const tourPhoto = (bokunProducts || []).find(t => t.title === b.tour)?.photo || getTourPhoto(b.tour) || null;
+      const tourPhoto = (bokunProducts || []).find(t => t.title === b.tour)?.photo || null;
       const thumbHtml = tourPhoto
         ? `<div class="w-10 h-10 rounded-xl shrink-0 overflow-hidden"><img src="${escapeHtml(tourPhoto)}" class="w-full h-full object-cover" loading="lazy"></div>`
         : `<div class="w-10 h-10 bg-brand-light rounded-xl flex items-center justify-center shrink-0"><i class="fa-solid fa-mountain-sun text-brand text-sm"></i></div>`;
