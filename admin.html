@@ -3834,10 +3834,10 @@
       Object.assign(b, { guest, email, phone });
       renderBookingsTable();
 
-      if (b._bokunBookingId) {
+      if (b._bokunCode) {
         try {
           await db.functions.invoke('bokun-update-contact', {
-            body: { bookingId: b._bokunBookingId, firstName: fn, lastName: ln, email: email || undefined, phoneNumber: phone || undefined },
+            body: { confirmationCode: b._bokunCode, firstName: fn, lastName: ln, email: email || undefined, phoneNumber: phone || undefined },
           });
         } catch(e) { console.warn('[Bokun] customer update failed:', e?.message); }
       }
@@ -3928,10 +3928,10 @@
       renderBookingsTable();
 
       // Sync guest details to Bokun (best-effort)
-      if (b._bokunBookingId) {
+      if (b._bokunCode) {
         try {
           await db.functions.invoke('bokun-update-contact', {
-            body: { bookingId: b._bokunBookingId, firstName: fn, lastName: ln, email: email || undefined, phoneNumber: phone || undefined },
+            body: { confirmationCode: b._bokunCode, firstName: fn, lastName: ln, email: email || undefined, phoneNumber: phone || undefined },
           });
         } catch(e) { console.warn('[Bokun] customer update failed:', e?.message); }
       }
