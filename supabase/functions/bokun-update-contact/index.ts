@@ -45,24 +45,19 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ error: 'bookingId required' }), { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } })
   }
 
-  // Step 1: find the full booking via search (GET /booking.json/{id} doesn't exist in Bokun API)
-  const { status: searchStatus, data: searchData } = await bokunFetch('POST', '/booking.json/booking-search', {
-    bookingIdList: [bookingId],
-    pageSize: 1,
-    page: 0,
-  })
-  console.log('[bokun-update-contact] search status:', searchStatus, JSON.stringify(searchData).slice(0, 300))
+  const numericId = Number(bookingId)
 
-  const items = (searchData as Record<string, unknown>)?.items
-  const booking = Array.isArray(items) && items.length > 0 ? items[0] : null
+  // Step 1: GET full booking directly by ID
+  const { status: getStatus, data: booking } = await bokunFetch('GET', `/booking.json/${numericId}`)
+  console.log('[bokun-update-contact] GET status:', getStatus, JSON.stringify(booking).slice(0, 200))
 
-  if (!booking) {
-    return new Response(JSON.stringify({ error: 'Booking not found via search', searchStatus, searchData }), {
+  if (getStatus !== 200 || !booking || typeof booking !== 'object') {
+    return new Response(JSON.stringify({ error: 'Booking not found', getStatus, booking }), {
       status: 404, headers: { ...CORS, 'Content-Type': 'application/json' },
     })
   }
 
-  // Step 2: patch customer fields on the retrieved object
+  // Step 2: patch customer fields
   const bk = booking as Record<string, unknown>
   const customer = (bk.customer && typeof bk.customer === 'object' ? { ...(bk.customer as object) } : {}) as Record<string, unknown>
   if (firstName   !== undefined) customer.firstName   = firstName
@@ -72,7 +67,7 @@ Deno.serve(async (req) => {
   bk.customer = customer
 
   // Step 3: PUT booking back
-  const { status: putStatus, data: putData } = await bokunFetch('PUT', `/booking.json/${bookingId}`, bk)
+  const { status: putStatus, data: putData } = await bokunFetch('PUT', `/booking.json/${numericId}`, bk)
   console.log('[bokun-update-contact] PUT status:', putStatus, JSON.stringify(putData).slice(0, 300))
 
   return new Response(JSON.stringify({ putStatus, putData }), {
