@@ -4256,12 +4256,8 @@ tailwind.config = {
     const b = partnerBookings.find(x => String(x.id) === String(editingBookingId));
     if (b?.bokun_booking_id) {
       try {
-        await db.functions.invoke('bokun-sync', {
-          body: {
-            path: `/booking.json/${b.bokun_booking_id}/customer`,
-            method: 'PUT',
-            payload: { firstName, lastName, email: email || undefined, phoneNumber: phone || undefined },
-          }
+        await db.functions.invoke('bokun-update-contact', {
+          body: { bookingId: b.bokun_booking_id, firstName, lastName, email: email || undefined, phoneNumber: phone || undefined },
         });
       } catch(e) { console.warn('[Bokun] customer update failed:', e?.message); }
     }
