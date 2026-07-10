@@ -1742,7 +1742,7 @@
 <!-- ===================== EDIT BOOKING PANEL ===================== -->
 <div id="edit-booking-panel" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
   <div onclick="closeEditBooking()" class="absolute inset-0 bg-black/40 modal-bg"></div>
-  <div id="edit-booking-drawer" class="relative w-full max-w-xl bg-white shadow-2xl flex flex-col rounded-2xl max-h-[90vh]">
+  <div id="edit-booking-drawer" class="relative w-full max-w-md bg-white shadow-2xl flex flex-col rounded-2xl max-h-[85vh]">
     <!-- Header -->
     <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white">
       <div>
@@ -1754,7 +1754,7 @@
       </button>
     </div>
     <!-- Form -->
-    <div class="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+    <div class="flex-1 overflow-y-auto px-5 py-4 space-y-3">
 
       <!-- READ-ONLY section label -->
       <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Tour details (read-only)</div>
@@ -1817,8 +1817,12 @@
       </div>
 
       <div>
-        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Additional guests</label>
-        <textarea id="edit-additional-guests" rows="2" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand resize-none" placeholder="e.g. Anna Kowalska, Piotr Nowak"></textarea>
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="text-xs font-semibold text-gray-600">Additional guests</label>
+          <button type="button" onclick="addEditGuestRow()" class="text-xs text-brand font-semibold hover:underline flex items-center gap-1"><i class="fa-solid fa-plus text-[10px]"></i> Add guest</button>
+        </div>
+        <div id="edit-guests-list" class="space-y-2"></div>
+        <div id="edit-guests-empty" class="text-xs text-gray-400 italic">No additional guests</div>
       </div>
 
       <div class="grid grid-cols-2 gap-3">
@@ -4036,6 +4040,63 @@
     setTimeout(() => toast.remove(), 3000);
   }
 
+  function _makeGuestRow(idx, firstName, lastName) {
+    const row = document.createElement('div');
+    row.className = 'edit-guest-row';
+    row.innerHTML = `
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-xs font-semibold text-gray-400">Guest ${idx + 2}</span>
+        <button type="button" onclick="removeEditGuestRow(this)" class="text-gray-300 hover:text-red-400 transition-colors text-xs"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <input type="text" value="${(firstName||'').replace(/"/g,'&quot;')}" placeholder="First name"
+          class="edit-guest-first text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        <input type="text" value="${(lastName||'').replace(/"/g,'&quot;')}" placeholder="Last name"
+          class="edit-guest-last text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+      </div>`;
+    return row;
+  }
+  function renderEditGuestRows(guests) {
+    const list = document.getElementById('edit-guests-list');
+    const empty = document.getElementById('edit-guests-empty');
+    list.innerHTML = '';
+    if (!guests.length) { empty.style.display = ''; return; }
+    empty.style.display = 'none';
+    guests.forEach((name, i) => {
+      const parts = name.trim().split(' ');
+      const fn = parts[0] || '';
+      const ln = parts.slice(1).join(' ') || '';
+      list.appendChild(_makeGuestRow(i, fn, ln));
+    });
+  }
+  function addEditGuestRow() {
+    const list = document.getElementById('edit-guests-list');
+    document.getElementById('edit-guests-empty').style.display = 'none';
+    const idx = list.querySelectorAll('.edit-guest-row').length;
+    const row = _makeGuestRow(idx, '', '');
+    list.appendChild(row);
+    row.querySelector('.edit-guest-first').focus();
+  }
+  function removeEditGuestRow(btn) {
+    btn.closest('.edit-guest-row').remove();
+    refreshEditGuestLabels();
+    if (!document.getElementById('edit-guests-list').querySelectorAll('.edit-guest-row').length)
+      document.getElementById('edit-guests-empty').style.display = '';
+  }
+  function refreshEditGuestLabels() {
+    document.querySelectorAll('#edit-guests-list .edit-guest-row').forEach((row, i) => {
+      row.querySelector('span').textContent = `Guest ${i + 2}`;
+    });
+  }
+  function collectEditGuests() {
+    return Array.from(document.querySelectorAll('#edit-guests-list .edit-guest-row'))
+      .map(row => {
+        const fn = row.querySelector('.edit-guest-first').value.trim();
+        const ln = row.querySelector('.edit-guest-last').value.trim();
+        return (fn + ' ' + ln).trim();
+      }).filter(Boolean).join(', ') || null;
+  }
+
   function openEditBooking(id) {
     const b = allBookings.find(x => x.id === id);
     if (!b) return;
@@ -4052,7 +4113,7 @@
     document.getElementById('edit-payment-display').value        = b.payment_method || '—';
     document.getElementById('edit-firstname').value              = firstName;
     document.getElementById('edit-lastname').value               = rest.join(' ');
-    document.getElementById('edit-additional-guests').value      = b.additional_guests || '';
+    renderEditGuestRows(b.additional_guests ? b.additional_guests.split(', ').filter(Boolean) : []);
     document.getElementById('edit-email').value                  = b.email || '';
     document.getElementById('edit-phone').value                  = b.phone || '';
     document.getElementById('edit-pickup').value                 = b.pickup || '';
@@ -4088,7 +4149,7 @@
     const phone = document.getElementById('edit-phone').value.trim();
     const dbUpdates = {
       guest,
-      additional_guests: document.getElementById('edit-additional-guests').value.trim() || null,
+      additional_guests: collectEditGuests() || null,
       email:  email || null,
       phone:  phone || null,
       pickup: document.getElementById('edit-pickup').value.trim() || null,
