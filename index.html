@@ -1813,7 +1813,7 @@ tailwind.config = {
     const { data, error } = await db.from('bookings')
       .select('*')
       .eq('partner_id', currentPartner.id)
-      .order('date', { ascending: false });
+      .order('created_at', { ascending: false });
     if (error) { console.error('bookings:', error); return; }
     partnerBookings = data || [];
     renderPartnerBookings(partnerBookings);
