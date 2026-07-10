@@ -48,8 +48,11 @@
   #edit-booking-drawer, #partner-detail-drawer, #ticket-detail-drawer { transform: translateX(100%); transition: transform 0.28s cubic-bezier(.4,0,.2,1); }
   #edit-booking-drawer.open, #partner-detail-drawer.open, #ticket-detail-drawer.open { transform: translateX(0); }
   @media print {
-    body > *:not(#voucher-print-wrap) { display: none !important; }
-    #voucher-print-wrap { display: block !important; position: fixed; inset: 0; background: white; padding: 32px; }
+    @page { size: A4 portrait; margin: 15mm; }
+    body > * { display: none !important; }
+    #modal-voucher { display: block !important; position: static !important; background: white !important; }
+    #voucher-content { display: block !important; }
+    #modal-voucher > div > div:last-child { display: none !important; }
   }
 
   /* ===== GLOBAL DARK THEME ===== */
@@ -3773,10 +3776,7 @@
     el.classList.add('hidden');
   }
   function printVoucher() {
-    const html = document.getElementById('voucher-content').innerHTML;
-    const w = window.open('', '_blank', 'width=700,height=900');
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Voucher TM</title><style>@page{size:A4 portrait;margin:15mm}body{margin:0;padding:0;font-family:Arial,sans-serif}</style></head><body>${html}<script>window.onload=function(){window.focus();window.print();}<\/script></body></html>`);
-    w.document.close();
+    window.print();
   }
 
   let editingBookingId = null;
