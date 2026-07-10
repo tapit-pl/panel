@@ -45,19 +45,28 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ error: 'confirmationCode required' }), { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } })
   }
 
-  // Step 1: GET booking by confirmation code
-  const { status: getStatus, data: booking } = await bokunFetch('GET', `/booking.json/confirmation-code/${confirmationCode}`)
-  console.log('[bokun-update-contact] GET status:', getStatus, JSON.stringify(booking).slice(0, 300))
+  // Search by confirmation code
+  const { status: searchStatus, data: searchData } = await bokunFetch('POST', '/booking.json/booking-search', {
+    confirmationCodeList: [confirmationCode],
+    pageSize: 1,
+    page: 0,
+  })
+  console.log('[bokun-update-contact] search status:', searchStatus, 'totalHits:', (searchData as Record<string,unknown>)?.totalHits, 'items:', ((searchData as Record<string,unknown>)?.items as unknown[])?.length)
 
-  if (getStatus !== 200 || !booking || typeof booking !== 'object') {
-    return new Response(JSON.stringify({ error: 'Booking not found', getStatus, confirmationCode }), {
+  const items = (searchData as Record<string, unknown>)?.items
+  const booking = Array.isArray(items) && items.length > 0 ? items[0] : null
+
+  if (!booking) {
+    return new Response(JSON.stringify({ error: 'Booking not found', searchStatus, totalHits: (searchData as Record<string,unknown>)?.totalHits }), {
       status: 404, headers: { ...CORS, 'Content-Type': 'application/json' },
     })
   }
 
-  // Step 2: patch customer fields
+  // Patch customer fields
   const bk = booking as Record<string, unknown>
   const internalId = bk.id
+  console.log('[bokun-update-contact] found booking id:', internalId, 'confirmationCode:', bk.confirmationCode)
+
   const customer = (bk.customer && typeof bk.customer === 'object' ? { ...(bk.customer as object) } : {}) as Record<string, unknown>
   if (firstName   !== undefined) customer.firstName   = firstName
   if (lastName    !== undefined) customer.lastName    = lastName
@@ -65,9 +74,9 @@ Deno.serve(async (req) => {
   if (phoneNumber !== undefined) customer.phoneNumber = phoneNumber
   bk.customer = customer
 
-  // Step 3: PUT booking back using internal id from GET response
+  // PUT booking back
   const { status: putStatus, data: putData } = await bokunFetch('PUT', `/booking.json/${internalId}`, bk)
-  console.log('[bokun-update-contact] PUT status:', putStatus, JSON.stringify(putData).slice(0, 300))
+  console.log('[bokun-update-contact] PUT status:', putStatus, JSON.stringify(putData).slice(0, 200))
 
   return new Response(JSON.stringify({ putStatus, putData }), {
     headers: { ...CORS, 'Content-Type': 'application/json' },
