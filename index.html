@@ -1847,6 +1847,65 @@ tailwind.config = {
     document.getElementById('stat-cancelled').textContent = cancelled;
   }
 
+  async function resendPaymentLink(bookingId) {
+    const b = (partnerBookings || []).find(x => x.id === bookingId);
+    if (!b) return;
+    const btn = document.querySelector(`button[onclick="resendPaymentLink('${bookingId}')"]`);
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i>'; }
+
+    try {
+      const { data: stripeRes, error: stripeErr } = await db.functions.invoke('create-stripe-session', {
+        body: {
+          booking_id: b.id,
+          bokun_reservation_code: b.bokun_confirmation_code || b.id,
+          amount_pln: b.total || 0,
+          pax: b.pax || 1,
+          tour_name: b.tour,
+          date: b.date,
+          guest_name: b.guest,
+          guest_email: b.email || null,
+        }
+      });
+      if (stripeErr || !stripeRes?.session_url) throw new Error(stripeErr?.message || 'No session URL');
+
+      await db.from('bookings').update({
+        stripe_session_id: stripeRes.session_id,
+        stripe_session_url: stripeRes.session_url,
+      }).eq('id', bookingId);
+
+      const bIdx = partnerBookings.findIndex(x => x.id === bookingId);
+      if (bIdx !== -1) {
+        partnerBookings[bIdx].stripe_session_id = stripeRes.session_id;
+        partnerBookings[bIdx].stripe_session_url = stripeRes.session_url;
+      }
+
+      if (!b.email) {
+        await navigator.clipboard.writeText(stripeRes.session_url).catch(() => {});
+        showPartnerToast('Payment link copied to clipboard!', false);
+      } else {
+        showPartnerToast('Payment link resent to ' + b.email, false);
+      }
+    } catch(e) {
+      console.error('[resendPaymentLink]', e.message);
+      showPartnerToast('Failed to resend link — check console', true);
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = b.email
+          ? '<i class="fa-solid fa-paper-plane text-xs"></i>'
+          : '<i class="fa-solid fa-copy text-xs"></i>';
+      }
+    }
+  }
+
+  function showPartnerToast(msg, isError) {
+    const t = document.createElement('div');
+    t.className = `fixed bottom-6 right-6 z-50 ${isError ? 'bg-red-500' : 'bg-green-500'} text-white text-sm font-semibold px-5 py-3.5 rounded-xl shadow-xl flex items-center gap-2`;
+    t.innerHTML = `<i class="fa-solid fa-${isError ? 'xmark' : 'check'}"></i> ${msg}`;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 4000);
+  }
+
   function renderPartnerBookings(bookings) {
     const list = document.getElementById('booking-list');
     if (!bookings.length) {
@@ -1893,6 +1952,7 @@ tailwind.config = {
         </div>
         <div class="flex gap-1.5 shrink-0">
           <button onclick="openBookingVoucher('${b.id}')" class="p-2 text-gray-400 hover:text-brand hover:bg-brand-light rounded-lg transition-colors" title="View voucher"><i class="fa-solid fa-file-pdf text-xs"></i></button>
+          ${['payment_pending','pending_payment'].includes(s) ? `<button onclick="resendPaymentLink('${b.id}')" class="p-2 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="${b.email ? 'Resend payment link to guest' : 'Copy payment link'}"><i class="fa-solid fa-${b.email ? 'paper-plane' : 'copy'} text-xs"></i></button>` : ''}
           <button onclick="openEditBooking('${b.id}')" class="p-2 text-gray-400 hover:text-brand hover:bg-brand-light rounded-lg transition-colors" title="Edit booking"><i class="fa-solid fa-pen text-xs"></i></button>
         </div>
       </div>`;
