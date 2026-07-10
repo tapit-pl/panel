@@ -2367,7 +2367,6 @@
     initSettleMonthDropdown();
     await loadPartners();
     await loadBookings();
-    db.from('tour_config').select('title, email_blocks').then(({ data }) => { if (data) allTourConfig = data; });
     await updateDashboardKPIs();
     await loadPendingChangeRequests();
 
@@ -3955,11 +3954,11 @@
       </div>`;
   }
 
-  function openVoucher(id) {
+  async function openVoucher(id) {
     const b = allBookings.find(x => x.id === id);
     if (!b) return;
-    const tourCfg = allTourConfig.find(t => t.title === b.tour);
-    const emailBlocks = tourCfg?.email_blocks || [];
+    const { data: cfgRows } = await db.from('tour_config').select('email_blocks').eq('title', b.tour).limit(1);
+    const emailBlocks = cfgRows?.[0]?.email_blocks || [];
     document.getElementById('voucher-content').innerHTML = buildVoucherHtml(b, emailBlocks);
     const el = document.getElementById('modal-voucher');
     el.style.display = 'block';
