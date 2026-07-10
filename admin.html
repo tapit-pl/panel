@@ -1742,7 +1742,7 @@
 <!-- ===================== EDIT BOOKING PANEL ===================== -->
 <div id="edit-booking-panel" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
   <div onclick="closeEditBooking()" class="absolute inset-0 bg-black/40 modal-bg"></div>
-  <div id="edit-booking-drawer" class="relative w-full max-w-md bg-white shadow-2xl flex flex-col rounded-2xl max-h-[85vh]">
+  <div id="edit-booking-drawer" class="relative w-full max-w-md bg-white shadow-2xl flex flex-col rounded-2xl" style="max-height:80vh">
     <!-- Header -->
     <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white">
       <div>
@@ -3786,6 +3786,7 @@
             ${b._partnerEdited ? `<span title="Edited by partner on ${new Date(b._partnerEditedAt).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}" class="text-blue-400 cursor-default ml-1"><i class="fa-solid fa-pen-to-square text-xs"></i></span>` : ''}
             ${b._dbBooking ? `<button onclick="openVoucher('${b.id}')" title="View voucher" class="text-gray-300 hover:text-brand transition-colors ml-1"><i class="fa-solid fa-file-pdf text-xs"></i></button>` : ''}
             ${b._dbBooking && (['to_be_paid','pending'].includes((b.status||'').toLowerCase())) ? `<button onclick="quickMarkPaid('${b.id}')" title="Mark as paid" class="text-gray-300 hover:text-green-600 transition-colors ml-2"><i class="fa-solid fa-circle-check text-xs"></i></button>` : ''}
+            ${b._dbBooking && (['payment_pending','pending_payment'].includes((b.status||'').toLowerCase())) ? `<button onclick="adminResendPaymentLink('${b.id}')" title="${b.email ? 'Resend payment link to guest' : 'Copy payment link'}" class="text-blue-300 hover:text-blue-600 transition-colors ml-2"><i class="fa-solid fa-${b.email ? 'paper-plane' : 'copy'} text-xs"></i></button>` : ''}
             ${b._dbBooking ? `<button onclick="openEditBooking('${b.id}')" title="Edit booking" class="text-gray-300 hover:text-brand transition-colors ml-2"><i class="fa-solid fa-pen text-xs"></i></button>` : ''}
             ${b._dbBooking && (b.status||'').toLowerCase() !== 'cancelled' ? `<button onclick="cancelBooking('${b.id}', '${(b.guest||'').replace(/'/g,"\\'")}', ${!!b._stripeSessionId}, true)" title="Cancel booking" class="text-gray-300 hover:text-red-500 transition-colors ml-2"><i class="fa-solid fa-xmark text-xs"></i></button>` : ''}
           </td>
@@ -4095,6 +4096,34 @@
         const ln = row.querySelector('.edit-guest-last').value.trim();
         return (fn + ' ' + ln).trim();
       }).filter(Boolean).join(', ') || null;
+  }
+
+  async function adminResendPaymentLink(bookingId) {
+    const b = allBookings.find(x => x.id === bookingId);
+    if (!b) return;
+    const btn = document.querySelector(`button[onclick="adminResendPaymentLink('${bookingId}')"]`);
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i>'; }
+    try {
+      const { data: stripeRes, error: stripeErr } = await db.functions.invoke('create-stripe-session', {
+        body: { booking_id: b.id, bokun_reservation_code: b._bokunCode || b.id, amount_pln: b.total || 0, pax: b.pax || 1, tour_name: b.tour, date: b.date, guest_name: b.guest, guest_email: b.email || null }
+      });
+      if (stripeErr || !stripeRes?.session_url) throw new Error(stripeErr?.message || 'No session URL');
+      await db.from('bookings').update({ stripe_session_id: stripeRes.session_id, stripe_session_url: stripeRes.session_url }).eq('id', bookingId);
+      if (!b.email) {
+        await navigator.clipboard.writeText(stripeRes.session_url).catch(() => {});
+        showToast('Payment link copied to clipboard');
+      } else {
+        showToast('Payment link resent to ' + b.email);
+      }
+    } catch(e) {
+      console.error('[adminResendPaymentLink]', e.message);
+      const t = document.createElement('div');
+      t.className = 'fixed bottom-6 right-6 z-50 bg-red-500 text-white text-sm font-semibold px-5 py-3.5 rounded-xl shadow-xl flex items-center gap-2';
+      t.innerHTML = '<i class="fa-solid fa-xmark"></i> Failed to resend — check console';
+      document.body.appendChild(t); setTimeout(() => t.remove(), 4000);
+    } finally {
+      if (btn) { btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-${b.email ? 'paper-plane' : 'copy'} text-xs"></i>`; }
+    }
   }
 
   function openEditBooking(id) {

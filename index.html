@@ -1438,9 +1438,9 @@ tailwind.config = {
       </div>
 
       <!-- Additional guests -->
-      <div>
-        <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Additional guests</label>
-        <textarea id="edit-additional-guests" rows="2" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand resize-none" placeholder="e.g. Anna Kowalska, Piotr Nowak"></textarea>
+      <div id="edit-guests-section" class="hidden">
+        <label class="block text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Additional guests</label>
+        <div id="edit-guests-list-partner" class="space-y-2"></div>
       </div>
 
       <!-- Email + Phone (editable) -->
@@ -1845,6 +1845,35 @@ tailwind.config = {
     document.getElementById('stat-paid').textContent      = confirmed;
     document.getElementById('stat-pending').textContent   = pending;
     document.getElementById('stat-cancelled').textContent = cancelled;
+  }
+
+  function renderPartnerGuestRows(guests) {
+    const section = document.getElementById('edit-guests-section');
+    const list = document.getElementById('edit-guests-list-partner');
+    if (!guests.length) { section.classList.add('hidden'); list.innerHTML = ''; return; }
+    section.classList.remove('hidden');
+    list.innerHTML = guests.map((name, i) => {
+      const parts = name.trim().split(' ');
+      const fn = (parts[0] || '').replace(/"/g, '&quot;');
+      const ln = parts.slice(1).join(' ').replace(/"/g, '&quot;');
+      return `<div class="partner-guest-row">
+        <div class="text-xs font-semibold text-gray-400 mb-1">Guest ${i + 2}</div>
+        <div class="grid grid-cols-2 gap-2">
+          <input type="text" value="${fn}" placeholder="First name"
+            class="partner-guest-first text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          <input type="text" value="${ln}" placeholder="Last name"
+            class="partner-guest-last text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        </div>
+      </div>`;
+    }).join('');
+  }
+  function collectPartnerGuests() {
+    return Array.from(document.querySelectorAll('#edit-guests-list-partner .partner-guest-row'))
+      .map(row => {
+        const fn = row.querySelector('.partner-guest-first').value.trim();
+        const ln = row.querySelector('.partner-guest-last').value.trim();
+        return (fn + ' ' + ln).trim();
+      }).filter(Boolean).join(', ') || null;
   }
 
   async function resendPaymentLink(bookingId) {
@@ -4274,7 +4303,7 @@ tailwind.config = {
     const nameParts = (b.guest || '').split(' ');
     document.getElementById('edit-first').value = nameParts[0] || '';
     document.getElementById('edit-last').value = nameParts.slice(1).join(' ') || '';
-    document.getElementById('edit-additional-guests').value = b.additional_guests || '';
+    renderPartnerGuestRows(b.additional_guests ? b.additional_guests.split(', ').filter(Boolean) : []);
     document.getElementById('edit-email').value = b.email || '';
     document.getElementById('edit-phone').value = b.phone || '';
     document.getElementById('edit-notes').value = b.notes || '';
@@ -4339,7 +4368,7 @@ tailwind.config = {
     const email           = document.getElementById('edit-email').value.trim();
     const phone           = document.getElementById('edit-phone').value.trim();
     const notes           = document.getElementById('edit-notes').value.trim();
-    const additionalGuests = document.getElementById('edit-additional-guests').value.trim();
+    const additionalGuests = collectPartnerGuests();
 
     const b = partnerBookings.find(x => String(x.id) === String(editingBookingId));
 
