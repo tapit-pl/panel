@@ -4286,7 +4286,12 @@ tailwind.config = {
     rows.forEach(row => {
       const status = row.dataset.status || '';
       const search = row.dataset.search || '';
-      const matchStatus = bookingActiveStatus === 'all' || status === bookingActiveStatus;
+      const statusGroups = {
+        paid:      ['paid', 'confirmed'],
+        pending:   ['pending', 'pending_payment'],
+        cancelled: ['cancelled'],
+      };
+      const matchStatus = bookingActiveStatus === 'all' || (statusGroups[bookingActiveStatus] || [bookingActiveStatus]).includes(status);
       const matchSearch = !q || search.includes(q);
       const show = matchStatus && matchSearch;
       row.style.display = show ? '' : 'none';
