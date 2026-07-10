@@ -3762,16 +3762,15 @@
   function openVoucher(id) {
     const b = allBookings.find(x => x.id === id);
     if (!b) return;
-    console.log('[openVoucher] status:', JSON.stringify(b.status));
     document.getElementById('voucher-content').innerHTML = buildVoucherHtml(b);
-    document.getElementById('modal-voucher').classList.remove('hidden');
+    const el = document.getElementById('modal-voucher');
+    el.style.display = 'block';
+    el.classList.remove('hidden');
   }
   function closeVoucher() {
-    console.log('[closeVoucher] called');
     const el = document.getElementById('modal-voucher');
-    console.log('[closeVoucher] el:', el, 'classes before:', el?.className);
-    if (el) { el.classList.add('hidden'); el.style.display = 'none'; }
-    console.log('[closeVoucher] classes after:', el?.className);
+    el.style.display = 'none';
+    el.classList.add('hidden');
   }
   function printVoucher() {
     const html = document.getElementById('voucher-content').innerHTML;
