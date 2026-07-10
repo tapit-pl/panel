@@ -3954,9 +3954,13 @@
       </div>`;
   }
 
-  function openVoucher(id) {
+  async function openVoucher(id) {
     const b = allBookings.find(x => x.id === id);
     if (!b) return;
+    if (!tourConfigLoaded && allTourConfig.length === 0) {
+      const { data } = await db.from('tour_config').select('title, email_blocks');
+      if (data) allTourConfig = data;
+    }
     document.getElementById('voucher-content').innerHTML = buildVoucherHtml(b);
     const el = document.getElementById('modal-voucher');
     el.style.display = 'block';
