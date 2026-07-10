@@ -49,10 +49,9 @@
   #edit-booking-drawer.open, #partner-detail-drawer.open, #ticket-detail-drawer.open { transform: translateX(0); }
   @media print {
     @page { size: A4 portrait; margin: 15mm; }
-    body > * { display: none !important; }
-    #modal-voucher { display: block !important; position: static !important; background: white !important; }
-    #voucher-content { display: block !important; }
-    #modal-voucher > div > div:last-child { display: none !important; }
+    body * { visibility: hidden !important; }
+    #voucher-content, #voucher-content * { visibility: visible !important; }
+    #voucher-content { position: fixed !important; top: 0; left: 0; width: 100%; background: white; }
   }
 
   /* ===== GLOBAL DARK THEME ===== */
