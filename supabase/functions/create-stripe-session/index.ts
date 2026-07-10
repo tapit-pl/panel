@@ -16,6 +16,7 @@ Deno.serve(async (req) => {
   params.set('line_items[0][price_data][product_data][description]', `${date} · ${pax} os.`)
   params.set('line_items[0][price_data][unit_amount]', String(Math.round(amount_pln * 100)))
   params.set('line_items[0][quantity]', '1')
+  params.set('expires_at', String(Math.floor(Date.now() / 1000) + 30 * 60))
   params.set('success_url', 'https://panel.thousandmiles.pl/payment-success.html')
   params.set('cancel_url', 'https://panel.thousandmiles.pl/payment-cancel.html')
   params.set('metadata[booking_id]', String(booking_id))
@@ -54,7 +55,11 @@ Deno.serve(async (req) => {
                style="display:inline-block;background:#E8751A;color:#fff;text-decoration:none;padding:14px 28px;border-radius:12px;font-weight:600;font-size:15px">
               Pay now — ${amount_pln} PLN
             </a>
-            <p style="color:#999;font-size:12px;margin-top:24px">This link expires in 24 hours. Questions? Reply to this email.</p>
+            <p style="color:#999;font-size:12px;margin-top:24px">Questions? Reply to this email or contact us at rezerwacje@thousandmiles.pl</p>
+            <div style="margin-top:16px;padding:12px 16px;background:#FEF3C7;border-radius:8px;border-left:4px solid #F59E0B">
+              <p style="margin:0;color:#92400E;font-size:13px;font-weight:600">Please note</p>
+              <p style="margin:4px 0 0;color:#92400E;font-size:13px">Your spot is reserved for 30 minutes. Please complete payment promptly to secure your booking.</p>
+            </div>
 
             <div style="margin-top:36px;border-top:2px solid #eee;padding-top:28px">
               <div style="display:inline-block;background:#DC2626;color:#fff;font-size:11px;font-weight:700;letter-spacing:1px;padding:4px 12px;border-radius:6px;margin-bottom:20px">PAYMENT PENDING</div>

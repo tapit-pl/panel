@@ -386,6 +386,29 @@
             </div>
           </div>
 
+          <!-- URGENT: pending change requests -->
+          <div id="urgent-section" class="hidden mb-4 rounded-xl overflow-hidden" style="border:1px solid rgba(239,68,68,0.4); background:#1a1010">
+            <div class="flex items-center gap-2 px-5 py-3" style="background:rgba(239,68,68,0.15); border-bottom:1px solid rgba(239,68,68,0.25)">
+              <i class="fa-solid fa-triangle-exclamation text-red-400 text-sm"></i>
+              <span class="text-sm font-bold text-red-300">Urgent — Pending change requests</span>
+              <span id="urgent-count" class="ml-auto text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-full">0</span>
+            </div>
+            <div id="urgent-list" class="divide-y" style="divide-color:rgba(255,255,255,0.06)"></div>
+          </div>
+
+          <!-- Reject reason modal -->
+          <div id="modal-reject-request" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 fade-in">
+              <h3 class="font-bold text-dark text-sm mb-1">Reject change request</h3>
+              <p class="text-xs text-gray-500 mb-4">Add a comment explaining why the request is rejected (optional).</p>
+              <textarea id="reject-comment" rows="3" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-300 resize-none mb-4" placeholder="Reason for rejection…"></textarea>
+              <div class="flex gap-2">
+                <button onclick="document.getElementById('modal-reject-request').classList.add('hidden')" class="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-500 hover:bg-gray-50">Cancel</button>
+                <button onclick="confirmRejectRequest()" class="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition-colors">Reject</button>
+              </div>
+            </div>
+          </div>
+
           <!-- Chart + top hotels -->
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-4">
 
@@ -1731,21 +1754,54 @@
     <!-- Form -->
     <div class="flex-1 overflow-y-auto px-6 py-5 space-y-4">
 
+      <!-- READ-ONLY section label -->
+      <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Tour details (read-only)</div>
+
       <div>
-        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Tour</label>
-        <input id="edit-tour" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        <label class="block text-xs font-semibold text-gray-500 mb-1.5">Tour</label>
+        <input id="edit-tour" type="text" readonly class="w-full text-sm border border-gray-100 rounded-xl px-3 py-2.5 bg-gray-50 text-gray-500 cursor-not-allowed">
       </div>
 
       <div class="grid grid-cols-2 gap-3">
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Date</label>
-          <input id="edit-date" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5">Date</label>
+          <input id="edit-date" type="text" readonly class="w-full text-sm border border-gray-100 rounded-xl px-3 py-2.5 bg-gray-50 text-gray-500 cursor-not-allowed">
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Time</label>
-          <input id="edit-time" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5">Time</label>
+          <input id="edit-time" type="text" readonly class="w-full text-sm border border-gray-100 rounded-xl px-3 py-2.5 bg-gray-50 text-gray-500 cursor-not-allowed">
         </div>
       </div>
+
+      <div class="grid grid-cols-3 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5">Pax</label>
+          <input id="edit-pax" type="text" readonly class="w-full text-sm border border-gray-100 rounded-xl px-3 py-2.5 bg-gray-50 text-gray-500 cursor-not-allowed">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5">Total (zł)</label>
+          <input id="edit-total" type="text" readonly class="w-full text-sm border border-gray-100 rounded-xl px-3 py-2.5 bg-gray-50 text-gray-500 cursor-not-allowed">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5">Commission</label>
+          <input id="edit-comm" type="text" readonly class="w-full text-sm border border-gray-100 rounded-xl px-3 py-2.5 bg-gray-50 text-gray-500 cursor-not-allowed">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5">Partner</label>
+          <input id="edit-hotel-display" type="text" readonly class="w-full text-sm border border-gray-100 rounded-xl px-3 py-2.5 bg-gray-50 text-gray-500 cursor-not-allowed">
+          <select id="edit-hotel" class="hidden"></select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5">Payment</label>
+          <input id="edit-payment-display" type="text" readonly class="w-full text-sm border border-gray-100 rounded-xl px-3 py-2.5 bg-gray-50 text-gray-500 cursor-not-allowed">
+        </div>
+      </div>
+
+      <!-- EDITABLE section label -->
+      <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider pt-2">Guest details (editable)</div>
 
       <div class="grid grid-cols-2 gap-3">
         <div>
@@ -1756,6 +1812,11 @@
           <label class="block text-xs font-semibold text-gray-600 mb-1.5">Last name</label>
           <input id="edit-lastname" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
         </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Additional guests</label>
+        <textarea id="edit-additional-guests" rows="2" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand resize-none" placeholder="e.g. Anna Kowalska, Piotr Nowak"></textarea>
       </div>
 
       <div class="grid grid-cols-2 gap-3">
@@ -1769,33 +1830,9 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Partner</label>
-          <select id="edit-hotel" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-dark">
-            <option value="—">— direct —</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Pax</label>
-          <input id="edit-pax" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-        </div>
-      </div>
-
       <div>
         <label class="block text-xs font-semibold text-gray-600 mb-1.5">Pickup point</label>
         <input id="edit-pickup" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-      </div>
-
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Total (zł)</label>
-          <input id="edit-total" type="number" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Commission (zł)</label>
-          <input id="edit-comm" type="number" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-        </div>
       </div>
 
       <div>
@@ -1814,12 +1851,18 @@
         <textarea id="edit-notes" rows="3" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand resize-none" placeholder="Internal notes…"></textarea>
       </div>
 
-      <!-- Source info (read-only) -->
-      <div class="bg-gray-50 rounded-xl px-4 py-3 text-xs text-gray-500 flex items-center gap-2">
-        <i class="fa-solid fa-circle-info text-gray-400"></i>
-        Source: <span id="edit-source-label" class="font-semibold text-dark ml-1">—</span>
-        <span class="text-gray-300 mx-1">·</span>
-        Bokun ID: <span id="edit-bokun-id" class="font-mono font-semibold text-dark ml-1">—</span>
+      <!-- Source info + Bokun disclaimer -->
+      <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-700 space-y-1">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
+          <span class="font-semibold">Changes apply to this panel only — Bokun will not be updated.</span>
+        </div>
+        <div class="flex items-center gap-2 text-gray-500 pt-0.5">
+          <i class="fa-solid fa-circle-info text-gray-400"></i>
+          Source: <span id="edit-source-label" class="font-semibold text-dark ml-1">—</span>
+          <span class="text-gray-300 mx-1">·</span>
+          Bokun ID: <span id="edit-bokun-id" class="font-mono font-semibold text-dark ml-1">—</span>
+        </div>
       </div>
 
     </div>
@@ -1831,7 +1874,8 @@
       </label>
       <div class="flex gap-2">
         <button onclick="saveEditBooking()" class="flex-1 bg-brand hover:bg-brand-dark text-white text-sm font-semibold py-2.5 rounded-xl transition-colors">Save changes</button>
-        <button onclick="closeEditBooking()" class="px-5 py-2.5 border border-gray-200 text-gray-500 text-sm font-semibold rounded-xl hover:bg-white transition-colors">Cancel</button>
+        <button onclick="resendConfirmationEmail()" id="edit-resend-btn" title="Resend confirmation email" class="px-4 py-2.5 border border-gray-200 text-gray-500 text-sm rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-1.5"><i class="fa-solid fa-envelope text-xs"></i> Resend</button>
+        <button onclick="closeEditBooking()" class="px-4 py-2.5 border border-gray-200 text-gray-500 text-sm font-semibold rounded-xl hover:bg-white transition-colors">Cancel</button>
       </div>
     </div>
   </div>
@@ -2190,6 +2234,119 @@
     if (searchEl) { searchEl.value = q; filterAllBookings(); }
   }
 
+  // ---- CHANGE REQUEST SYSTEM ----
+
+  let rejectingRequestId = null;
+
+  const CHANGE_FIELD_LABELS = {
+    guest: 'Guest name', additional_guests: 'Additional guests',
+    email: 'Email', phone: 'Phone', notes: 'Notes',
+  };
+
+  async function loadPendingChangeRequests() {
+    const { data, error } = await db.from('booking_change_requests')
+      .select('*').eq('status', 'pending').order('created_at', { ascending: false });
+    if (error) { console.warn('[Urgent]', error.message); return; }
+    renderUrgentSection(data || []);
+  }
+
+  function renderUrgentSection(requests) {
+    const section = document.getElementById('urgent-section');
+    const list    = document.getElementById('urgent-list');
+    const count   = document.getElementById('urgent-count');
+    if (!requests.length) { section.classList.add('hidden'); return; }
+    section.classList.remove('hidden');
+    count.textContent = requests.length;
+    list.innerHTML = requests.map(r => {
+      const changesHtml = Object.entries(r.changes || {}).map(([field, diff]) =>
+        `<span class="inline-block text-xs mr-2 mb-1">
+          <span class="font-semibold text-slate-300">${CHANGE_FIELD_LABELS[field] || field}:</span>
+          <span class="text-slate-500 line-through ml-1">${diff.old || '(empty)'}</span>
+          <span class="text-green-400 ml-1">→ ${diff.new || '(empty)'}</span>
+        </span>`
+      ).join('');
+      const date = new Date(r.created_at).toLocaleString('en', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+      return `
+        <div class="px-5 py-4">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex-1 min-w-0">
+              <div class="text-xs font-bold text-white mb-0.5">${r.partner_name || '—'} · <span class="font-mono text-slate-400">#${String(r.booking_id).slice(0,8).toUpperCase()}</span></div>
+              <div class="text-xs text-slate-500 mb-2">${date}</div>
+              <div class="flex flex-wrap">${changesHtml}</div>
+            </div>
+            <div class="flex gap-2 shrink-0">
+              <button onclick="approveChangeRequest('${r.id}')" class="text-xs px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold transition-colors">Approve</button>
+              <button onclick="openRejectModal('${r.id}')" class="text-xs px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold transition-colors">Reject</button>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  async function approveChangeRequest(requestId) {
+    const { data: req, error: fetchErr } = await db.from('booking_change_requests').select('*').eq('id', requestId).single();
+    if (fetchErr || !req) { showToast('Error fetching request'); return; }
+
+    // Apply changes to booking
+    const updates = {};
+    for (const [field, diff] of Object.entries(req.changes || {})) updates[field] = diff.new || null;
+    if (updates.guest !== undefined) {
+      const parts = (updates.guest || '').split(' ');
+      updates.guest = updates.guest;
+    }
+
+    const { error: updateErr } = await db.from('bookings').update(updates).eq('id', req.booking_id);
+    if (updateErr) { showToast('Update failed: ' + updateErr.message); return; }
+
+    // Mark request as approved
+    await db.from('booking_change_requests').update({ status: 'approved', resolved_at: new Date().toISOString() }).eq('id', requestId);
+
+    // Notify partner
+    await db.from('notifications').insert({
+      target: req.partner_id,
+      type: 'success',
+      title: 'Change request approved',
+      message: `Your change request for booking #${String(req.booking_id).slice(0,8).toUpperCase()} has been approved and applied.`,
+    });
+
+    await loadPendingChangeRequests();
+    await loadBookings();
+    showToast('Change request approved ✓');
+  }
+
+  function openRejectModal(requestId) {
+    rejectingRequestId = requestId;
+    document.getElementById('reject-comment').value = '';
+    const m = document.getElementById('modal-reject-request');
+    m.classList.remove('hidden');
+  }
+
+  async function confirmRejectRequest() {
+    if (!rejectingRequestId) return;
+    const comment = document.getElementById('reject-comment').value.trim();
+    const { data: req } = await db.from('booking_change_requests').select('*').eq('id', rejectingRequestId).single();
+
+    await db.from('booking_change_requests').update({
+      status: 'rejected', admin_comment: comment || null, resolved_at: new Date().toISOString(),
+    }).eq('id', rejectingRequestId);
+
+    if (req) {
+      await db.from('notifications').insert({
+        target: req.partner_id,
+        type: 'warning',
+        title: 'Change request rejected',
+        message: `Your change request for booking #${String(req.booking_id).slice(0,8).toUpperCase()} was not approved.${comment ? ' Reason: ' + comment : ''}`,
+      });
+    }
+
+    document.getElementById('modal-reject-request').classList.add('hidden');
+    rejectingRequestId = null;
+    await loadPendingChangeRequests();
+    showToast('Change request rejected');
+  }
+
+  // ---- END CHANGE REQUEST SYSTEM ----
+
   async function initDashboard() {
     showScreen('screen-admin');
     const dateEl = document.getElementById('header-date');
@@ -2208,6 +2365,7 @@
     await loadPartners();
     await loadBookings();
     await updateDashboardKPIs();
+    await loadPendingChangeRequests();
 
     db.channel('bookings-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, async () => {
@@ -2375,6 +2533,7 @@
         hotel: partner?.name || '—', date: dateFormatted, time: b.time, pickup: b.pickup,
         language: b.language || '',
         pax: b.pax, total: dbTotal, currency: dbCurrency, comm: b.comm, source, status: b.status, notes: b.notes || '',
+        additional_guests: b.additional_guests || '', payment_method: b.payment_method || '',
         _dbBooking: true, _stripeSessionId: b.stripe_session_id, _bokunCode: b.bokun_confirmation_code,
         _bokunBookingId: b.bokun_booking_id || null, _paymentType: b.payment_type || null,
         _creationTs: b.created_at ? new Date(b.created_at).getTime() : 0,
@@ -2458,6 +2617,21 @@
       const tours = [...new Set(allBookings.map(b => b.tour).filter(Boolean))].sort();
       tourSel.innerHTML = '<option value="">All tours</option>' + tours.map(t => `<option value="${t}">${t}</option>`).join('');
     }
+
+    // Mark bookings edited by partner (from audit_log)
+    try {
+      const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 30);
+      const { data: edits } = await db.from('audit_log')
+        .select('details, created_at').eq('action', 'partner_edit_booking')
+        .gte('created_at', cutoff.toISOString()).order('created_at', { ascending: false });
+      if (edits?.length) {
+        const editMap = new Map();
+        edits.forEach(e => {
+          try { const p = JSON.parse(e.details); if (p.booking_id) editMap.set(p.booking_id, e.created_at); } catch {}
+        });
+        allBookings.forEach(b => { if (editMap.has(b.id)) { b._partnerEdited = true; b._partnerEditedAt = editMap.get(b.id); } });
+      }
+    } catch {}
 
     setBookingView('recent');
 
@@ -3603,6 +3777,7 @@
           <td class="px-4 py-3 text-center">${statusBadge(b.status)}</td>
           <td class="px-4 py-3 text-right whitespace-nowrap">
             ${b.notes ? `<span title="${(b.notes||'').replace(/"/g,'&quot;')}" class="text-amber-400 cursor-default ml-1"><i class="fa-solid fa-note-sticky text-xs"></i></span>` : ''}
+            ${b._partnerEdited ? `<span title="Edited by partner on ${new Date(b._partnerEditedAt).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}" class="text-blue-400 cursor-default ml-1"><i class="fa-solid fa-pen-to-square text-xs"></i></span>` : ''}
             ${b._dbBooking ? `<button onclick="openVoucher('${b.id}')" title="View voucher" class="text-gray-300 hover:text-brand transition-colors ml-1"><i class="fa-solid fa-file-pdf text-xs"></i></button>` : ''}
             ${b._dbBooking && (['to_be_paid','pending'].includes((b.status||'').toLowerCase())) ? `<button onclick="quickMarkPaid('${b.id}')" title="Mark as paid" class="text-gray-300 hover:text-green-600 transition-colors ml-2"><i class="fa-solid fa-circle-check text-xs"></i></button>` : ''}
             ${b._dbBooking ? `<button onclick="openContactEdit('${b.id}')" title="Edit guest details" class="text-gray-300 hover:text-brand transition-colors ml-2"><i class="fa-solid fa-pen text-xs"></i></button>` : ''}
@@ -3863,27 +4038,29 @@
     const b = allBookings.find(x => x.id === id);
     if (!b) return;
     editingBookingId = id;
-    const [firstName, ...rest] = b.guest.split(' ');
-    document.getElementById('edit-booking-ref').textContent  = b.id;
-    document.getElementById('edit-tour').value        = b.tour;
-    document.getElementById('edit-date').value        = b.date;
-    document.getElementById('edit-time').value        = b.time;
-    document.getElementById('edit-firstname').value   = firstName;
-    document.getElementById('edit-lastname').value    = rest.join(' ');
-    document.getElementById('edit-email').value       = b.email;
-    document.getElementById('edit-phone').value       = b.phone;
-    document.getElementById('edit-pax').value         = b.pax;
-    document.getElementById('edit-pickup').value      = b.pickup;
-    document.getElementById('edit-total').value       = b.total;
-    document.getElementById('edit-comm').value        = b.comm;
-    document.getElementById('edit-notes').value       = b.notes || '';
-    document.getElementById('edit-status').value      = b.status;
-    document.getElementById('edit-source-label').textContent = b.source;
-    document.getElementById('edit-bokun-id').textContent     = b.source === 'Bokun' ? b.id : '—';
-    document.getElementById('edit-confirm-check').checked    = false;
-    const hotelSel = document.getElementById('edit-hotel');
-    const hotelVal = b.hotel === '—' ? '—' : Object.values({Wawel:'Wawel',Stary:'Stary',Copernicus:'Copernicus','Pod Różą':'Pod Różą'}).find(v => b.hotel.toLowerCase().includes(v.toLowerCase())) || '—';
-    hotelSel.value = hotelVal;
+    const [firstName, ...rest] = (b.guest || '').split(' ');
+    document.getElementById('edit-booking-ref').textContent      = b._bokunCode || ('TM-' + b.id.slice(0,8).toUpperCase());
+    document.getElementById('edit-tour').value                   = b.tour;
+    document.getElementById('edit-date').value                   = b.date;
+    document.getElementById('edit-time').value                   = b.time;
+    document.getElementById('edit-pax').value                    = b.pax;
+    document.getElementById('edit-total').value                  = b.total;
+    document.getElementById('edit-comm').value                   = b.comm;
+    document.getElementById('edit-hotel-display').value          = b.hotel || '— direct —';
+    document.getElementById('edit-payment-display').value        = b.payment_method || '—';
+    document.getElementById('edit-firstname').value              = firstName;
+    document.getElementById('edit-lastname').value               = rest.join(' ');
+    document.getElementById('edit-additional-guests').value      = b.additional_guests || '';
+    document.getElementById('edit-email').value                  = b.email || '';
+    document.getElementById('edit-phone').value                  = b.phone || '';
+    document.getElementById('edit-pickup').value                 = b.pickup || '';
+    document.getElementById('edit-notes').value                  = b.notes || '';
+    document.getElementById('edit-status').value                 = b.status;
+    document.getElementById('edit-source-label').textContent     = b.source;
+    document.getElementById('edit-bokun-id').textContent         = b._bokunCode || '—';
+    document.getElementById('edit-confirm-check').checked        = false;
+    const resendBtn = document.getElementById('edit-resend-btn');
+    if (resendBtn) resendBtn.disabled = !b.email;
     const panel = document.getElementById('edit-booking-panel');
     panel.classList.remove('hidden');
     requestAnimationFrame(() => document.getElementById('edit-booking-drawer').classList.add('open'));
@@ -3908,16 +4085,11 @@
     const email = document.getElementById('edit-email').value.trim();
     const phone = document.getElementById('edit-phone').value.trim();
     const dbUpdates = {
-      tour:   document.getElementById('edit-tour').value.trim(),
-      date:   document.getElementById('edit-date').value.trim(),
-      time:   document.getElementById('edit-time').value.trim(),
       guest,
+      additional_guests: document.getElementById('edit-additional-guests').value.trim() || null,
       email:  email || null,
       phone:  phone || null,
-      pax:    parseInt(document.getElementById('edit-pax').value) || null,
       pickup: document.getElementById('edit-pickup').value.trim() || null,
-      total:  parseFloat(document.getElementById('edit-total').value) || null,
-      comm:   parseFloat(document.getElementById('edit-comm').value) || null,
       notes:  document.getElementById('edit-notes').value.trim() || null,
       status: document.getElementById('edit-status').value,
     };
@@ -3926,18 +4098,8 @@
     if (error) {
       console.error('[Admin] booking update failed:', error.message);
     } else {
-      // Update in-memory cache
-      Object.assign(b, { ...dbUpdates, guest, email, phone });
+      Object.assign(b, dbUpdates);
       renderBookingsTable();
-
-      // Sync guest details to Bokun (best-effort)
-      if (b._bokunBookingId) {
-        try {
-          await db.functions.invoke('bokun-sync', {
-            body: { path: `/booking.json/${b._bokunBookingId}/customer`, method: 'PUT', payload: { firstName: fn, lastName: ln, email: email || undefined, phoneNumber: phone || undefined } },
-          });
-        } catch(e) { console.warn('[Bokun] customer update failed:', e?.message); }
-      }
     }
 
     closeEditBooking();
@@ -3949,6 +4111,28 @@
       : '<i class="fa-solid fa-xmark"></i> Save failed — check console.';
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3500);
+  }
+
+  async function resendConfirmationEmail() {
+    const b = allBookings.find(x => x.id === editingBookingId);
+    if (!b || !b.email) return;
+    const btn = document.getElementById('edit-resend-btn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i> Sending…'; }
+    let ok = false;
+    try {
+      await db.functions.invoke('send-booking-confirmation', { body: {
+        bookingId: b.id, tour: b.tour, date: b.date, time: b.time,
+        guest: b.guest, email: b.email, phone: b.phone, pax: b.pax,
+        total: b.total, pickup: b.pickup, notes: b.notes,
+      }});
+      ok = true;
+    } catch(e) { console.warn('[Resend]', e?.message); }
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-envelope text-xs"></i> Resend'; }
+    const t = document.createElement('div');
+    t.className = `fixed bottom-6 right-6 z-50 ${ok ? 'bg-green-500' : 'bg-red-500'} text-white text-sm font-semibold px-5 py-3.5 rounded-xl shadow-xl flex items-center gap-2 fade-in`;
+    t.innerHTML = ok ? '<i class="fa-solid fa-check"></i> Confirmation email sent' : '<i class="fa-solid fa-xmark"></i> Email failed — check console';
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
   }
 
   const TOURS_LIST = [

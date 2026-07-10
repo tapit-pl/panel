@@ -1404,15 +1404,25 @@ tailwind.config = {
           <div id="edit-time" class="px-3 py-2.5 bg-gray-50 rounded-xl text-sm text-gray-600 border border-gray-100"></div>
         </div>
       </div>
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-3 gap-3">
         <div>
           <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Pax</label>
           <div id="edit-pax" class="px-3 py-2.5 bg-gray-50 rounded-xl text-sm text-gray-600 border border-gray-100"></div>
         </div>
         <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Total</label>
+          <div id="edit-total-display" class="px-3 py-2.5 bg-gray-50 rounded-xl text-sm text-gray-600 border border-gray-100"></div>
+        </div>
+        <div>
           <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Status</label>
           <div id="edit-status-display" class="px-3 py-2.5 bg-gray-50 rounded-xl text-sm text-gray-600 border border-gray-100"></div>
         </div>
+      </div>
+
+      <!-- 1h time limit warning (shown when > 1h after booking creation) -->
+      <div id="edit-time-limit-banner" class="hidden bg-orange-50 border border-orange-200 rounded-xl px-4 py-3 text-xs text-orange-700">
+        <div class="flex items-center gap-2 font-semibold mb-1"><i class="fa-solid fa-clock"></i> More than 1 hour has passed since this booking was created.</div>
+        <div>You can no longer edit directly. Fill in the form below to submit a change request — our team will review and apply the changes.</div>
       </div>
 
       <!-- Guest name (editable) -->
@@ -1425,6 +1435,12 @@ tailwind.config = {
           <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Last name</label>
           <input id="edit-last" type="text" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
         </div>
+      </div>
+
+      <!-- Additional guests -->
+      <div>
+        <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Additional guests</label>
+        <textarea id="edit-additional-guests" rows="2" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand resize-none" placeholder="e.g. Anna Kowalska, Piotr Nowak"></textarea>
       </div>
 
       <!-- Email + Phone (editable) -->
@@ -3112,6 +3128,7 @@ tailwind.config = {
       bokun_confirmation_code: payment === 'link' ? (bokunReservationCode || null) : (bokunConfirmationCode || null),
       bokun_booking_id: bokunBookingId,
       notes: notes || null,
+      additional_guests: extraGuests.length ? extraGuests.join(', ') : null,
     });
 
     btn.disabled = false;
@@ -4171,25 +4188,45 @@ tailwind.config = {
   let bookingActiveStatus = 'all';
   let editingBookingId = null;
 
+  let editIsChangeRequest = false;
+
   function openEditBooking(bookingId) {
     const b = partnerBookings.find(x => String(x.id) === String(bookingId));
     if (!b) return;
     editingBookingId = bookingId;
 
-    document.getElementById('edit-booking-subtitle').textContent = `#${b.id} · ${b.tour || ''}`;
+    const displayId = b.bokun_confirmation_code || ('TM-' + String(b.id).slice(0,8).toUpperCase());
+    document.getElementById('edit-booking-subtitle').textContent = `${displayId} · ${b.tour || ''}`;
     document.getElementById('edit-tour-name').textContent = b.tour || '—';
     document.getElementById('edit-date').textContent = b.date || '—';
     document.getElementById('edit-time').textContent = b.time || '—';
     document.getElementById('edit-pax').textContent = b.pax ? `${b.pax} guest${b.pax > 1 ? 's' : ''}` : '—';
-    document.getElementById('edit-status-display').textContent = b.status || '—';
+    document.getElementById('edit-total-display').textContent = b.total ? `${b.total} zł` : '—';
+    document.getElementById('edit-status-display').textContent = STATUS_LABELS[b.status] || b.status || '—';
     const nameParts = (b.guest || '').split(' ');
     document.getElementById('edit-first').value = nameParts[0] || '';
     document.getElementById('edit-last').value = nameParts.slice(1).join(' ') || '';
+    document.getElementById('edit-additional-guests').value = b.additional_guests || '';
     document.getElementById('edit-email').value = b.email || '';
     document.getElementById('edit-phone').value = b.phone || '';
     document.getElementById('edit-notes').value = b.notes || '';
     document.getElementById('edit-confirm-check').checked = false;
     document.getElementById('edit-booking-error').classList.add('hidden');
+
+    // 1-hour edit window check
+    const createdAt = b.created_at ? new Date(b.created_at) : null;
+    const ageMs = createdAt ? (Date.now() - createdAt.getTime()) : Infinity;
+    editIsChangeRequest = ageMs > 60 * 60 * 1000;
+    const banner = document.getElementById('edit-time-limit-banner');
+    const saveBtn = document.getElementById('edit-save-btn');
+    if (editIsChangeRequest) {
+      banner.classList.remove('hidden');
+      saveBtn.textContent = 'Request change';
+    } else {
+      banner.classList.add('hidden');
+      saveBtn.textContent = 'Save changes';
+    }
+
     toggleEditSaveBtn();
 
     const m = document.getElementById('modal-edit-booking');
@@ -4229,37 +4266,93 @@ tailwind.config = {
 
     const btn = document.getElementById('edit-save-btn');
     btn.disabled = true;
-    btn.textContent = 'Saving...';
+    btn.textContent = editIsChangeRequest ? 'Sending request...' : 'Saving...';
 
-    const email = document.getElementById('edit-email').value.trim();
-    const phone = document.getElementById('edit-phone').value.trim();
-    const notes = document.getElementById('edit-notes').value.trim();
+    const email           = document.getElementById('edit-email').value.trim();
+    const phone           = document.getElementById('edit-phone').value.trim();
+    const notes           = document.getElementById('edit-notes').value.trim();
+    const additionalGuests = document.getElementById('edit-additional-guests').value.trim();
 
+    const b = partnerBookings.find(x => String(x.id) === String(editingBookingId));
+
+    if (editIsChangeRequest) {
+      // Build changes diff
+      const changes = {};
+      const newGuest = `${firstName} ${lastName}`;
+      if (newGuest !== (b?.guest || ''))           changes.guest            = { old: b?.guest || '', new: newGuest };
+      if (additionalGuests !== (b?.additional_guests || '')) changes.additional_guests = { old: b?.additional_guests || '', new: additionalGuests };
+      if (email !== (b?.email || ''))              changes.email            = { old: b?.email || '', new: email };
+      if (phone !== (b?.phone || ''))              changes.phone            = { old: b?.phone || '', new: phone };
+      if (notes !== (b?.notes || ''))              changes.notes            = { old: b?.notes || '', new: notes };
+
+      if (Object.keys(changes).length === 0) {
+        errEl.textContent = 'No changes detected.';
+        errEl.classList.remove('hidden');
+        btn.disabled = false; btn.textContent = 'Request change'; toggleEditSaveBtn();
+        return;
+      }
+
+      const { error } = await db.from('booking_change_requests').insert({
+        booking_id:   String(editingBookingId),
+        partner_id:   currentPartner.id,
+        partner_name: currentPartner.name,
+        changes,
+      });
+
+      if (error) {
+        errEl.textContent = error.message;
+        errEl.classList.remove('hidden');
+        btn.disabled = false; btn.textContent = 'Request change'; toggleEditSaveBtn();
+        return;
+      }
+
+      // Notify admin via email
+      try {
+        await db.functions.invoke('notify-admin-change-request', { body: {
+          booking_id: String(editingBookingId),
+          partner_name: currentPartner.name,
+          changes,
+        }});
+      } catch(e) { console.warn('[notify-admin]', e?.message); }
+
+      closeEditBooking();
+      await loadPartnerBookings();
+      // Show success message
+      const t = document.createElement('div');
+      t.className = 'fixed bottom-6 right-6 z-50 bg-green-500 text-white text-sm font-semibold px-5 py-3.5 rounded-xl shadow-xl flex items-center gap-2 fade-in';
+      t.innerHTML = '<i class="fa-solid fa-check"></i> Change request submitted — our team will review it.';
+      document.body.appendChild(t); setTimeout(() => t.remove(), 5000);
+      return;
+    }
+
+    // Direct edit (within 1h)
     const updates = {
-      guest: `${firstName} ${lastName}`,
-      email: email || null,
-      phone: phone || null,
-      notes: notes || null,
+      guest:             `${firstName} ${lastName}`,
+      additional_guests: additionalGuests || null,
+      email:             email || null,
+      phone:             phone || null,
+      notes:             notes || null,
     };
+
+    // Build changes diff for audit log
+    const changes = {};
+    if (updates.guest !== (b?.guest || ''))                         changes.guest            = { old: b?.guest || '', new: updates.guest };
+    if ((additionalGuests || '') !== (b?.additional_guests || ''))  changes.additional_guests = { old: b?.additional_guests || '', new: additionalGuests };
+    if ((email || '') !== (b?.email || ''))                         changes.email            = { old: b?.email || '', new: email };
+    if ((phone || '') !== (b?.phone || ''))                         changes.phone            = { old: b?.phone || '', new: phone };
+    if ((notes || '') !== (b?.notes || ''))                         changes.notes            = { old: b?.notes || '', new: notes };
 
     const { error } = await db.from('bookings').update(updates).eq('id', editingBookingId);
     if (error) {
       errEl.textContent = error.message;
       errEl.classList.remove('hidden');
-      btn.disabled = false;
-      btn.textContent = 'Save changes';
-      toggleEditSaveBtn();
+      btn.disabled = false; btn.textContent = 'Save changes'; toggleEditSaveBtn();
       return;
     }
 
-    // Sync guest details to Bokun (best-effort)
-    const b = partnerBookings.find(x => String(x.id) === String(editingBookingId));
-    if (b?.bokun_booking_id) {
-      try {
-        await db.functions.invoke('bokun-sync', {
-          body: { path: `/booking.json/${b.bokun_booking_id}/customer`, method: 'PUT', payload: { firstName, lastName, email: email || undefined, phoneNumber: phone || undefined } },
-        });
-      } catch(e) { console.warn('[Bokun] customer update failed:', e?.message); }
+    // Audit log
+    if (Object.keys(changes).length > 0) {
+      logPartnerActivity('partner_edit_booking', JSON.stringify({ booking_id: editingBookingId, changes }));
     }
 
     closeEditBooking();

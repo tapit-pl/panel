@@ -48,6 +48,11 @@ function voucherHtml(p: {
 
       <p style="text-align:center;font-weight:bold;font-size:15px;letter-spacing:2px;margin:28px 0;padding:14px 20px;border:2px solid ${p.badge_color};color:${p.badge_color}">${p.badge}</p>
 
+      <div style="margin:24px 0;padding:14px 16px;border-left:4px solid #CC0000;background:#FFF5F5">
+        <p style="margin:0 0 5px;font-weight:bold;font-size:12px;color:#CC0000;letter-spacing:1px;text-transform:uppercase">Cancellation policy</p>
+        <p style="margin:0;font-size:12px;color:#333;line-height:1.6">Please notice that cancellations may be made up to 24 hours before the start of the trip. In case of later cancellations, the client will be charged 100% cost of the trip.</p>
+      </div>
+
       <div style="border-top:1px solid #eee;padding-top:14px;text-align:center;font-size:11px;color:#888">
         <p style="margin:0">How was your visit? Please review us on <strong>TripAdvisor</strong>: <strong>Thousand Miles Krakow</strong></p>
         <p style="margin:6px 0 0">Instagram: /thousandmiles.pl &nbsp;·&nbsp; Facebook: /ThousandMilesPL</p>
