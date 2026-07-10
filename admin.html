@@ -4067,7 +4067,12 @@
     el.classList.remove('flex');
   }
   function printVoucher() {
-    window.print();
+    const content = document.getElementById('voucher-content').innerHTML;
+    const win = window.open('', '_blank');
+    win.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><style>@page{margin:0;size:A4;}*{box-sizing:border-box;}body{margin:0;padding:0;background:white;font-family:Arial,sans-serif;}</style></head><body>' + content + '</body></html>');
+    win.document.close();
+    win.focus();
+    win.print();
   }
 
   let editingBookingId = null;
