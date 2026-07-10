@@ -51,11 +51,12 @@
   #edit-booking-drawer.open { opacity: 1; transform: scale(1) translateY(0); }
   @media print {
     @page { margin: 0; size: A4; }
+    body { background: white !important; }
     body > *:not(#modal-voucher) { display: none !important; }
-    #modal-voucher { display: block !important; position: static !important; background: none !important; padding: 0 !important; overflow: visible !important; }
+    #modal-voucher { display: block !important; position: static !important; background: white !important; padding: 0 !important; overflow: visible !important; }
     #modal-voucher .flex.flex-col { padding: 0 !important; }
     #modal-voucher button { display: none !important; }
-    #voucher-content { width: 100% !important; }
+    #voucher-content { width: 100% !important; background: white !important; }
   }
 
   /* ===== GLOBAL DARK THEME ===== */
