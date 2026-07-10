@@ -390,28 +390,6 @@
             </div>
           </div>
 
-          <!-- URGENT: pending change requests -->
-          <div id="urgent-section" class="hidden mb-4 rounded-xl overflow-hidden" style="border:1px solid rgba(239,68,68,0.4); background:#1a1010">
-            <div class="flex items-center gap-2 px-5 py-3" style="background:rgba(239,68,68,0.15); border-bottom:1px solid rgba(239,68,68,0.25)">
-              <i class="fa-solid fa-triangle-exclamation text-red-400 text-sm"></i>
-              <span class="text-sm font-bold text-red-300">Urgent — Pending change requests</span>
-              <span id="urgent-count" class="ml-auto text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-full">0</span>
-            </div>
-            <div id="urgent-list" class="divide-y" style="divide-color:rgba(255,255,255,0.06)"></div>
-          </div>
-
-          <!-- Reject reason modal -->
-          <div id="modal-reject-request" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
-            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 fade-in">
-              <h3 class="font-bold text-dark text-sm mb-1">Reject change request</h3>
-              <p class="text-xs text-gray-500 mb-4">Add a comment explaining why the request is rejected (optional).</p>
-              <textarea id="reject-comment" rows="3" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-300 resize-none mb-4" placeholder="Reason for rejection…"></textarea>
-              <div class="flex gap-2">
-                <button onclick="document.getElementById('modal-reject-request').classList.add('hidden')" class="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-500 hover:bg-gray-50">Cancel</button>
-                <button onclick="confirmRejectRequest()" class="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition-colors">Reject</button>
-              </div>
-            </div>
-          </div>
 
           <!-- Chart + top hotels -->
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-4">
@@ -2242,116 +2220,6 @@
 
   // ---- CHANGE REQUEST SYSTEM ----
 
-  let rejectingRequestId = null;
-
-  const CHANGE_FIELD_LABELS = {
-    guest: 'Guest name', additional_guests: 'Additional guests',
-    email: 'Email', phone: 'Phone', notes: 'Notes',
-  };
-
-  async function loadPendingChangeRequests() {
-    const { data, error } = await db.from('booking_change_requests')
-      .select('*').eq('status', 'pending').order('created_at', { ascending: false });
-    if (error) { console.warn('[Urgent]', error.message); return; }
-    renderUrgentSection(data || []);
-  }
-
-  function renderUrgentSection(requests) {
-    const section = document.getElementById('urgent-section');
-    const list    = document.getElementById('urgent-list');
-    const count   = document.getElementById('urgent-count');
-    if (!requests.length) { section.classList.add('hidden'); return; }
-    section.classList.remove('hidden');
-    count.textContent = requests.length;
-    list.innerHTML = requests.map(r => {
-      const changesHtml = Object.entries(r.changes || {}).map(([field, diff]) =>
-        `<span class="inline-block text-xs mr-2 mb-1">
-          <span class="font-semibold text-slate-300">${CHANGE_FIELD_LABELS[field] || field}:</span>
-          <span class="text-slate-500 line-through ml-1">${diff.old || '(empty)'}</span>
-          <span class="text-green-400 ml-1">→ ${diff.new || '(empty)'}</span>
-        </span>`
-      ).join('');
-      const date = new Date(r.created_at).toLocaleString('en', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
-      return `
-        <div class="px-5 py-4">
-          <div class="flex items-start justify-between gap-3">
-            <div class="flex-1 min-w-0">
-              <div class="text-xs font-bold text-white mb-0.5">${r.partner_name || '—'} · <span class="font-mono text-slate-400">#${String(r.booking_id).slice(0,8).toUpperCase()}</span></div>
-              <div class="text-xs text-slate-500 mb-2">${date}</div>
-              <div class="flex flex-wrap">${changesHtml}</div>
-            </div>
-            <div class="flex gap-2 shrink-0">
-              <button onclick="approveChangeRequest('${r.id}')" class="text-xs px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold transition-colors">Approve</button>
-              <button onclick="openRejectModal('${r.id}')" class="text-xs px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold transition-colors">Reject</button>
-            </div>
-          </div>
-        </div>`;
-    }).join('');
-  }
-
-  async function approveChangeRequest(requestId) {
-    const { data: req, error: fetchErr } = await db.from('booking_change_requests').select('*').eq('id', requestId).single();
-    if (fetchErr || !req) { showToast('Error fetching request'); return; }
-
-    // Apply changes to booking
-    const updates = {};
-    for (const [field, diff] of Object.entries(req.changes || {})) updates[field] = diff.new || null;
-    if (updates.guest !== undefined) {
-      const parts = (updates.guest || '').split(' ');
-      updates.guest = updates.guest;
-    }
-
-    const { error: updateErr } = await db.from('bookings').update(updates).eq('id', req.booking_id);
-    if (updateErr) { showToast('Update failed: ' + updateErr.message); return; }
-
-    // Mark request as approved
-    await db.from('booking_change_requests').update({ status: 'approved', resolved_at: new Date().toISOString() }).eq('id', requestId);
-
-    // Notify partner
-    await db.from('notifications').insert({
-      target: req.partner_id,
-      type: 'success',
-      title: 'Change request approved',
-      message: `Your change request for booking #${String(req.booking_id).slice(0,8).toUpperCase()} has been approved and applied.`,
-    });
-
-    await loadPendingChangeRequests();
-    await loadBookings();
-    showToast('Change request approved ✓');
-  }
-
-  function openRejectModal(requestId) {
-    rejectingRequestId = requestId;
-    document.getElementById('reject-comment').value = '';
-    const m = document.getElementById('modal-reject-request');
-    m.classList.remove('hidden');
-  }
-
-  async function confirmRejectRequest() {
-    if (!rejectingRequestId) return;
-    const comment = document.getElementById('reject-comment').value.trim();
-    const { data: req } = await db.from('booking_change_requests').select('*').eq('id', rejectingRequestId).single();
-
-    await db.from('booking_change_requests').update({
-      status: 'rejected', admin_comment: comment || null, resolved_at: new Date().toISOString(),
-    }).eq('id', rejectingRequestId);
-
-    if (req) {
-      await db.from('notifications').insert({
-        target: req.partner_id,
-        type: 'warning',
-        title: 'Change request rejected',
-        message: `Your change request for booking #${String(req.booking_id).slice(0,8).toUpperCase()} was not approved.${comment ? ' Reason: ' + comment : ''}`,
-      });
-    }
-
-    document.getElementById('modal-reject-request').classList.add('hidden');
-    rejectingRequestId = null;
-    await loadPendingChangeRequests();
-    showToast('Change request rejected');
-  }
-
-  // ---- END CHANGE REQUEST SYSTEM ----
 
   async function initDashboard() {
     showScreen('screen-admin');
@@ -2373,8 +2241,6 @@
     if (_tc) allTourConfig = _tc;
     await loadBookings();
     await updateDashboardKPIs();
-    await loadPendingChangeRequests();
-
     db.channel('bookings-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, async () => {
         await loadBookings();
@@ -2626,20 +2492,6 @@
       tourSel.innerHTML = '<option value="">All tours</option>' + tours.map(t => `<option value="${t}">${t}</option>`).join('');
     }
 
-    // Mark bookings edited by partner (from audit_log)
-    try {
-      const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 30);
-      const { data: edits } = await db.from('audit_log')
-        .select('details, created_at').eq('action', 'partner_edit_booking')
-        .gte('created_at', cutoff.toISOString()).order('created_at', { ascending: false });
-      if (edits?.length) {
-        const editMap = new Map();
-        edits.forEach(e => {
-          try { const p = JSON.parse(e.details); if (p.booking_id) editMap.set(p.booking_id, e.created_at); } catch {}
-        });
-        allBookings.forEach(b => { if (editMap.has(b.id)) { b._partnerEdited = true; b._partnerEditedAt = editMap.get(b.id); } });
-      }
-    } catch {}
 
     setBookingView('recent');
 
@@ -3785,7 +3637,6 @@
           <td class="px-4 py-3 text-center">${statusBadge(b.status)}</td>
           <td class="px-4 py-3 text-right whitespace-nowrap">
             ${b.notes ? `<span title="${(b.notes||'').replace(/"/g,'&quot;')}" class="text-amber-400 cursor-default ml-1"><i class="fa-solid fa-note-sticky text-xs"></i></span>` : ''}
-            ${b._partnerEdited ? `<span title="Edited by partner on ${new Date(b._partnerEditedAt).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}" class="text-blue-400 cursor-default ml-1"><i class="fa-solid fa-pen-to-square text-xs"></i></span>` : ''}
             ${b._dbBooking ? `<button onclick="openVoucher('${b.id}')" title="View voucher" class="text-gray-300 hover:text-brand transition-colors ml-1"><i class="fa-solid fa-file-pdf text-xs"></i></button>` : ''}
             ${b._dbBooking && (['to_be_paid','pending'].includes((b.status||'').toLowerCase())) ? `<button onclick="quickMarkPaid('${b.id}')" title="Mark as paid" class="text-gray-300 hover:text-green-600 transition-colors ml-2"><i class="fa-solid fa-circle-check text-xs"></i></button>` : ''}
             ${b._dbBooking && (['payment_pending','pending_payment'].includes((b.status||'').toLowerCase())) ? `<button onclick="adminResendPaymentLink('${b.id}')" title="${b.email ? 'Resend payment link to guest' : 'Copy payment link'}" class="text-blue-400 hover:text-blue-300 transition-colors ml-2"><i class="fa-solid fa-${b.email ? 'paper-plane' : 'copy'} text-xs"></i></button>` : ''}
