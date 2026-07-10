@@ -2367,6 +2367,7 @@
     initSettleMonthDropdown();
     await loadPartners();
     await loadBookings();
+    db.from('tour_config').select('title, email_blocks').then(({ data }) => { if (data) allTourConfig = data; });
     await updateDashboardKPIs();
     await loadPendingChangeRequests();
 
@@ -3900,8 +3901,10 @@
     const ref = b._bokunBookingId || b.displayId || b.id;
     const isStripe = !!b._stripeSessionId;
     const pt = b._paymentType;
-    const badge     = isStripe ? 'PAID BY GUEST' : (pt === 'hotel' ? 'PAID AT HOTEL' : 'PAY TO DRIVER');
-    const badgeColor = (isStripe || pt === 'hotel') ? '#16A34A' : '#E8751A';
+    const st = (b.status || '').toLowerCase();
+    const linkPending = st === 'payment_pending' || st === 'pending_payment';
+    const badge      = linkPending ? 'PAYMENT LINK SENT — AWAITING PAYMENT' : (isStripe ? 'PAID BY GUEST' : (pt === 'hotel' ? 'PAID AT HOTEL' : 'PAY TO DRIVER'));
+    const badgeColor = linkPending ? '#2563EB' : ((isStripe || pt === 'hotel') ? '#16A34A' : '#E8751A');
     const rows = [
       ['Offer name', b.tour],
       ['Number of participants', b.pax ?? '—'],
@@ -3952,11 +3955,11 @@
       </div>`;
   }
 
-  async function openVoucher(id) {
+  function openVoucher(id) {
     const b = allBookings.find(x => x.id === id);
     if (!b) return;
-    const { data: cfgRow } = await db.from('tour_config').select('email_blocks').eq('title', b.tour).maybeSingle();
-    const emailBlocks = cfgRow?.email_blocks || [];
+    const tourCfg = allTourConfig.find(t => t.title === b.tour);
+    const emailBlocks = tourCfg?.email_blocks || [];
     document.getElementById('voucher-content').innerHTML = buildVoucherHtml(b, emailBlocks);
     const el = document.getElementById('modal-voucher');
     el.style.display = 'block';
