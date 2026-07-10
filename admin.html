@@ -3720,8 +3720,13 @@
       (b.time || b.pickup) ? ['Time and place of meeting', [b.time, b.pickup].filter(Boolean).join('<br>')] : null,
     ].filter(Boolean);
     const blocksHtml = emailBlocks.length ? `<div style="margin-bottom:28px;font-size:12px">${emailBlocks.map(bl => `<p style="font-weight:bold;margin:0 0 4px">${bl.name}</p><p style="color:#E8751A;margin:0 0 14px">${bl.info}</p>`).join('')}</div>` : '';
+    const cancelledStamp = (b.status||'').toLowerCase() === 'cancelled' ? `
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:10">
+        <div style="transform:rotate(-30deg);border:12px solid rgba(180,0,0,0.75);border-radius:8px;padding:14px 32px;color:rgba(180,0,0,0.75);font-size:72px;font-weight:900;font-family:Arial,sans-serif;letter-spacing:6px;text-align:center;line-height:1;white-space:nowrap">CANCELLED</div>
+      </div>` : '';
     return `
-      <div style="padding:24px;color:#333;font-size:13px">
+      <div style="position:relative;padding:24px;color:#333;font-size:13px">
+      ${cancelledStamp}
         <table style="width:100%;padding-bottom:16px;border-bottom:2px solid #333;margin-bottom:20px">
           <tr>
             <td style="vertical-align:top;font-size:11px;line-height:1.7">
@@ -3757,11 +3762,16 @@
   function openVoucher(id) {
     const b = allBookings.find(x => x.id === id);
     if (!b) return;
+    console.log('[openVoucher] status:', JSON.stringify(b.status));
     document.getElementById('voucher-content').innerHTML = buildVoucherHtml(b);
     document.getElementById('modal-voucher').classList.remove('hidden');
   }
   function closeVoucher() {
-    document.getElementById('modal-voucher').classList.add('hidden');
+    console.log('[closeVoucher] called');
+    const el = document.getElementById('modal-voucher');
+    console.log('[closeVoucher] el:', el, 'classes before:', el?.className);
+    if (el) { el.classList.add('hidden'); el.style.display = 'none'; }
+    console.log('[closeVoucher] classes after:', el?.className);
   }
   function printVoucher() {
     const html = document.getElementById('voucher-content').innerHTML;
