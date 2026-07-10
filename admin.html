@@ -4922,7 +4922,7 @@
     }
 
     const rows = bookings || [];
-    const confirmedRows = rows.filter(b => (b.status||'').toLowerCase() === 'confirmed');
+    const confirmedRows = rows.filter(b => !['cancelled','payment_pending','pending_payment'].includes((b.status||'').toLowerCase()));
 
     // hotel payment: guest paid hotel → hotel owes TM (total - comm)
     // cash/link: guest paid TM → TM owes hotel (comm)
