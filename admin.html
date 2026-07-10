@@ -3957,8 +3957,7 @@
   async function openVoucher(id) {
     const b = allBookings.find(x => x.id === id);
     if (!b) return;
-    const { data: cfgRows, error: cfgErr } = await db.from('tour_config').select('title, email_blocks').eq('title', b.tour).limit(1);
-    console.log('VOUCHER DEBUG v5', { tour: b.tour, cfgRows, cfgErr, allTourConfigLen: allTourConfig.length });
+    const { data: cfgRows } = await db.from('tour_config').select('email_blocks').eq('title', (b.tour || '').trim()).limit(1);
     const emailBlocks = cfgRows?.[0]?.email_blocks || [];
     document.getElementById('voucher-content').innerHTML = buildVoucherHtml(b, emailBlocks);
     const el = document.getElementById('modal-voucher');
