@@ -3836,10 +3836,13 @@
 
       if (b._bokunBookingId) {
         try {
-          await db.functions.invoke('bokun-sync', {
+          const { data: bokunRes, error: bokunErr } = await db.functions.invoke('bokun-sync', {
             body: { path: `/booking.json/${b._bokunBookingId}/customer`, method: 'PUT', payload: { firstName: fn, lastName: ln, email: email || undefined, phoneNumber: phone || undefined } },
           });
+          console.log('[Bokun] customer update:', JSON.stringify(bokunRes), bokunErr);
         } catch(e) { console.warn('[Bokun] customer update failed:', e?.message); }
+      } else {
+        console.warn('[Bokun] skipped — no _bokunBookingId for booking', editingContactId);
       }
     }
 
