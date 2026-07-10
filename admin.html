@@ -4029,9 +4029,11 @@
       </table>
     `;
 
-    document.getElementById('voucher-content').innerHTML = html;
-    document.getElementById('modal-voucher').classList.remove('hidden');
-    document.getElementById('modal-voucher').classList.add('flex');
+    const win = window.open('', '_blank');
+    win.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><style>@page{margin:0;size:A4;}*{box-sizing:border-box;}body{margin:0;padding:0;background:white;font-family:Arial,sans-serif;}</style></head><body>' + html + '</body></html>');
+    win.document.close();
+    win.focus();
+    win.print();
   }
 
   function openVoucher(id) {
@@ -4060,19 +4062,6 @@
       payment,
       status: b.status || null,
     }, partner);
-  }
-  function closeVoucher() {
-    const el = document.getElementById('modal-voucher');
-    el.classList.add('hidden');
-    el.classList.remove('flex');
-  }
-  function printVoucher() {
-    const content = document.getElementById('voucher-content').innerHTML;
-    const win = window.open('', '_blank');
-    win.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><style>@page{margin:0;size:A4;}*{box-sizing:border-box;}body{margin:0;padding:0;background:white;font-family:Arial,sans-serif;}</style></head><body>' + content + '</body></html>');
-    win.document.close();
-    win.focus();
-    win.print();
   }
 
   let editingBookingId = null;
