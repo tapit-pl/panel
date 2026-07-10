@@ -2030,17 +2030,21 @@ tailwind.config = {
           });
           if (det?.body && ![400, 401, 403, 404].includes(det.body?.status)) {
             const d = det.body;
+            const pickPhoto = (p) => p?.originalUrl || p?.largeUrl || p?.mediumUrl || p?.url || null;
+            const featuredPhoto = (d.photos||[]).find(x=>x.featured);
+            const photo = pickPhoto(featuredPhoto) || pickPhoto(d.photos?.[0]) || getTourPhoto(t.title);
             return {
               ...base,
               title: d.title || t.title,
               description: d.shortDescription || d.description || '',
-              photo: (d.photos||[]).find(x=>x.featured)?.originalUrl || d.photos?.[0]?.originalUrl || getTourPhoto(t.title),
+              photo,
               durationMins: d.durationInMinutes || null,
               maxPax: d.maxParticipants || null,
               pricing: d.pricingCategories || [],
             };
           }
-        } catch(e) {}
+          console.warn('[Tours] Bokun returned error for ID', t.bokun_id, det?.body?.status, det?.status);
+        } catch(e) { console.warn('[Tours] Bokun fetch failed for ID', t.bokun_id, e?.message); }
         return base;
       }));
 
