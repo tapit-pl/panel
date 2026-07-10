@@ -3681,7 +3681,7 @@
   }
 
   async function quickMarkPaid(id) {
-    const { error } = await _supabase.from('bookings').update({ status: 'paid' }).eq('id', id);
+    const { error } = await db.from('bookings').update({ status: 'paid' }).eq('id', id);
     if (error) { showToast('Błąd: ' + error.message, 'error'); return; }
     const b = allBookings.find(x => x.id === id);
     if (b) b.status = 'paid';
