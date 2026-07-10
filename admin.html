@@ -1744,7 +1744,7 @@
   <div onclick="closeEditBooking()" class="absolute inset-0 bg-black/40 modal-bg"></div>
   <div id="edit-booking-drawer" class="relative w-full max-w-md bg-white shadow-2xl flex flex-col rounded-2xl" style="max-height:80vh">
     <!-- Header -->
-    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
       <div>
         <div class="font-bold text-dark text-base">Edit booking</div>
         <div class="text-xs text-gray-400 mt-0.5" id="edit-booking-ref">—</div>
@@ -1817,10 +1817,7 @@
       </div>
 
       <div>
-        <div class="flex items-center justify-between mb-1.5">
-          <label class="text-xs font-semibold text-gray-600">Additional guests</label>
-          <button type="button" onclick="addEditGuestRow()" class="text-xs text-brand font-semibold hover:underline flex items-center gap-1"><i class="fa-solid fa-plus text-[10px]"></i> Add guest</button>
-        </div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Additional guests</label>
         <div id="edit-guests-list" class="space-y-2"></div>
         <div id="edit-guests-empty" class="text-xs text-gray-400 italic">No additional guests</div>
       </div>
@@ -3786,7 +3783,7 @@
             ${b._partnerEdited ? `<span title="Edited by partner on ${new Date(b._partnerEditedAt).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}" class="text-blue-400 cursor-default ml-1"><i class="fa-solid fa-pen-to-square text-xs"></i></span>` : ''}
             ${b._dbBooking ? `<button onclick="openVoucher('${b.id}')" title="View voucher" class="text-gray-300 hover:text-brand transition-colors ml-1"><i class="fa-solid fa-file-pdf text-xs"></i></button>` : ''}
             ${b._dbBooking && (['to_be_paid','pending'].includes((b.status||'').toLowerCase())) ? `<button onclick="quickMarkPaid('${b.id}')" title="Mark as paid" class="text-gray-300 hover:text-green-600 transition-colors ml-2"><i class="fa-solid fa-circle-check text-xs"></i></button>` : ''}
-            ${b._dbBooking && (['payment_pending','pending_payment'].includes((b.status||'').toLowerCase())) ? `<button onclick="adminResendPaymentLink('${b.id}')" title="${b.email ? 'Resend payment link to guest' : 'Copy payment link'}" class="text-blue-300 hover:text-blue-600 transition-colors ml-2"><i class="fa-solid fa-${b.email ? 'paper-plane' : 'copy'} text-xs"></i></button>` : ''}
+            ${b._dbBooking && (['payment_pending','pending_payment'].includes((b.status||'').toLowerCase())) ? `<button onclick="adminResendPaymentLink('${b.id}')" title="${b.email ? 'Resend payment link to guest' : 'Copy payment link'}" class="text-blue-500 hover:text-blue-700 transition-colors ml-2"><i class="fa-solid fa-${b.email ? 'paper-plane' : 'copy'} text-xs"></i></button>` : ''}
             ${b._dbBooking ? `<button onclick="openEditBooking('${b.id}')" title="Edit booking" class="text-gray-300 hover:text-brand transition-colors ml-2"><i class="fa-solid fa-pen text-xs"></i></button>` : ''}
             ${b._dbBooking && (b.status||'').toLowerCase() !== 'cancelled' ? `<button onclick="cancelBooking('${b.id}', '${(b.guest||'').replace(/'/g,"\\'")}', ${!!b._stripeSessionId}, true)" title="Cancel booking" class="text-gray-300 hover:text-red-500 transition-colors ml-2"><i class="fa-solid fa-xmark text-xs"></i></button>` : ''}
           </td>
