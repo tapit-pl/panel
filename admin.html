@@ -3833,6 +3833,18 @@
     if (!error) {
       Object.assign(b, { guest, email, phone });
       renderBookingsTable();
+
+      if (b._bokunBookingId) {
+        try {
+          await db.functions.invoke('bokun-sync', {
+            body: {
+              path: `/booking.json/${b._bokunBookingId}/customer`,
+              method: 'PUT',
+              payload: { firstName: fn, lastName: ln, email: email || undefined, phoneNumber: phone || undefined },
+            }
+          });
+        } catch(e) { console.warn('[Bokun] customer update failed:', e?.message); }
+      }
     }
 
     btn.disabled = false;
