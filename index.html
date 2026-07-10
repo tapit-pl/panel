@@ -1862,7 +1862,7 @@ tailwind.config = {
           <div class="text-xs text-gray-400 mt-0.5">${b.date || '—'}${b.time ? ' · ' + b.time : ''}${b.pax ? ' · ' + b.pax + ' pax' : ''}</div>
         </div>
         <div class="text-right shrink-0">
-          <div class="font-bold text-brand text-sm">${b.comm ? b.comm + ' zł' : '—'}</div>
+          <div class="font-bold text-brand text-sm">${b.total ? Math.round(b.total) + ' zł' : '—'}</div>
           <span class="text-xs ${badge} px-2 py-0.5 rounded-full font-medium">${statusLabel}</span>
         </div>
         <div class="flex gap-1.5 shrink-0">
