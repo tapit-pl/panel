@@ -3898,20 +3898,20 @@
     }
   }
 
-  function buildVoucherHtml(data, partner) {
+  function fillAndShowVoucher(data, currentPartner) {
     const pad = n => String(n).padStart(2, '0');
     const now = new Date();
     const todayStr = `Kraków, ${pad(now.getDate())}.${pad(now.getMonth()+1)}.${now.getFullYear()}`;
 
-    const hotelName = partner?.name || '—';
-    const hotelAddr = (partner?.address && !partner.address.includes('@')) ? partner.address : '';
-    const hotelPhone = partner?.phone ? 'tel. ' + partner.phone : '';
+    const hotelName = currentPartner?.name || '—';
+    const hotelAddr = (currentPartner?.address && !currentPartner.address.includes('@')) ? currentPartner.address : '';
+    const hotelPhone = currentPartner?.phone ? 'tel. ' + currentPartner.phone : '';
 
     let bookingNr = '—';
     if (data) {
       if (data.bokunConfirmationCode) bookingNr = data.bokunConfirmationCode;
       else if (data.bokunBookingId) bookingNr = 'TM-' + data.bokunBookingId;
-      else if (data.bookingId) bookingNr = '#' + String(data.bookingId).split('-')[0].toUpperCase();
+      else if (data.bookingId) bookingNr = '#' + data.bookingId.split('-')[0].toUpperCase();
     }
 
     const guestsList = data?.guestName
@@ -3951,10 +3951,10 @@
       </tr>`);
     }
 
-    const infoBlocks = (data?.emailBlocks || []).map(bl =>
+    const infoBlocks = (data?.emailBlocks || []).map(b =>
       `<div style="border-left:3px solid #E8751A;padding:0 0 0 14px;margin-bottom:16px;page-break-inside:avoid;break-inside:avoid;">
-        <div style="font-size:11px;font-weight:700;color:#1A1714;margin-bottom:4px;">${escapeHtml(bl.name)}</div>
-        <div style="font-size:12px;color:#7A6A62;line-height:1.65;">${escapeHtml(bl.info)}</div>
+        <div style="font-size:11px;font-weight:700;color:#1A1714;margin-bottom:4px;">${escapeHtml(b.name)}</div>
+        <div style="font-size:12px;color:#7A6A62;line-height:1.65;">${escapeHtml(b.info)}</div>
       </div>`
     ).join('');
 
@@ -3979,12 +3979,7 @@
         </div>
       </div>`;
 
-    const st = (data?.status || '').toLowerCase();
-    const linkPending = st === 'payment_pending' || st === 'pending_payment';
-    const badgeColor = linkPending ? '#2563EB' : (data?.payment === 'hotel' ? '#16A34A' : '#E8751A');
-    const badgeLabel = linkPending ? 'Payment link sent — awaiting payment' : (data?.payment === 'hotel' ? 'Reservation Paid' : 'To Be Paid at Driver');
-
-    return `
+    const html = `
       <table style="width:100%;border-collapse:collapse;">
         <thead><tr><td style="padding:0;">${headerHtml}</td></tr></thead>
         <tbody><tr><td style="padding:0;">
@@ -4012,9 +4007,15 @@
         ${infoBlocks}
       </div>` : ''}
 
-      <div style="margin:0 32px 26px;text-align:center;padding:13px 16px;border:2px solid ${badgeColor};border-radius:8px;">
-        <div style="font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:${badgeColor};">${badgeLabel}</div>
-      </div>
+      ${(() => {
+        const st = (data?.status || '').toLowerCase();
+        const linkPending = st === 'payment_pending' || st === 'pending_payment';
+        const color = linkPending ? '#2563EB' : (data?.payment === 'hotel' ? '#16A34A' : '#E8751A');
+        const label = linkPending ? 'Payment link sent — awaiting payment' : (data?.payment === 'hotel' ? 'Reservation Paid' : 'To Be Paid at Driver');
+        return `<div style="margin:0 32px 26px;text-align:center;padding:13px 16px;border:2px solid ${color};border-radius:8px;">
+          <div style="font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:${color};">${label}</div>
+        </div>`;
+      })()}
 
       <div style="background:#F7F3EF;padding:18px 32px;text-align:center;">
         <div style="font-size:10px;color:#B09B8F;line-height:1.8;">
@@ -4025,7 +4026,12 @@
       </div>
 
         </td></tr></tbody>
-      </table>`;
+      </table>
+    `;
+
+    document.getElementById('voucher-content').innerHTML = html;
+    document.getElementById('modal-voucher').classList.remove('hidden');
+    document.getElementById('modal-voucher').classList.add('flex');
   }
 
   function openVoucher(id) {
@@ -4036,7 +4042,7 @@
     const partner = allPartners.find(p => p.name === b.hotel);
     const isStripe = !!b._stripeSessionId;
     const payment = (isStripe || b._paymentType === 'hotel') ? 'hotel' : 'driver';
-    document.getElementById('voucher-content').innerHTML = buildVoucherHtml({
+    fillAndShowVoucher({
       bokunConfirmationCode: b._bokunCode || null,
       bokunBookingId: b._bokunBookingId || null,
       bookingId: b.id,
@@ -4054,14 +4060,11 @@
       payment,
       status: b.status || null,
     }, partner);
-    const el = document.getElementById('modal-voucher');
-    el.style.display = 'block';
-    el.classList.remove('hidden');
   }
   function closeVoucher() {
     const el = document.getElementById('modal-voucher');
-    el.style.display = 'none';
     el.classList.add('hidden');
+    el.classList.remove('flex');
   }
   function printVoucher() {
     window.print();
