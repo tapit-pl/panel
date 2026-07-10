@@ -45,8 +45,10 @@
   .section { display: none !important; }
   .section.active { display: block !important; width: 100%; }
   input[type=range]::-webkit-slider-thumb { background: #E8751A; }
-  #edit-booking-drawer, #partner-detail-drawer, #ticket-detail-drawer { transform: translateX(100%); transition: transform 0.28s cubic-bezier(.4,0,.2,1); }
-  #edit-booking-drawer.open, #partner-detail-drawer.open, #ticket-detail-drawer.open { transform: translateX(0); }
+  #partner-detail-drawer, #ticket-detail-drawer { transform: translateX(100%); transition: transform 0.28s cubic-bezier(.4,0,.2,1); }
+  #partner-detail-drawer.open, #ticket-detail-drawer.open { transform: translateX(0); }
+  #edit-booking-drawer { opacity: 0; transform: scale(0.96) translateY(8px); transition: opacity 0.22s ease, transform 0.22s ease; }
+  #edit-booking-drawer.open { opacity: 1; transform: scale(1) translateY(0); }
   @media print {
     @page { size: A4 portrait; margin: 15mm; }
     body * { visibility: hidden !important; }
@@ -1738,9 +1740,9 @@
 </div>
 
 <!-- ===================== EDIT BOOKING PANEL ===================== -->
-<div id="edit-booking-panel" class="fixed inset-0 z-50 hidden">
+<div id="edit-booking-panel" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
   <div onclick="closeEditBooking()" class="absolute inset-0 bg-black/40 modal-bg"></div>
-  <div id="edit-booking-drawer" class="absolute right-0 top-0 bottom-0 w-full max-w-lg bg-white shadow-2xl flex flex-col">
+  <div id="edit-booking-drawer" class="relative w-full max-w-xl bg-white shadow-2xl flex flex-col rounded-2xl max-h-[90vh]">
     <!-- Header -->
     <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white">
       <div>
@@ -4067,7 +4069,7 @@
   }
   function closeEditBooking() {
     document.getElementById('edit-booking-drawer').classList.remove('open');
-    setTimeout(() => document.getElementById('edit-booking-panel').classList.add('hidden'), 280);
+    setTimeout(() => document.getElementById('edit-booking-panel').classList.add('hidden'), 220);
   }
   async function saveEditBooking() {
     if (!document.getElementById('edit-confirm-check').checked) {
