@@ -65,7 +65,7 @@ async function bokunConfirm(confirmationCode: string) {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     },
-    body: '{}',
+    body: JSON.stringify({ sendNotificationToMainContact: false }),
   })
   return res.json()
 }
@@ -101,7 +101,7 @@ Deno.serve(async (req) => {
     }
 
     if (bookingId) {
-      const updatePayload: Record<string, unknown> = { status: 'confirmed', stripe_session_id: session.id }
+      const updatePayload: Record<string, unknown> = { status: 'paid', stripe_session_id: session.id }
       if (bokunInternalId) updatePayload.bokun_booking_id = bokunInternalId
       const { error } = await db.from('bookings').update(updatePayload).eq('id', bookingId)
       console.log('[Webhook] db update error:', error)
@@ -152,6 +152,10 @@ Deno.serve(async (req) => {
               <tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold">Selected date:</td><td style="padding:8px 4px">${booking.date || ''}</td></tr>
               ${booking.time || booking.pickup ? `<tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold">Time and place of meeting:</td><td style="padding:8px 4px">${booking.time || ''}${booking.time && booking.pickup ? '<br>' : ''}${booking.pickup || ''}</td></tr>` : ''}
             </table>
+            <div style="margin:0 0 24px;padding:14px 16px;border-left:4px solid #CC0000;background:#FFF5F5">
+              <p style="margin:0 0 5px;font-weight:bold;font-size:12px;color:#CC0000;letter-spacing:1px;text-transform:uppercase">Cancellation policy</p>
+              <p style="margin:0;font-size:12px;color:#333;line-height:1.6">Please notice that cancellations may be made up to 24 hours before the start of the trip. In case of later cancellations, the client will be charged 100% cost of the trip.</p>
+            </div>
             ${tourEmailBlocks.length > 0 ? `<div style="margin-bottom:28px;font-size:12px">${tourEmailBlocks.map((b: {name: string, info: string}) => `<p style="font-weight:bold;margin:0 0 4px">${b.name}</p><p style="color:#E8751A;margin:0 0 14px">${b.info}</p>`).join('')}</div>` : ''}
             <p style="text-align:center;font-weight:bold;font-size:15px;letter-spacing:2px;margin:28px 0;padding:14px 20px;border:2px solid #16A34A;color:#16A34A">PAID BY GUEST</p>
             <div style="border-top:1px solid #eee;padding-top:14px;text-align:center;font-size:11px;color:#888">

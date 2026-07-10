@@ -1823,7 +1823,7 @@ tailwind.config = {
   function updateBookingStats(bookings) {
     const total     = bookings.length;
     const confirmed = bookings.filter(b => ['paid','confirmed'].includes(b.status?.toLowerCase())).length;
-    const pending   = bookings.filter(b => ['pending','pending_payment'].includes(b.status?.toLowerCase())).length;
+    const pending   = bookings.filter(b => ['to_be_paid','pending','payment_pending','pending_payment'].includes(b.status?.toLowerCase())).length;
     const cancelled = bookings.filter(b => b.status?.toLowerCase() === 'cancelled').length;
     document.getElementById('stat-total').textContent     = total;
     document.getElementById('stat-paid').textContent      = confirmed;
@@ -1842,13 +1842,21 @@ tailwind.config = {
       const statusColors = {
         paid:            'bg-green-100 text-green-700',
         confirmed:       'bg-green-100 text-green-700',
-        pending:         'bg-yellow-100 text-yellow-700',
-        pending_payment: 'bg-yellow-100 text-yellow-700',
+        to_be_paid:      'bg-orange-100 text-orange-700',
+        pending:         'bg-orange-100 text-orange-700',
+        payment_pending: 'bg-blue-100 text-blue-700',
+        pending_payment: 'bg-blue-100 text-blue-700',
         cancelled:       'bg-red-100 text-red-700',
-        arrived:         'bg-blue-100 text-blue-700',
+        arrived:         'bg-green-100 text-green-700',
+      };
+      const STATUS_LABELS = {
+        paid: 'Paid', confirmed: 'Paid',
+        to_be_paid: 'To be paid', pending: 'To be paid',
+        payment_pending: 'Payment pending', pending_payment: 'Payment pending',
+        cancelled: 'Cancelled', arrived: 'Arrived',
       };
       const badge = statusColors[s] || 'bg-gray-100 text-gray-600';
-      const statusLabel = b.status ? b.status.charAt(0).toUpperCase() + b.status.slice(1).replace('_', ' ') : '—';
+      const statusLabel = STATUS_LABELS[s] || b.status || '—';
       const displayId = b.bokun_confirmation_code || ('TM-' + b.id.slice(0,8).toUpperCase());
       const tourPhoto = (bokunProducts || []).find(t => t.title === b.tour)?.photo || null;
       const thumbHtml = tourPhoto
@@ -3031,9 +3039,9 @@ tailwind.config = {
       } catch(e) { console.warn('[Booking] Bokun creation failed:', e.message); }
     }
 
-    const insertStatus = payment === 'link'
-      ? (bokunReservationCode ? 'pending_payment' : 'pending')
-      : (bokunConfirmationCode ? 'confirmed' : 'pending');
+    const insertStatus = payment === 'link' ? 'payment_pending'
+      : payment === 'hotel' ? 'paid'
+      : 'to_be_paid';
 
     const insertTotal = hasPackages
       ? tdRateSelections.reduce((s, x) => s + x.count * (lookupCommPln(x.rate.title) || 0), 0)
@@ -4288,7 +4296,7 @@ tailwind.config = {
       const search = row.dataset.search || '';
       const statusGroups = {
         paid:      ['paid', 'confirmed'],
-        pending:   ['pending', 'pending_payment'],
+        pending:   ['to_be_paid', 'pending', 'payment_pending', 'pending_payment'],
         cancelled: ['cancelled'],
       };
       const matchStatus = bookingActiveStatus === 'all' || (statusGroups[bookingActiveStatus] || [bookingActiveStatus]).includes(status);

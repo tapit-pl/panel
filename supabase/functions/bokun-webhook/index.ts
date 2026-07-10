@@ -47,12 +47,15 @@ async function bokunGet(path: string): Promise<{ ok: boolean; status: number; bo
 }
 
 const BOKUN_STATUS_MAP: Record<string, string> = {
-  CONFIRMED: 'Confirmed',
-  CANCELLED: 'Cancelled',
-  PENDING:   'Pending',
-  DECLINED:  'Cancelled',
-  ON_HOLD:   'Pending',
+  CONFIRMED: 'confirmed',
+  CANCELLED: 'cancelled',
+  PENDING:   'payment_pending',
+  DECLINED:  'cancelled',
+  ON_HOLD:   'payment_pending',
 }
+
+// Statuses that Bokun CONFIRM/PENDING events should never overwrite
+const PROTECTED_STATUSES = ['paid', 'to_be_paid', 'cancelled']
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
@@ -118,9 +121,9 @@ Deno.serve(async (req) => {
 
   // Topic takes priority (cancel event is authoritative even if status field says otherwise)
   if (topic === 'bookings/cancel' || topic === 'booking/cancel') {
-    newStatus = 'Cancelled'
+    newStatus = 'cancelled'
   } else if (topic === 'bookings/create' || topic === 'booking/create') {
-    newStatus = 'Confirmed'
+    newStatus = 'confirmed'
   } else if (rawBokunStatus) {
     newStatus = BOKUN_STATUS_MAP[rawBokunStatus.toUpperCase()] ?? null
   }
@@ -132,6 +135,16 @@ Deno.serve(async (req) => {
 
   // --- Update Supabase ---
   const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
+
+  // Don't overwrite protected statuses with non-cancel events
+  if (newStatus !== 'cancelled') {
+    const { data: existing } = await db.from('bookings')
+      .select('status').eq('bokun_confirmation_code', confirmationCode).maybeSingle()
+    if (existing && PROTECTED_STATUSES.includes(existing.status)) {
+      console.log(`[bokun-webhook] skipping — status '${existing.status}' is protected`)
+      return new Response(JSON.stringify({ ok: true, skipped: true, reason: 'protected_status', current: existing.status }), { headers: CORS })
+    }
+  }
 
   const { data: updated, error } = await db
     .from('bookings')

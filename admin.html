@@ -522,9 +522,10 @@
               </select>
               <select id="booking-filter-status" onchange="filterAllBookings()" class="text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 text-gray-600">
                 <option value="">All statuses</option>
-                <option value="Paid">Paid</option>
-                <option value="Pending">Pending</option>
-                <option value="Cancelled">Cancelled</option>
+                <option value="paid">Paid</option>
+                <option value="to_be_paid">To be paid</option>
+                <option value="payment_pending">Payment pending</option>
+                <option value="cancelled">Cancelled</option>
               </select>
               <select id="booking-filter-tour" onchange="filterAllBookings()" class="text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 text-gray-600">
                 <option value="">All tours</option>
@@ -1800,9 +1801,11 @@
       <div>
         <label class="block text-xs font-semibold text-gray-600 mb-1.5">Status</label>
         <select id="edit-status" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-dark">
-          <option value="Paid">Paid</option>
-          <option value="Pending">Pending</option>
-          <option value="Cancelled">Cancelled</option>
+          <option value="paid">Paid</option>
+          <option value="to_be_paid">To be paid</option>
+          <option value="payment_pending">Payment pending</option>
+          <option value="cancelled">Cancelled</option>
+          <option value="confirmed">Confirmed (legacy)</option>
         </select>
       </div>
 
@@ -3541,10 +3544,10 @@
 
   function statusBadge(status) {
     const s = (status || '').toLowerCase();
-    if (s === 'paid')    return `<span class="status-paid text-xs font-semibold px-2.5 py-0.5 rounded-full">Paid</span>`;
-    if (s === 'confirmed') return `<span class="status-confirmed text-xs font-semibold px-2.5 py-0.5 rounded-full">Confirmed</span>`;
+    if (s === 'paid' || s === 'confirmed') return `<span class="status-paid text-xs font-semibold px-2.5 py-0.5 rounded-full">Paid</span>`;
+    if (s === 'to_be_paid' || s === 'pending') return `<span class="status-pending text-xs font-semibold px-2.5 py-0.5 rounded-full">To be paid</span>`;
+    if (s === 'payment_pending' || s === 'pending_payment') return `<span class="status-pending-payment text-xs font-semibold px-2.5 py-0.5 rounded-full">Payment pending</span>`;
     if (s === 'cancelled') return `<span class="status-cancelled text-xs font-semibold px-2.5 py-0.5 rounded-full">Cancelled</span>`;
-    if (s === 'pending_payment') return `<span class="status-pending-payment text-xs font-semibold px-2.5 py-0.5 rounded-full">Pending payment</span>`;
     if (s === 'arrived') return `<span class="status-arrived text-xs font-semibold px-2.5 py-0.5 rounded-full">Arrived ✓</span>`;
     return `<span class="status-pending text-xs font-semibold px-2.5 py-0.5 rounded-full">${status || 'Pending'}</span>`;
   }
@@ -3659,7 +3662,8 @@
       const matchQ      = !q      || b.tour.toLowerCase().includes(q) || b.guest.toLowerCase().includes(q) || String(b.id).toLowerCase().includes(q);
       const matchHotel  = !hotel  || (hotel === 'none' ? b.hotel === '—' : b.hotel.toLowerCase().includes(hotel.toLowerCase().split(' ')[1] || hotel.toLowerCase()));
       const matchSource = !source || b.source === source;
-      const matchStatus = !status || b.status === status;
+      const STATUS_GROUPS = { paid: ['paid','confirmed'], to_be_paid: ['to_be_paid','pending'], payment_pending: ['payment_pending','pending_payment'], cancelled: ['cancelled'] };
+      const matchStatus = !status || (STATUS_GROUPS[status] || [status]).includes((b.status||'').toLowerCase());
       const matchTour   = !tour   || b.tour === tour;
       const ts = b._startTs || 0;
       const matchFrom   = !fromTs || ts >= fromTs;
