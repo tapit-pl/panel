@@ -2030,6 +2030,8 @@ tailwind.config = {
           });
           if (det?.body && ![400, 401, 403, 404].includes(det.body?.status)) {
             const d = det.body;
+            if (!d.photos?.length) console.warn('[Tours] No photos for bokun_id', t.bokun_id, t.title);
+            else if (!d.photos.find(x=>x.featured)?.originalUrl && !d.photos[0]?.originalUrl) console.warn('[Tours] Photos exist but no originalUrl for bokun_id', t.bokun_id, JSON.stringify(d.photos[0]));
             const pickPhoto = (p) => p?.originalUrl || p?.largeUrl || p?.mediumUrl || p?.url || null;
             const featuredPhoto = (d.photos||[]).find(x=>x.featured);
             const photo = pickPhoto(featuredPhoto) || pickPhoto(d.photos?.[0]) || getTourPhoto(t.title);
