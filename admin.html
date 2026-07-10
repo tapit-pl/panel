@@ -523,8 +523,8 @@
               <select id="booking-filter-status" onchange="filterAllBookings()" class="text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 text-gray-600">
                 <option value="">All statuses</option>
                 <option value="paid">Paid</option>
-                <option value="to_be_paid">To be paid</option>
-                <option value="payment_pending">Payment pending</option>
+                <option value="to_be_paid">Driver pay</option>
+                <option value="payment_pending">Link sent</option>
                 <option value="cancelled">Cancelled</option>
               </select>
               <select id="booking-filter-tour" onchange="filterAllBookings()" class="text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 text-gray-600">
@@ -1802,8 +1802,8 @@
         <label class="block text-xs font-semibold text-gray-600 mb-1.5">Status</label>
         <select id="edit-status" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-dark">
           <option value="paid">Paid</option>
-          <option value="to_be_paid">To be paid</option>
-          <option value="payment_pending">Payment pending</option>
+          <option value="to_be_paid">Driver pay</option>
+          <option value="payment_pending">Link sent</option>
           <option value="cancelled">Cancelled</option>
           <option value="confirmed">Confirmed (legacy)</option>
         </select>
@@ -3545,8 +3545,8 @@
   function statusBadge(status) {
     const s = (status || '').toLowerCase();
     if (s === 'paid' || s === 'confirmed') return `<span class="status-paid text-xs font-semibold px-2.5 py-0.5 rounded-full">Paid</span>`;
-    if (s === 'to_be_paid' || s === 'pending') return `<span class="status-pending text-xs font-semibold px-2.5 py-0.5 rounded-full">To be paid</span>`;
-    if (s === 'payment_pending' || s === 'pending_payment') return `<span class="status-pending-payment text-xs font-semibold px-2.5 py-0.5 rounded-full">Payment pending</span>`;
+    if (s === 'to_be_paid' || s === 'pending') return `<span class="status-pending text-xs font-semibold px-2.5 py-0.5 rounded-full">Driver pay</span>`;
+    if (s === 'payment_pending' || s === 'pending_payment') return `<span class="status-pending-payment text-xs font-semibold px-2.5 py-0.5 rounded-full">Link sent</span>`;
     if (s === 'cancelled') return `<span class="status-cancelled text-xs font-semibold px-2.5 py-0.5 rounded-full">Cancelled</span>`;
     if (s === 'arrived') return `<span class="status-arrived text-xs font-semibold px-2.5 py-0.5 rounded-full">Arrived ✓</span>`;
     return `<span class="status-pending text-xs font-semibold px-2.5 py-0.5 rounded-full">${status || 'Pending'}</span>`;
@@ -3604,6 +3604,7 @@
           <td class="px-4 py-3 text-right whitespace-nowrap">
             ${b.notes ? `<span title="${(b.notes||'').replace(/"/g,'&quot;')}" class="text-amber-400 cursor-default ml-1"><i class="fa-solid fa-note-sticky text-xs"></i></span>` : ''}
             ${b._dbBooking ? `<button onclick="openVoucher('${b.id}')" title="View voucher" class="text-gray-300 hover:text-brand transition-colors ml-1"><i class="fa-solid fa-file-pdf text-xs"></i></button>` : ''}
+            ${b._dbBooking && (s === 'to_be_paid' || s === 'pending') ? `<button onclick="quickMarkPaid('${b.id}')" title="Mark as paid" class="text-gray-300 hover:text-green-600 transition-colors ml-2"><i class="fa-solid fa-circle-check text-xs"></i></button>` : ''}
             ${b._dbBooking ? `<button onclick="openContactEdit('${b.id}')" title="Edit guest details" class="text-gray-300 hover:text-brand transition-colors ml-2"><i class="fa-solid fa-pen text-xs"></i></button>` : ''}
             ${b._dbBooking && (b.status||'').toLowerCase() !== 'cancelled' ? `<button onclick="cancelBooking('${b.id}', '${(b.guest||'').replace(/'/g,"\\'")}', ${!!b._stripeSessionId}, true)" title="Cancel booking" class="text-gray-300 hover:text-red-500 transition-colors ml-2"><i class="fa-solid fa-xmark text-xs"></i></button>` : ''}
           </td>
@@ -3677,6 +3678,15 @@
     document.getElementById('booking-filter-from').value = '';
     document.getElementById('booking-filter-to').value = '';
     filterAllBookings();
+  }
+
+  async function quickMarkPaid(id) {
+    const { error } = await _supabase.from('bookings').update({ status: 'paid' }).eq('id', id);
+    if (error) { showToast('Błąd: ' + error.message, 'error'); return; }
+    const b = allBookings.find(x => x.id === id);
+    if (b) b.status = 'paid';
+    filterAllBookings();
+    showToast('Oznaczono jako Paid ✓', 'success');
   }
 
   async function cancelBooking(id, guestName, hasStripe, isDbBooking = true) {
