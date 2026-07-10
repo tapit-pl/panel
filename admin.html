@@ -3836,8 +3836,8 @@
 
       if (b._bokunBookingId) {
         try {
-          await db.functions.invoke('bokun-update-contact', {
-            body: { bookingId: b._bokunBookingId, firstName: fn, lastName: ln, email: email || undefined, phoneNumber: phone || undefined },
+          await db.functions.invoke('bokun-sync', {
+            body: { path: `/booking.json/${b._bokunBookingId}/customer`, method: 'PUT', payload: { firstName: fn, lastName: ln, email: email || undefined, phoneNumber: phone || undefined } },
           });
         } catch(e) { console.warn('[Bokun] customer update failed:', e?.message); }
       }
@@ -3930,8 +3930,8 @@
       // Sync guest details to Bokun (best-effort)
       if (b._bokunBookingId) {
         try {
-          await db.functions.invoke('bokun-update-contact', {
-            body: { bookingId: b._bokunBookingId, firstName: fn, lastName: ln, email: email || undefined, phoneNumber: phone || undefined },
+          await db.functions.invoke('bokun-sync', {
+            body: { path: `/booking.json/${b._bokunBookingId}/customer`, method: 'PUT', payload: { firstName: fn, lastName: ln, email: email || undefined, phoneNumber: phone || undefined } },
           });
         } catch(e) { console.warn('[Bokun] customer update failed:', e?.message); }
       }
