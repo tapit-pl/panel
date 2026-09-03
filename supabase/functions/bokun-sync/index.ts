@@ -1,7 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://panel.thousandmiles.pl',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
@@ -11,9 +12,6 @@ function bokunDate(): string {
   return `${now.getUTCFullYear()}-${pad(now.getUTCMonth()+1)}-${pad(now.getUTCDate())} ${pad(now.getUTCHours())}:${pad(now.getUTCMinutes())}:${pad(now.getUTCSeconds())}`
 }
 
-function rfcDate(): string {
-  return new Date().toUTCString()
-}
 
 async function hmac(secret: string, message: string): Promise<string> {
   const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-1' }, false, ['sign'])
@@ -25,76 +23,42 @@ function safeJson(obj: unknown): string {
   return JSON.stringify(obj).replace(/[-￿]/g, c => `\\u${c.codePointAt(0)!.toString(16).padStart(4, '0')}`)
 }
 
-async function tryVariant(label: string, date: string, message: string, secret: string, path: string, accessKey: string) {
-  const signature = await hmac(secret, message)
-  try {
-    const res = await fetch(`https://api.bokun.io${path}`, {
-      method: 'GET',
-      headers: {
-        'X-Bokun-Date': date,
-        'X-Bokun-AccessKey': accessKey,
-        'X-Bokun-Signature': signature,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-    })
-    const body = await res.text()
-    let parsed
-    try { parsed = JSON.parse(body) } catch { parsed = body }
-    const ok = !body.includes('Invalid signature')
-    return { label, status: res.status, ok, preview: typeof parsed === 'object' ? JSON.stringify(parsed).slice(0, 120) : String(parsed).slice(0, 120) }
-  } catch (e) {
-    return { label, status: 0, ok: false, preview: String(e) }
-  }
-}
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
+  const authHeader = req.headers.get('Authorization')
+  if (!authHeader) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+  const authClient = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, { global: { headers: { Authorization: authHeader } } })
+  const { data: { user } } = await authClient.auth.getUser()
+  if (!user) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+
+  const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
+  const { data: adminRow } = await db.from('admin_users').select('id').eq('email', user.email).maybeSingle()
+  const isAdmin = !!adminRow
+
+  // Partners (not in admin_users) may only call read-only Bokun availability endpoints.
+  // Admins have unrestricted access to all Bokun endpoints.
+  let isPartner = false
+  if (!isAdmin) {
+    const { data: partnerRow } = await db.from('partners').select('id').eq('email', user.email).eq('active', true).maybeSingle()
+    if (!partnerRow) return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    isPartner = true
+  }
+
   try {
     const body = await req.json()
+
+    // Partners may call availability, product info, and checkout endpoints.
+    // Blocked: /booking.json/booking-search and other admin-level booking management paths.
+    if (isPartner) {
+      const path: string = body.path || ''
+      const allowed = path.startsWith('/activity.json/') ||
+                      path.startsWith('/product.json/') ||
+                      path.startsWith('/checkout.json/')
+      if (!allowed) return new Response(JSON.stringify({ error: 'Forbidden — partners may not access this endpoint' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
     const accessKey = Deno.env.get('BOKUN_ACCESS_KEY')!
     const secretKey = Deno.env.get('BOKUN_SECRET_KEY')!
-
-    if (body.signatureTest) {
-      const activityId = body.activityId || '225214'
-      const today = new Date()
-      const fmt = (d: Date) => d.toISOString().slice(0, 10)
-      const start = fmt(today)
-      const end = fmt(new Date(today.getTime() + 30 * 86400000))
-      const fullPath = `/activity.json/${activityId}/availabilities?start=${start}&end=${end}`
-      const basePath = `/activity.json/${activityId}/availabilities`
-      const fullPathEncoded = `/activity.json/${activityId}/availabilities?start=${start}%26end=${end}`
-      const fullPathSorted = `/activity.json/${activityId}/availabilities?end=${end}&start=${start}`
-      const d1 = bokunDate()
-      const d2 = rfcDate()
-      const variants = [
-        { label: 'V1: custom-date + full-path', date: d1, msg: d1 + accessKey + 'GET' + fullPath },
-        { label: 'V2: custom-date + base-path (no query)', date: d1, msg: d1 + accessKey + 'GET' + basePath },
-        { label: 'V3: rfc-date + full-path', date: d2, msg: d2 + accessKey + 'GET' + fullPath },
-        { label: 'V4: rfc-date + base-path', date: d2, msg: d2 + accessKey + 'GET' + basePath },
-        { label: 'V5: custom-date + full-path + newlines', date: d1, msg: d1 + '\n' + accessKey + '\n' + 'GET' + '\n' + fullPath },
-        { label: 'V6: custom-date + base-path + newlines', date: d1, msg: d1 + '\n' + accessKey + '\n' + 'GET' + '\n' + basePath },
-        { label: 'V7: rfc-date + full-path + newlines', date: d2, msg: d2 + '\n' + accessKey + '\n' + 'GET' + '\n' + fullPath },
-        { label: 'V8: rfc-date + base-path + newlines', date: d2, msg: d2 + '\n' + accessKey + '\n' + 'GET' + '\n' + basePath },
-        { label: 'V9: custom-date + & encoded as %26', date: d1, msg: d1 + accessKey + 'GET' + fullPathEncoded },
-        { label: 'V10: custom-date + sorted params', date: d1, msg: d1 + accessKey + 'GET' + fullPathSorted },
-        { label: 'V11: lowercase method + full-path', date: d1, msg: d1 + accessKey + 'get' + fullPath },
-        { label: 'V12: path without leading slash', date: d1, msg: d1 + accessKey + 'GET' + fullPath.slice(1) },
-        { label: 'V13: accessKey first', date: d1, msg: accessKey + d1 + 'GET' + fullPath },
-        { label: 'V14: rfc-date + sorted params', date: d2, msg: d2 + accessKey + 'GET' + fullPathSorted },
-        { label: 'V15: rfc-date + & encoded', date: d2, msg: d2 + accessKey + 'GET' + fullPathEncoded },
-      ]
-      const results = []
-      for (const v of variants) {
-        const r = await tryVariant(v.label, v.date, v.msg, secretKey, fullPath, accessKey)
-        results.push(r)
-        if (r.ok) results.push({ label: '*** WINNER ***', winner: v.label, message: v.msg })
-      }
-      return new Response(JSON.stringify({ results, fullPath }, null, 2), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    }
 
     const { path, method = 'GET', payload } = body
     const date = bokunDate()

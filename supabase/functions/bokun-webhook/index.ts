@@ -46,6 +46,56 @@ async function bokunGet(path: string): Promise<{ ok: boolean; status: number; bo
   return { ok: res.ok, status: res.status, body: await res.json() }
 }
 
+// Returns true if refund was issued successfully, false if booking was not in paid state,
+// throws if refund was attempted but failed (caller should NOT mark as cancelled).
+async function stripeRefundIfPaid(db: ReturnType<typeof createClient>, confirmationCode: string): Promise<boolean> {
+  // Atomically claim the cancellation by switching status from 'paid' → 'cancelling'.
+  // If two webhooks arrive simultaneously only one UPDATE will match — prevents double refund.
+  const { data: claimed } = await db.from('bookings')
+    .update({ status: 'cancelling' })
+    .eq('bokun_confirmation_code', confirmationCode)
+    .in('status', ['paid'])
+    .select('id, stripe_session_id, payment_method')
+    .maybeSingle()
+
+  if (!claimed) return false  // Not paid, already cancelling/cancelled, or no record — skip refund
+  if (!claimed.stripe_session_id && claimed.payment_method !== 'link') return false
+
+  const stripeKey = Deno.env.get('STRIPE_SECRET_KEY')!
+  let sessionId = claimed.stripe_session_id
+
+  if (!sessionId) {
+    const res = await fetch(`https://api.stripe.com/v1/checkout/sessions?limit=10&metadata[booking_id]=${encodeURIComponent(claimed.id)}`, {
+      headers: { 'Authorization': `Bearer ${stripeKey}` }
+    })
+    const data = await res.json()
+    sessionId = data?.data?.[0]?.id || null
+  }
+  if (!sessionId) return false
+
+  const sessionRes = await fetch(`https://api.stripe.com/v1/checkout/sessions/${sessionId}`, {
+    headers: { 'Authorization': `Bearer ${stripeKey}` }
+  })
+  const session = await sessionRes.json()
+  if (!session.payment_intent || session.payment_status !== 'paid') return false
+
+  const refundRes = await fetch('https://api.stripe.com/v1/refunds', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${stripeKey}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ payment_intent: session.payment_intent }).toString(),
+  })
+  const refund = await refundRes.json()
+  console.log('[bokun-webhook] Stripe refund:', JSON.stringify({ id: refund.id, status: refund.status, error: refund.error }))
+
+  if (refund.error) {
+    // Refund failed — revert status to 'paid' so admin can retry manually
+    await db.from('bookings').update({ status: 'refund_failed' })
+      .eq('bokun_confirmation_code', confirmationCode).eq('status', 'cancelling')
+    throw new Error(`Stripe refund failed: ${refund.error.message}`)
+  }
+  return true
+}
+
 const BOKUN_STATUS_MAP: Record<string, string> = {
   CONFIRMED: 'confirmed',
   CANCELLED: 'cancelled',
@@ -70,12 +120,14 @@ Deno.serve(async (req) => {
   const topic = req.headers.get('x-bokun-topic') || ''
   console.log('[bokun-webhook] topic:', topic || '(none)', '| keys:', Object.keys(payload).join(','))
 
-  // Verify signature — logs mismatch but doesn't block (enable strict mode by setting BOKUN_WEBHOOK_SECRET)
+  // Verify signature — always required; reject if env var is missing
   const webhookSecret = Deno.env.get('BOKUN_WEBHOOK_SECRET')
-  if (webhookSecret) {
-    const valid = await verifyBokunSignature(req.headers, webhookSecret)
-    if (!valid) console.warn('[bokun-webhook] Signature mismatch — check BOKUN_WEBHOOK_SECRET')
+  if (!webhookSecret) {
+    console.error('[bokun-webhook] BOKUN_WEBHOOK_SECRET not set — rejecting request')
+    return new Response(JSON.stringify({ error: 'Webhook not configured' }), { status: 500, headers: CORS })
   }
+  const valid = await verifyBokunSignature(req.headers, webhookSecret)
+  if (!valid) return new Response(JSON.stringify({ error: 'Invalid signature' }), { status: 401, headers: CORS })
 
   // Skip non-booking events
   if (topic && !topic.startsWith('booking')) {
@@ -136,8 +188,28 @@ Deno.serve(async (req) => {
   // --- Update Supabase ---
   const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
 
-  // Don't overwrite protected statuses with non-cancel events
-  if (newStatus !== 'cancelled') {
+  if (newStatus === 'cancelled') {
+    // Atomically claim + refund. If refund fails, status is set to 'refund_failed' and we abort.
+    try {
+      const refunded = await stripeRefundIfPaid(db, confirmationCode)
+      // If booking was in 'cancelling' state (set by stripeRefundIfPaid), the final UPDATE below
+      // handles it. If refunded=false the booking was not paid — proceed to normal cancel UPDATE.
+      if (refunded) {
+        // Refund succeeded — the status was already set to 'cancelling'; now set to 'cancelled'
+        const { data: updated } = await db.from('bookings')
+          .update({ status: 'cancelled' })
+          .eq('bokun_confirmation_code', confirmationCode)
+          .select('id, status')
+        console.log(`[bokun-webhook] cancel+refund | ${confirmationCode} → cancelled | rows: ${updated?.length ?? 0}`)
+        return new Response(JSON.stringify({ ok: true, confirmationCode, newStatus: 'cancelled', refunded: true, rowsUpdated: updated?.length ?? 0 }), { headers: { ...CORS, 'Content-Type': 'application/json' } })
+      }
+    } catch(e) {
+      const msg = (e as Error).message
+      console.error('[bokun-webhook] Stripe refund error — booking left as refund_failed:', msg)
+      return new Response(JSON.stringify({ ok: false, error: 'stripe_refund_failed', detail: msg }), { status: 500, headers: { ...CORS, 'Content-Type': 'application/json' } })
+    }
+  } else {
+    // Don't overwrite protected statuses with non-cancel events
     const { data: existing } = await db.from('bookings')
       .select('status').eq('bokun_confirmation_code', confirmationCode).maybeSingle()
     if (existing && PROTECTED_STATUSES.includes(existing.status)) {

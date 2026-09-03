@@ -721,7 +721,7 @@
             <div class="flex flex-wrap gap-3 items-center">
               <div class="relative flex-1 min-w-48">
                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-                <input type="search" id="booking-search" placeholder="Search guest, tour, phone, #…" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" oninput="filterAllBookings()" class="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+                <input type="text" id="booking-search" placeholder="Search guest, tour, phone, email, #…" oninput="filterAllBookings()" class="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
               </div>
               <div class="msel" id="msel-ab-tour">
                 <button type="button" class="cdrop-btn" onclick="mselToggle('msel-ab-tour')"><span class="cdrop-val">All tours</span><span class="cdrop-arrow"></span></button>
@@ -737,13 +737,6 @@
                   <div class="msel-search-row"><i class="fa-solid fa-magnifying-glass"></i><input class="msel-search" placeholder="Search partners…" oninput="mselSearch('msel-ab-hotel',this.value)"></div>
                   <div class="msel-opts" id="msel-ab-hotel-opts"></div>
                   <div class="msel-foot"><button onclick="mselClear('msel-ab-hotel')">Clear</button></div>
-                </div>
-              </div>
-              <div class="msel" id="msel-ab-partner-type">
-                <button type="button" class="cdrop-btn" onclick="mselToggle('msel-ab-partner-type')"><span class="cdrop-val">All types</span><span class="cdrop-arrow"></span></button>
-                <div class="msel-panel" id="msel-ab-partner-type-panel">
-                  <div class="msel-opts" id="msel-ab-partner-type-opts"></div>
-                  <div class="msel-foot"><button onclick="mselClear('msel-ab-partner-type')">Clear</button></div>
                 </div>
               </div>
               <div class="flex items-center gap-1.5">
@@ -861,7 +854,7 @@
             <div class="flex flex-wrap gap-3 items-center">
               <div class="relative flex-1 min-w-48">
                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-                <input type="search" id="hb-search" placeholder="Search guest, tour, phone, #…" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" oninput="filterHotelBookings()" class="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+                <input type="text" id="hb-search" placeholder="Search guest, tour, phone, email, #…" oninput="filterHotelBookings()" class="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
               </div>
               <div class="msel" id="msel-hb-tour">
                 <button type="button" class="cdrop-btn" onclick="mselToggle('msel-hb-tour')"><span class="cdrop-val">All tours</span><span class="cdrop-arrow"></span></button>
@@ -877,13 +870,6 @@
                   <div class="msel-search-row"><i class="fa-solid fa-magnifying-glass"></i><input class="msel-search" placeholder="Search partners…" oninput="mselSearch('msel-hb-hotel',this.value)"></div>
                   <div class="msel-opts" id="msel-hb-hotel-opts"></div>
                   <div class="msel-foot"><button onclick="mselClear('msel-hb-hotel')">Clear</button></div>
-                </div>
-              </div>
-              <div class="msel" id="msel-hb-partner-type">
-                <button type="button" class="cdrop-btn" onclick="mselToggle('msel-hb-partner-type')"><span class="cdrop-val">All types</span><span class="cdrop-arrow"></span></button>
-                <div class="msel-panel" id="msel-hb-partner-type-panel">
-                  <div class="msel-opts" id="msel-hb-partner-type-opts"></div>
-                  <div class="msel-foot"><button onclick="mselClear('msel-hb-partner-type')">Clear</button></div>
                 </div>
               </div>
               <div class="flex items-center gap-1.5">
@@ -905,13 +891,6 @@
                 <div class="msel-panel" id="msel-hb-status-panel">
                   <div class="msel-opts" id="msel-hb-status-opts"></div>
                   <div class="msel-foot"><button onclick="mselClear('msel-hb-status')">Clear</button></div>
-                </div>
-              </div>
-              <div class="msel" id="msel-hb-source">
-                <button type="button" class="cdrop-btn" onclick="mselToggle('msel-hb-source')"><span class="cdrop-val">All channels</span><span class="cdrop-arrow"></span></button>
-                <div class="msel-panel" id="msel-hb-source-panel">
-                  <div class="msel-opts" id="msel-hb-source-opts"></div>
-                  <div class="msel-foot"><button onclick="mselClear('msel-hb-source')">Clear</button></div>
                 </div>
               </div>
               <button onclick="clearAllHbFilters()" class="text-xs font-medium px-3 py-2 rounded-xl transition-colors ml-auto" style="color:#64748b;border:1px solid rgba(255,255,255,0.08)" onmouseover="this.style.color='#e8751a'" onmouseout="this.style.color='#64748b'">Clear all</button>
@@ -936,7 +915,6 @@
                     <th class="text-left px-4 py-3 text-gray-400 font-semibold">Phone</th>
                     <th class="text-center px-4 py-3 text-gray-400 font-semibold">Pax</th>
                     <th class="text-right px-4 py-3 text-gray-400 font-semibold">Total</th>
-                    <th class="text-center px-4 py-3 text-gray-400 font-semibold">Source</th>
                     <th class="text-left px-4 py-3 text-gray-400 font-semibold">Payment</th>
                     <th class="text-center px-4 py-3 text-gray-400 font-semibold">Status</th>
                     <th class="px-4 py-3"></th>
@@ -979,7 +957,7 @@
           <div class="flex flex-wrap gap-2 mb-4">
             <div class="relative flex-1 min-w-48">
               <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-              <input type="search" id="partners-search" placeholder="Search by name…" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" oninput="renderPartnersTable()" class="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+              <input type="text" id="partners-search" placeholder="Search by name or email…" oninput="renderPartnersTable()" class="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
             </div>
             <div class="msel" id="msel-partners-groups">
               <button type="button" class="cdrop-btn" onclick="mselToggle('msel-partners-groups')"><span class="cdrop-val">All groups</span><span class="cdrop-arrow"></span></button>
@@ -1086,28 +1064,24 @@
                   </div>
                 </div>
                 <!-- Summary stats -->
-                <div id="settlement-stats" class="hidden grid grid-cols-4 divide-x divide-gray-100 border-b border-gray-100">
+                <div id="settlement-stats" class="hidden grid grid-cols-3 divide-x divide-gray-100 border-b border-gray-100">
                   <div class="px-5 py-4 text-center">
                     <div class="text-2xl font-bold text-dark tabular-nums" id="stats-bookings">0</div>
                     <div class="text-xs text-gray-400 mt-0.5">Confirmed bookings</div>
                   </div>
                   <div class="px-5 py-4 text-center">
-                    <div class="text-2xl font-bold tabular-nums" id="stats-total" style="color:#fff">0 pln</div>
+                    <div class="text-2xl font-bold text-dark tabular-nums" id="stats-total">0 pln</div>
                     <div class="text-xs text-gray-400 mt-0.5">Total tour sales</div>
                   </div>
                   <div class="px-5 py-4 text-center">
-                    <div class="text-2xl font-bold tabular-nums" id="stats-hotel-comm" style="color:#E8751A">0 pln</div>
-                    <div class="text-xs text-gray-400 mt-0.5">Hotel commission</div>
-                  </div>
-                  <div class="px-5 py-4 text-center">
-                    <div class="text-2xl font-bold tabular-nums" id="stats-tm-income" style="color:#22c55e">0 pln</div>
-                    <div class="text-xs text-gray-400 mt-0.5">TM Income</div>
+                    <div class="text-2xl font-bold tabular-nums" id="stats-net">0 pln</div>
+                    <div class="text-xs text-gray-400 mt-0.5" id="stats-net-label">Net to settle</div>
                   </div>
                 </div>
 
-                <div id="settlement-driver-warning" class="hidden mx-5 mt-4 mb-1 rounded-xl px-4 py-3 text-sm" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.25);color:#fbbf24;">
+                <div id="settlement-driver-warning" class="hidden mx-5 mt-4 mb-1 rounded-xl px-4 py-3 text-sm" style="background:#fffbeb;border:1px solid #fcd34d;color:#92400e;">
                   <div class="flex items-start gap-3">
-                    <i class="fa-solid fa-triangle-exclamation mt-0.5 shrink-0" style="color:#fbbf24;"></i>
+                    <i class="fa-solid fa-triangle-exclamation mt-0.5 shrink-0" style="color:#d97706;"></i>
                     <span id="settlement-driver-warning-text"></span>
                   </div>
                   <div id="settlement-driver-warning-list" class="mt-2.5 space-y-1.5"></div>
@@ -1128,7 +1102,7 @@
                     </thead>
                     <tbody id="settlement-tbody" class="divide-y divide-gray-50"></tbody>
                     <tfoot>
-                      <tr id="settlement-footer-row" class="bg-dark">
+                      <tr class="bg-dark">
                         <td colspan="6" class="px-5 py-3.5 font-bold text-white text-right text-sm">
                           Net settlement (excl. cancelled):
                           <span id="settlement-direction" class="ml-2 text-xs font-semibold px-2 py-0.5 rounded-full"></span>
@@ -1175,9 +1149,9 @@
                 class="flex items-center gap-2 btn-ol text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors">
                 <i class="fa-solid fa-plus"></i>Add tour
               </button>
-              <button onclick="openTourSettingsModal()"
+              <button onclick="openStripeExpirySettingsModal()"
                 class="flex items-center gap-2 border border-gray-200 hover:bg-gray-50 text-gray-600 text-xs font-semibold px-3 py-2.5 rounded-xl transition-colors">
-                <i class="fa-solid fa-gear"></i>Tour settings
+                <i class="fa-solid fa-gear"></i>Payment link settings
               </button>
             </div>
           </div>
@@ -1198,7 +1172,7 @@
               <span>Changes are locked — enter PIN to edit</span>
             </div>
             <div class="flex items-center gap-2">
-              <input id="tours-pin-input" type="password" maxlength="20" placeholder="Enter code" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')"
+              <input id="tours-pin-input" type="password" maxlength="20" placeholder="Enter PIN"
                 class="w-28 text-center border-2 border-gray-300 rounded-xl px-3 py-1.5 text-sm font-semibold text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-400 bg-white"
                 onkeydown="if(event.key==='Enter')tryUnlockEditing()">
               <button onclick="tryUnlockEditing()"
@@ -1253,12 +1227,12 @@
               <button id="disc-add-btn" onclick="openAddDiscountCodeModal()" disabled class="text-xs px-3 py-1.5 bg-brand text-white rounded-xl font-medium hover:bg-brand/90 disabled:opacity-40 disabled:pointer-events-none">+ Add code</button>
             </div>
             <div id="discount-codes-empty" class="hidden text-xs text-gray-400 py-2">No discount codes yet.</div>
-            <div id="discount-codes-list" class="flex flex-wrap gap-2"></div>
+            <div id="discount-codes-list" class="space-y-1.5"></div>
           </div>
 
           <div class="relative mb-4">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-            <input type="search" id="tours-search" placeholder="Search by name, Bokun ID, group, category…" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" oninput="renderTourConfigTable()" class="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand bg-white">
+            <input type="text" id="tours-search" placeholder="Search by name, Bokun ID, group, category…" oninput="renderTourConfigTable()" class="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand bg-white">
           </div>
 
           <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
@@ -1309,7 +1283,7 @@
 
           <!-- Filter bar -->
           <div class="mb-4 flex flex-wrap gap-2 items-center">
-            <input id="ct-search" type="search" placeholder="Search name, ID, phone…" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" oninput="renderCustomTours()"
+            <input id="ct-search" type="text" placeholder="Search name, ID, email, phone…" oninput="renderCustomTours()"
               class="text-xs rounded-xl px-3 py-2 focus:outline-none focus:ring-1"
               style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);color:#e2e8f0;min-width:220px;flex:1 1 220px">
             <div class="flex items-center gap-1.5">
@@ -1531,7 +1505,7 @@
                       </button>
                       <div class="cdrop-list" id="phone-prefix-list" style="width:250px;max-height:260px;display:none">
                         <div style="padding:6px 8px 6px;border-bottom:1px solid rgba(255,255,255,0.07)">
-                          <input id="phone-prefix-search" type="search" placeholder="Search country or code…" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" oninput="filterPhonePrefixes(this.value)"
+                          <input id="phone-prefix-search" type="text" placeholder="Search country or code…" oninput="filterPhonePrefixes(this.value)"
                             style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:7px;padding:5px 9px;font-size:12px;color:#e2e8f0;outline:none">
                         </div>
                         <div id="phone-prefix-items" style="max-height:196px;overflow-y:auto;padding:4px"></div>
@@ -1703,7 +1677,7 @@
           </div>
 
           <div class="mb-4">
-            <input id="staff-search-input" type="search" placeholder="Search by name…" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')"
+            <input id="staff-search-input" type="text" placeholder="Search by name or email…"
               oninput="filterStaffSearch(this.value)"
               class="w-full sm:w-72 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30"
               style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);color:#e2e8f0">
@@ -1752,7 +1726,7 @@
                   <select id="add-staff-role" class="fsel">
                     <option value="staff">Staff — Seller Panel & Custom Tours</option>
                     <option value="manager">Manager — All except Dashboard & Staff</option>
-                    <option id="add-staff-role-admin-opt" value="admin">Admin — Full access</option>
+                    <option value="admin">Admin — Full access</option>
                   </select>
                 </div>
               </div>
@@ -1805,7 +1779,7 @@
                   <select id="edit-staff-role" class="fsel">
                     <option value="staff">Staff — Seller Panel & Custom Tours</option>
                     <option value="manager">Manager — All except Dashboard & Staff</option>
-                    <option id="edit-staff-role-admin-opt" value="admin">Admin — Full access</option>
+                    <option value="admin">Admin — Full access</option>
                   </select>
                 </div>
               </div>
@@ -1852,7 +1826,7 @@
             <div class="flex flex-wrap gap-3 items-center">
               <div class="relative flex-1 min-w-48">
                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-                <input type="search" id="ticket-search" placeholder="Search partner, subject, category…" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" oninput="applyTicketFilters()" class="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+                <input type="text" id="ticket-search" placeholder="Search partner, subject, category…" oninput="applyTicketFilters()" class="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
               </div>
               <div class="msel" id="msel-ticket-category">
                 <button type="button" class="cdrop-btn" onclick="mselToggle('msel-ticket-category')"><span class="cdrop-val">All categories</span><span class="cdrop-arrow"></span></button>
@@ -1997,7 +1971,7 @@
             <div class="flex flex-wrap gap-3 items-center">
               <div class="relative flex-1 min-w-48">
                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-                <input id="activity-search" type="search" placeholder="Search details" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" oninput="filterActivity()"
+                <input id="activity-search" type="text" placeholder="Search details, user, ref…" oninput="filterActivity()"
                   class="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
               </div>
               <div class="msel" id="msel-activity-user">
@@ -2049,7 +2023,7 @@
             <div class="text-lg font-bold text-white">Create a booking</div>
             <div class="text-xs text-slate-400 mt-0.5">Book a tour directly through the system</div>
           </div>
-          <input id="ab-search" type="search" placeholder="Search tours…" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" oninput="abFilterTours()"
+          <input id="ab-search" type="text" placeholder="Search tours…" oninput="abFilterTours()"
             class="w-full mb-4 text-sm px-4 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/40"
             style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#fff;">
           <div id="ab-tour-grid" class="grid grid-cols-1 gap-4" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))"></div>
@@ -2538,7 +2512,7 @@
       <!-- ── TOUR GROUPS ─────────────────────────── -->
       <div style="border-top:1px solid rgba(255,255,255,0.08);padding-top:20px">
         <div style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Tour groups</div>
-        <div style="font-size:12px;color:#64748b;margin-bottom:10px">If you assign groups here, the partner will only see tours that share at least one of them — tours with no groups become invisible to them. Leave this partner with no groups to show them every tour instead.</div>
+        <div style="font-size:12px;color:#64748b;margin-bottom:10px">Partner will see only tours assigned to these groups. Tours with no groups are visible to all partners.</div>
         <div id="ap-tour-groups-wrap" class="flex flex-wrap gap-2" style="min-height:24px"></div>
       </div>
 
@@ -2622,7 +2596,7 @@
       <!-- Tour groups -->
       <div class="border-t border-gray-100 pt-4">
         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Tour groups</div>
-        <div class="text-xs text-gray-400 mb-3">If you assign groups here, the partner will only see tours that share at least one of them — tours with no groups become invisible to them. Leave this partner with no groups to show them every tour instead.</div>
+        <div class="text-xs text-gray-400 mb-3">Partner sees only tours assigned to these groups. Tours with no groups are visible to all partners.</div>
         <div id="pd-tour-groups-wrap" class="flex flex-wrap gap-2 min-h-6"></div>
       </div>
 
@@ -2655,18 +2629,6 @@
           <div>
             <div class="text-sm text-dark">Enable pickup from this property</div>
             <div class="text-xs text-gray-400 mt-0.5">If disabled, partner can only select the tour's meeting point</div>
-          </div>
-        </label>
-      </div>
-
-      <!-- Commission settings -->
-      <div class="border-t border-gray-100 pt-4">
-        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Commission</div>
-        <label class="flex items-center gap-3 cursor-pointer">
-          <input type="checkbox" id="pd-commission-enabled" class="accent-brand w-4 h-4" checked>
-          <div>
-            <div class="text-sm text-dark">Enable commission for this partner</div>
-            <div class="text-xs text-gray-400 mt-0.5">If disabled, none of this partner's commission is calculated anywhere — Commission tab, exports, and their own dashboard. The full booking amount counts as Thousand Miles' income instead.</div>
           </div>
         </label>
       </div>
@@ -2788,77 +2750,49 @@
     <!-- Form -->
     <div class="flex-1 overflow-y-auto px-5 py-4 space-y-3">
 
-      <!-- Bokun disclaimer -->
-      <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-700 space-y-1">
-        <div class="flex items-start gap-2">
-          <i class="fa-solid fa-triangle-exclamation text-amber-500 mt-0.5"></i>
-          <span class="font-semibold">Changes here are NOT sent to Bokun. For tours with an external supplier (e.g. Auschwitz), the supplier won't be informed of anything you change here — a changed date will not reach them. Edit guest details directly in Bokun instead; to change the date, cancel this booking rather than editing it here.</span>
-        </div>
-        <div class="flex items-center gap-2 text-gray-500 pt-0.5">
-          <i class="fa-solid fa-circle-info text-gray-400"></i>
-          Source: <span id="edit-source-label" class="font-semibold text-dark ml-1">—</span>
-          <span class="text-gray-300 mx-1">·</span>
-          Bokun ID: <span id="edit-bokun-id" class="font-mono font-semibold text-dark ml-1">—</span>
-        </div>
-      </div>
-
-      <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Tour details</div>
+      <!-- READ-ONLY section label -->
+      <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Tour details (read-only)</div>
 
       <div>
         <label class="block text-xs font-semibold text-gray-500 mb-1.5">Tour</label>
-        <input id="edit-tour" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        <input id="edit-tour" type="text" readonly class="w-full text-sm border border-gray-100 rounded-xl px-3 py-2.5 bg-gray-50 text-gray-500 cursor-not-allowed">
       </div>
 
       <div class="grid grid-cols-2 gap-3">
         <div>
           <label class="block text-xs font-semibold text-gray-500 mb-1.5">Date</label>
-          <input id="edit-date" type="date" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          <input id="edit-date" type="text" readonly class="w-full text-sm border border-gray-100 rounded-xl px-3 py-2.5 bg-gray-50 text-gray-500 cursor-not-allowed">
         </div>
         <div>
           <label class="block text-xs font-semibold text-gray-500 mb-1.5">Time</label>
-          <input id="edit-time" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          <input id="edit-time" type="text" readonly class="w-full text-sm border border-gray-100 rounded-xl px-3 py-2.5 bg-gray-50 text-gray-500 cursor-not-allowed">
         </div>
       </div>
 
       <div class="grid grid-cols-3 gap-3">
         <div>
           <label class="block text-xs font-semibold text-gray-500 mb-1.5">Pax</label>
-          <input id="edit-pax" type="number" min="1" step="1" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          <input id="edit-pax" type="text" readonly class="w-full text-sm border border-gray-100 rounded-xl px-3 py-2.5 bg-gray-50 text-gray-500 cursor-not-allowed">
         </div>
         <div>
           <label class="block text-xs font-semibold text-gray-500 mb-1.5">Total (zł)</label>
-          <input id="edit-total" type="number" min="0" step="0.01" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          <input id="edit-total" type="text" readonly class="w-full text-sm border border-gray-100 rounded-xl px-3 py-2.5 bg-gray-50 text-gray-500 cursor-not-allowed">
         </div>
         <div>
           <label class="block text-xs font-semibold text-gray-500 mb-1.5">Commission</label>
-          <input id="edit-comm" type="number" min="0" step="0.01" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          <input id="edit-comm" type="text" readonly class="w-full text-sm border border-gray-100 rounded-xl px-3 py-2.5 bg-gray-50 text-gray-500 cursor-not-allowed">
         </div>
       </div>
 
-      <div class="grid grid-cols-3 gap-3">
+      <div class="grid grid-cols-2 gap-3">
         <div>
           <label class="block text-xs font-semibold text-gray-500 mb-1.5">Partner</label>
-          <select id="edit-hotel" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"></select>
+          <input id="edit-hotel-display" type="text" readonly class="w-full text-sm border border-gray-100 rounded-xl px-3 py-2.5 bg-gray-50 text-gray-500 cursor-not-allowed">
+          <select id="edit-hotel" class="hidden"></select>
         </div>
         <div>
           <label class="block text-xs font-semibold text-gray-500 mb-1.5">Payment</label>
-          <select id="edit-payment" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-            <option value="">— unknown —</option>
-            <option value="driver">Pay at driver</option>
-            <option value="hotel">Pay at hotel</option>
-            <option value="link">Payment link</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-gray-500 mb-1.5">Status</label>
-          <select id="edit-status" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-            <option value="paid">Paid</option>
-            <option value="to_be_paid">Driver pay</option>
-            <option value="payment_pending">Payment link sent</option>
-            <option value="arrived">Arrived</option>
-            <option value="no_show">No Show</option>
-          </select>
-          <p id="edit-status-locked-note" class="hidden text-xs text-gray-400 mt-1">Use the Cancel button to cancel — not editable here.</p>
+          <input id="edit-payment-display" type="text" readonly class="w-full text-sm border border-gray-100 rounded-xl px-3 py-2.5 bg-gray-50 text-gray-500 cursor-not-allowed">
         </div>
       </div>
 
@@ -2901,6 +2835,20 @@
       <div>
         <label class="block text-xs font-semibold text-gray-600 mb-1.5">Notes</label>
         <textarea id="edit-notes" rows="3" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand resize-none" placeholder="Internal notes…"></textarea>
+      </div>
+
+      <!-- Source info + Bokun disclaimer -->
+      <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-700 space-y-1">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
+          <span class="font-semibold">Changes apply to this panel only — Bokun will not be updated.</span>
+        </div>
+        <div class="flex items-center gap-2 text-gray-500 pt-0.5">
+          <i class="fa-solid fa-circle-info text-gray-400"></i>
+          Source: <span id="edit-source-label" class="font-semibold text-dark ml-1">—</span>
+          <span class="text-gray-300 mx-1">·</span>
+          Bokun ID: <span id="edit-bokun-id" class="font-mono font-semibold text-dark ml-1">—</span>
+        </div>
       </div>
 
     </div>
@@ -3583,7 +3531,7 @@
     const lbEl = el('dash-leaderboard');
     if (lbEl) lbEl.innerHTML = topPartners.length ? topPartners.map(([name, count], i) => `
       <div class="flex items-center gap-3">
-        <div class="w-5 text-center text-xs font-bold ${i===0?'text-yellow-400':i===1?'text-slate-300':i===2?'':'text-slate-500'}"${i===2?' style="color:#DDA15E"':''}>${i+1}</div>
+        <div class="w-5 text-center text-xs font-bold ${i===0?'text-yellow-400':i===1?'text-slate-300':i===2?'text-amber-600':'text-slate-500'}">${i+1}</div>
         <div class="flex-1 min-w-0">
           <div class="flex items-center justify-between text-xs mb-1">
             <span class="font-medium text-white truncate">${escapeHtml(name)}</span>
@@ -3733,12 +3681,9 @@
     mselInit('msel-ab-hotel', 'All partners', filterAllBookings);
     mselInit('msel-ab-status','All statuses', filterAllBookings);
     mselInit('msel-ab-source','All channels', filterAllBookings);
-    mselInit('msel-ab-partner-type','All types', filterAllBookings);
     mselInit('msel-hb-tour',  'All tours',    filterHotelBookings);
     mselInit('msel-hb-hotel', 'All partners', filterHotelBookings);
     mselInit('msel-hb-status','All statuses', filterHotelBookings);
-    mselInit('msel-hb-source','All channels', filterHotelBookings);
-    mselInit('msel-hb-partner-type','All types', filterHotelBookings);
     mselInit('msel-ct-staff',   'All staff',    renderCustomTours);
     mselInit('msel-ct-status',  'All statuses', renderCustomTours);
     mselInit('msel-ct-payment', 'All payments', renderCustomTours);
@@ -3746,9 +3691,6 @@
     mselSetOptions('msel-ct-payment', [{value:'stripe',label:'Stripe'},{value:'bank_transfer',label:'Bank transfer'},{value:'cash',label:'Cash'}]);
     mselSetOptions('msel-ab-status', STATUS_OPTS_EARLY);
     mselSetOptions('msel-hb-status', STATUS_OPTS_EARLY);
-    const PARTNER_TYPE_OPTS = [{value:'hotel',label:'Hotels'},{value:'agency',label:'Tour Agencies'}];
-    mselSetOptions('msel-ab-partner-type', PARTNER_TYPE_OPTS);
-    mselSetOptions('msel-hb-partner-type', PARTNER_TYPE_OPTS);
     mselInit('msel-partners-groups', 'All groups',    () => renderPartnersTable());
     mselInit('msel-partners-status', 'All statuses',  () => renderPartnersTable());
     mselSetOptions('msel-partners-status', [{value:'active',label:'Active'},{value:'inactive',label:'Deactivated'}]);
@@ -3782,19 +3724,17 @@
         updateNewBookingsBadge();
         // Add the new booking to allBookings so KPIs reflect it immediately
         const nb = payload?.new;
-        const _rtDateFormatted = nb?.date ? new Date(nb.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
         if (nb && !allBookings.find(b => b.id === nb.id)) {
           const partner = allPartners.find(p => p.id === nb.partner_id);
           const source = partner ? 'Partner Panel' : (nb.source || 'TM Panel');
           allBookings.push({
             id: nb.id, displayId: nb.bokun_confirmation_code || nb.id,
             tour: nb.tour, guest: nb.guest, email: nb.email, phone: nb.phone,
-            hotel: partner?.name || '—', date: _rtDateFormatted, time: nb.time,
+            hotel: partner?.name || '—', date: nb.date || '—', time: nb.time,
             pickup: nb.pickup, language: nb.language || '',
             pax: nb.pax, total: nb.total || 0, currency: nb.currency || 'PLN',
             comm: nb.comm, source, status: nb.status, notes: nb.notes || '',
             additional_guests: nb.additional_guests || '', payment_method: nb.payment_method || '',
-            package_lines: nb.package_lines || null,
             _dbBooking: true, _stripeSessionId: nb.stripe_session_id,
             _bokunCode: nb.bokun_confirmation_code, _bokunBookingId: nb.bokun_booking_id || null,
             _paymentType: nb.payment_type || null,
@@ -3815,7 +3755,6 @@
             comm: nb.comm, source: nb.source === 'admin' ? 'Admin' : 'Partner Panel',
             status: nb.status, notes: nb.notes || '', additional_guests: nb.additional_guests || '',
             payment_method: nb.payment_method || '',
-            package_lines: nb.package_lines || null,
             _dbBooking: true, _stripeSessionId: nb.stripe_session_id,
             _bokunCode: nb.bokun_confirmation_code, _bokunBookingId: nb.bokun_booking_id || null,
             _paymentType: nb.payment_type || null,
@@ -3884,8 +3823,8 @@
   function applyAdminRoleUI() {
     const ALLOWED = {
       'admin':   null, // null = all sections
-      'manager': ['bookings','hotelbookings','sellerpanel','customtours','tailormade','hotels','settlement','tours','suppliers','support','notifications','activity','createbooking','staff'],
-      'staff':   ['bookings','hotelbookings','sellerpanel','customtours','tailormade','tours','support','createbooking','hotels'],
+      'manager': ['bookings','hotelbookings','sellerpanel','customtours','tailormade','hotels','settlement','tours','suppliers','support','notifications','activity','createbooking'],
+      'staff':   ['bookings','hotelbookings','sellerpanel','customtours','tailormade','tours','support','createbooking'],
     };
     const allowed = currentAdminRole === 'admin' ? null : (ALLOWED[currentAdminRole] ?? ALLOWED['staff']);
 
@@ -4381,7 +4320,6 @@
         _bokunBookingId: b.bokun_booking_id || null, _paymentType: b.payment_type || null,
         _creationTs: b.created_at ? new Date(b.created_at).getTime() : 0,
         _startTs: b.date ? new Date(b.date).getTime() : 0,
-        _rawDate: b.date || null, _partnerId: b.partner_id || null,
       });
     });
 
@@ -4437,9 +4375,8 @@
             if (mapped.source && (dbSrc === 'TM Panel' || dbSrc === 'bokun_ota') && !DIRECT_SOURCES.has(mapped.source)) {
               allBookings[idx].source = mapped.source;
             }
-            // Partner Panel and Admin (Create Booking) bookings use their own PLN amount from DB —
-            // both are priced by us, not a real OTA reseller invoice; all other OTA sources use the API.
-            if (allBookings[idx].source !== 'Partner Panel' && allBookings[idx].source !== 'admin') {
+            // Partner Panel bookings use their own PLN amount from DB; all OTA sources use API
+            if (allBookings[idx].source !== 'Partner Panel') {
               const pfx = (allBookings[idx]._bokunCode || mapped.id || '').replace(/^#/, '').split('-')[0].toUpperCase();
               const forcePln = otaPlnPrefixes.includes(pfx);
               if (mapped.total > 0) {
@@ -4486,7 +4423,7 @@
   let _lastSettledByPartner = {};
   async function loadPartners() {
     // settlements loaded separately (lazy) to keep this query fast
-    const { data, error } = await db.from('partners').select('id,name,initials,color,type,role,stars,address,contact,phone,email,username,created_at,bookings_count,comm,comm_rate,active,notes,last_login,contract_signed,contract_expiry,notify_email,logo_url,nip,invoice_email,invoice_company,invoice_address,tour_groups,payment_options,hotel_pickup_enabled,commission_enabled').order('name');
+    const { data, error } = await db.from('partners').select('id,name,initials,color,type,role,stars,address,contact,phone,email,username,created_at,bookings_count,comm,comm_rate,active,notes,last_login,contract_signed,contract_expiry,notify_email,logo_url,nip,invoice_email,invoice_company,invoice_address,tour_groups,payment_options,hotel_pickup_enabled').order('name');
     if (error) { console.error('partners:', error); return; }
     allPartners.length = 0;
     data.forEach(p => allPartners.push({
@@ -4503,7 +4440,6 @@
       tourGroups: p.tour_groups || [],
       paymentOptions: p.payment_options || ['driver', 'hotel', 'link'],
       hotel_pickup_enabled: p.hotel_pickup_enabled,
-      commission_enabled: p.commission_enabled,
       settlements: []
     }));
     _partnerDropdownsStale = true;
@@ -4795,7 +4731,7 @@
     const empty = document.getElementById('discount-codes-empty');
     if (!list) return;
     const locked = currentAdminRole === 'staff' || !editingUnlocked;
-    const lockCls = locked ? 'pointer-events-none' : '';
+    const lockCls = locked ? 'opacity-40 pointer-events-none' : '';
     if (allDiscountCodes.length === 0) {
       list.innerHTML = '';
       if (empty) empty.classList.remove('hidden');
@@ -4803,11 +4739,17 @@
     }
     if (empty) empty.classList.add('hidden');
     list.innerHTML = allDiscountCodes.map(d => `
-      <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${d.active ? 'bg-brand/10 text-brand' : 'bg-gray-100 text-gray-400'}" title="${d.active ? 'Active' : 'Inactive'} — ${d.discount_pct}% off">
-        <span class="font-mono">${escapeHtml(d.code)}</span>
-        <button onclick="openEditDiscountCodeModal('${d.id}')" title="Edit" ${locked ? 'disabled' : ''} class="opacity-40 hover:opacity-100 ml-0.5 leading-none ${lockCls}">✏</button>
-        <button onclick="deleteDiscountCode('${d.id}')" title="Delete" ${locked ? 'disabled' : ''} class="hover:text-red-500 font-bold leading-none opacity-40 hover:opacity-100 ${lockCls}">×</button>
-      </span>`).join('');
+      <div class="flex items-center justify-between gap-3 px-3 py-2 rounded-xl border border-gray-100 hover:bg-gray-50">
+        <div class="flex items-center gap-3">
+          <span class="font-mono text-xs font-bold text-dark">${escapeHtml(d.code)}</span>
+          <span class="text-xs text-brand font-semibold">-${d.discount_pct}%</span>
+          <button onclick="toggleDiscountCodeActive('${d.id}')" ${locked ? 'disabled' : ''} class="text-xs px-2 py-0.5 rounded-full font-medium ${lockCls} ${d.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'}">${d.active ? 'Active' : 'Inactive'}</button>
+        </div>
+        <div class="flex items-center gap-1">
+          <button onclick="openEditDiscountCodeModal('${d.id}')" ${locked ? 'disabled' : ''} class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 ${lockCls}"><i class="fa-solid fa-pen text-xs"></i></button>
+          <button onclick="deleteDiscountCode('${d.id}')" ${locked ? 'disabled' : ''} class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 ${lockCls}"><i class="fa-solid fa-trash text-xs"></i></button>
+        </div>
+      </div>`).join('');
   }
 
   function openAddDiscountCodeModal() { openDiscountCodeModal(null); }
@@ -4859,6 +4801,16 @@
       renderDiscountCodes();
       logActivity('discount_code_added', `Discount code "${code}" added (${pct}%)`);
     }
+  }
+
+  async function toggleDiscountCodeActive(id) {
+    if (!editingUnlocked || currentAdminRole === 'staff') return;
+    const d = allDiscountCodes.find(x => x.id === id);
+    if (!d) return;
+    const { error } = await db.from('discount_codes').update({ active: !d.active }).eq('id', id);
+    if (error) { showToast('Failed to update discount code.', 'error', error.message); return; }
+    d.active = !d.active;
+    renderDiscountCodes();
   }
 
   async function deleteDiscountCode(id) {
@@ -4941,10 +4893,11 @@
     const has = bokunHasCat(tourId, keyword);
     if (has === null) return '';
     if (has) return '';
-    return `<button onmouseenter="openCatPopover(event,'${label}')" onmouseleave="closeCatPopover()" class="ml-0.5 text-amber-500 hover:text-amber-600 text-xs font-bold leading-none cursor-default" title="Category missing in Bokun">⚠ <span class="underline font-normal">info</span></button>`;
+    return `<button onclick="openCatPopover(event,'${label}')" class="ml-0.5 text-amber-500 hover:text-amber-600 text-xs font-bold leading-none cursor-pointer" title="Category missing in Bokun">⚠ <span class="underline font-normal">info</span></button>`;
   }
 
   function openCatPopover(e, label) {
+    e.stopPropagation();
     const pop = document.getElementById('bokun-cat-popover');
     document.getElementById('bokun-cat-popover-label').textContent = `The "${label}" pricing category doesn't exist in Bokun for this tour — the price won't be shown to partners until you add it there.`;
     const rect = e.target.closest('button').getBoundingClientRect();
@@ -4960,21 +4913,10 @@
     document.getElementById('bokun-cat-popover').classList.add('hidden');
   }
 
-  function openInfoPopover(e, message) {
-    const pop = document.getElementById('generic-info-popover');
-    document.getElementById('generic-info-popover-label').textContent = message;
-    const rect = e.target.closest('button').getBoundingClientRect();
-    pop.classList.remove('hidden');
-    const top = rect.bottom + window.scrollY + 6;
-    let left = rect.left + window.scrollX - 80;
-    left = Math.max(16, Math.min(left, window.innerWidth - 304));
-    pop.style.top = top + 'px';
-    pop.style.left = left + 'px';
-  }
-
-  function closeInfoPopover() {
-    document.getElementById('generic-info-popover').classList.add('hidden');
-  }
+  document.addEventListener('click', e => {
+    const pop = document.getElementById('bokun-cat-popover');
+    if (pop && !pop.contains(e.target)) pop.classList.add('hidden');
+  });
 
   function renderTourConfigTable() {
     if (currentAdminRole === 'staff') {
@@ -5014,8 +4956,8 @@
       return (a.sort_order || 0) - (b.sort_order || 0);
     }).filter(t => !tq || (t.title||'').toLowerCase().includes(tq) || (t.bokun_id||'').toString().includes(tq) || (t.groups||[]).some(g=>(g||'').toLowerCase().includes(tq)) || (t.categories||[]).some(c=>(c||'').toLowerCase().includes(tq)));
     displayTours.forEach((t, idx) => {
-      const groups   = (t.groups || []).length > 0 ? t.groups.map(groupChip).join('') : '<span class="text-gray-300 text-xs">no groups</span>';
-      const pkgCount = allCommissions.filter(c => c.tour_config_id === t.id).length;
+      const groups   = (t.groups || []).length > 0 ? t.groups.map(groupChip).join('') : '<span class="text-gray-300 text-xs">all partners</span>';
+      const packages = allCommissions.filter(c => c.tour_config_id === t.id).sort((a,b) => (a.sort_order||0)-(b.sort_order||0));
 
       // ── Main tour row ──────────────────────────────────────────────
       tbody.insertAdjacentHTML('beforeend', `
@@ -5061,7 +5003,7 @@
                 <div class="h-5 w-px bg-gray-200 mx-1"></div>
                 <button onclick="openEditTour('${t.id}')" title="Edit tour" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-gray-100 text-gray-400 ${lockCls}"><i class="fa-solid fa-pen text-sm"></i></button>
                 <button onclick="openTourInfoBlocks('${t.id}')" title="Info blocks" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-blue-50 text-gray-400 hover:text-blue-500 ${lockCls}"><i class="fa-solid fa-layer-group text-sm"></i></button>
-                <button onclick="openPkgModal('${t.id}')" title="Pricing (${pkgCount} package${pkgCount !== 1 ? 's' : ''})" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-orange-50 text-gray-400 hover:text-brand ${lockCls}"><i class="fa-solid fa-coins text-sm"></i></button>
+                <button onclick="toggleTourPricing('${t.id}', this)" title="Pricing" id="pricing-btn-${t.id}" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-orange-50 text-gray-400 hover:text-brand ${lockCls}"><i class="fa-solid fa-coins text-sm"></i></button>
                 ${(t.bokun_id != null || (t.manual_slots && t.manual_slots.length)) ? `<button onclick="tsaOpenModal('${t.id}')" title="Slot availability by date" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-gray-100 text-gray-400 hover:text-brand ${calLockCls}"><i class="fa-solid fa-calendar-days text-sm"></i></button>` : ''}
                 ${t.bokun_id != null ? `<button title="Bokun-linked — cannot delete" class="w-9 h-9 flex items-center justify-center rounded-xl text-gray-300 cursor-not-allowed" disabled><i class="fa-solid fa-trash text-sm"></i></button>` : `<button onclick="deleteTour('${t.id}')" title="Delete" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-gray-200 hover:text-red-400 ${lockCls}"><i class="fa-solid fa-trash text-sm"></i></button>`}
               </div>
@@ -5069,6 +5011,110 @@
           </td>
         </tr>`);
 
+      // ── Pricing expanded row (hidden by default) ────────────────────
+      const pkgRows = packages.length > 0 ? packages.map(pkg => `
+        <tr class="divide-x divide-gray-100 ${pkg.active ? '' : 'opacity-50'}">
+          <td class="px-3 py-1.5 min-w-32">
+            <input type="text" value="${pkg.title.replace(/"/g, '&quot;')}" ${locked ? 'disabled' : ''}
+              class="w-full text-xs font-semibold text-gray-900 bg-transparent border border-transparent rounded px-1.5 py-1 hover:border-gray-300 focus:border-brand/40 focus:outline-none focus:ring-1 focus:ring-brand/40 focus:bg-white ${locked ? 'cursor-default' : ''}"
+              onchange="quickSavePkg('${pkg.id}', 'title', this.value.trim())"
+              onblur="quickSavePkg('${pkg.id}', 'title', this.value.trim())">
+          </td>
+          <td class="px-2 py-1.5 text-center">
+            <input type="number" value="${pkg.price_pln ?? ''}" min="0" placeholder="off" ${locked ? 'disabled' : ''}
+              class="w-16 text-center text-xs border border-gray-300 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 text-gray-800 font-medium placeholder-gray-400 ${locked ? 'bg-gray-100' : 'bg-white'}"
+              onchange="quickSavePkg('${pkg.id}', 'price_pln', this.value === '' ? null : parseInt(this.value)||0)">
+          </td>
+          <td class="px-2 py-1.5 text-center">
+            <div class="inline-flex items-center gap-0.5">
+              <input type="number" value="${pkg.price_student ?? ''}" min="0" placeholder="off" ${locked ? 'disabled' : ''}
+                class="w-16 text-center text-xs border border-gray-300 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 text-gray-800 font-medium placeholder-gray-400 ${locked ? 'bg-gray-100' : 'bg-white'}"
+                onchange="quickSavePkg('${pkg.id}', 'price_student', this.value === '' ? null : parseInt(this.value)||0)">
+              ${pkg.price_student !== null && pkg.price_student !== undefined ? catWarning(t.id, 'student', 'Student') : ''}
+            </div>
+          </td>
+          <td class="px-2 py-1.5 text-center">
+            <div class="inline-flex items-center gap-0.5">
+              <input type="number" value="${pkg.price_child ?? ''}" min="0" placeholder="off" ${locked ? 'disabled' : ''}
+                class="w-16 text-center text-xs border border-gray-300 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 text-gray-800 font-medium placeholder-gray-400 ${locked ? 'bg-gray-100' : 'bg-white'}"
+                onchange="quickSavePkg('${pkg.id}', 'price_child', this.value === '' ? null : parseInt(this.value)||0)">
+              ${pkg.price_child !== null && pkg.price_child !== undefined ? catWarning(t.id, 'child', 'Child') : ''}
+            </div>
+          </td>
+          <td class="px-2 py-1.5 text-center">
+            <div class="inline-flex items-center gap-0.5">
+              <input type="number" value="${pkg.price_senior ?? ''}" min="0" placeholder="off" ${locked ? 'disabled' : ''}
+                class="w-16 text-center text-xs border border-gray-300 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 text-gray-800 font-medium placeholder-gray-400 ${locked ? 'bg-gray-100' : 'bg-white'}"
+                onchange="quickSavePkg('${pkg.id}', 'price_senior', this.value === '' ? null : parseInt(this.value)||0)">
+              ${pkg.price_senior !== null && pkg.price_senior !== undefined ? catWarning(t.id, 'senior', 'Senior') : ''}
+            </div>
+          </td>
+          <td class="px-2 py-1.5 text-center">
+            <div class="inline-flex items-center gap-0.5">
+              <input type="number" value="${pkg.price_infant ?? ''}" min="0" placeholder="off" ${locked ? 'disabled' : ''}
+                class="w-16 text-center text-xs border border-gray-300 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 text-gray-800 font-medium placeholder-gray-400 ${locked ? 'bg-gray-100' : 'bg-white'}"
+                onchange="quickSavePkg('${pkg.id}', 'price_infant', this.value === '' ? null : parseInt(this.value)||0)">
+              ${pkg.price_infant !== null && pkg.price_infant !== undefined ? catWarning(t.id, 'infant', 'Infant') : ''}
+            </div>
+          </td>
+          <td class="px-2 py-1.5 text-center">
+            <input type="number" value="${pkg.commission_pln || 0}" min="0" ${locked ? 'disabled' : ''}
+              class="w-16 text-center text-xs border-2 border-brand/40 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 font-bold text-brand ${locked ? 'bg-gray-100' : 'bg-orange-50'}"
+              onchange="quickSavePkg('${pkg.id}', 'commission_pln', parseInt(this.value)||0)">
+          </td>
+          <td class="px-2 py-1.5 text-center">
+            <input type="number" value="${pkg.transport_price_pln ?? ''}" min="0" placeholder="—" ${locked ? 'disabled' : ''}
+              class="w-16 text-center text-xs border border-gray-300 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 text-gray-800 ${locked ? 'bg-gray-100' : 'bg-white'}"
+              title="Transport surcharge per person (PLN) for hotel pickup"
+              onchange="quickSavePkg('${pkg.id}', 'transport_price_pln', this.value === '' ? null : parseInt(this.value)||0)">
+          </td>
+          <td class="px-2 py-1.5 text-center">
+            <input type="number" value="${pkg.transport_commission_pln ?? ''}" min="0" placeholder="—" ${locked ? 'disabled' : ''}
+              class="w-16 text-center text-xs border border-gray-300 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand/40 text-gray-800 ${locked ? 'bg-gray-100' : 'bg-white'}"
+              title="Extra commission per person (PLN) when guest chooses hotel pickup"
+              onchange="quickSavePkg('${pkg.id}', 'transport_commission_pln', this.value === '' ? null : parseInt(this.value)||0)">
+          </td>
+          <td class="px-3 py-1.5 text-center">
+            <label class="relative inline-flex ${lockCls} cursor-pointer">
+              <input type="checkbox" class="sr-only peer" ${pkg.active ? 'checked' : ''} ${locked ? 'disabled' : ''} onchange="togglePkgActive('${pkg.id}', this.checked)">
+              <div class="w-8 h-4 bg-gray-300 peer-checked:bg-green-500 rounded-full transition-colors"></div>
+              <div class="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4"></div>
+            </label>
+          </td>
+          <td class="px-2 py-1.5 text-right">
+            <button onclick="deletePackage('${pkg.id}')" title="Delete package" class="w-6 h-6 flex items-center justify-center rounded hover:bg-red-50 text-gray-300 hover:text-red-400 ${lockCls}"><i class="fa-solid fa-trash text-xs"></i></button>
+          </td>
+        </tr>`).join('') : `
+        <tr><td colspan="11" class="px-3 py-2.5 text-xs text-brand/50 italic">No packages — click <span class="not-italic font-semibold text-brand/80">Add package</span> to add price &amp; commission</td></tr>`;
+
+      tbody.insertAdjacentHTML('beforeend', `
+        <tr id="pricing-row-${t.id}" class="hidden">
+          <td colspan="5" class="px-3 pb-3 pt-1">
+            <div class="border border-gray-200 rounded-xl overflow-hidden">
+              <table class="w-full text-xs">
+                <thead>
+                  <tr class="bg-gray-50 border-b border-gray-200">
+                    <th class="text-left px-3 py-2 text-gray-400 font-semibold">Package</th>
+                    <th class="text-center px-2 py-2 text-gray-400 font-semibold w-20">Adult</th>
+                    <th class="text-center px-2 py-2 text-gray-400 font-semibold w-20">Student</th>
+                    <th class="text-center px-2 py-2 text-gray-400 font-semibold w-20">Child</th>
+                    <th class="text-center px-2 py-2 text-gray-400 font-semibold w-20">Senior</th>
+                    <th class="text-center px-2 py-2 text-gray-400 font-semibold w-20">Infant</th>
+                    <th class="text-center px-2 py-2 text-gray-400 font-semibold w-24 text-brand">Commission</th>
+                    <th class="text-center px-2 py-2 text-gray-400 font-semibold w-24">Transport</th>
+                    <th class="text-center px-2 py-2 text-gray-400 font-semibold w-24">Transport Comm.</th>
+                    <th class="text-center px-2 py-2 text-gray-400 font-semibold w-14">Active</th>
+                    <th class="w-8"></th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">${pkgRows}</tbody>
+              </table>
+              <div class="px-3 py-2 border-t border-gray-100 bg-gray-50/50">
+                <button onclick="openAddPackageModal('${t.id}')" class="text-xs px-3 py-1 rounded-lg border border-dashed border-brand/40 text-brand hover:bg-brand/5 transition-colors ${lockCls}"><i class="fa-solid fa-plus text-xs mr-1"></i>Add package</button>
+              </div>
+            </div>
+          </td>
+        </tr>`);
     });
   }
 
@@ -5082,8 +5128,6 @@
       btn.style.color = isActive ? '#fff' : (isDark ? '#64748b' : '#6b7280');
       btn.style.fontWeight = isActive ? '600' : '';
     });
-    document.querySelectorAll('.' + prefix + '-per-person-hint').forEach(el => el.classList.toggle('hidden', val !== 'per_person'));
-    document.querySelectorAll('.' + prefix + '-package-hint').forEach(el => el.classList.toggle('hidden', val !== 'package'));
   }
 
   function openAddTourModal() {
@@ -5313,8 +5357,6 @@
     document.getElementById('edit-tour-allow-hotel-pickup').checked = t.allow_hotel_pickup !== false;
     document.getElementById('edit-tour-allow-meeting-point').checked = t.allow_meeting_point !== false;
     document.getElementById('edit-tour-require-guest-names').checked = !!t.require_guest_names;
-    document.getElementById('edit-tour-cutoff-hours').value = t.booking_cutoff_hours ?? '';
-    document.getElementById('edit-tour-slot-capacity').value = t.slot_capacity ?? '';
     editTourPickupToggle();
     renderEditTourGroups(t.groups || []);
     document.getElementById('edit-tour-force-rate-id').value = t.bokun_force_rate_id || '';
@@ -5347,19 +5389,14 @@
 
     const slotsSection = document.getElementById('edit-tour-slots-section');
     const slotsList    = document.getElementById('edit-tour-slots-list');
-    const categoriesSection = document.getElementById('edit-tour-categories-section');
-    const categoriesList    = document.getElementById('edit-tour-categories-list');
     const nonBokunSection = document.getElementById('edit-tour-nonbokun-section');
     if (t.bokun_id) {
       slotsSection.classList.remove('hidden');
       slotsList.innerHTML = '<span class="text-xs text-gray-400">Loading slots…</span>';
-      categoriesSection.classList.remove('hidden');
-      categoriesList.innerHTML = '<span class="text-xs text-gray-400">Loading…</span>';
       loadEditTourSlots(t);
       if (nonBokunSection) nonBokunSection.classList.add('hidden');
     } else {
       slotsSection.classList.add('hidden');
-      categoriesSection.classList.add('hidden');
       if (nonBokunSection) {
         nonBokunSection.classList.remove('hidden');
         document.getElementById('edit-tour-duration').value    = t.duration_mins || '';
@@ -5386,69 +5423,32 @@
 
   async function loadEditTourSlots(t) {
     const slotsList = document.getElementById('edit-tour-slots-list');
-    const categoriesList = document.getElementById('edit-tour-categories-list');
     const hiddenIds = (t.hidden_slot_ids || []).map(String);
-    const hiddenCatIds = (t.hidden_category_ids || []).map(String);
     try {
       const today  = new Date().toISOString().slice(0, 10);
       const inWeek = new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10);
-      const [{ data }, { data: det }] = await Promise.all([
-        invokeEdge('bokun-sync', { body: { path: `/activity.json/${t.bokun_id}/availabilities?start=${today}&end=${inWeek}`, method: 'GET' } }),
-        invokeEdge('bokun-sync', { body: { path: `/activity.json/${t.bokun_id}`, method: 'GET' } }),
-      ]);
-      // The availabilities endpoint's pricePerCategoryUnit often omits a readable title —
-      // enrich by id against the activity detail's pricingCategories, which always has one
-      // (same pattern as _abResolveCategoriesToShow's tour-wide title enrichment).
-      const pricingCategories = (Array.isArray(det) ? det[0] : (det?.body || det || {})).pricingCategories || [];
+      const { data } = await invokeEdge('bokun-sync', {
+        body: { path: `/activity.json/${t.bokun_id}/availabilities?start=${today}&end=${inWeek}`, method: 'GET' }
+      });
       const items = data?.body || [];
       const seen  = new Map();
-      const seenPkgs = new Map();
       items.forEach(entry => {
-        if (entry.startTimeId && !seen.has(entry.startTimeId)) {
-          seen.set(entry.startTimeId, entry.startTime || String(entry.startTimeId));
-        }
-        (entry.rates || []).forEach(r => {
-          const key = `rate:${r.id}`;
-          if (r.id == null || seenPkgs.has(key)) return;
-          seenPkgs.set(key, (r.title || '').trim() || `Rate ${r.id}`);
-        });
-        (entry.pricesByRate || []).forEach(p => {
-          (p.pricePerCategoryUnit || []).forEach(c => {
-            const cid = c.pricingCategoryId ?? c.id;
-            const key = `cat:${cid}`;
-            if (cid == null || seenPkgs.has(key)) return;
-            const tourWideMatch = pricingCategories.find(x => x.id === cid);
-            seenPkgs.set(key, tourWideMatch?.title || c.pricingCategoryTitle || c.title || `Category ${cid}`);
-          });
-        });
+        if (!entry.startTimeId || seen.has(entry.startTimeId)) return;
+        seen.set(entry.startTimeId, entry.startTime || String(entry.startTimeId));
       });
       if (seen.size === 0) {
         slotsList.innerHTML = '<span class="text-xs text-gray-400">No slots in next 14 days</span>';
-      } else {
-        slotsList.innerHTML = Array.from(seen.entries()).map(([sid, stime]) => {
-          const isHidden = hiddenIds.includes(String(sid));
-          return `<label style="display:flex;align-items:center;gap:8px;padding:2px 0;cursor:pointer;user-select:none">
-            <input type="checkbox" value="${sid}" ${!isHidden ? 'checked' : ''} class="edit-tour-slot-cb accent-brand">
-            <span style="font-size:13px;font-weight:600;color:#e2e8f0">${stime}</span>
-          </label>`;
-        }).join('');
+        return;
       }
-      if (categoriesList) {
-        if (seenPkgs.size === 0) {
-          categoriesList.innerHTML = '<span class="text-xs text-gray-400">No packages/categories found in next 14 days</span>';
-        } else {
-          categoriesList.innerHTML = Array.from(seenPkgs.entries()).map(([key, title]) => {
-            const isHidden = hiddenCatIds.includes(key);
-            return `<label style="display:flex;align-items:center;gap:8px;padding:2px 0;cursor:pointer;user-select:none">
-              <input type="checkbox" value="${key}" ${!isHidden ? 'checked' : ''} class="edit-tour-category-cb accent-brand">
-              <span style="font-size:13px;font-weight:600;color:#e2e8f0">${escapeHtml(title)}</span>
-            </label>`;
-          }).join('');
-        }
-      }
+      slotsList.innerHTML = Array.from(seen.entries()).map(([sid, stime]) => {
+        const isHidden = hiddenIds.includes(String(sid));
+        return `<label style="display:flex;align-items:center;gap:8px;padding:2px 0;cursor:pointer;user-select:none">
+          <input type="checkbox" value="${sid}" ${!isHidden ? 'checked' : ''} class="edit-tour-slot-cb accent-brand">
+          <span style="font-size:13px;font-weight:600;color:#e2e8f0">${stime}</span>
+        </label>`;
+      }).join('');
     } catch(e) {
       slotsList.innerHTML = '<span class="text-xs text-red-400">Failed to load slots</span>';
-      if (categoriesList) categoriesList.innerHTML = '<span class="text-xs text-red-400">Failed to load packages/categories</span>';
     }
   }
 
@@ -5463,13 +5463,7 @@
     const hiddenSlots = Array.from(slotCbs).filter(cb => !cb.checked).map(cb => cb.value);
     const hiddenSlotIds = hiddenSlots.length ? hiddenSlots : null;
 
-    const categoryCbs      = document.querySelectorAll('.edit-tour-category-cb');
-    const hiddenCategories = Array.from(categoryCbs).filter(cb => !cb.checked).map(cb => cb.value);
-    const hiddenCategoryIds = hiddenCategories.length ? hiddenCategories : null;
-
     const meetingPoint = document.getElementById('edit-tour-meeting-point').value.trim() || null;
-    const cutoffHours  = parseInt(document.getElementById('edit-tour-cutoff-hours').value) || null;
-    const slotCapacity = parseInt(document.getElementById('edit-tour-slot-capacity').value) || null;
     const nonBokunFields = bokunId ? {} : {
       description: document.getElementById('edit-tour-description')?.value.trim() || null,
       pricing_type: document.getElementById('edit-tour-pricing-type')?.value || 'per_person',
@@ -5492,10 +5486,10 @@
     const titleFields = bokunId ? {} : { title: newTitle || undefined };
     const tourEditBefore = _editTourSnapshot ? JSON.parse(_editTourSnapshot) : null;
     const tourEditAfter = JSON.parse(_getEditTourFormValues());
-    const { error } = await db.from('tour_config').update({ bokun_id: bokunId, bokun_force_rate_id: forceRateId, bokun_force_pickup_place_id: forcePickupId, groups, hidden_slot_ids: hiddenSlotIds, hidden_category_ids: hiddenCategoryIds, meeting_point: meetingPoint, allow_hotel_pickup: allowHotelPickup, allow_meeting_point: allowMeetingPoint, require_guest_names: requireGuestNames, photo_url: _editTourPhotoUrl, booking_cutoff_hours: cutoffHours, slot_capacity: slotCapacity, ...titleFields, ...nonBokunFields }).eq('id', editingTourId);
+    const { error } = await db.from('tour_config').update({ bokun_id: bokunId, bokun_force_rate_id: forceRateId, bokun_force_pickup_place_id: forcePickupId, groups, hidden_slot_ids: hiddenSlotIds, meeting_point: meetingPoint, allow_hotel_pickup: allowHotelPickup, allow_meeting_point: allowMeetingPoint, require_guest_names: requireGuestNames, photo_url: _editTourPhotoUrl, ...titleFields, ...nonBokunFields }).eq('id', editingTourId);
     if (error) { showToast('Failed to save tour changes.', 'error', error.message); return; }
     const t = allTourConfig.find(x => x.id === editingTourId);
-    if (t) { t.bokun_id = bokunId; t.bokun_force_rate_id = forceRateId; t.bokun_force_pickup_place_id = forcePickupId; t.groups = groups; t.hidden_slot_ids = hiddenSlotIds; t.hidden_category_ids = hiddenCategoryIds; t.meeting_point = meetingPoint; t.allow_hotel_pickup = allowHotelPickup; t.allow_meeting_point = allowMeetingPoint; t.require_guest_names = requireGuestNames; t.photo_url = _editTourPhotoUrl; t.booking_cutoff_hours = cutoffHours; t.slot_capacity = slotCapacity; if (!bokunId && newTitle) t.title = newTitle; Object.assign(t, nonBokunFields); }
+    if (t) { t.bokun_id = bokunId; t.bokun_force_rate_id = forceRateId; t.bokun_force_pickup_place_id = forcePickupId; t.groups = groups; t.hidden_slot_ids = hiddenSlotIds; t.meeting_point = meetingPoint; t.allow_hotel_pickup = allowHotelPickup; t.allow_meeting_point = allowMeetingPoint; t.require_guest_names = requireGuestNames; t.photo_url = _editTourPhotoUrl; if (!bokunId && newTitle) t.title = newTitle; Object.assign(t, nonBokunFields); }
     _editTourSnapshot = null;
     renderTourConfigTable();
     document.getElementById('modal-edit-tour').classList.add('hidden');
@@ -5503,9 +5497,8 @@
     const tourEditLabels = { title: 'title', bokun: 'Bokun ID', mp: 'meeting point', hotel: 'hotel pickup',
       meetingPt: 'meeting point enabled', requireNames: 'require guest names', groups: 'groups',
       forceRate: 'forced rate', forcePickup: 'forced pickup', photo: 'photo', hiddenSlots: 'hidden slots',
-      hiddenCategories: 'hidden packages/categories',
       description: 'description', pricingType: 'pricing type', durationMins: 'duration', maxPax: 'max capacity',
-      manualSlots: 'manual slots', cutoff: 'booking cutoff', slotCap: 'slot capacity' };
+      manualSlots: 'manual slots' };
     const tourEditChanges = tourEditBefore ? describeChanges(tourEditBefore, tourEditAfter, tourEditLabels) : 'edited';
     logActivity('tour_edited', `Tour "${t?.title || editingTourId}" — changed: ${tourEditChanges}`, editingTourId);
   }
@@ -5556,6 +5549,17 @@
   function removeEmailBlock(i) {
     editingEmailBlocks.splice(i, 1);
     renderEmailBlocks();
+  }
+
+  function toggleTourPricing(tourId, btn) {
+    const row = document.getElementById('pricing-row-' + tourId);
+    if (!row) return;
+    const nowHidden = row.classList.toggle('hidden');
+    if (btn) {
+      btn.classList.toggle('text-brand', !nowHidden);
+      btn.classList.toggle('bg-orange-50', !nowHidden);
+      btn.classList.toggle('text-gray-400', nowHidden);
+    }
   }
 
   let _infoBlocksTourId = null;
@@ -5704,16 +5708,9 @@
           const ds = new Date(entry.date).toISOString().slice(0,10);
           if (!ds) return;
           if (!tsaAvailability[ds]) tsaAvailability[ds] = [];
-          let availabilityCount = entry.availabilityCount || 0;
-          const bokunRawCount = availabilityCount;
-          if (tsaCurrentTour.slot_capacity != null) {
-            const alreadyBooked = bookedMap.get(`${ds}|${entry.startTimeId}`) || 0;
-            availabilityCount = Math.min(availabilityCount, Math.max(0, tsaCurrentTour.slot_capacity - alreadyBooked));
-          }
           tsaAvailability[ds].push({
             startTime: entry.startTime || '', startTimeId: entry.startTimeId,
-            startTimeStr: entry.startTimeStr || '', availabilityCount,
-            bokunRawCount,
+            startTimeStr: entry.startTimeStr || '', availabilityCount: entry.availabilityCount || 0,
             rates: entry.rates || [],
           });
         });
@@ -5811,9 +5808,7 @@
     document.getElementById('tsa-editor-slot-label').textContent = `${timeStr}${slotLang ? ' · ' + slotLang : ''} · ${tsaSelectedDate}`;
     const liveEl = document.getElementById('tsa-editor-live-count');
     if (tsaCurrentTour.bokun_id) {
-      liveEl.textContent = (s.bokunRawCount != null && s.bokunRawCount !== s.availabilityCount)
-        ? `Availability: ${s.availabilityCount} seats (capped from Bokun's ${s.bokunRawCount} — see this tour's "Slot capacity" setting)`
-        : `Bokun live availability: ${s.availabilityCount} seats`;
+      liveEl.textContent = `Bokun live availability: ${s.availabilityCount} seats`;
     } else if (s.availabilityCount != null) {
       liveEl.textContent = `Tour's configured max guests: ${s.availabilityCount}`;
     } else {
@@ -5877,12 +5872,7 @@
       const maxGuests = parseInt(raw, 10);
       if (isNaN(maxGuests) || maxGuests < 1) { showToast('Enter a valid number of guests.', 'error'); return; }
       if (liveCount != null && maxGuests > liveCount) {
-        const bokunRaw = tsaSelectedSlot.bokunRawCount;
-        const msg = !tsaCurrentTour.bokun_id
-          ? `Cannot exceed this tour's configured max guests (${liveCount}).`
-          : (bokunRaw != null && bokunRaw !== liveCount)
-            ? `Cannot exceed this tour's capped slot capacity (${liveCount}). Bokun's raw availability is ${bokunRaw} — raise or clear the "Slot capacity" setting to allow more.`
-            : `Cannot exceed Bokun's live availability (${liveCount}).`;
+        const msg = tsaCurrentTour.bokun_id ? `Cannot exceed Bokun's live availability (${liveCount}).` : `Cannot exceed this tour's configured max guests (${liveCount}).`;
         showToast(msg, 'error'); return;
       }
       const alreadyBooked = tsaBookedMap.get(key) || 0;
@@ -5916,12 +5906,8 @@
   // ===== END TOUR SLOT AVAILABILITY OVERRIDES =====
 
   async function toggleTourActive(id, newActive) {
-    const t = allTourConfig.find(x => x.id === id);
-    if (!newActive) {
-      const ok = await showConfirm(`Deactivate "${t?.title || 'this tour'}"?\n\nIt will disappear from Create Booking and the partner panel — no one will be able to book it. It stays visible here in Tours & Pricing (greyed out) so you can reactivate it later.`, { okLabel: 'Deactivate', okColor: '#dc2626', cancelLabel: 'Cancel' });
-      if (!ok) { renderTourConfigTable(); return; }
-    }
     await db.from('tour_config').update({ active: newActive }).eq('id', id);
+    const t = allTourConfig.find(x => x.id === id);
     if (t) t.active = newActive;
     renderTourConfigTable();
     logActivity(newActive ? 'tour_activated' : 'tour_deactivated', `Tour "${t?.title || id}" ${newActive ? 'activated' : 'deactivated'}`, id);
@@ -5996,9 +5982,8 @@
 
   let allCommissions  = [];
   let editingCommId   = null;
-  let pkgModalTourId  = null;
-  let pkgModalRows    = [];
-  let pkgModalSnapshot = null;
+  let editingPkgId    = null;
+  let addPkgTourId    = null;
   let editingUnlocked = false;
   let _dragTourId = null;
   let unlockTimer     = null;
@@ -6009,7 +5994,6 @@
   function _getEditTourFormValues() {
     const groups = [...document.querySelectorAll('#edit-tour-groups-wrap .tg-group-cb:checked')].map(cb => cb.value).sort();
     const hiddenSlots = Array.from(document.querySelectorAll('.edit-tour-slot-cb')).filter(cb => !cb.checked).map(cb => cb.value).sort();
-    const hiddenCategories = Array.from(document.querySelectorAll('.edit-tour-category-cb')).filter(cb => !cb.checked).map(cb => cb.value).sort();
     const bokunId = document.getElementById('edit-tour-bokun-id')?.value || '';
     return JSON.stringify({
       title: document.getElementById('edit-tour-title-input')?.value || '',
@@ -6022,10 +6006,7 @@
       forceRate: document.getElementById('edit-tour-force-rate-id')?.value || '',
       forcePickup: document.getElementById('edit-tour-force-pickup-id')?.value || '',
       photo: _editTourPhotoUrl || '',
-      cutoff: document.getElementById('edit-tour-cutoff-hours')?.value || '',
-      slotCap: document.getElementById('edit-tour-slot-capacity')?.value || '',
       hiddenSlots,
-      hiddenCategories,
       description: bokunId ? '' : (document.getElementById('edit-tour-description')?.value.trim() || ''),
       pricingType: bokunId ? '' : (document.getElementById('edit-tour-pricing-type')?.value || ''),
       durationMins: bokunId ? '' : (document.getElementById('edit-tour-duration')?.value || ''),
@@ -6237,7 +6218,6 @@
     renderTourConfigTable();
     renderCategories();
     renderDiscountCodes();
-    pkgModalRefreshLockState();
     if (unlockTimer) clearInterval(unlockTimer);
     unlockTimer = setInterval(() => {
       unlockSecondsLeft--;
@@ -6258,17 +6238,6 @@
     renderTourConfigTable();
     renderCategories();
     renderDiscountCodes();
-    pkgModalRefreshLockState();
-  }
-
-  function pkgModalRefreshLockState() {
-    if (!pkgModalTourId) return;
-    const locked = currentAdminRole === 'staff' || !editingUnlocked;
-    const saveBtn = document.getElementById('pkg-modal-save-btn');
-    const addBtn  = document.getElementById('pkg-modal-add-row-btn');
-    if (saveBtn) saveBtn.style.display = locked ? 'none' : '';
-    if (addBtn)  addBtn.style.display  = locked ? 'none' : '';
-    renderPkgModalRows();
   }
 
   function openChangePinModal() {
@@ -6295,195 +6264,90 @@
     logActivity('admin_pin_changed', 'Tours & Pricing editing PIN changed').catch(() => {});
   }
 
-  function openPkgModal(tourId) {
-    pkgModalTourId = tourId;
+  async function quickSavePkg(id, field, value) {
+    const { error } = await db.from('tour_commissions').update({ [field]: value }).eq('id', id);
+    if (error) { showToast('Save error: ' + error.message, 'error'); return; }
+    const c = allCommissions.find(x => x.id === id);
+    if (c) c[field] = value;
+    const labels = { price_pln: 'price', commission_pln: 'commission' };
+    logActivity('commission_edited', `Package "${c?.title || id}" ${labels[field] || field} → ${value} PLN`, id);
+  }
+
+  async function togglePkgActive(id, active) {
+    await db.from('tour_commissions').update({ active }).eq('id', id);
+    const c = allCommissions.find(x => x.id === id);
+    if (c) c.active = active;
+    renderTourConfigTable();
+    logActivity(active ? 'commission_activated' : 'commission_deactivated', `Package "${c?.title || id}" ${active ? 'activated' : 'deactivated'}`, id);
+  }
+
+  function openAddPackageModal(tourId) {
+    addPkgTourId = tourId;
     const t = allTourConfig.find(x => x.id === tourId);
-    document.getElementById('pkg-modal-tour-label').textContent = t ? t.title : '';
-    pkgModalRows = allCommissions
-      .filter(c => c.tour_config_id === tourId)
-      .sort((a,b) => (a.sort_order||0)-(b.sort_order||0))
-      .map(c => ({ ...c }));
-    pkgModalSnapshot = JSON.stringify(pkgModalRows);
-    document.getElementById('modal-pkg').classList.remove('hidden');
-    pkgModalRefreshLockState();
+    document.getElementById('add-pkg-tour-label').textContent = t ? t.title : '';
+    document.getElementById('add-pkg-title').value    = '';
+    document.getElementById('add-pkg-price').value    = '';
+    document.getElementById('add-pkg-comm').value     = '';
+    document.getElementById('modal-add-pkg').classList.remove('hidden');
+    setTimeout(() => document.getElementById('add-pkg-title').focus(), 50);
   }
 
-  function renderPkgModalRows() {
-    const container = document.getElementById('pkg-modal-rows');
-    if (!container) return;
-    const t = allTourConfig.find(x => x.id === pkgModalTourId);
-    const locked = currentAdminRole === 'staff' || !editingUnlocked;
-    if (!pkgModalRows.length) {
-      container.innerHTML = '<p style="font-size:12px;color:#64748b;font-style:italic;padding:4px 0 8px">No packages yet — click "+ Add package" below.</p>';
-      return;
-    }
-    const dInput = 'width:100%;font-size:13px;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:#f1f5f9;outline:none;box-sizing:border-box';
-    const dLock  = locked ? 'opacity:0.5;pointer-events:none;' : '';
-    const dLabel = 'font-size:10px;color:#64748b;margin-bottom:3px;text-transform:uppercase;letter-spacing:0.02em;display:flex;align-items:center;gap:4px';
-    const catField = (key, label, cwKey, cwLabel) => {
-      const warn = (pkg => cwKey && pkg[key] !== null && pkg[key] !== undefined && t ? catWarning(t.id, cwKey, cwLabel) : '');
-      return (pkg, i) => `
-      <div>
-        <div style="${dLabel}">${label}${warn(pkg)}</div>
-        <input type="number" min="0" placeholder="off" value="${pkg[key] ?? ''}" style="${dInput}${dLock}"
-          onchange="pkgModalSetField(${i}, '${key}', this.value, true)">
-      </div>`;
-    };
-    const fAdult   = catField('price_pln', 'Adult PLN', 'adult', 'Adult');
-    const fStudent = catField('price_student', 'Student PLN', 'student', 'Student');
-    const fChild   = catField('price_child', 'Child PLN', 'child', 'Child');
-    const fSenior  = catField('price_senior', 'Senior PLN', 'senior', 'Senior');
-    const fInfant  = catField('price_infant', 'Infant PLN', 'infant', 'Infant');
-    container.innerHTML = pkgModalRows.map((pkg, i) => `
-    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px;${pkg.active === false ? 'opacity:0.55' : ''}">
-      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:10px">
-        <div style="flex:1">
-          <div style="${dLabel}">Package name${t?.bokun_id ? `<button type="button" onmouseenter="openInfoPopover(event, 'Must exactly match the Rate name in Bokun for this tour, or this package will not be linked to bookings made under that rate.')" onmouseleave="closeInfoPopover()" style="display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:50%;background:rgba(232,117,26,0.15);color:#E8751A;font-size:9px;font-weight:700;font-style:normal;border:none;cursor:default;text-transform:none;letter-spacing:normal;padding:0;line-height:1">i</button>` : ''}</div>
-          <input type="text" value="${escapeHtml(pkg.title || '')}" placeholder="e.g. City Tour Adult" style="${dInput}${dLock}"
-            onchange="pkgModalSetField(${i}, 'title', this.value)">
-        </div>
-        <button onclick="pkgModalDeleteRow(${i})" title="Delete package" style="width:34px;height:34px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(255,255,255,0.04);color:#94a3b8;border:none;cursor:pointer;${dLock}" onmouseover="this.style.background='rgba(220,38,38,0.15)';this.style.color='#f87171'" onmouseout="this.style.background='rgba(255,255,255,0.04)';this.style.color='#94a3b8'"><i class="fa-solid fa-trash text-xs"></i></button>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
-        ${fAdult(pkg,i)}${fStudent(pkg,i)}${fChild(pkg,i)}${fSenior(pkg,i)}${fInfant(pkg,i)}
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
-        <div>
-          <div style="${dLabel}color:#E8751A">Commission PLN</div>
-          <input type="number" min="0" value="${pkg.commission_pln || 0}" style="${dInput}${dLock}border-color:rgba(232,117,26,0.4)"
-            onchange="pkgModalSetField(${i}, 'commission_pln', this.value, true)">
-        </div>
-        <div>
-          <div style="${dLabel}" title="Transport surcharge per person (PLN) for hotel pickup">Transport PLN</div>
-          <input type="number" min="0" placeholder="—" value="${pkg.transport_price_pln ?? ''}" style="${dInput}${dLock}"
-            onchange="pkgModalSetField(${i}, 'transport_price_pln', this.value, true)">
-        </div>
-        <div>
-          <div style="${dLabel}" title="Extra commission per person (PLN) when guest chooses hotel pickup">Transport comm. PLN</div>
-          <input type="number" min="0" placeholder="—" value="${pkg.transport_commission_pln ?? ''}" style="${dInput}${dLock}"
-            onchange="pkgModalSetField(${i}, 'transport_commission_pln', this.value, true)">
-        </div>
-      </div>
-      <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#94a3b8;cursor:pointer;${dLock}">
-        <input type="checkbox" ${pkg.active !== false ? 'checked' : ''} onchange="pkgModalSetField(${i}, 'active', this.checked)" style="accent-color:#E8751A">
-        Active
-      </label>
-    </div>`).join('');
+  async function saveAddPackage() {
+    const title = document.getElementById('add-pkg-title').value.trim();
+    const price = parseInt(document.getElementById('add-pkg-price').value) || 0;
+    const comm  = parseInt(document.getElementById('add-pkg-comm').value) || 0;
+    if (!title) { showToast('Package name is required.', 'error'); return; }
+    const maxOrder = allCommissions.reduce((m, c) => Math.max(m, c.sort_order || 0), 0);
+    const { data, error } = await db.from('tour_commissions')
+      .insert({ title, price_pln: price, commission_pln: comm, tour_config_id: addPkgTourId, sort_order: maxOrder + 10, active: true })
+      .select().single();
+    if (error) { showToast('Failed to add package.', 'error', error.message); return; }
+    allCommissions.push(data);
+    renderTourConfigTable();
+    document.getElementById('modal-add-pkg').classList.add('hidden');
+    showToast('Package added.');
+    logActivity('package_added', `Package "${title}" (${price} PLN, comm ${comm} PLN) added to tour ${allTourConfig.find(x => x.id === addPkgTourId)?.title || addPkgTourId}`, addPkgTourId);
   }
 
-  function pkgModalSetField(i, key, val, isNumber) {
-    if (!pkgModalRows[i]) return;
-    pkgModalRows[i][key] = isNumber ? (val === '' ? null : (parseInt(val)||0)) : val;
-    renderPkgModalRows();
+  function openEditPackageModal(id) {
+    const c = allCommissions.find(x => x.id === id);
+    if (!c) return;
+    editingPkgId = id;
+    document.getElementById('edit-pkg-title').value    = c.title;
+    document.getElementById('edit-pkg-cat').value = c.category || '';
+    document.getElementById('edit-pkg-price').value    = c.price_pln || '';
+    document.getElementById('edit-pkg-comm').value     = c.commission_pln || '';
+    document.getElementById('modal-edit-pkg').classList.remove('hidden');
+    setTimeout(() => document.getElementById('edit-pkg-title').focus(), 50);
   }
 
-  function pkgModalAddRow() {
-    pkgModalRows.push({
-      id: null, tour_config_id: pkgModalTourId, title: '', category: null,
-      price_pln: null, price_student: null, price_child: null, price_senior: null, price_infant: null,
-      commission_pln: 0, transport_price_pln: null, transport_commission_pln: null,
-      active: true, sort_order: null,
-    });
-    renderPkgModalRows();
-    const inputs = document.querySelectorAll('#pkg-modal-rows input[type="text"]');
-    inputs[inputs.length - 1]?.focus();
+  async function saveEditPackage() {
+    const title = document.getElementById('edit-pkg-title').value.trim();
+    const cat   = document.getElementById('edit-pkg-cat').value.trim().toLowerCase();
+    const price = parseInt(document.getElementById('edit-pkg-price').value) || 0;
+    const comm  = parseInt(document.getElementById('edit-pkg-comm').value) || 0;
+    if (!title) { showToast('Name is required.', 'error'); return; }
+    const { error } = await db.from('tour_commissions')
+      .update({ title, category: cat, price_pln: price, commission_pln: comm })
+      .eq('id', editingPkgId);
+    if (error) { showToast('Failed to save package changes.', 'error', error.message); return; }
+    const c = allCommissions.find(x => x.id === editingPkgId);
+    if (c) { c.title = title; c.category = cat; c.price_pln = price; c.commission_pln = comm; }
+    renderTourConfigTable();
+    document.getElementById('modal-edit-pkg').classList.add('hidden');
+    showToast('Package updated.');
+    logActivity('package_edited', `Package "${title}" → ${price} PLN, comm ${comm} PLN`, editingPkgId);
   }
 
-  async function pkgModalDeleteRow(i) {
-    const row = pkgModalRows[i];
-    if (!row) return;
-    if (row.id) {
-      if (currentAdminRole !== 'admin') { showToast('Admin role required.', 'error'); return; }
-      const ok = await showConfirm(`Delete package "${row.title || ''}"?`);
-      if (!ok) return;
-      const { error } = await db.from('tour_commissions').delete().eq('id', row.id);
-      if (error) { showToast('Failed to delete package.', 'error', error.message); return; }
-      allCommissions = allCommissions.filter(x => x.id !== row.id);
-      showToast('Package deleted.');
-      logActivity('package_deleted', `Package "${row.title}" deleted`, row.id);
-      renderTourConfigTable();
-    }
-    pkgModalRows.splice(i, 1);
-    pkgModalSnapshot = JSON.stringify(pkgModalRows);
-    renderPkgModalRows();
-  }
-
-  function pkgModalIsBlank(row) {
-    return !row.id && !((row.title || '').trim()) && row.price_pln == null && row.price_student == null
-      && row.price_child == null && row.price_senior == null && row.price_infant == null
-      && !row.commission_pln && row.transport_price_pln == null && row.transport_commission_pln == null;
-  }
-
-  async function savePkgModal() {
-    if (currentAdminRole === 'staff' || !editingUnlocked) { showToast('Unlock editing first.', 'error'); return; }
-    for (const row of pkgModalRows) {
-      if (pkgModalIsBlank(row)) continue;
-      if (!(row.title || '').trim()) { showToast('Every package needs a name.', 'error'); return; }
-    }
-    const originalRows = pkgModalSnapshot ? JSON.parse(pkgModalSnapshot) : [];
-    const newlyDeactivated = pkgModalRows.filter(row => {
-      if (!row.id) return false;
-      const before = originalRows.find(o => o.id === row.id);
-      return before?.active !== false && row.active === false;
-    });
-    if (newlyDeactivated.length) {
-      const names = newlyDeactivated.map(r => `"${r.title}"`).join(', ');
-      const ok = await showConfirm(`Deactivate ${names}?\n\nIt will disappear from Create Booking and the partner panel — no one will be able to book it under that package. It stays visible here (greyed out) so you can reactivate it later.`, { okLabel: 'Deactivate', okColor: '#dc2626', cancelLabel: 'Cancel' });
-      if (!ok) return;
-    }
-    const btn = document.getElementById('pkg-modal-save-btn');
-    const origLabel = btn.textContent;
-    btn.disabled = true; btn.textContent = 'Saving…';
-    try {
-      let nextOrder = allCommissions.reduce((m, c) => Math.max(m, c.sort_order || 0), 0);
-      for (const row of pkgModalRows) {
-        if (pkgModalIsBlank(row)) continue;
-        const payload = {
-          title: row.title.trim(),
-          price_pln: row.price_pln, price_student: row.price_student, price_child: row.price_child,
-          price_senior: row.price_senior, price_infant: row.price_infant,
-          commission_pln: row.commission_pln || 0,
-          transport_price_pln: row.transport_price_pln, transport_commission_pln: row.transport_commission_pln,
-          active: row.active !== false,
-        };
-        if (row.id) {
-          const { error } = await db.from('tour_commissions').update(payload).eq('id', row.id);
-          if (error) throw error;
-          const c = allCommissions.find(x => x.id === row.id);
-          if (c) Object.assign(c, payload);
-        } else {
-          nextOrder += 10;
-          const { data, error } = await db.from('tour_commissions')
-            .insert({ ...payload, tour_config_id: pkgModalTourId, sort_order: nextOrder })
-            .select().single();
-          if (error) throw error;
-          allCommissions.push(data);
-        }
-      }
-      const tTitle = allTourConfig.find(x => x.id === pkgModalTourId)?.title || pkgModalTourId;
-      logActivity('commission_edited', `Packages saved for tour "${tTitle}"`, pkgModalTourId);
-      renderTourConfigTable();
-      showToast('Packages saved.');
-      closePkgModalForce();
-    } catch (e) {
-      showToast('Failed to save packages.', 'error', e.message);
-    } finally {
-      btn.disabled = false; btn.textContent = origLabel;
-    }
-  }
-
-  async function closePkgModal() {
-    const dirty = pkgModalSnapshot !== null && JSON.stringify(pkgModalRows) !== pkgModalSnapshot;
-    if (dirty) {
-      const ok = await showConfirm('You have unsaved changes.\nLeave without saving?', { okLabel: 'Leave', okColor: '#dc2626', cancelLabel: 'Stay' });
-      if (!ok) return;
-    }
-    closePkgModalForce();
-  }
-
-  function closePkgModalForce() {
-    document.getElementById('modal-pkg').classList.add('hidden');
-    pkgModalTourId = null; pkgModalRows = []; pkgModalSnapshot = null;
+  async function deletePackage(id) {
+    if (currentAdminRole !== 'admin') { showToast('Admin role required.', 'error'); return; }
+    const c = allCommissions.find(x => x.id === id);
+    if (!c || !await showConfirm(`Delete package "${c.title}"?`)) return;
+    await db.from('tour_commissions').delete().eq('id', id);
+    allCommissions = allCommissions.filter(x => x.id !== id);
+    renderTourConfigTable();
+    showToast('Package deleted.');
+    logActivity('package_deleted', `Package "${c.title}" deleted`, id);
   }
 
   async function syncToursFromBokun() {
@@ -6588,8 +6452,8 @@
     // RBAC guard: block navigation to sections not permitted for this role
     const SECTION_ALLOWED = {
       'admin':   null,
-      'manager': ['bookings','hotelbookings','sellerpanel','customtours','tailormade','hotels','settlement','tours','suppliers','support','notifications','activity','createbooking','staff'],
-      'staff':   ['bookings','hotelbookings','sellerpanel','customtours','tailormade','tours','support','createbooking','hotels'],
+      'manager': ['bookings','hotelbookings','sellerpanel','customtours','tailormade','hotels','settlement','tours','suppliers','support','notifications','activity','createbooking'],
+      'staff':   ['bookings','hotelbookings','sellerpanel','customtours','tailormade','tours','support','createbooking'],
     };
     const allowedSections = currentAdminRole === 'admin' ? null : (SECTION_ALLOWED[currentAdminRole] ?? SECTION_ALLOWED['staff']);
     if (allowedSections && !allowedSections.includes(name)) return;
@@ -6659,10 +6523,8 @@
     if (addPartnerEl && !addPartnerEl.classList.contains('hidden')) { tryCloseAddPartner(); return; }
     const addSupplierEl = document.getElementById('modal-add-supplier');
     if (addSupplierEl && !addSupplierEl.classList.contains('hidden')) { tryCloseAddSupplierModal(); return; }
-    const pkgModalEl = document.getElementById('modal-pkg');
-    if (pkgModalEl && !pkgModalEl.classList.contains('hidden')) { closePkgModal(); return; }
     // Other modals
-    ['modal-change-pin','modal-manual'].forEach(id => {
+    ['modal-add-pkg','modal-edit-pkg','modal-change-pin','modal-manual'].forEach(id => {
       const el = document.getElementById(id);
       if (el && !el.classList.contains('hidden')) { el.classList.add('hidden'); el.classList.remove('flex'); }
     });
@@ -6936,8 +6798,7 @@
     tbody.innerHTML = page.map(b => {
       const sourceLabel = b.source === 'admin' ? 'Admin' : b.source === 'Partner Panel' ? 'Partner' : b.source;
       const _isCancelledRow = (b.status||'').toLowerCase() === 'cancelled';
-      const _isUrgentLink = !!_paymentLinkUrgency(b);
-      const _trStyle = _isCancelledRow ? 'opacity:0.45' : (_isUrgentLink ? 'box-shadow:inset 3px 0 0 #f97316;background:rgba(249,115,22,0.06)' : (b.source === 'Partner Panel' ? 'box-shadow:inset 3px 0 0 #E8751A' : ''));
+      const _trStyle = _isCancelledRow ? 'opacity:0.45' : (b.source === 'Partner Panel' ? 'box-shadow:inset 3px 0 0 #E8751A' : '');
       return `<tr class="hover:bg-gray-50 transition-colors text-xs cursor-pointer" data-id="${b.id}" data-hotel="${escapeHtml(b.hotel)}" data-source="${escapeHtml(b.source)}" data-status="${escapeHtml(b.status)}"${_trStyle ? ` style="${_trStyle}"` : ''} onclick="openBookingDetail('${b.id}')">
           <td class="px-5 py-3 font-mono text-gray-400" style="white-space:nowrap">#${b.displayId || b.id}</td>
           <td class="px-4 py-3 font-medium text-dark" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(b.tour)}">${escapeHtml(b.tour)}</td>
@@ -6960,7 +6821,6 @@
             ${b._dbBooking && (['payment_pending','pending_payment'].includes((b.status||'').toLowerCase())) ? `<button onclick="event.stopPropagation();adminResendPaymentLink('${b.id}')" title="${b.email ? 'Resend payment link to guest' : 'Copy payment link'}" class="text-blue-400 hover:text-blue-300 transition-colors ml-1.5"><i class="fa-solid fa-${b.email ? 'paper-plane' : 'copy'} text-xs"></i></button>` : ''}
             ${b._dbBooking && canMarkNoShow(b) ? `<button onclick="event.stopPropagation();markNoShow('${b.id}')" title="No show — obciąż hotel pełną kwotą" class="text-red-400 hover:text-red-300 transition-colors ml-1.5"><i class="fa-solid fa-user-slash text-xs"></i></button>` : ''}
             ${b._dbBooking ? `<button onclick="event.stopPropagation();openEditBooking('${b.id}')" title="Edit booking" class="text-gray-400 hover:text-brand transition-colors ml-1.5"><i class="fa-solid fa-pen text-xs"></i></button>` : ''}
-            ${!b._dbBooking && b.source === 'Old TM System' ? `<button onclick="event.stopPropagation();openAssignHotelModal('${escapeHtml(b.id)}')" title="Assign to hotel" class="text-blue-400 hover:text-blue-300 transition-colors ml-1.5"><i class="fa-solid fa-hotel text-xs"></i></button>` : ''}
             ${b._dbBooking && (b.status||'').toLowerCase() === 'cancelling' ? `<button onclick="event.stopPropagation();forceUnlockBooking('${escapeHtml(b.id)}')" title="Force unlock — stuck cancelling" class="text-amber-400 hover:text-amber-300 transition-colors ml-1.5"><i class="fa-solid fa-lock-open text-xs"></i></button>` : ''}
             ${b._dbBooking && !['cancelled','cancelling'].includes((b.status||'').toLowerCase()) ? `<button title="Cancel booking" class="text-red-500 hover:text-red-400 transition-colors ml-1.5" onclick="event.stopPropagation();cancelBooking('${escapeHtml(b.id)}','${escapeHtml((b.guest||'').replace(/'/g,"\\'"))}',${!!b._stripeSessionId},true)"><i class="fa-solid fa-xmark text-xs"></i></button>` : ''}
           </td>
@@ -7007,15 +6867,6 @@
 
   const STATUS_GROUPS = { paid: ['paid','confirmed'], to_be_paid: ['to_be_paid','pending'], payment_pending: ['payment_pending','pending_payment'], cancelled: ['cancelled'] };
 
-  // 'hotel' = partner has commission enabled (real hotels); 'agency' = commission disabled (tour agencies/DMCs).
-  // Bookings with no partner (direct/'—') never match either type.
-  function _bookingPartnerType(b) {
-    if (!b.hotel || b.hotel === '—') return null;
-    const p = allPartners.find(x => x.name === b.hotel);
-    if (!p) return null;
-    return p.commission_enabled === false ? 'agency' : 'hotel';
-  }
-
   function filterAllBookings() {
     ensurePartnerDropdowns();
     const q       = (document.getElementById('booking-search')?.value || '').toLowerCase();
@@ -7023,7 +6874,6 @@
     const sources = mselGetVals('msel-ab-source');
     const statuses = mselGetVals('msel-ab-status');
     const tours   = mselGetVals('msel-ab-tour');
-    const partnerTypes = mselGetVals('msel-ab-partner-type');
     const fromVal = document.getElementById('booking-filter-from')?.value || '';
     const toVal   = document.getElementById('booking-filter-to')?.value || '';
     const fromTs  = fromVal ? new Date(fromVal).setHours(0,0,0,0) : null;
@@ -7039,14 +6889,13 @@
       const matchSource = sources.length === 0 || sources.includes(b.source);
       const matchStatus = statuses.length === 0 || statuses.some(s => (STATUS_GROUPS[s] || [s]).includes((b.status||'').toLowerCase()));
       const matchTour   = tours.length === 0   || tours.includes(b.tour);
-      const matchPartnerType = partnerTypes.length === 0 || partnerTypes.includes(_bookingPartnerType(b));
       const ts = b._startTs || 0;
       const matchFrom   = !fromTs || ts >= fromTs;
       const matchTo     = !toTs   || ts <= toTs;
       const cts = b._creationTs || 0;
       const matchCreatedFrom = !createdFromTs || cts >= createdFromTs;
       const matchCreatedTo   = !createdToTs   || cts <= createdToTs;
-      return matchQ && matchHotel && matchSource && matchStatus && matchTour && matchPartnerType && matchFrom && matchTo && matchCreatedFrom && matchCreatedTo;
+      return matchQ && matchHotel && matchSource && matchStatus && matchTour && matchFrom && matchTo && matchCreatedFrom && matchCreatedTo;
     });
     renderBookingsTable(filtered);
   }
@@ -7069,7 +6918,6 @@
     mselClear('msel-ab-hotel', true);
     mselClear('msel-ab-status', true);
     mselClear('msel-ab-source', true);
-    mselClear('msel-ab-partner-type', true);
     dpopClear('booking-filter-from', true);
     dpopClear('booking-filter-to', true);
     dpopClear('booking-filter-created-from', true);
@@ -7155,7 +7003,6 @@
         _bokunBookingId: b.bokun_booking_id || null, _paymentType: b.payment_type || null,
         _creationTs: b.created_at ? new Date(b.created_at).getTime() : 0,
         _startTs: b.date ? new Date(b.date).getTime() : 0,
-        _rawDate: b.date || null, _partnerId: b.partner_id || null,
       };
     });
 
@@ -7164,8 +7011,6 @@
     mselSetOptions('msel-hb-tour', hbTours.map(t => ({value: t, label: t})));
     const hbHotels = [...new Set(partnerBookings.map(b => b.hotel).filter(h => h && h !== '—'))].sort();
     mselSetOptions('msel-hb-hotel', hbHotels.map(h => ({value: h, label: h})));
-    const hbSources = [...new Set(partnerBookings.map(b => b.source).filter(Boolean))].sort();
-    mselSetOptions('msel-hb-source', hbSources.map(s => ({value: s, label: s})));
 
     filterHotelBookings();
   }
@@ -7194,8 +7039,6 @@
     const hotels  = mselGetVals('msel-hb-hotel');
     const statuses = mselGetVals('msel-hb-status');
     const tours   = mselGetVals('msel-hb-tour');
-    const sources = mselGetVals('msel-hb-source');
-    const partnerTypes = mselGetVals('msel-hb-partner-type');
     const fromVal = document.getElementById('hb-filter-from')?.value || '';
     const toVal   = document.getElementById('hb-filter-to')?.value || '';
     const fromTs  = fromVal ? new Date(fromVal).setHours(0,0,0,0) : null;
@@ -7210,13 +7053,11 @@
       const matchHotel  = hotels.length === 0  || hotels.includes(b.hotel);
       const matchStatus = statuses.length === 0 || statuses.some(s => (STATUS_GROUPS[s] || [s]).includes((b.status||'').toLowerCase()));
       const matchTour   = tours.length === 0   || tours.includes(b.tour);
-      const matchSource = sources.length === 0 || sources.includes(b.source);
-      const matchPartnerType = partnerTypes.length === 0 || partnerTypes.includes(_bookingPartnerType(b));
       const matchFrom   = !fromTs  || b._startTs >= fromTs;
       const matchTo     = !toTs    || b._startTs <= toTs;
       const matchCFrom  = !cFromTs || b._creationTs >= cFromTs;
       const matchCTo    = !cToTs   || b._creationTs <= cToTs;
-      return matchQ && matchHotel && matchStatus && matchTour && matchSource && matchPartnerType && matchFrom && matchTo && matchCFrom && matchCTo;
+      return matchQ && matchHotel && matchStatus && matchTour && matchFrom && matchTo && matchCFrom && matchCTo;
     });
     _hbPage = 0;
     renderHotelBookingsPage();
@@ -7237,10 +7078,8 @@
     if (!tbody) return;
     tbody.innerHTML = '';
     page.forEach(b => {
-      const _hbIsCancelled = (b.status||'').toLowerCase() === 'cancelled';
-      const _hbTrStyle = _hbIsCancelled ? 'opacity:0.45' : (_paymentLinkUrgency(b) ? 'box-shadow:inset 3px 0 0 #f97316;background:rgba(249,115,22,0.06)' : '');
       tbody.insertAdjacentHTML('beforeend', `
-        <tr class="hover:bg-gray-50 transition-colors text-xs cursor-pointer" data-id="${b.id}" onclick="openBookingDetail('${b.id}')" style="${_hbTrStyle}">
+        <tr class="hover:bg-gray-50 transition-colors text-xs cursor-pointer" data-id="${b.id}" onclick="openBookingDetail('${b.id}')" style="${(b.status||'').toLowerCase() === 'cancelled' ? 'opacity:0.45' : ''}">
           <td class="px-5 py-3 font-mono text-gray-400" style="white-space:nowrap">#${b.displayId || b.id}</td>
           <td class="px-4 py-3 font-medium text-dark" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(b.tour)}">${escapeHtml(b.tour)}</td>
           <td class="px-4 py-3 text-gray-600" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(b.guest)}">${escapeHtml(b.guest)}</td>
@@ -7252,7 +7091,6 @@
           <td class="px-4 py-3 text-xs whitespace-nowrap" onclick="event.stopPropagation()">${b.phone ? `<a href="tel:${escapeHtml(b.phone)}" style="color:#60a5fa;text-decoration:none">${escapeHtml(b.phone)}</a>${b.email ? ` <a href="mailto:${escapeHtml(b.email)}" title="${escapeHtml(b.email)}" style="color:#64748b;margin-left:3px"><i class="fa-solid fa-envelope" style="font-size:10px"></i></a>` : ''}` : '<span class="text-gray-300">—</span>'}</td>
           <td class="px-4 py-3 text-center text-dark">${b.pax}</td>
           <td class="px-4 py-3 text-right font-semibold text-dark whitespace-nowrap">${Math.round(b.total || 0).toLocaleString('pl')} zł</td>
-          <td class="px-4 py-3 text-slate-300 text-xs">${escapeHtml(b.source)}</td>
           <td class="px-4 py-3 text-xs">${paymentMethodCell(b)}</td>
           <td class="px-4 py-3 text-center">${statusBadge(b.status)}</td>
           <td class="px-4 py-3 text-right whitespace-nowrap" onclick="event.stopPropagation()">
@@ -7300,8 +7138,6 @@
     mselClear('msel-hb-tour', true);
     mselClear('msel-hb-hotel', true);
     mselClear('msel-hb-status', true);
-    mselClear('msel-hb-source', true);
-    mselClear('msel-hb-partner-type', true);
     dpopClear('hb-filter-from', true);
     dpopClear('hb-filter-to', true);
     dpopClear('hb-filter-created-from', true);
@@ -7332,6 +7168,7 @@
   });
 
   async function cancelBooking(id, guestName, hasStripe, isDbBooking = true) {
+    if (currentAdminRole === 'staff') { showToast('Manager or admin role required.', 'error'); return; }
     const refundMsg = hasStripe ? ' and refund the Stripe payment' : '';
     if (!await showConfirm(`Cancel booking for ${guestName}${refundMsg}?\n\nThis cannot be undone.`, { okLabel: 'Cancel booking', okColor: '#dc2626' })) return;
     const btn = document.querySelector(`[data-action="cancel"][data-id="${id}"]`);
@@ -7361,7 +7198,7 @@
   }
 
   async function forceUnlockBooking(id) {
-    if (currentAdminRole === 'staff') { showToast('Manager or admin role required.', 'error'); return; }
+    if (currentAdminRole !== 'admin') { showToast('Admin role required.', 'error'); return; }
     const b = allBookings.find(x => x.id === id) || partnerBookings.find(x => x.id === id);
     if (!await showConfirm(`Force unlock booking for ${b?.guest || id}?\n\nThis sets status back to 'paid'. You may need to handle the cancellation or refund manually.`, { okLabel: 'Unlock', okColor: '#e8751a' })) return;
     const { error } = await db.from('bookings').update({ status: 'paid' }).eq('id', id).eq('status', 'cancelling');
@@ -7542,7 +7379,6 @@
   }
 
   let editingBookingId = null;
-  let editBookingBefore = null;
   let editingContactId = null;
 
   function openContactEdit(id) {
@@ -7704,14 +7540,6 @@
     }
   }
 
-  function _statusOptionLabel(s) {
-    const labels = { paid: 'Paid', to_be_paid: 'Driver pay', payment_pending: 'Payment link sent',
-      arrived: 'Arrived', no_show: 'No Show', confirmed: 'Confirmed', cancelled: 'Cancelled',
-      cancelling: 'Cancelling…', refund_failed: 'Refund failed' };
-    return labels[s] || (s ? s.charAt(0).toUpperCase() + s.slice(1) : 'Pending');
-  }
-  const EDIT_STATUS_LOCKED = ['cancelled', 'cancelling', 'refund_failed'];
-
   function openEditBooking(id) {
     const b = allBookings.find(x => x.id === id) || partnerBookings.find(x => x.id === id);
     if (!b) return;
@@ -7719,14 +7547,13 @@
     const [firstName, ...rest] = (b.guest || '').split(' ');
     document.getElementById('edit-booking-ref').textContent      = b._bokunCode || ('TM-' + b.id.slice(0,8).toUpperCase());
     document.getElementById('edit-tour').value                   = b.tour;
-    document.getElementById('edit-date').value                   = b._rawDate || '';
+    document.getElementById('edit-date').value                   = b.date;
     document.getElementById('edit-time').value                   = b.time;
     document.getElementById('edit-pax').value                    = b.pax;
     document.getElementById('edit-total').value                  = b.total;
     document.getElementById('edit-comm').value                   = b.comm;
-    const editHotelSel = document.getElementById('edit-hotel');
-    if (editHotelSel) editHotelSel.value = b._partnerId || '';
-    document.getElementById('edit-payment').value                 = b.payment_method || '';
+    document.getElementById('edit-hotel-display').value          = b.hotel || '— direct —';
+    document.getElementById('edit-payment-display').value        = b.payment_method || '—';
     document.getElementById('edit-firstname').value              = firstName;
     document.getElementById('edit-lastname').value               = rest.join(' ');
     renderEditGuestRows(b.additional_guests ? b.additional_guests.split(', ').filter(Boolean) : []);
@@ -7737,29 +7564,6 @@
     document.getElementById('edit-source-label').textContent     = b.source;
     document.getElementById('edit-bokun-id').textContent         = b._bokunCode || '—';
     document.getElementById('edit-confirm-check').checked        = false;
-
-    const statusSel = document.getElementById('edit-status');
-    const statusLockNote = document.getElementById('edit-status-locked-note');
-    const rawStatus = b.status || 'paid';
-    const sLower = rawStatus.toLowerCase();
-    statusSel.querySelectorAll('option[data-dynamic]').forEach(o => o.remove());
-    if (!statusSel.querySelector(`option[value="${CSS.escape(rawStatus)}"]`)) {
-      const opt = document.createElement('option');
-      opt.value = rawStatus;
-      opt.textContent = _statusOptionLabel(sLower);
-      opt.setAttribute('data-dynamic', '1');
-      statusSel.insertBefore(opt, statusSel.firstChild);
-    }
-    statusSel.value = rawStatus;
-    const statusLocked = EDIT_STATUS_LOCKED.includes(sLower);
-    statusSel.disabled = statusLocked;
-    statusLockNote.classList.toggle('hidden', !statusLocked);
-
-    editBookingBefore = { guest: b.guest, additional_guests: b.additional_guests || null, email: b.email || null,
-      phone: b.phone || null, pickup: b.pickup || null, notes: b.notes || null, comm: b.comm ?? null,
-      payment_method: b.payment_method || null, status: rawStatus,
-      tour: b.tour || null, date: b._rawDate || null, time: b.time || null, pax: b.pax ?? null,
-      total: b.total ?? null, partner_id: b._partnerId || null };
     const panel = document.getElementById('edit-booking-panel');
     panel.classList.remove('hidden');
     requestAnimationFrame(() => document.getElementById('edit-booking-drawer').classList.add('open'));
@@ -7790,17 +7594,7 @@
       phone:  phone || null,
       pickup: document.getElementById('edit-pickup').value.trim() || null,
       notes:  document.getElementById('edit-notes').value.trim() || null,
-      comm:   (() => { const v = document.getElementById('edit-comm').value.trim(); return v === '' ? null : parseFloat(v); })(),
-      payment_method: document.getElementById('edit-payment').value || null,
-      tour: document.getElementById('edit-tour').value.trim(),
-      date: document.getElementById('edit-date').value || null,
-      time: document.getElementById('edit-time').value.trim() || null,
-      pax: (() => { const v = parseInt(document.getElementById('edit-pax').value); return isNaN(v) ? null : v; })(),
-      total: (() => { const v = parseFloat(document.getElementById('edit-total').value); return isNaN(v) ? null : v; })(),
-      partner_id: document.getElementById('edit-hotel')?.value || null,
     };
-    const statusSel = document.getElementById('edit-status');
-    if (!statusSel.disabled) { dbUpdates.status = statusSel.value; }
 
     const { error } = await db.from('bookings').update(dbUpdates).eq('id', editingBookingId);
     if (error) {
@@ -7809,32 +7603,9 @@
       return;
     }
 
-    // date/partner_id are stored raw but displayed formatted/resolved-to-name in the in-memory
-    // table rows — patch those derived display fields too, or the table would show the raw
-    // ISO date / disappear the partner name until the next full reload.
     Object.assign(b, dbUpdates);
-    const newPartner = allPartners.find(p => p.id === dbUpdates.partner_id);
-    if (dbUpdates.date) {
-      b.date = new Date(dbUpdates.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-      b._rawDate = dbUpdates.date;
-      b._startTs = new Date(dbUpdates.date).getTime();
-    }
-    b.hotel = newPartner?.name || '—';
-    b._partnerId = dbUpdates.partner_id;
-    const pb = partnerBookings.find(x => x.id === editingBookingId);
-    if (pb) {
-      Object.assign(pb, dbUpdates);
-      if (dbUpdates.date) { pb.date = b.date; pb._rawDate = b._rawDate; pb._startTs = b._startTs; }
-      pb.hotel = newPartner?.name || '—';
-      pb._partnerId = dbUpdates.partner_id;
-    }
     renderBookingsTable();
-    if (_hbLoaded) filterHotelBookings();
-    const editBookingLabels = { guest: 'guest name', additional_guests: 'additional guests', email: 'email',
-      phone: 'phone', pickup: 'pickup point', notes: 'notes', comm: 'commission', payment_method: 'payment method', status: 'status',
-      tour: 'tour', date: 'date', time: 'time', pax: 'pax', total: 'total', partner_id: 'partner' };
-    const editBookingChanges = describeChanges(editBookingBefore, dbUpdates, editBookingLabels);
-    logActivity('booking_edited', `Booking ${b._bokunCode || editingBookingId} (${b.tour} · ${b.guest}) — changed: ${editBookingChanges}`, editingBookingId);
+    logActivity('booking_edited', `Booking ${b.bokun_confirmation_code || editingBookingId} (${b.tour} · ${b.guest}) → status: ${dbUpdates.status}`, editingBookingId);
     closeEditBooking();
     const toast = document.createElement('div');
     const toastOk = !error;
@@ -7844,87 +7615,6 @@
       : '<i class="fa-solid fa-xmark"></i> Save failed — check console.';
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3500);
-  }
-
-  function openAssignHotelModal(id) {
-    const b = allBookings.find(x => x.id === id);
-    if (!b) return;
-    document.getElementById('ah-booking-id').value = id;
-    document.getElementById('ah-tour').textContent = b.tour || '—';
-    document.getElementById('ah-guest').textContent = b.guest || '—';
-    document.getElementById('ah-date').textContent = b.date || '—';
-    document.getElementById('ah-code').textContent = b.displayId || b.id;
-    const sel = document.getElementById('ah-partner');
-    sel.innerHTML = '<option value="">— select hotel —</option>' +
-      allPartners.slice().sort((a, c) => a.name.localeCompare(c.name)).map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
-    document.getElementById('ah-total').value = b.total ? Math.round(b.total) : '';
-    document.getElementById('ah-payment').value = '';
-    document.getElementById('ah-comm').value = '';
-    document.getElementById('ah-pickup').value = (b.pickup && b.pickup !== '—') ? b.pickup : '';
-    document.getElementById('ah-error').classList.add('hidden');
-    document.getElementById('modal-assign-hotel').classList.remove('hidden');
-  }
-  function closeAssignHotelModal() {
-    document.getElementById('modal-assign-hotel').classList.add('hidden');
-  }
-  async function saveAssignHotel() {
-    const id = document.getElementById('ah-booking-id').value;
-    const b = allBookings.find(x => x.id === id);
-    const errEl = document.getElementById('ah-error');
-    if (!b) return;
-    const partnerId = document.getElementById('ah-partner').value;
-    const total = parseFloat(document.getElementById('ah-total').value);
-    const commRaw = document.getElementById('ah-comm').value.trim();
-    const comm = commRaw === '' ? null : parseFloat(commRaw);
-    const pickupVal = document.getElementById('ah-pickup').value.trim() || null;
-    const paymentMethod = document.getElementById('ah-payment').value || null;
-    if (!partnerId) { errEl.textContent = 'Select a hotel.'; errEl.classList.remove('hidden'); return; }
-    if (!(total > 0)) { errEl.textContent = 'Enter a valid total.'; errEl.classList.remove('hidden'); return; }
-    if (comm !== null && !(comm >= 0)) { errEl.textContent = 'Enter a valid commission.'; errEl.classList.remove('hidden'); return; }
-
-    const btn = document.getElementById('ah-save-btn');
-    btn.disabled = true; btn.textContent = 'Saving…';
-
-    const isoDate = b._startTs ? new Date(b._startTs).toISOString().slice(0, 10) : null;
-    const rawTime = (b.time && b.time !== '—') ? (b.time.includes(' - ') ? b.time.split(' - ')[0].trim() : b.time) : null;
-    const newId = crypto.randomUUID();
-
-    const { error } = await db.from('bookings').insert({
-      id: newId,
-      tour: b.tour,
-      date: isoDate,
-      time: rawTime,
-      language: b.language || null,
-      guest: b.guest,
-      email: b.email || null,
-      phone: b.phone || null,
-      pax: b.pax,
-      total: total,
-      comm: comm,
-      payment_method: paymentMethod,
-      status: b.status || 'paid',
-      stripe_session_id: null,
-      stripe_session_url: null,
-      pickup: pickupVal,
-      partner_id: partnerId,
-      bokun_confirmation_code: b.id,
-      bokun_booking_id: null,
-      notes: 'Migrated from Old TM System',
-      additional_guests: null,
-    });
-
-    btn.disabled = false; btn.textContent = 'Assign';
-
-    if (error) {
-      errEl.textContent = 'Save error: ' + error.message;
-      errEl.classList.remove('hidden');
-      return;
-    }
-
-    closeAssignHotelModal();
-    showToast('Booking assigned — reloading…');
-    logActivity('booking_assigned_to_hotel', `Old TM System booking ${b.displayId || b.id} (${b.tour} · ${b.guest}) assigned to hotel, total ${total} PLN`, newId).catch(() => {});
-    await loadBookings();
   }
 
   async function resendConfirmationEmailForBooking(b) {
@@ -8819,8 +8509,7 @@
 
   function rebuildPartnerDropdowns() {
     const bookingPartnerOpts = allPartners.map(p => `<option value="${escapeHtml(p.name)}">${escapeHtml(p.name)}</option>`).join('');
-    const settlePartnerOpts  = allPartners.filter(p => p.commission_enabled !== false).map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)}</option>`).join('');
-    const partnerIdOpts = allPartners.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)}</option>`).join('');
+    const settlePartnerOpts  = allPartners.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)}</option>`).join('');
     const abHotelOpts = [{value:'none', label:'No partner (direct)'}].concat(allPartners.map(p => ({value: escapeHtml(p.name), label: p.name})));
     mselSetOptions('msel-ab-hotel', abHotelOpts);
     const settleHotel = document.getElementById('settle-hotel');
@@ -8830,11 +8519,7 @@
     const manualPartner = document.getElementById('manual-booking-partner');
     if (manualPartner) manualPartner.innerHTML = `<option value="">— direct —</option>${bookingPartnerOpts}`;
     const editHotel = document.getElementById('edit-hotel');
-    if (editHotel) {
-      const cur = editHotel.value;
-      editHotel.innerHTML = `<option value="">— direct —</option>${partnerIdOpts}`;
-      editHotel.value = cur;
-    }
+    if (editHotel) { const cur = editHotel.value; editHotel.innerHTML = `<option value="—">— direct —</option>${bookingPartnerOpts}`; editHotel.value = cur; }
   }
 
   let _partnersPage = 0;
@@ -9090,7 +8775,6 @@
     document.getElementById('pd-pay-hotel').checked  = opts.includes('hotel');
     document.getElementById('pd-pay-link').checked   = opts.includes('link');
     document.getElementById('pd-hotel-pickup-enabled').checked = p.hotel_pickup_enabled !== false;
-    document.getElementById('pd-commission-enabled').checked = p.commission_enabled !== false;
 
     if (_tourConfigFullyLoaded) {
       renderPartnerTourGroups(p.tourGroups);
@@ -9133,7 +8817,7 @@
     if (!p) return;
     const partnerEditBefore = { name: p.name, phone: p.phone, email: p.email, address: p.address,
       notes: p.notes, tourGroups: [...(p.tourGroups||[])], paymentOptions: [...(p.paymentOptions||[])],
-      hotel_pickup_enabled: p.hotel_pickup_enabled, commission_enabled: p.commission_enabled };
+      hotel_pickup_enabled: p.hotel_pickup_enabled };
     const oldEmail = p.email;
     p.name           = document.getElementById('pd-edit-name').value;
     p.phone          = document.getElementById('pd-edit-phone').value;
@@ -9147,9 +8831,7 @@
     if (document.getElementById('pd-pay-link').checked)   payOpts.push('link');
     p.paymentOptions = payOpts;
     p.hotel_pickup_enabled = document.getElementById('pd-hotel-pickup-enabled').checked;
-    p.commission_enabled = document.getElementById('pd-commission-enabled').checked;
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(p.email)) { showToast('Invalid email address', 'error'); return; }
-    let emailSyncError = null;
     if (p.email !== oldEmail) {
       const { data: syncRes, error: syncErr } = await invokeEdge('create-partner', {
         body: { action: 'set_email', old_email: oldEmail, new_email: p.email }
@@ -9157,31 +8839,25 @@
       const err = syncErr || (syncRes?.error ? { message: syncRes.error } : null);
       if (err) {
         p.email = oldEmail;
-        emailSyncError = err.message || 'unknown error';
+        showToast('Failed to update login email: ' + (err.message || 'unknown error'), 'error');
+        return;
       }
     }
-    // Save everything else regardless of email-sync outcome — a failed login-email sync
-    // shouldn't discard unrelated edits (name, phone, groups, etc.) made in the same session.
     await db.from('partners').update({
       name: p.name, phone: p.phone,
       email: p.email, address: p.address, notes: p.notes,
       tour_groups: p.tourGroups,
       payment_options: payOpts,
       hotel_pickup_enabled: p.hotel_pickup_enabled,
-      commission_enabled: p.commission_enabled,
     }).eq('id', editingPartnerId);
     const partnerEditLabels = { name: 'name', phone: 'phone', email: 'email', address: 'address',
       notes: 'notes', tourGroups: 'tour groups', paymentOptions: 'payment options',
-      hotel_pickup_enabled: 'hotel pickup enabled', commission_enabled: 'commission enabled' };
+      hotel_pickup_enabled: 'hotel pickup enabled' };
     const partnerEditChanges = describeChanges(partnerEditBefore, p, partnerEditLabels);
     await logActivity('partner_edited', `Partner "${p.name}" — changed: ${partnerEditChanges}`, editingPartnerId);
     renderPartnersTable();
     closePartnerDetail();
-    if (emailSyncError) {
-      showToast('Other changes saved, but login email was NOT updated: ' + emailSyncError, 'error');
-    } else {
-      showToast('Partner updated successfully!');
-    }
+    showToast('Partner updated successfully!');
   }
   async function togglePartnerStatus(id) {
     const p = allPartners.find(x => x.id === id);
@@ -9197,7 +8873,7 @@
   }
 
   async function deletePartner() {
-    if (currentAdminRole !== 'admin' && currentAdminRole !== 'manager') { showToast('Admin or manager role required.', 'error'); return; }
+    if (currentAdminRole !== 'admin') { showToast('Admin role required.', 'error'); return; }
     const p = allPartners.find(x => x.id === editingPartnerId);
     if (!p) return;
     if (!await showConfirm(`Are you sure you want to permanently delete "${p.name}"? This cannot be undone.`, { okLabel: 'Delete permanently' })) return;
@@ -9466,44 +9142,11 @@
     return null;
   }
 
-  // Payment-link booking, still unpaid, whose tour is today or tomorrow (calendar day, not a live
-  // countdown) — Bokun holds the slot on a much shorter fuse than our own payment window, so these
-  // are the ones at real risk of Bokun releasing/cancelling the slot before the guest gets to pay.
-  function _paymentLinkUrgency(b) {
-    const pm = b.payment_method || '';
-    const s = (b.status || '').toLowerCase();
-    const isLink = pm === 'link' || s === 'payment_pending' || s === 'pending_payment';
-    if (!isLink || !b._startTs || ['cancelled', 'paid', 'cancelling'].includes(s)) return null;
-    // b.date is a display-formatted string ("3 Sept 2026") by the time it reaches this object —
-    // compare calendar days via _startTs (the raw timestamp) instead.
-    const dayStr = ts => new Date(ts).toISOString().slice(0, 10);
-    const tourDayStr = dayStr(b._startTs);
-    const todayStr = dayStr(Date.now());
-    const tomorrowStr = dayStr(Date.now() + 86400000);
-    if (tourDayStr === todayStr) return 'today';
-    if (tourDayStr === tomorrowStr) return 'tomorrow';
-    return null;
-  }
-
-  // Commission-disabled partners: comm is never rewritten in the DB (so re-enabling restores the
-  // original value) — every settlement/export calculation reads through this instead of raw b.comm.
-  function partnerCommissionEnabled(partnerId) {
-    const p = allPartners.find(x => x.id === partnerId);
-    return p ? p.commission_enabled !== false : true;
-  }
-  function effectiveComm(b) {
-    return partnerCommissionEnabled(b.partner_id) ? parseFloat(b.comm || 0) : 0;
-  }
-
   function paymentMethodCell(b) {
     const pm = b.payment_method || '';
     const s  = (b.status || '').toLowerCase();
     if (pm === 'link' || s === 'payment_pending' || s === 'pending_payment') {
-      const urgency = _paymentLinkUrgency(b);
-      return `<div class="flex flex-col gap-0.5">
-        <span class="inline-flex items-center gap-1 text-blue-600 whitespace-nowrap"><i class="fa-solid fa-link text-xs"></i>Payment link</span>
-        ${urgency ? `<span class="inline-flex items-center gap-1 font-semibold whitespace-nowrap" style="font-size:10px;color:#ef4444"><i class="fa-solid fa-triangle-exclamation"></i>Departs ${urgency}, unpaid</span>` : ''}
-      </div>`;
+      return `<span class="inline-flex items-center gap-1 text-blue-600 whitespace-nowrap"><i class="fa-solid fa-link text-xs"></i>Payment link</span>`;
     }
     if (pm === 'driver' || s === 'to_be_paid' || s === 'pending') {
       return `<span class="inline-flex items-center gap-1 text-orange-500 whitespace-nowrap"><i class="fa-solid fa-car-side text-xs"></i>Pay at driver</span>`;
@@ -9571,9 +9214,7 @@
       settledAmount = history.filter(s => s.period === period).reduce((s, r) => s + parseFloat(r.amount||0), 0);
     }
 
-    // Partners with commission disabled don't participate in commission accounting at all —
-    // exclude their bookings entirely (not just zero the commission) from this tab, including "All partners".
-    const rows = (bookings || []).filter(b => partnerCommissionEnabled(b.partner_id));
+    const rows = bookings || [];
     const COMMISSION_STATUSES = ['confirmed', 'paid', 'arrived', 'no_show'];
     const confirmedRows = rows.filter(b => COMMISSION_STATUSES.includes((b.status||'').toLowerCase()));
 
@@ -9582,7 +9223,7 @@
     // no_show: hotel owes TM (total - comm) — commission excluded since hotel never earned it
     let hotelOwesTM = 0, tmOwesHotel = 0;
     for (const b of confirmedRows) {
-      const total = parseFloat(b.total||0), comm = effectiveComm(b);
+      const total = parseFloat(b.total||0), comm = parseFloat(b.comm||0);
       if ((b.status||'').toLowerCase() === 'no_show') hotelOwesTM += total - comm;
       else if (resolvePaymentMethod(b) === 'hotel') hotelOwesTM += total - comm;
       else tmOwesHotel += comm;
@@ -9629,13 +9270,11 @@
       document.getElementById('stats-bookings').textContent = confirmedRows.length;
       const totalSales = confirmedRows.reduce((s, b) => s + parseFloat(b.total||0), 0);
       document.getElementById('stats-total').textContent = Math.round(totalSales).toLocaleString('pl') + ' pln';
-      const totalComm = confirmedRows.reduce((s, b) => s + effectiveComm(b), 0);
-      document.getElementById('stats-hotel-comm').textContent = Math.round(totalComm).toLocaleString('pl') + ' pln';
-      document.getElementById('stats-tm-income').textContent = Math.round(totalSales - totalComm).toLocaleString('pl') + ' pln';
+      const netEl = document.getElementById('stats-net');
+      netEl.textContent = Math.abs(Math.round(toSettle)).toLocaleString('pl') + ' pln';
+      netEl.className = 'text-2xl font-bold tabular-nums ' + (toSettle > 0.01 ? 'text-brand' : toSettle < -0.01 ? 'text-blue-400' : 'text-gray-400');
+      document.getElementById('stats-net-label').textContent = toSettle > 0.01 ? 'Hotel → TM' : toSettle < -0.01 ? 'TM → Hotel' : 'Settled ✓';
     }
-
-    const footerRowEl = document.getElementById('settlement-footer-row');
-    if (footerRowEl) footerRowEl.classList.toggle('hidden', isAllPartners);
 
     const totalEl = document.getElementById('settlement-total');
     const dirEl = document.getElementById('settlement-direction');
@@ -9693,7 +9332,7 @@
       : sortedRows.map(b => {
           const cancelled = (b.status||'').toLowerCase() === 'cancelled';
           const dateStr = b.date ? new Date(b.date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : '—';
-          const total = parseFloat(b.total||0), comm = effectiveComm(b);
+          const total = parseFloat(b.total||0), comm = parseFloat(b.comm||0);
           const isHotel = resolvePaymentMethod(b) === 'hotel';
           const settlementAmt = isHotel ? (total - comm) : comm;
           const _pm = resolvePaymentMethod(b);
@@ -9753,8 +9392,8 @@
       }
     }
 
-    // Driver-pay / payment-link-pending warning
-    const DRIVER_PAY_STATUSES = ['to_be_paid', 'pending', 'payment_pending', 'pending_payment'];
+    // Driver-pay warning
+    const DRIVER_PAY_STATUSES = ['to_be_paid', 'pending'];
     const driverPending = rows.filter(b => DRIVER_PAY_STATUSES.includes((b.status||'').toLowerCase()));
     const warnEl  = document.getElementById('settlement-driver-warning');
     const warnTxt = document.getElementById('settlement-driver-warning-text');
@@ -9762,7 +9401,7 @@
     if (warnEl && warnTxt) {
       if (driverPending.length > 0) {
         const n = driverPending.length;
-        warnTxt.textContent = `${n} booking${n > 1 ? 's' : ''} with "Pay at driver" or "Link sent" status found in this period — ${n > 1 ? 'they are' : 'it is'} not included in the calculation. Mark each as Paid or Cancel below, or in All Bookings.`;
+        warnTxt.textContent = `${n} booking${n > 1 ? 's' : ''} with "Pay at driver" status found in this period — ${n > 1 ? 'they are' : 'it is'} not included in the calculation. Mark each as Paid or No Show below, or in All Bookings.`;
         warnEl.classList.remove('hidden');
         if (warnList) {
           warnList.innerHTML = driverPending.map(b => {
@@ -9771,12 +9410,11 @@
             const noShowBtn = canMarkNoShow(enriched)
               ? `<button onclick="markNoShow('${b.id}').then(()=>calculateSettlement())" class="text-xs font-semibold px-2 py-1 rounded-lg bg-red-100 hover:bg-red-200 text-red-700 transition-colors">No show</button>`
               : '';
-            return `<div class="flex items-center justify-between gap-2 rounded-lg px-3 py-1.5" style="background:#1a2332">
-              <span class="text-xs truncate" style="color:#fff">${escapeHtml(b.tour||'—')} — ${escapeHtml(b.guest||'—')} · ${dateStr}</span>
+            return `<div class="flex items-center justify-between gap-2 bg-white bg-opacity-60 rounded-lg px-3 py-1.5">
+              <span class="text-xs truncate" style="color:#78350f">${escapeHtml(b.tour||'—')} — ${escapeHtml(b.guest||'—')} · ${dateStr}</span>
               <div class="flex gap-1.5 shrink-0">
                 <button onclick="quickMarkPaid('${b.id}').then(()=>calculateSettlement())" class="text-xs font-semibold px-2 py-1 rounded-lg bg-green-100 hover:bg-green-200 text-green-700 transition-colors">Mark paid</button>
                 ${noShowBtn}
-                <button onclick="cancelBooking('${b.id}', '${escapeHtml((b.guest||'').replace(/'/g,"\\'"))}', ${!!b.stripe_session_id}, true).then(()=>calculateSettlement())" class="text-xs font-semibold px-2 py-1 rounded-lg transition-colors" style="background:#dc2626;color:#fff">Cancel</button>
               </div>
             </div>`;
           }).join('');
@@ -9839,9 +9477,9 @@
       const day = b.date ? new Date(b.date + 'T12:00:00').getDate() : '';
       const pkg = allCommissions.find(c => c.title === b.tour);
       const pricePerPerson = pkg?.price_pln ?? '';
+      const commPerPerson = b.pax ? Math.round(parseFloat(b.comm||0) / b.pax) : (pkg?.commission_pln ?? 0);
       const total = parseFloat(b.total || 0);
-      const comm  = effectiveComm(b);
-      const commPerPerson = b.pax ? Math.round(comm / b.pax) : (partnerCommissionEnabled(b.partner_id) ? (pkg?.commission_pln ?? 0) : 0);
+      const comm  = parseFloat(b.comm  || 0);
       const isNoShow = (b.status||'').toLowerCase() === 'no_show';
       const isHotel = !isNoShow && resolvePaymentMethod(b) === 'hotel';
       const _pmEx = resolvePaymentMethod(b);
@@ -9974,7 +9612,7 @@
       if (!pid) continue;
       if (!perPartner[pid]) perPartner[pid] = { tmOwesHotel: 0, hotelOwesTM: 0 };
       const total = parseFloat(b.total || 0);
-      const comm  = effectiveComm(b);
+      const comm  = parseFloat(b.comm  || 0);
       const isNoShow = (b.status||'').toLowerCase() === 'no_show';
       const isHotel  = !isNoShow && resolvePaymentMethod(b) === 'hotel';
       if (isNoShow)     perPartner[pid].hotelOwesTM += Math.round(total - comm);
@@ -9982,8 +9620,8 @@
       else              perPartner[pid].tmOwesHotel += Math.round(comm);
     }
 
-    // Build sorted partner list (all partners with commission enabled, even those with 0)
-    const partners = allPartners.filter(p => p.commission_enabled !== false).sort((a, b) => (a.name||'').localeCompare(b.name||''));
+    // Build sorted partner list (all partners, even those with 0)
+    const partners = allPartners.slice().sort((a, b) => (a.name||'').localeCompare(b.name||''));
 
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet('Cash Settlement');
@@ -10126,7 +9764,7 @@
         const pAddress = partner?.address || '';
         let totalComm = 0, hotelOwesTM = 0, tmOwesHotel = 0;
         for (const b of pRows) {
-          const comm = effectiveComm(b);
+          const comm = parseFloat(b.comm || 0);
           const total = parseFloat(b.total || 0);
           const isNoShow = (b.status||'').toLowerCase() === 'no_show';
           const isHotel = !isNoShow && resolvePaymentMethod(b) === 'hotel';
@@ -10187,7 +9825,7 @@
       : ['Tour','Guest','Date','Pax','Total','Settlement','Payment','Status'];
     const lines = [headers.join(',')];
     for (const b of sortedRows) {
-      const total = parseFloat(b.total||0), comm = effectiveComm(b);
+      const total = parseFloat(b.total||0), comm = parseFloat(b.comm||0);
       const isHotel = resolvePaymentMethod(b) === 'hotel';
       const settlementAmt = isHotel ? (total - comm) : comm;
       const pm = resolvePaymentMethod(b);
@@ -10253,12 +9891,10 @@
 </script>
 
 <!-- Modal: Add tour -->
-<div id="modal-add-tour" class="hidden fixed inset-0 z-50 flex items-start justify-center p-4 py-8" style="background:rgba(0,0,0,0.65);overflow-y:auto" onclick="if(event.target===this)tryCloseAddTourModal()">
+<div id="modal-add-tour" class="hidden fixed inset-0 z-50 overflow-y-auto" style="background:rgba(0,0,0,0.65)">
+  <div class="flex min-h-full items-start justify-center p-4 py-8">
   <div class="w-full max-w-lg" style="background:#1a2332;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:24px;box-shadow:0 25px 50px rgba(0,0,0,0.5)">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-      <h3 style="color:#f1f5f9;font-weight:700;font-size:15px;margin:0">Add tour</h3>
-      <button onclick="tryCloseAddTourModal()" class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-white/5" style="color:#94a3b8"><i class="fa-solid fa-xmark"></i></button>
-    </div>
+    <h3 style="color:#f1f5f9;font-weight:700;font-size:15px;margin:0 0 20px 0">Add tour</h3>
     <div class="space-y-3">
       <!-- Tour name -->
       <div>
@@ -10298,7 +9934,7 @@
           <button type="button" data-val="package" class="add-pricing-btn" onclick="setPricingType('add','package')" style="padding:6px 12px;background:rgba(255,255,255,0.05);color:#64748b;border:none;cursor:pointer">Fixed package</button>
         </div>
         <input type="hidden" id="add-tour-pricing-type" value="per_person">
-        <p style="font-size:11px;color:#64748b;margin-top:6px"><span class="add-per-person-hint">Price multiplied by number of guests (Adult, Child…)</span><span class="add-package-hint hidden">Fixed price for the whole transfer / package, regardless of pax</span></p>
+        <p style="font-size:11px;color:#64748b;margin-top:6px"><span class="per-person-hint">Cena mnożona × liczbę osób (Adult, Child…)</span><span class="package-hint hidden">Stała cena za cały transfer / pakiet, niezależnie od pax</span></p>
       </div>
       <!-- Pickup options -->
       <div style="border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px;background:rgba(255,255,255,0.03)" class="space-y-2.5">
@@ -10331,7 +9967,7 @@
           <span style="position:relative;display:inline-flex;align-items:center;cursor:help;" onmouseenter="this.querySelector('.groups-tip-add').style.opacity=1" onmouseleave="this.querySelector('.groups-tip-add').style.opacity=0">
             <i class="fa-solid fa-circle-info" style="color:#475569;font-size:11px"></i>
             <span class="groups-tip-add" style="position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);width:260px;background:#111827;color:#fff;font-size:11px;line-height:1.55;border-radius:10px;padding:10px 12px;box-shadow:0 4px 20px rgba(0,0,0,0.3);opacity:0;pointer-events:none;transition:opacity 0.15s;z-index:9999">
-              Controls which partners can see this tour. Partners with groups assigned only see tours sharing at least one group with them — leaving this tour ungrouped will NOT show it to them. Only partners who have no groups of their own see every tour, ungrouped or not.
+              Controls which partners can see this tour. Partners are assigned groups in their profile — only those with a matching group will see this tour in their booking panel. Leave empty to show the tour to all partners.
             </span>
           </span>
         </label>
@@ -10366,13 +10002,15 @@
     </div>
     <div style="display:flex;gap:8px;margin-top:20px">
       <button onclick="saveAddTour()" style="flex:1;background:#E8751A;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;padding:10px;cursor:pointer" onmouseover="this.style.background='#d46419'" onmouseout="this.style.background='#E8751A'">Add tour</button>
-      <button onclick="tryCloseAddTourModal()" style="padding:10px 20px;border:1px solid rgba(255,255,255,0.1);border-radius:10px;font-size:13px;color:#94a3b8;background:rgba(255,255,255,0.04);cursor:pointer" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.04)'">Cancel</button>
+      <button onclick="document.getElementById('modal-add-tour').classList.add('hidden')" style="padding:10px 20px;border:1px solid rgba(255,255,255,0.1);border-radius:10px;font-size:13px;color:#94a3b8;background:rgba(255,255,255,0.04);cursor:pointer" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.04)'">Cancel</button>
     </div>
+  </div>
   </div>
 </div>
 
 <!-- Modal: Edit tour -->
-<div id="modal-edit-tour" class="hidden fixed inset-0 z-50 flex items-start justify-center p-4 py-8" style="background:rgba(0,0,0,0.65);overflow-y:auto" onclick="if(event.target===this)closeEditTour()">
+<div id="modal-edit-tour" class="hidden fixed inset-0 z-50 overflow-y-auto" style="background:rgba(0,0,0,0.65)">
+  <div class="flex min-h-full items-start justify-center p-4 py-8">
   <div class="w-full max-w-lg" style="background:#1a2332;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:24px;box-shadow:0 25px 50px rgba(0,0,0,0.5)">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
       <h3 style="color:#f1f5f9;font-weight:700;font-size:15px;margin:0">Edit tour</h3>
@@ -10435,7 +10073,7 @@
           <span style="position:relative;display:inline-flex;align-items:center;cursor:help;" onmouseenter="this.querySelector('.groups-tip').style.opacity=1" onmouseleave="this.querySelector('.groups-tip').style.opacity=0">
             <i class="fa-solid fa-circle-info" style="color:#475569;font-size:11px"></i>
             <span class="groups-tip" style="position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);width:260px;background:#111827;color:#fff;font-size:11px;line-height:1.55;border-radius:10px;padding:10px 12px;box-shadow:0 4px 20px rgba(0,0,0,0.3);opacity:0;pointer-events:none;transition:opacity 0.15s;z-index:9999">
-              Controls which partners can see this tour. Partners with groups assigned only see tours sharing at least one group with them — leaving this tour ungrouped will NOT show it to them. Only partners who have no groups of their own see every tour, ungrouped or not.
+              Controls which partners can see this tour. Partners are assigned groups in their profile — only those with a matching group will see this tour in their booking panel. Leave empty to show the tour to all partners.
             </span>
           </span>
         </label>
@@ -10471,24 +10109,9 @@
         </label>
         <input id="edit-tour-force-pickup-id" type="number" class="etm-input" style="width:100%;font-size:13px;padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:#f1f5f9;outline:none;font-family:monospace;box-sizing:border-box" placeholder="e.g. 9030192">
       </div>
-      <!-- Cutoff + Slot capacity -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div>
-          <label style="display:block;font-size:12px;color:#94a3b8;margin-bottom:4px">Booking cutoff <span style="color:#475569">(hours before)</span></label>
-          <input id="edit-tour-cutoff-hours" type="number" min="0" class="etm-input" style="width:100%;font-size:13px;padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:#f1f5f9;outline:none;box-sizing:border-box" placeholder="e.g. 24">
-        </div>
-        <div>
-          <label style="display:block;font-size:12px;color:#94a3b8;margin-bottom:4px">Slot capacity <span style="color:#475569">(max per slot)</span></label>
-          <input id="edit-tour-slot-capacity" type="number" min="0" class="etm-input" style="width:100%;font-size:13px;padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:#f1f5f9;outline:none;box-sizing:border-box" placeholder="e.g. 8">
-        </div>
-      </div>
       <div id="edit-tour-slots-section" class="hidden">
         <label style="display:block;font-size:12px;color:#94a3b8;margin-bottom:6px">Time slots <span style="color:#475569">— uncheck to hide from partners</span></label>
         <div id="edit-tour-slots-list" class="space-y-1"></div>
-      </div>
-      <div id="edit-tour-categories-section" class="hidden">
-        <label style="display:block;font-size:12px;color:#94a3b8;margin-bottom:6px">Packages &amp; guest categories <span style="color:#475569">— uncheck to hide from partners</span></label>
-        <div id="edit-tour-categories-list" class="space-y-1"></div>
       </div>
       <div id="edit-tour-nonbokun-section" class="hidden space-y-3" style="border-top:1px solid rgba(255,255,255,0.07);padding-top:12px">
         <div>
@@ -10520,6 +10143,7 @@
       <button onclick="saveEditTour()" style="flex:1;background:#E8751A;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;padding:10px;cursor:pointer" onmouseover="this.style.background='#d46419'" onmouseout="this.style.background='#E8751A'">Save changes</button>
       <button onclick="closeEditTour()" style="padding:10px 16px;border:1px solid rgba(255,255,255,0.1);border-radius:10px;font-size:13px;color:#94a3b8;background:rgba(255,255,255,0.04);cursor:pointer" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.04)'">Cancel</button>
     </div>
+  </div>
   </div>
 </div>
 
@@ -10597,23 +10221,35 @@
   </div>
 </div>
 
-<!-- Packages modal (Tours & Pricing) -->
-<div id="modal-pkg" class="hidden fixed inset-0 z-50 flex items-start justify-center p-4 py-8" style="background:rgba(0,0,0,0.65);overflow-y:auto" onclick="if(event.target===this)closePkgModal()">
-  <div class="w-full max-w-lg" style="background:#1a2332;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:24px;box-shadow:0 25px 50px rgba(0,0,0,0.5)">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-      <h3 style="color:#f1f5f9;font-weight:700;font-size:15px;margin:0"><i class="fa-solid fa-coins" style="color:#E8751A;margin-right:8px"></i>Packages</h3>
-      <button onclick="closePkgModal()" class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-white/5" style="color:#94a3b8"><i class="fa-solid fa-xmark"></i></button>
+<!-- Add Package Modal -->
+<div id="modal-add-pkg" class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+    <h3 class="text-sm font-bold text-dark mb-1">Add Package</h3>
+    <p id="add-pkg-tour-label" class="text-xs text-gray-400 mb-4"></p>
+    <div class="space-y-3">
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">Package name</label>
+        <input id="add-pkg-title" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="e.g. Shooting 15 boll Band of Brothers">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Price PLN (guest pays)</label>
+          <input id="add-pkg-price" type="number" min="0" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="299">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Commission PLN (hotel earns)</label>
+          <input id="add-pkg-comm" type="number" min="0" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="60">
+        </div>
+      </div>
     </div>
-    <p id="pkg-modal-tour-label" style="font-size:12px;color:#64748b;margin:0 0 18px"></p>
-    <div id="pkg-modal-rows" style="display:flex;flex-direction:column;gap:10px;max-height:56vh;overflow-y:auto;padding-right:2px"></div>
-    <button id="pkg-modal-add-row-btn" onclick="pkgModalAddRow()" style="margin-top:12px;width:100%;padding:9px;border-radius:10px;border:1px dashed rgba(232,117,26,0.4);color:#E8751A;background:transparent;font-size:12px;font-weight:600;cursor:pointer" onmouseover="this.style.background='rgba(232,117,26,0.08)'" onmouseout="this.style.background='transparent'"><i class="fa-solid fa-plus text-xs mr-1"></i>Add package</button>
-    <div style="display:flex;gap:8px;margin-top:20px">
-      <button id="pkg-modal-save-btn" onclick="savePkgModal()" style="flex:1;background:#E8751A;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;padding:10px;cursor:pointer" onmouseover="this.style.background='#d46419'" onmouseout="this.style.background='#E8751A'">Save</button>
-      <button onclick="closePkgModal()" style="padding:10px 16px;border:1px solid rgba(255,255,255,0.1);border-radius:10px;font-size:13px;color:#94a3b8;background:rgba(255,255,255,0.04);cursor:pointer" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.04)'">Cancel</button>
+    <div class="flex gap-2 mt-5">
+      <button onclick="document.getElementById('modal-add-pkg').classList.add('hidden')" class="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-500 hover:bg-gray-50 transition-colors">Cancel</button>
+      <button onclick="saveAddPackage()" class="flex-1 px-4 py-2.5 btn-ol rounded-xl text-sm font-semibold transition-colors">Add</button>
     </div>
   </div>
 </div>
 
+<!-- Edit Package Modal -->
 <div id="modal-change-password" class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onclick="if(event.target===this)document.getElementById('modal-change-password').classList.add('hidden')">
   <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
     <h3 class="text-sm font-bold text-dark mb-4">Change admin password</h3>
@@ -10653,6 +10289,37 @@
   </div>
 </div>
 
+<div id="modal-edit-pkg" class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+    <h3 class="text-sm font-bold text-dark mb-4">Edit Package</h3>
+    <input type="hidden" id="edit-pkg-id">
+    <div class="space-y-3">
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">Package name</label>
+        <input id="edit-pkg-title" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">Category</label>
+        <input id="edit-pkg-cat" type="text" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Price PLN</label>
+          <input id="edit-pkg-price" type="number" min="0" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Commission PLN</label>
+          <input id="edit-pkg-comm" type="number" min="0" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-2 mt-5">
+      <button onclick="document.getElementById('modal-edit-pkg').classList.add('hidden')" class="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-500 hover:bg-gray-50 transition-colors">Cancel</button>
+      <button onclick="saveEditPackage()" class="flex-1 px-4 py-2.5 btn-ol rounded-xl text-sm font-semibold transition-colors">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- Bokun Category Help Popover -->
 <div id="bokun-cat-popover" class="hidden fixed z-50 bg-white border border-amber-200 rounded-2xl shadow-xl p-4 w-80" style="max-width:calc(100vw - 32px)">
   <div class="flex items-start justify-between gap-2 mb-3">
@@ -10671,13 +10338,6 @@
   <p class="text-xs text-gray-400 mt-3">After adding it in Bokun, click <strong>Sync from Bokun</strong> in this panel to refresh.</p>
 </div>
 
-<div id="generic-info-popover" class="hidden fixed z-50 bg-white border border-gray-200 rounded-2xl shadow-xl p-3 w-72" style="max-width:calc(100vw - 32px)">
-  <div class="flex items-start justify-between gap-2">
-    <p id="generic-info-popover-label" class="text-xs text-gray-600 leading-relaxed pr-1"></p>
-    <button onclick="document.getElementById('generic-info-popover').classList.add('hidden')" class="w-6 h-6 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 shrink-0 -mt-1 -mr-1"><i class="fa-solid fa-xmark text-xs"></i></button>
-  </div>
-</div>
-
 <!-- Change PIN Modal -->
 <div id="modal-change-pin" class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
@@ -10685,15 +10345,15 @@
     <div class="space-y-3">
       <div>
         <label class="block text-xs font-semibold text-gray-600 mb-1">Current PIN</label>
-        <input id="change-pin-current" type="password" inputmode="numeric" maxlength="8" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="••••">
+        <input id="change-pin-current" type="password" inputmode="numeric" maxlength="8" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="••••">
       </div>
       <div>
         <label class="block text-xs font-semibold text-gray-600 mb-1">New PIN</label>
-        <input id="change-pin-new" type="password" inputmode="numeric" maxlength="8" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="••••">
+        <input id="change-pin-new" type="password" inputmode="numeric" maxlength="8" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="••••">
       </div>
       <div>
         <label class="block text-xs font-semibold text-gray-600 mb-1">Confirm new PIN</label>
-        <input id="change-pin-confirm" type="password" inputmode="numeric" maxlength="8" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="••••">
+        <input id="change-pin-confirm" type="password" inputmode="numeric" maxlength="8" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="••••">
       </div>
       <p id="change-pin-error" class="hidden text-xs text-red-500 font-medium"></p>
     </div>
@@ -10779,57 +10439,6 @@
   </div>
 </div>
 
-<div id="modal-assign-hotel" class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onclick="if(event.target===this)closeAssignHotelModal()">
-  <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
-    <div class="flex items-center justify-between mb-5">
-      <h3 class="text-sm font-bold text-dark">Assign to hotel</h3>
-      <button onclick="closeAssignHotelModal()" class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-gray-100 text-gray-400"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <div class="space-y-3">
-      <div class="bg-gray-50 rounded-xl p-3 text-xs text-gray-500 space-y-1">
-        <div><span class="text-gray-400">Tour:</span> <span id="ah-tour" class="text-dark font-medium"></span></div>
-        <div><span class="text-gray-400">Guest:</span> <span id="ah-guest" class="text-dark font-medium"></span></div>
-        <div><span class="text-gray-400">Date:</span> <span id="ah-date" class="text-dark font-medium"></span></div>
-        <div><span class="text-gray-400">Bokun code:</span> <span id="ah-code" class="text-dark font-medium"></span></div>
-      </div>
-      <div>
-        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Hotel (partner) <span class="text-red-400">*</span></label>
-        <select id="ah-partner" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"></select>
-      </div>
-      <div>
-        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Correct total (PLN) <span class="text-red-400">*</span></label>
-        <input id="ah-total" type="number" min="0" step="0.01" placeholder="e.g. 250"
-          class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-      </div>
-      <div>
-        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Payment method</label>
-        <select id="ah-payment" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-          <option value="">— unknown —</option>
-          <option value="driver">Pay at driver</option>
-          <option value="hotel">Pay at hotel</option>
-          <option value="link">Payment link</option>
-        </select>
-      </div>
-      <div>
-        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Commission (PLN)</label>
-        <input id="ah-comm" type="number" min="0" step="0.01" placeholder="e.g. 20 (optional)"
-          class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-      </div>
-      <div>
-        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Pickup point</label>
-        <input id="ah-pickup" type="text" placeholder="e.g. Hotel Wawel, lobby"
-          class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-      </div>
-      <p id="ah-error" class="hidden text-xs text-red-500 font-medium"></p>
-    </div>
-    <input type="hidden" id="ah-booking-id">
-    <div class="flex gap-2 mt-5">
-      <button onclick="closeAssignHotelModal()" class="flex-1 text-sm text-gray-600 border border-gray-200 rounded-xl py-2.5 hover:bg-gray-50 transition-colors">Cancel</button>
-      <button id="ah-save-btn" onclick="saveAssignHotel()" class="flex-1 text-sm btn-ol font-semibold rounded-xl py-2.5 transition-colors">Assign</button>
-    </div>
-  </div>
-</div>
-
 <script>
 // ===== CUSTOM PACKAGES (Seller Panel) =====
 let cpData = [];
@@ -10902,25 +10511,20 @@ function openCpSettingsModal() {
   document.body.insertAdjacentHTML('beforeend', html);
 }
 
-async function openTourSettingsModal() {
+async function openStripeExpirySettingsModal() {
   if (currentAdminRole === 'staff') { showToast('Manager or admin role required', 'error'); return; }
-  if (document.getElementById('tour-settings-modal')) return;
-  const [{ data }, { data: officeSetting }] = await Promise.all([
-    db.from('app_settings').select('value').eq('key', 'stripe_expiry_settings').maybeSingle(),
-    db.from('app_settings').select('value').eq('key', 'office_notification_email').maybeSingle(),
-  ]);
+  if (document.getElementById('stripe-expiry-modal')) return;
+  const { data } = await db.from('app_settings').select('value').eq('key', 'stripe_expiry_settings').maybeSingle();
   let s = { longWindowHours: 24, shortWindowHours: 1 };
   if (data?.value) { try { s = { ...s, ...JSON.parse(data.value) }; } catch(e) {} }
-  const officeEmail = officeSetting?.value || '';
   const html = `
-<div id="tour-settings-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(0,0,0,0.6)" onclick="if(event.target===this)document.getElementById('tour-settings-modal').remove()">
+<div id="stripe-expiry-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(0,0,0,0.6)" onclick="if(event.target===this)document.getElementById('stripe-expiry-modal').remove()">
   <div class="rounded-2xl shadow-2xl w-full max-w-md fade-in" style="background:#1a2332;border:1px solid rgba(255,255,255,0.08)">
     <div class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid rgba(255,255,255,0.07)">
-      <div class="font-bold text-sm" style="color:#f1f5f9">Tour settings</div>
-      <button onclick="document.getElementById('tour-settings-modal').remove()" class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-gray-100 text-gray-400"><i class="fa-solid fa-xmark"></i></button>
+      <div class="font-bold text-sm" style="color:#f1f5f9">Payment link settings</div>
+      <button onclick="document.getElementById('stripe-expiry-modal').remove()" class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-gray-100 text-gray-400"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="px-5 py-4 space-y-3">
-      <p class="text-xs font-semibold" style="color:#94a3b8">Payment link</p>
       <p class="text-xs" style="color:#64748b">Controls how long a guest has to pay a "Payment link" reservation before it auto-cancels. Applies to Create Booking and the partner panel — not Custom Tours.</p>
       <div>
         <label class="text-xs font-semibold mb-1 block" style="color:#64748b">Full window (hours) — used when the tour is at least this many hours away. Max 24 (Stripe's own limit).</label>
@@ -10931,24 +10535,17 @@ async function openTourSettingsModal() {
         <input id="ses-short" type="number" min="0.5" max="24" step="0.5" value="${s.shortWindowHours}" class="w-full text-sm rounded-xl px-3 py-2 focus:outline-none" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);color:#e2e8f0">
       </div>
       <p id="ses-error" class="hidden text-xs text-red-400"></p>
-
-      <p class="text-xs font-semibold mb-1 pt-2 block" style="color:#94a3b8;border-top:1px solid rgba(255,255,255,0.07)">Office notifications</p>
-      <div>
-        <label class="text-xs font-semibold mb-1 block" style="color:#64748b">Office notification email — receives a copy of every new reservation created in Create Booking or the partner panel. Leave blank to disable.</label>
-        <input id="ses-office-email" type="email" value="${escapeHtml(officeEmail)}" placeholder="biuro@thousandmiles.pl" class="w-full text-sm rounded-xl px-3 py-2 focus:outline-none" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);color:#e2e8f0">
-      </div>
-      <p id="ses-office-error" class="hidden text-xs text-red-400"></p>
     </div>
     <div class="flex gap-2 px-5 pb-5 pt-3" style="border-top:1px solid rgba(255,255,255,0.07)">
-      <button onclick="saveTourSettings()" class="flex-1 btn-ol text-sm font-semibold py-2.5 rounded-xl transition-colors">Save</button>
-      <button onclick="document.getElementById('tour-settings-modal').remove()" class="px-4 py-2.5 text-sm rounded-xl transition-colors" style="border:1px solid rgba(255,255,255,0.1);color:#94a3b8">Cancel</button>
+      <button onclick="saveStripeExpirySettings()" class="flex-1 btn-ol text-sm font-semibold py-2.5 rounded-xl transition-colors">Save</button>
+      <button onclick="document.getElementById('stripe-expiry-modal').remove()" class="px-4 py-2.5 text-sm rounded-xl transition-colors" style="border:1px solid rgba(255,255,255,0.1);color:#94a3b8">Cancel</button>
     </div>
   </div>
 </div>`;
   document.body.insertAdjacentHTML('beforeend', html);
 }
 
-async function saveTourSettings() {
+async function saveStripeExpirySettings() {
   if (currentAdminRole === 'staff') { showToast('Manager or admin role required', 'error'); return; }
   const long = parseFloat(document.getElementById('ses-long').value);
   const short = parseFloat(document.getElementById('ses-short').value);
@@ -10957,28 +10554,13 @@ async function saveTourSettings() {
   if (long > 24) { errEl.textContent = "Full window can't exceed 24h — that's Stripe's own limit."; errEl.classList.remove('hidden'); return; }
   if (short > long) { errEl.textContent = "Short window can't be larger than the full window."; errEl.classList.remove('hidden'); return; }
   errEl.classList.add('hidden');
-
-  const officeEmail = document.getElementById('ses-office-email').value.trim();
-  const officeErrEl = document.getElementById('ses-office-error');
-  if (officeEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(officeEmail)) {
-    officeErrEl.textContent = 'Enter a valid email address, or leave blank.'; officeErrEl.classList.remove('hidden'); return;
-  }
-  officeErrEl.classList.add('hidden');
-
   const value = JSON.stringify({ longWindowHours: long, shortWindowHours: short });
   await db.from('app_settings').delete().eq('key', 'stripe_expiry_settings');
   const { error } = await db.from('app_settings').insert({ key: 'stripe_expiry_settings', value });
   if (error) { errEl.textContent = 'Error: ' + error.message; errEl.classList.remove('hidden'); return; }
-
-  await db.from('app_settings').delete().eq('key', 'office_notification_email');
-  if (officeEmail) {
-    const { error: officeError } = await db.from('app_settings').insert({ key: 'office_notification_email', value: officeEmail });
-    if (officeError) { officeErrEl.textContent = 'Error: ' + officeError.message; officeErrEl.classList.remove('hidden'); return; }
-  }
-
-  document.getElementById('tour-settings-modal')?.remove();
-  showToast('Tour settings saved.');
-  logActivity('tour_settings_updated', `Tour settings updated: payment link full ${long}h / short ${short}h, office notification email: ${officeEmail || '(disabled)'}`);
+  document.getElementById('stripe-expiry-modal')?.remove();
+  showToast('Payment link settings saved.');
+  logActivity('stripe_expiry_settings_updated', `Payment link settings updated: full ${long}h, short ${short}h`);
 }
 
 function fmtPln(n) {
@@ -12890,8 +12472,6 @@ async function deleteStaffUser(email) {
 }
 
 function openEditStaffModal(email, firstName, lastName, role, isActive) {
-  if (currentAdminRole === 'manager' && role === 'admin') { showToast('Managers cannot edit admin accounts.', 'error'); return; }
-  document.getElementById('edit-staff-role-admin-opt')?.classList.toggle('hidden', currentAdminRole !== 'admin');
   document.getElementById('edit-staff-email-display').textContent = email;
   document.getElementById('edit-staff-email-hidden').value = email;
   document.getElementById('edit-staff-firstname').value = firstName || '';
@@ -12958,8 +12538,6 @@ async function submitEditStaff() {
   const password = document.getElementById('edit-staff-password').value;
 
   if (password && password.length < 8) { showToast('Password must be at least 8 characters', 'error'); return; }
-  if (currentAdminRole === 'manager' && role === 'admin') { showToast('Managers cannot promote accounts to admin.', 'error'); return; }
-  if (currentAdminRole === 'manager' && _editStaffSnapshot?.role === 'admin') { showToast('Managers cannot edit admin accounts.', 'error'); return; }
 
   const btn = document.getElementById('edit-staff-submit-btn');
   btn.disabled = true;
@@ -13002,7 +12580,6 @@ function openAddStaffModal() {
   document.getElementById('add-staff-lastname').value = '';
   document.getElementById('add-staff-password').value = '';
   document.getElementById('add-staff-role').value = 'staff';
-  document.getElementById('add-staff-role-admin-opt')?.classList.toggle('hidden', currentAdminRole !== 'admin');
   syncFselLabel('add-staff-role');
   const m = document.getElementById('add-staff-modal');
   m.classList.remove('hidden');
@@ -13025,7 +12602,6 @@ async function submitAddStaff() {
   if (!email) { showToast('Email is required', 'error'); return; }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { showToast('Invalid email address', 'error'); return; }
   if (!password || password.length < 8) { showToast('Password must be at least 8 characters', 'error'); return; }
-  if (currentAdminRole === 'manager' && role === 'admin') { showToast('Managers cannot create admin accounts.', 'error'); return; }
 
   const btn = document.getElementById('add-staff-submit-btn');
   btn.disabled = true;
@@ -13191,20 +12767,6 @@ async function deleteSupplier(id) {
 
 let abTours = []; // kept for compat
 const TSA_SLOT_CAP_EXCLUDED_STATUSES = ['cancelled','refund_failed','cancelling'];
-
-// Turns a slot's date + Bokun's raw startTime field into a ms timestamp for cutoff comparisons.
-// startTime is sometimes a short "HH:MM" and sometimes a longer datetime-like string with the time
-// embedded at position 11-16 (same ambiguity already handled by the display code elsewhere).
-// Returns null when no time can be determined — callers must skip cutoff filtering in that case.
-function computeSlotDepartureMs(dateStr, startTimeRaw) {
-  const t = startTimeRaw || '';
-  if (!t || !dateStr) return null;
-  const timePart = t.length > 8 ? t.slice(11, 16) : t.slice(0, 5);
-  if (!/^\d{2}:\d{2}$/.test(timePart)) return null;
-  const ms = new Date(`${dateStr}T${timePart}:00`).getTime();
-  return Number.isNaN(ms) ? null : ms;
-}
-
 async function fetchSlotBookedMap(tourTitle, start, end) {
   const map = new Map();
   const { data: bookedRows } = await db.from('bookings').select('date,start_time_id,pax')
@@ -13276,69 +12838,28 @@ function abComputeBaseTotal(ignoreOverrides) {
   }, 0);
 }
 
-function _abSafePriceKey(key) { return key.replace(/[^a-zA-Z0-9_-]/g, '_'); }
-
 function abRenderPriceOverrideSection() {
   const container = document.getElementById('ab-price-override-rows');
   if (!container) return;
   container.innerHTML = abGetPriceLineItems().map(item => {
     const val = abPriceOverrides[item.key] ?? item.defaultPrice;
-    const pct = item.defaultPrice > 0 ? Math.round((1 - val / item.defaultPrice) * 100) : 0;
-    const safeKey = _abSafePriceKey(item.key);
     const countLabel = (!item.isPackageTotal && item.count > 1) ? ` <span class="text-gray-400">×${item.count}</span>` : '';
     return `<div class="flex items-center justify-between gap-3 py-1">
       <div class="text-sm text-dark">${escapeHtml(item.label)}${countLabel}</div>
       <div class="flex items-center gap-1.5">
-        <span id="ab-ov-orig-${safeKey}" class="text-xs text-gray-400" style="text-decoration:line-through;${pct > 0 ? '' : 'display:none'}">${item.defaultPrice} PLN</span>
-        <input type="number" min="0" step="1" value="${pct}" title="Discount %"
-          id="ab-ov-pct-${safeKey}"
-          oninput="abSetPriceOverridePct('${item.key.replace(/'/g,"\\'")}', ${item.defaultPrice}, this.value)"
-          class="w-12 text-sm text-right border border-gray-200 rounded-lg px-1.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-brand/30">
-        <span class="text-xs text-gray-400">%</span>
         <input type="number" min="0" step="1" value="${val}"
-          id="ab-ov-pln-${safeKey}"
           oninput="abSetPriceOverride('${item.key.replace(/'/g,"\\'")}', this.value)"
-          style="${pct > 0 ? 'color:#E8751A;font-weight:600' : ''}"
-          class="w-16 text-sm text-right border border-gray-200 rounded-lg px-1.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-brand/30">
+          class="w-24 text-sm text-right border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-brand/30">
         <span class="text-xs text-gray-400">PLN</span>
       </div>
     </div>`;
   }).join('');
 }
 
-// Updates the strikethrough "original price" label + orange highlight on the PLN input for one row,
-// after either its % or PLN field changes. Returns the recomputed pct (used to keep the % input in sync).
-function abRefreshPriceOverrideRowVisual(key, defaultPrice, val) {
-  const pct = defaultPrice > 0 ? Math.round((1 - val / defaultPrice) * 100) : 0;
-  const safeKey = _abSafePriceKey(key);
-  const origSpan = document.getElementById(`ab-ov-orig-${safeKey}`);
-  if (origSpan) origSpan.style.display = pct > 0 ? '' : 'none';
-  const plnInput = document.getElementById(`ab-ov-pln-${safeKey}`);
-  if (plnInput) { plnInput.style.color = pct > 0 ? '#E8751A' : ''; plnInput.style.fontWeight = pct > 0 ? '600' : ''; }
-  return pct;
-}
-
 function abSetPriceOverride(key, val) {
   const n = parseFloat(val);
   if (isNaN(n) || n < 0) return;
   abPriceOverrides[key] = n;
-  abUpdateTransportPrice();
-  const item = abGetPriceLineItems().find(i => i.key === key);
-  if (item) {
-    const pct = abRefreshPriceOverrideRowVisual(key, item.defaultPrice, n);
-    const pctInput = document.getElementById(`ab-ov-pct-${_abSafePriceKey(key)}`);
-    if (pctInput) pctInput.value = pct;
-  }
-}
-
-function abSetPriceOverridePct(key, defaultPrice, val) {
-  const pct = parseFloat(val);
-  if (isNaN(pct)) return;
-  const n = Math.max(0, Math.round(defaultPrice * (1 - pct / 100)));
-  abPriceOverrides[key] = n;
-  const plnInput = document.getElementById(`ab-ov-pln-${_abSafePriceKey(key)}`);
-  if (plnInput) plnInput.value = n;
-  abRefreshPriceOverrideRowVisual(key, defaultPrice, n);
   abUpdateTransportPrice();
 }
 const LANGUAGE_KEYWORDS = ['English','Polish','German','French','Spanish','Italian','Czech','Slovak','Hungarian','Russian','Ukrainian','Chinese','Japanese','Korean','Portuguese','Dutch','Swedish','Norwegian','Danish','Hebrew','Arabic','Romanian','Bulgarian','Croatian','Serbian','Turkish'];
@@ -13479,14 +13000,11 @@ async function abLoadTours() {
         allowMeetingPoint: t.allow_meeting_point ?? true,
         requireGuestNames: t.require_guest_names || false,
         maxPax: t.max_pax || null,
-        bookingCutoffHours: t.booking_cutoff_hours || null,
-        slotCapacity: t.slot_capacity || null,
         bokunForceRateId: t.bokun_force_rate_id || null,
         bokunForcePickupPlaceId: t.bokun_force_pickup_place_id || null,
         bokunRequiresDob: t.bokun_require_dob || false,
         pricingType: t.pricing_type || 'per_person',
         pricing: [],
-        hiddenCategoryIds: (t.hidden_category_ids || []).map(String),
         photo: t.photo_url || abGetTourPhoto(t.title),
         durationMins: t.duration_mins || null,
         manualSlots: t.manual_slots || [],
@@ -13505,7 +13023,7 @@ async function abLoadTours() {
           if (_photoUrl) base.photo = _photoUrl;
           base.title = body.title || base.title;
           base.durationMins = body.durationInMinutes || body.durationMins || base.durationMins;
-          base.pricing = (body.pricingCategories || []).filter(c => !base.hiddenCategoryIds.includes(`cat:${c.id}`));
+          base.pricing = body.pricingCategories || [];
           base.description = body.shortDescription || body.description || base.description;
         } catch(e) { /* keep base */ }
       }
@@ -13663,34 +13181,23 @@ async function abFetchAvailabilityForMonth() {
         if (entry.unavailable || entry.soldOut) return;
         const ds = new Date(entry.date).toISOString().slice(0, 10);
         if (!ds) return;
-        if (abCurrentTour.bookingCutoffHours > 0) {
-          const depMs = computeSlotDepartureMs(ds, entry.startTime);
-          if (depMs != null && depMs - Date.now() < abCurrentTour.bookingCutoffHours * 3600000) return;
-        }
         const ov = overrideMap.get(`${ds}|${entry.startTimeId}`);
         if (ov?.disabled) return;
         if (!abAvailability[ds]) abAvailability[ds] = [];
-        const hiddenCatIds = abCurrentTour.hiddenCategoryIds || [];
-        const rates = (entry.rates || [])
-          .filter(r => !hiddenCatIds.includes(`rate:${r.id}`))
-          .map(r => {
-            const priceInfo = (entry.pricesByRate || []).find(p => p.activityRateId === r.id);
-            const cats = (priceInfo?.pricePerCategoryUnit || []).filter(c => !hiddenCatIds.includes(`cat:${c.pricingCategoryId ?? c.id}`));
-            return {
-              id: r.id,
-              title: r.title.trim(),
-              price: cats[0]?.amount,
-              pricesByCategory: cats,
-            };
-          });
+        const rates = (entry.rates || []).map(r => {
+          const priceInfo = (entry.pricesByRate || []).find(p => p.activityRateId === r.id);
+          const cats = priceInfo?.pricePerCategoryUnit || [];
+          return {
+            id: r.id,
+            title: r.title.trim(),
+            price: cats[0]?.amount,
+            pricesByCategory: cats,
+          };
+        });
         let availabilityCount = entry.availabilityCount || 0;
         if (ov?.max_guests != null) {
           const alreadyBooked = bookedMap.get(`${ds}|${entry.startTimeId}`) || 0;
           const remainingUnderCap = Math.max(0, ov.max_guests - alreadyBooked);
-          availabilityCount = Math.min(availabilityCount, remainingUnderCap);
-        } else if (abCurrentTour.slotCapacity != null) {
-          const alreadyBooked = bookedMap.get(`${ds}|${entry.startTimeId}`) || 0;
-          const remainingUnderCap = Math.max(0, abCurrentTour.slotCapacity - alreadyBooked);
           availabilityCount = Math.min(availabilityCount, remainingUnderCap);
         }
         abAvailability[ds].push({
@@ -13877,26 +13384,11 @@ function _abResolveCategoriesToShow(slotCatPrices) {
     ].filter(Boolean);
   }
 
-  // Bokun tour: use pricing categories, filtered to those with PLN config.
-  // Prefer slotCatPrices — the SPECIFICALLY SELECTED rate's own pricesByCategory — since
-  // abCurrentTour.pricing is a tour-wide list across ALL rates and its ids can belong to a
-  // different rate entirely (e.g. "Basic" instead of the actually-selected "Ranger" package),
-  // which Bokun then books under the wrong pricing category even though the guest picked the
-  // right label. Only fall back to abCurrentTour.pricing if the slot has no category data at all.
-  // Note: slotCatPrices only carries id+amount, never a display title/age range — enrich each
-  // with the matching tour-wide entry (same id) for the readable title, falling back to 'Guest'
-  // only if that id genuinely isn't in the tour-wide list either.
-  let allBokunCats = slotCatPrices.length > 0
-    ? slotCatPrices.map(c => {
-        const id = c.pricingCategoryId || c.id;
-        const tourWideMatch = (abCurrentTour?.pricing || []).find(x => x.id === id);
-        return tourWideMatch ? { ...tourWideMatch, id } : { id, title: c.pricingCategoryTitle || 'Guest' };
-      })
-    : (abCurrentTour?.pricing || []).filter(c => !c.internalUseOnly);
-  // Match the tour's configured category order (e.g. Adult, Student, Child) rather than whatever
-  // order this slot's own pricePerCategoryUnit happens to list them in.
-  const _abTourWideOrder = (abCurrentTour?.pricing || []).map(c => c.id);
-  allBokunCats = [...allBokunCats].sort((a, b) => _abTourWideOrder.indexOf(a.id) - _abTourWideOrder.indexOf(b.id));
+  // Bokun tour: use pricing categories, filtered to those with PLN config
+  const allBokunCats = (abCurrentTour?.pricing || []).filter(c => !c.internalUseOnly);
+  if (allBokunCats.length === 0 && slotCatPrices.length > 0) {
+    return slotCatPrices.map(c => ({id: c.pricingCategoryId || c.id, title: c.pricingCategoryTitle || 'Guest'}));
+  }
   if (!commEntry) return allBokunCats;
   return allBokunCats.filter(c => abCategoryPln(commEntry, c.title) != null);
 }
@@ -14253,20 +13745,18 @@ function abUpdateTransportPrice() {
   const commEntry = allCommissions.find(c => c.active && c.tour_config_id === abCurrentTour?.configId && _abNorm(c.title) === _abNorm(rateTitle));
   const transportPln = commEntry?.transport_price_pln || 0;
   const transportSurcharge = pickupVal === 'hotel' ? transportPln * abGuestCount : 0;
-  const standardTotal = abComputeBaseTotal(true) + transportSurcharge;
   const baseTotal = abComputeBaseTotal();
   const total = baseTotal + transportSurcharge;
   const discountedTotal = applyDiscountToTotal(total, abAppliedDiscountPct);
-  const hasDiscount = discountedTotal < standardTotal;
-  const transportNote = transportSurcharge ? ` (incl. ${transportSurcharge} PLN transport)` : '';
-  const codeNote = abAppliedDiscountPct ? ` (−${abAppliedDiscountPct}% ${abAppliedDiscountCode || ''})` : '';
-  const priceHtml = total <= 0 ? '' : (hasDiscount
-    ? `Estimated total: <span style="color:#9ca3af;text-decoration:line-through">${standardTotal} PLN</span> <span style="color:#E8751A;font-weight:600">${discountedTotal} PLN</span>${codeNote}${transportNote}`
-    : `Estimated total: ${total} PLN${transportNote}`);
+  const priceText = total > 0
+    ? (abAppliedDiscountPct
+        ? `Estimated total: ${discountedTotal} PLN (was ${total} PLN, −${abAppliedDiscountPct}% ${abAppliedDiscountCode || ''})`
+        : `Estimated total: ${total} PLN`) + (transportSurcharge ? ` (incl. ${transportSurcharge} PLN transport)` : '')
+    : '';
   const priceRow = document.getElementById('ab-price-row');
-  if (priceRow) priceRow.innerHTML = priceHtml;
+  if (priceRow) priceRow.textContent = priceText;
   const ratesPriceRow = document.getElementById('ab-rates-price-row');
-  if (ratesPriceRow) ratesPriceRow.innerHTML = priceHtml;
+  if (ratesPriceRow) ratesPriceRow.textContent = priceText;
 }
 
 async function abApplyDiscountCode() {
@@ -14453,26 +13943,14 @@ async function abSubmitBooking() {
     try {
       const effectiveRateId = abCurrentTour.bokunForceRateId || abSelectedRate?.id || null;
 
-      const _abGetGuest = (idx) => {
-        const g = abGuests[idx] || abGuests[0] || { firstName, lastName };
-        return [
-          { questionId: 'firstName', values: [g.firstName || firstName] },
-          { questionId: 'lastName',  values: [g.lastName  || lastName]  },
-        ];
-      };
-      // A "package" line's own pricing category — each rate in abRateSelections is a distinct Bokun
-      // rate (not a category within one rate), so passengers built for it must use ITS OWN category,
-      // never a different rate's or the tour-wide first one.
-      let _abGuestIdx = 0;
-      const abBuildPassengersForRate = (rate, count) => {
-        const cat = rate?.pricesByCategory?.[0];
-        const pricingCategoryId = (cat?.pricingCategoryId ?? cat?.id) ?? rate?.id;
-        return Array.from({ length: count }, () => ({
-          pricingCategoryId, groupSize: 1, passengerDetails: _abGetGuest(_abGuestIdx++), answers: [], extras: []
-        }));
-      };
       const abBuildPassengers = () => {
-        const _getGuest = _abGetGuest;
+        const _getGuest = (idx) => {
+          const g = abGuests[idx] || abGuests[0] || { firstName, lastName };
+          return [
+            { questionId: 'firstName', values: [g.firstName || firstName] },
+            { questionId: 'lastName',  values: [g.lastName  || lastName]  },
+          ];
+        };
         if (abCategorySelections.some(c=>c.count>0)) {
           let gIdx = 0;
           return abCategorySelections.filter(c=>c.count>0).flatMap(c =>
@@ -14484,21 +13962,11 @@ async function abSubmitBooking() {
             }))
           );
         }
-        if (_hasRates) {
-          // Combined view across all selected rates — used only for the options/checkout-methods
-          // probe below, which doesn't need to know which specific rate each passenger belongs to.
-          // The actual submit further down sends one activityBookings entry per rate instead.
-          _abGuestIdx = 0;
-          return abRateSelections.filter(r=>r.count>0).flatMap(r => abBuildPassengersForRate(r.rate, r.count));
-        }
-        // Prefer the pricing category tied to the SPECIFICALLY SELECTED rate — abCurrentTour.pricing
-        // is a tour-wide list across ALL rates, so its first entry can belong to a different rate
-        // entirely (e.g. a per-person "Adult" category when a flat "Group Offer / Private Van" rate
-        // was actually selected), which Bokun rejects as an unsupported pricing category for that
-        // rate. Only fall back to abCurrentTour.pricing if no rate-specific category exists at all
-        // (an empty passengers array is rejected by Bokun).
+        // abCurrentTour.pricing comes from the activity-detail endpoint and can be empty for
+        // activities whose categories only show up in the per-slot availability data — fall
+        // back to that before giving up (an empty passengers array is rejected by Bokun).
         const _abFallbackCat = abSelectedRate?.pricesByCategory?.[0] || abSelectedSlot?.rates?.[0]?.pricesByCategory?.[0];
-        const catId = (_abFallbackCat?.pricingCategoryId ?? _abFallbackCat?.id) ?? abCurrentTour.pricing?.[0]?.id;
+        const catId = abCurrentTour.pricing?.[0]?.id ?? (_abFallbackCat?.pricingCategoryId ?? _abFallbackCat?.id);
         return catId != null
           ? Array.from({ length: abGuestCount }, (_, i) => ({
               pricingCategoryId: catId, groupSize: 1,
@@ -14534,7 +14002,6 @@ async function abSubmitBooking() {
         notes
       ].filter(Boolean).join(' | ');
 
-      _abGuestIdx = 0; // reset before the real per-rate passenger build below — abBuildPassengers() above already advanced it once for the options probe
       const submitPayload = {
         source: 'DIRECT_REQUEST',
         checkoutOption: 'CUSTOMER_FULL_PAYMENT',
@@ -14550,25 +14017,18 @@ async function abSubmitBooking() {
             ...(abCurrentTour?.bokunRequiresDob ? [{ questionId: 'dateOfBirth', values: ['1990-01-01'] }] : []),
           ],
           promoCode: 'HOTELBOOKING',
-          // One activityBookings entry per DISTINCT selected rate when booked from the packages cart
-          // (abRateSelections) — a single entry can only carry one rateId, so mixing e.g. "1x Ranger"
-          // + "1x U.S. Army Weapons" into one entry silently drops to whichever rate happens to be
-          // first, which is exactly the "registers as Basic" bug this fixes.
-          activityBookings: (_hasRates
-            ? abRateSelections.filter(r=>r.count>0).map(r => ({ rateId: r.rate.id, passengers: abBuildPassengersForRate(r.rate, r.count) }))
-            : [{ rateId: effectiveRateId, passengers: abBuildPassengers() }]
-          ).map(entry => ({
+          activityBookings: [{
             activityId: parseInt(abCurrentTour.bokunId),
             startTimeId: abSelectedSlot.startTimeId,
-            ...(entry.rateId ? { rateId: entry.rateId } : {}),
+            ...(effectiveRateId ? { rateId: effectiveRateId } : {}),
             date: dateStr,
-            passengers: entry.passengers,
+            passengers: abBuildPassengers(),
             note: bookingNote || undefined,
             answers: [],
             ...(abCurrentTour?.bokunForcePickupPlaceId ? { pickupPlaceId: parseInt(abCurrentTour.bokunForcePickupPlaceId) } : {}),
             pickupAnswers: abCurrentTour?.bokunForcePickupPlaceId ? [] : [{ questionId: 'pickupPlaceDescription', values: [_abPickupDesc] }],
             dropoffAnswers: [],
-          })),
+          }],
         },
       };
       const { data: submitRes } = await invokeEdge('bokun-sync', {
@@ -14578,17 +14038,14 @@ async function abSubmitBooking() {
       const reservedCode = submitBody?.booking?.confirmationCode || submitBody?.confirmationCode;
       if (reservedCode) {
         bokunReservationCode = reservedCode;
-        // Confirm immediately regardless of payment method (matches index.html) — Bokun's own
-        // ~30-min hold on a "Reserved" booking is much shorter than our payment-link window (up to
-        // 24h), so leaving it Reserved risks Bokun releasing the slot before the guest gets to pay.
-        // If the guest never pays, stripe-webhook's checkout.session.expired still cancels it in
-        // Bokun regardless of whether it was Reserved or Confirmed at that point.
-        const { data: confirmRes } = await invokeEdge('bokun-sync', {
-          body: { path: `/checkout.json/confirm-reserved/${reservedCode}`, method: 'POST', payload: { sendNotificationToMainContact: false } }
-        });
-        const confirmBody = confirmRes?.body;
-        bokunConfirmationCode = confirmBody?.booking?.confirmationCode || confirmBody?.confirmationCode || reservedCode;
-        bokunBookingId = confirmBody?.booking?.bookingId || confirmBody?.booking?.id || submitBody?.booking?.bookingId || submitBody?.booking?.id || null;
+        if (abPayment !== 'link') {
+          const { data: confirmRes } = await invokeEdge('bokun-sync', {
+            body: { path: `/checkout.json/confirm-reserved/${reservedCode}`, method: 'POST', payload: { sendNotificationToMainContact: false } }
+          });
+          const confirmBody = confirmRes?.body;
+          bokunConfirmationCode = confirmBody?.booking?.confirmationCode || confirmBody?.confirmationCode || reservedCode;
+          bokunBookingId = confirmBody?.booking?.bookingId || confirmBody?.booking?.id || submitBody?.booking?.bookingId || submitBody?.booking?.id || null;
+        }
       } else {
         console.warn('[abBooking] submit failed — raw Bokun response:', JSON.stringify(submitBody));
         const msgStr = submitBody?.message || '';
@@ -14736,25 +14193,6 @@ async function abSubmitBooking() {
       payment_type: abPayment,
     }}).catch(e => console.warn('[AB] confirmation email failed:', e?.message));
   }
-
-  invokeEdge('send-office-notification', { body: {
-    booking_id: bookingId,
-    bokun_confirmation_code: bokunConfirmationCode || null,
-    bokun_booking_id: bokunBookingId || null,
-    tour_name: tour,
-    date: dateStr,
-    time: timeStr || null,
-    guest_name: guest,
-    extra_guests: additionalGuestsStr ? additionalGuestsStr.split(', ').filter(Boolean) : [],
-    guest_email: email || null,
-    phone: phone || null,
-    pax: abGuestCount,
-    total: insertTotal || null,
-    pickup: _abPickupDesc || null,
-    language: detectedLanguage || null,
-    payment_method: abPayment,
-    package_lines: abPackageLines || null,
-  }}).catch(e => console.warn('[AB] office notification failed:', e?.message));
 }
 
 function abViewVoucher() {
@@ -15470,7 +14908,7 @@ function mbViewVoucher() {
                 </button>
                 <div class="cdrop-list" id="ab-phone-prefix-list" style="width:250px;max-height:260px;display:none">
                   <div style="padding:6px 8px 6px;border-bottom:1px solid rgba(255,255,255,0.07)">
-                    <input id="ab-phone-prefix-search" type="search" placeholder="Search country or code…" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" oninput="filterAbPhonePrefixes(this.value)" style="width:100%;background:rgba(255,255,255,0.07);border:none;outline:none;color:#e2e8f0;font-size:12px;padding:4px 6px;border-radius:6px;">
+                    <input id="ab-phone-prefix-search" type="text" placeholder="Search country or code…" oninput="filterAbPhonePrefixes(this.value)" style="width:100%;background:rgba(255,255,255,0.07);border:none;outline:none;color:#e2e8f0;font-size:12px;padding:4px 6px;border-radius:6px;">
                   </div>
                   <div id="ab-phone-prefix-items" style="max-height:196px;overflow-y:auto;padding:4px"></div>
                 </div>

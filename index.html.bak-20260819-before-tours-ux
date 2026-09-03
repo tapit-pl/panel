@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Thousand Miles – Hotel Booking Panel</title>
-<link rel="icon" type="image/png" href="assets/favicon.png">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -46,40 +45,6 @@ tailwind.config = {
   .calendar-day.unavailable { opacity: 0.35; cursor: not-allowed; }
   .calendar-day.selected { background: #E8751A !important; color: white !important; }
   .tab-btn.active { border-bottom: 3px solid #E8751A; color: #E8751A; }
-  .dpop { position: relative; display: inline-flex; flex-shrink: 0; }
-  .dpop > input[type=hidden] { display: none !important; }
-  .dpop-btn {
-    display: flex; align-items: center; gap: 6px;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    padding: 6px 10px;
-    font-size: 12px;
-    color: #4b5563;
-    background: #fff;
-    cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
-    min-width: 88px;
-    transition: border-color 0.15s;
-    outline: none;
-  }
-  .dpop-btn:hover { border-color: #d1d5db; }
-  .dpop-btn.open { border-color: rgba(232,117,26,0.5); }
-  .dpop-label { flex: 1; }
-  .dpop-panel {
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0;
-    z-index: 10000;
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 14px;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
-    padding: 14px;
-    width: 238px;
-    display: none;
-  }
-  .dpop-panel.open { display: block; }
   .voucher-print { background: linear-gradient(135deg, #E8751A, #C4611A); }
   @media print {
     @page { margin: 0; size: A4; }
@@ -252,10 +217,9 @@ tailwind.config = {
       <button class="tab-btn whitespace-nowrap px-4 py-2.5 text-xs font-medium text-gray-600 hover:text-brand transition-colors" onclick="setTab(this, 'tab-bookings')">My bookings</button>
       <button class="tab-btn whitespace-nowrap px-4 py-2.5 text-xs font-medium text-gray-600 hover:text-brand transition-colors" onclick="setTab(this, 'tab-departures')">Today's departures</button>
       <button class="tab-btn whitespace-nowrap px-4 py-2.5 text-xs font-medium text-gray-600 hover:text-brand transition-colors" onclick="setTab(this, 'tab-updates')">Updates <span id="notif-badge-tab" class="ml-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full hidden"></span></button>
-      <button class="tab-btn whitespace-nowrap px-4 py-2.5 text-xs font-medium text-gray-600 hover:text-brand transition-colors" id="nav-btn-commissions" onclick="setTab(this, 'tab-faq')">Commissions</button>
+      <button class="tab-btn whitespace-nowrap px-4 py-2.5 text-xs font-medium text-gray-600 hover:text-brand transition-colors" onclick="setTab(this, 'tab-faq')">Commissions</button>
       <button class="tab-btn whitespace-nowrap px-4 py-2.5 text-xs font-medium text-gray-600 hover:text-brand transition-colors" onclick="setTab(this, 'tab-tailor')">Tailor made</button>
       <button class="tab-btn whitespace-nowrap px-4 py-2.5 text-xs font-medium text-gray-600 hover:text-brand transition-colors" id="nav-btn-support" onclick="setTab(this, 'tab-support')">Support <span id="support-tab-badge" class="ml-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full hidden"></span></button>
-      <button class="tab-btn whitespace-nowrap px-4 py-2.5 text-xs font-medium text-gray-600 hover:text-brand transition-colors" onclick="setTab(this, 'tab-instructions')">Instructions</button>
     </div>
 
     <!-- TAB: UPDATES -->
@@ -275,7 +239,7 @@ tailwind.config = {
       <div class="flex flex-wrap items-center gap-3 mb-5">
         <div class="relative flex-1 min-w-56">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-          <input id="tour-search" type="search" placeholder="Search tours..." autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" oninput="filterTours()" class="w-full pl-8 pr-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand bg-white">
+          <input id="tour-search" type="text" placeholder="Search tours..." oninput="filterTours()" class="w-full pl-8 pr-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand bg-white">
         </div>
         <div id="tour-cat-filters" class="flex gap-2 flex-wrap">
           <button onclick="filterTourCat(this,'all')" class="tour-cat-btn text-xs px-3 py-2 bg-brand text-white rounded-lg font-medium">All</button>
@@ -326,7 +290,7 @@ tailwind.config = {
       <div class="flex flex-wrap items-center gap-3 mb-4">
         <div class="relative flex-1 min-w-48">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-          <input id="booking-search" type="search" placeholder="Search by guest, tour, phone, #..." autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" oninput="searchBookings()" class="w-full pl-8 pr-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand bg-white">
+          <input id="booking-search" type="text" placeholder="Search by guest, tour, phone, email, #..." oninput="searchBookings()" class="w-full pl-8 pr-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand bg-white">
         </div>
         <div class="flex gap-2 flex-wrap">
           <button onclick="filterBookings('all', this)" class="booking-filter-btn text-xs px-3 py-2 bg-brand text-white rounded-lg font-medium">All</button>
@@ -334,20 +298,6 @@ tailwind.config = {
           <button onclick="filterBookings('pending', this)" class="booking-filter-btn text-xs px-3 py-2 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">Pending</button>
           <button onclick="filterBookings('cancelled', this)" class="booking-filter-btn text-xs px-3 py-2 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">Cancelled</button>
           <button onclick="filterBookings('no_show', this)" class="booking-filter-btn text-xs px-3 py-2 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">No Show</button>
-        </div>
-        <div class="flex items-center gap-1.5">
-          <span class="text-xs text-gray-500 font-medium">Tour date:</span>
-          <div class="dpop"><input type="hidden" id="booking-filter-from"></div>
-          <span class="text-xs text-gray-400">—</span>
-          <div class="dpop"><input type="hidden" id="booking-filter-to"></div>
-          <button onclick="clearBookingDates()" title="Clear tour dates" class="text-xs ml-1 font-bold" style="color:#ef4444;background:none;border:none;cursor:pointer;line-height:1" onmouseover="this.style.color='#b91c1c'" onmouseout="this.style.color='#ef4444'"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        <div class="flex items-center gap-1.5">
-          <span class="text-xs text-gray-500 font-medium">Booking date:</span>
-          <div class="dpop"><input type="hidden" id="booking-filter-created-from"></div>
-          <span class="text-xs text-gray-400">—</span>
-          <div class="dpop"><input type="hidden" id="booking-filter-created-to"></div>
-          <button onclick="clearBookingCreatedDates()" title="Clear booking dates" class="text-xs ml-1 font-bold" style="color:#ef4444;background:none;border:none;cursor:pointer;line-height:1" onmouseover="this.style.color='#b91c1c'" onmouseout="this.style.color='#ef4444'"><i class="fa-solid fa-xmark"></i></button>
         </div>
       </div>
 
@@ -385,7 +335,7 @@ tailwind.config = {
       <div class="flex gap-3 mb-6">
         <div class="relative flex-1">
           <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-          <input id="voucher-search" type="search" placeholder="Type guest last name or booking number (e.g. TM-2026-0847)..." autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" oninput="filterVouchers()" class="w-full pl-11 pr-4 py-3.5 border border-gray-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand bg-white shadow-sm">
+          <input id="voucher-search" type="text" placeholder="Type guest last name or booking number (e.g. TM-2026-0847)..." oninput="filterVouchers()" class="w-full pl-11 pr-4 py-3.5 border border-gray-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand bg-white shadow-sm">
         </div>
         <button onclick="filterVouchers()" class="bg-brand hover:bg-brand-dark text-white px-6 py-3.5 rounded-2xl font-semibold text-sm transition-colors flex items-center gap-2">
           <i class="fa-solid fa-magnifying-glass"></i> Search
@@ -660,17 +610,17 @@ tailwind.config = {
               <label class="block text-xs font-semibold text-gray-500 mb-1.5">Category <span class="text-red-400">*</span></label>
               <select id="st-category" onchange="handleCategoryChange()" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand bg-white">
                 <option value="" disabled selected>Choose category</option>
-                <option value="Booking cancellation/issue">Booking cancellation/issue</option>
+                <option value="Booking issue">Booking issue</option>
+                <option value="Voucher">Voucher</option>
                 <option value="Commission">Commission</option>
                 <option value="Technical">Technical</option>
                 <option value="Other">Other</option>
               </select>
             </div>
-            <!-- Booking reference — shown for Booking cancellation/issue -->
+            <!-- Booking reference — shown for Booking issue & Voucher -->
             <div id="st-booking-ref-wrap" class="hidden">
               <label class="block text-xs font-semibold text-gray-500 mb-1.5">Booking reference <span class="text-gray-400 font-normal">(optional)</span></label>
-              <input id="st-booking-ref" type="text" placeholder="e.g. TM-453335" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-              <div id="st-recent-bookings" class="mt-2 space-y-1.5"></div>
+              <input id="st-booking-ref" type="text" placeholder="Booking reference" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
             </div>
             <!-- Subject -->
             <div>
@@ -759,340 +709,6 @@ tailwind.config = {
       </div>
     </div>
 
-    <!-- TAB: INSTRUCTIONS -->
-    <div id="tab-instructions" class="hidden fade-in">
-      <div class="max-w-3xl">
-
-        <!-- Header -->
-        <div class="flex items-center justify-between mb-6">
-          <div>
-            <h2 class="text-base font-semibold text-dark">Partner Instructions</h2>
-            <p class="text-xs text-gray-400 mt-0.5">Step-by-step guide to using the Thousand Miles partner panel.</p>
-          </div>
-          <div class="w-12 h-12 bg-brand/10 rounded-2xl flex items-center justify-center shrink-0">
-            <i class="fa-solid fa-book-open text-brand text-xl"></i>
-          </div>
-        </div>
-
-        <!-- Navigation pills -->
-        <div class="flex flex-wrap gap-2 mb-8">
-          <a href="#instr-booking" onclick="instrScrollTo('instr-booking')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand/10 text-brand text-xs font-semibold rounded-full cursor-pointer hover:bg-brand/20 transition-colors">
-            <i class="fa-solid fa-calendar-plus text-xs"></i> Creating a booking
-          </a>
-          <a href="#instr-voucher" onclick="instrScrollTo('instr-voucher')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-semibold rounded-full cursor-pointer hover:bg-gray-200 transition-colors">
-            <i class="fa-solid fa-file-pdf text-xs"></i> Downloading a voucher
-          </a>
-          <a href="#instr-cancel" onclick="instrScrollTo('instr-cancel')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-semibold rounded-full cursor-pointer hover:bg-gray-200 transition-colors">
-            <i class="fa-solid fa-ban text-xs"></i> Cancellations
-          </a>
-          <a href="#instr-policy" onclick="instrScrollTo('instr-policy')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-semibold rounded-full cursor-pointer hover:bg-gray-200 transition-colors">
-            <i class="fa-solid fa-shield-halved text-xs"></i> Cancellation policy
-          </a>
-          <a href="#instr-contact" onclick="instrScrollTo('instr-contact')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-semibold rounded-full cursor-pointer hover:bg-gray-200 transition-colors">
-            <i class="fa-solid fa-phone text-xs"></i> Contact
-          </a>
-        </div>
-
-        <!-- SECTION 1: Creating a booking -->
-        <div id="instr-booking" class="mb-10 scroll-mt-4">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-8 h-8 bg-brand rounded-xl flex items-center justify-center shrink-0">
-              <span class="text-white text-xs font-bold">1</span>
-            </div>
-            <h3 class="text-sm font-bold text-dark">Creating a booking</h3>
-          </div>
-
-          <div class="space-y-4">
-
-            <!-- Step 1 -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-              <div class="flex items-start gap-3 mb-3">
-                <div class="w-6 h-6 bg-brand/10 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
-                  <span class="text-brand text-xs font-bold">1</span>
-                </div>
-                <div>
-                  <div class="text-sm font-semibold text-dark mb-0.5">Go to the Tours tab and select a tour</div>
-                  <p class="text-xs text-gray-500 leading-relaxed">On the main screen, tap <strong>Tours</strong> in the top navigation. Browse the available tours and tap the one you want to book.</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Step 2 -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-              <div class="flex items-start gap-3 mb-3">
-                <div class="w-6 h-6 bg-brand/10 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
-                  <span class="text-brand text-xs font-bold">2</span>
-                </div>
-                <div>
-                  <div class="text-sm font-semibold text-dark mb-0.5">Select a date</div>
-                  <p class="text-xs text-gray-500 leading-relaxed">A calendar will appear showing available dates. Tap the date of the tour. Days without availability are greyed out.</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Step 3 -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-              <div class="flex items-start gap-3 mb-3">
-                <div class="w-6 h-6 bg-brand/10 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
-                  <span class="text-brand text-xs font-bold">3</span>
-                </div>
-                <div>
-                  <div class="text-sm font-semibold text-dark mb-0.5">Select a time slot and language (if available)</div>
-                  <p class="text-xs text-gray-500 leading-relaxed">Depending on the tour, you may see one or more time slots. Some tours offer multiple language options — each slot may represent a different departure time or language of the guide. Tap the slot that matches your guest's preference.</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Step 4 -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-              <div class="flex items-start gap-3 mb-3">
-                <div class="w-6 h-6 bg-brand/10 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
-                  <span class="text-brand text-xs font-bold">4</span>
-                </div>
-                <div>
-                  <div class="text-sm font-semibold text-dark mb-0.5">Select the number of guests and categories</div>
-                  <p class="text-xs text-gray-500 leading-relaxed">Use the <strong>+</strong> and <strong>−</strong> buttons to set the number of guests in each available category. Common categories are:</p>
-                  <ul class="mt-2 space-y-1 text-xs text-gray-500">
-                    <li class="flex items-start gap-1.5"><i class="fa-solid fa-circle text-brand/40 text-[6px] mt-1.5 shrink-0"></i><span><strong>Adult</strong> — standard guest</span></li>
-                    <li class="flex items-start gap-1.5"><i class="fa-solid fa-circle text-brand/40 text-[6px] mt-1.5 shrink-0"></i><span><strong>Student</strong> — requires valid student ID</span></li>
-                    <li class="flex items-start gap-1.5"><i class="fa-solid fa-circle text-brand/40 text-[6px] mt-1.5 shrink-0"></i><span><strong>Child / Infant</strong> — age ranges defined per tour</span></li>
-                    <li class="flex items-start gap-1.5"><i class="fa-solid fa-circle text-brand/40 text-[6px] mt-1.5 shrink-0"></i><span><strong>Senior</strong> — may require proof of age</span></li>
-                  </ul>
-                  <p class="text-xs text-gray-400 mt-2 italic">Categories shown depend on the specific tour — not all tours have all categories.</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Step 5 -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-              <div class="flex items-start gap-3">
-                <div class="w-6 h-6 bg-brand/10 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
-                  <span class="text-brand text-xs font-bold">5</span>
-                </div>
-                <div class="w-full">
-                  <div class="text-sm font-semibold text-dark mb-0.5">Fill in guest details</div>
-                  <p class="text-xs text-gray-500 leading-relaxed mb-3">Complete the booking form with the following information:</p>
-
-                  <div class="space-y-2.5">
-                    <div class="flex items-start gap-2.5 p-3 bg-gray-50 rounded-xl">
-                      <i class="fa-solid fa-user text-brand text-xs mt-0.5 shrink-0"></i>
-                      <div>
-                        <div class="text-xs font-semibold text-dark">Full name of the lead guest</div>
-                        <div class="text-xs text-gray-400 mt-0.5">First and last name of the main person in the group.</div>
-                      </div>
-                    </div>
-                    <div class="flex items-start gap-2.5 p-3 bg-gray-50 rounded-xl">
-                      <i class="fa-solid fa-envelope text-brand text-xs mt-0.5 shrink-0"></i>
-                      <div>
-                        <div class="text-xs font-semibold text-dark">Guest email address</div>
-                        <div class="text-xs text-gray-400 mt-0.5">The booking confirmation and voucher will be sent to this address.</div>
-                      </div>
-                    </div>
-                    <div class="flex items-start gap-2.5 p-3 bg-gray-50 rounded-xl">
-                      <i class="fa-solid fa-phone text-brand text-xs mt-0.5 shrink-0"></i>
-                      <div>
-                        <div class="text-xs font-semibold text-dark">Phone number</div>
-                        <div class="text-xs text-gray-400 mt-0.5">Include the country prefix (e.g. +48 for Poland). Used for day-of-tour contact only.</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Payment type -->
-                  <div class="mt-4 mb-1 text-xs font-semibold text-gray-500 uppercase tracking-wide">Payment method</div>
-                  <div class="space-y-2">
-                    <div class="flex items-start gap-2.5 p-3 bg-green-50 border border-green-100 rounded-xl">
-                      <i class="fa-solid fa-building-columns text-green-600 text-xs mt-0.5 shrink-0"></i>
-                      <div>
-                        <div class="text-xs font-semibold text-green-800">Paid at reception</div>
-                        <div class="text-xs text-green-700/70 mt-0.5">Guest has already paid at the hotel / reception. Booking is marked as confirmed and paid.</div>
-                      </div>
-                    </div>
-                    <div class="flex items-start gap-2.5 p-3 bg-orange-50 border border-orange-100 rounded-xl">
-                      <i class="fa-solid fa-car text-orange-500 text-xs mt-0.5 shrink-0"></i>
-                      <div>
-                        <div class="text-xs font-semibold text-orange-800">Pay to driver</div>
-                        <div class="text-xs text-orange-700/70 mt-0.5">Guest will pay cash on the day of the tour directly to the guide or driver.</div>
-                      </div>
-                    </div>
-                    <div class="flex items-start gap-2.5 p-3 bg-blue-50 border border-blue-100 rounded-xl">
-                      <i class="fa-solid fa-link text-blue-500 text-xs mt-0.5 shrink-0"></i>
-                      <div>
-                        <div class="text-xs font-semibold text-blue-800">Online (payment link)</div>
-                        <div class="text-xs text-blue-700/70 mt-0.5">A secure payment link is sent to the guest's email. Booking is confirmed once payment is completed.</div>
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- SECTION 2: Downloading a voucher -->
-        <div id="instr-voucher" class="mb-10 scroll-mt-4">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-8 h-8 bg-gray-700 rounded-xl flex items-center justify-center shrink-0">
-              <span class="text-white text-xs font-bold">2</span>
-            </div>
-            <h3 class="text-sm font-bold text-dark">Downloading a voucher</h3>
-          </div>
-
-          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4">
-            <p class="text-xs text-gray-500 leading-relaxed">A PDF voucher is available in two ways:</p>
-
-            <div class="space-y-3">
-              <div class="flex items-start gap-3 p-4 bg-brand/5 border border-brand/15 rounded-xl">
-                <div class="w-8 h-8 bg-brand/10 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
-                  <i class="fa-solid fa-circle-check text-brand text-sm"></i>
-                </div>
-                <div>
-                  <div class="text-xs font-semibold text-dark mb-1">Option A — right after booking</div>
-                  <p class="text-xs text-gray-500 leading-relaxed">Once the booking is confirmed, a <strong>"Print / Save PDF"</strong> button appears on screen. Tap it to open and download the voucher immediately.</p>
-                </div>
-              </div>
-
-              <div class="flex items-start gap-3 p-4 bg-gray-50 border border-gray-100 rounded-xl">
-                <div class="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
-                  <i class="fa-solid fa-clock-rotate-left text-gray-500 text-sm"></i>
-                </div>
-                <div>
-                  <div class="text-xs font-semibold text-dark mb-1">Option B — from My bookings</div>
-                  <p class="text-xs text-gray-500 leading-relaxed">Go to the <strong>My bookings</strong> tab. Find the booking and tap the <strong>PDF icon</strong> <i class="fa-solid fa-file-pdf text-red-400 text-xs"></i> next to it — the voucher will open in a new window ready to print or save.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- SECTION 3: Cancelling a booking -->
-        <div id="instr-cancel" class="mb-10 scroll-mt-4">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-8 h-8 bg-gray-700 rounded-xl flex items-center justify-center shrink-0">
-              <span class="text-white text-xs font-bold">3</span>
-            </div>
-            <h3 class="text-sm font-bold text-dark">Cancelling a booking</h3>
-          </div>
-
-          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4">
-            <p class="text-xs text-gray-500 leading-relaxed">Partners cannot cancel bookings directly in the panel. To request a cancellation, please contact Thousand Miles via the Support tab.</p>
-
-            <div class="space-y-3">
-              <div class="flex items-start gap-3">
-                <div class="w-6 h-6 bg-gray-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
-                  <span class="text-gray-600 text-xs font-bold">1</span>
-                </div>
-                <div>
-                  <div class="text-xs font-semibold text-dark">Go to the Support tab</div>
-                  <div class="text-xs text-gray-400 mt-0.5">Tap <strong>Support</strong> in the top navigation bar.</div>
-                </div>
-              </div>
-              <div class="flex items-start gap-3">
-                <div class="w-6 h-6 bg-gray-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
-                  <span class="text-gray-600 text-xs font-bold">2</span>
-                </div>
-                <div>
-                  <div class="text-xs font-semibold text-dark">Select category: "Booking cancellation/issue"</div>
-                  <div class="text-xs text-gray-400 mt-0.5">Choose this category from the dropdown.</div>
-                </div>
-              </div>
-              <div class="flex items-start gap-3">
-                <div class="w-6 h-6 bg-gray-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
-                  <span class="text-gray-600 text-xs font-bold">3</span>
-                </div>
-                <div>
-                  <div class="text-xs font-semibold text-dark">Provide the booking reference</div>
-                  <div class="text-xs text-gray-400 mt-0.5">Enter the booking reference number (e.g. <strong>TM-453335</strong>). You can find it in the <strong>My bookings</strong> tab.</div>
-                </div>
-              </div>
-              <div class="flex items-start gap-3">
-                <div class="w-6 h-6 bg-gray-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
-                  <span class="text-gray-600 text-xs font-bold">4</span>
-                </div>
-                <div>
-                  <div class="text-xs font-semibold text-dark">Describe the reason and submit</div>
-                  <div class="text-xs text-gray-400 mt-0.5">Briefly explain why the booking needs to be cancelled. Our team will process the request and confirm via the ticket thread.</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="mt-2">
-              <button onclick="setTab(document.getElementById('nav-btn-support'), 'tab-support')" class="inline-flex items-center gap-2 px-4 py-2 bg-brand hover:bg-brand-dark text-white text-xs font-semibold rounded-xl transition-colors">
-                <i class="fa-solid fa-paper-plane text-xs"></i> Go to Support
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- SECTION 4: Cancellation policy -->
-        <div id="instr-policy" class="mb-10 scroll-mt-4">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-8 h-8 bg-red-500 rounded-xl flex items-center justify-center shrink-0">
-              <span class="text-white text-xs font-bold">4</span>
-            </div>
-            <h3 class="text-sm font-bold text-dark">Cancellation policy</h3>
-          </div>
-
-          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="bg-red-50 border-b border-red-100 px-5 py-3 flex items-center gap-2">
-              <i class="fa-solid fa-triangle-exclamation text-red-500 text-sm"></i>
-              <span class="text-xs font-semibold text-red-700">Please inform your guests of the following policy</span>
-            </div>
-            <div class="p-5 space-y-3">
-              <div class="flex items-start gap-3 p-3 bg-green-50 border border-green-100 rounded-xl">
-                <i class="fa-solid fa-check text-green-600 text-xs mt-0.5 shrink-0"></i>
-                <div class="text-xs text-green-800 leading-relaxed"><strong>Free cancellation</strong> — cancellations made more than <strong>24 hours before</strong> the scheduled start of the tour are fully refundable.</div>
-              </div>
-              <div class="flex items-start gap-3 p-3 bg-red-50 border border-red-100 rounded-xl">
-                <i class="fa-solid fa-xmark text-red-600 text-xs mt-0.5 shrink-0"></i>
-                <div class="text-xs text-red-800 leading-relaxed"><strong>No refund</strong> — cancellations made <strong>less than 24 hours</strong> before the tour start time are charged <strong>100% of the tour price</strong>.</div>
-              </div>
-              <div class="flex items-start gap-3 p-3 bg-red-50 border border-red-100 rounded-xl">
-                <i class="fa-solid fa-xmark text-red-600 text-xs mt-0.5 shrink-0"></i>
-                <div class="text-xs text-red-800 leading-relaxed"><strong>No refund</strong> — bookings made <strong>less than 24 hours</strong> before the tour start cannot be cancelled and require <strong>100% of the price</strong>.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- SECTION 5: Contact -->
-        <div id="instr-contact" class="mb-6 scroll-mt-4">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-8 h-8 bg-brand rounded-xl flex items-center justify-center shrink-0">
-              <span class="text-white text-xs font-bold">5</span>
-            </div>
-            <h3 class="text-sm font-bold text-dark">Contact</h3>
-          </div>
-
-          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-            <p class="text-xs text-gray-500 leading-relaxed mb-4">If you need assistance that cannot be handled through the Support tab, contact us directly:</p>
-            <div class="space-y-3">
-              <div class="flex items-center gap-3 p-3.5 bg-gray-50 rounded-xl">
-                <div class="w-9 h-9 bg-green-50 rounded-xl flex items-center justify-center shrink-0">
-                  <i class="fa-solid fa-phone text-green-600"></i>
-                </div>
-                <div>
-                  <div class="text-xs text-gray-400">Phone · hotline 7:30–21:00</div>
-                  <a href="tel:+48607896523" class="text-sm font-bold text-dark hover:text-brand transition-colors">+48 607 896 523</a>
-                </div>
-              </div>
-              <div class="flex items-center gap-3 p-3.5 bg-gray-50 rounded-xl">
-                <div class="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center shrink-0">
-                  <i class="fa-solid fa-envelope text-blue-500"></i>
-                </div>
-                <div>
-                  <div class="text-xs text-gray-400">Email</div>
-                  <a href="mailto:office@thousandmiles.pl" class="text-sm font-bold text-dark hover:text-brand transition-colors">office@thousandmiles.pl</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
     <!-- TAB: COMMISSIONS -->
     <div id="tab-faq" class="hidden fade-in">
 
@@ -1145,7 +761,7 @@ tailwind.config = {
       <div class="flex flex-wrap gap-3 mb-4 items-center">
         <div class="relative flex-1 min-w-48">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-          <input id="comm-search" type="search" placeholder="Search tours..." autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" oninput="filterCommTable()" class="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand bg-white">
+          <input id="comm-search" type="text" placeholder="Search tours..." oninput="filterCommTable()" class="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand bg-white">
         </div>
         <div class="flex gap-2 flex-wrap">
           <button onclick="filterCommCategory(this,'all')" class="comm-cat-btn active text-xs px-3 py-2 bg-brand text-white rounded-lg font-medium">All</button>
@@ -1168,16 +784,42 @@ tailwind.config = {
         <span class="text-sm font-semibold text-dark">Commission calculator:</span>
         <select id="calc-tour" class="flex-1 min-w-48 px-3 py-2 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand" onchange="calcCommission()">
           <option value="">— select a tour —</option>
+          <option value="60">Shooting 15 boll Band of Brothers (60 pln)</option>
+          <option value="70">Shooting 25 boll Soldier (70 pln)</option>
+          <option value="90">Shooting Army Beginner (90 pln)</option>
+          <option value="100">Shooting 50 bolls Ranger (100 pln)</option>
+          <option value="110">Shooting US/RED Army (110 pln)</option>
+          <option value="120">Shooting 75 bolls Commando (120 pln)</option>
+          <option value="130">Shooting 100 bolls Veteran (130 pln)</option>
+          <option value="80">Zakopane option 1 (80 pln)</option>
+          <option value="100">Zakopane option 2 (100 pln)</option>
+          <option value="110">Zakopane option 3 (110 pln)</option>
+          <option value="90">E-Scooter Food Tasting Tour (90 pln)</option>
+          <option value="100">Auschwitz Guided by MINIVAN (100 pln)</option>
+          <option value="100">Auschwitz & Wieliczka in one day (100 pln)</option>
+          <option value="110">Auschwitz Last Minute (110 pln)</option>
+          <option value="80">Wieliczka with hotel transfer (80 pln)</option>
+          <option value="100">Bochnia Salt Mine (100 pln)</option>
+          <option value="100">Quads 30 min (100 pln)</option>
+          <option value="120">Quads 60 min (120 pln)</option>
+          <option value="120">Snowmobile / Hot Bath (120 pln)</option>
+          <option value="120">Snowmobile / Gubalowka (120 pln)</option>
+          <option value="100">Dunajec Rafting (100 pln)</option>
+          <option value="90">Energylandia (90 pln)</option>
+          <option value="40">ZOO with transfer (40 pln)</option>
+          <option value="30">Airport transfer (30 pln)</option>
+          <option value="50">Rynek Underground Museum (50 pln)</option>
+          <option value="50">Wawel Castle Tour (50 pln)</option>
+          <option value="60">Schindler's Factory Tour (60 pln)</option>
+          <option value="30">Jewish Quarter Tour (30 pln)</option>
+          <option value="30">Jewish Ghetto Tour (30 pln)</option>
+          <option value="50">Plaszow Camp Tour (50 pln)</option>
         </select>
         <div class="flex items-center gap-2">
           <span class="text-sm text-gray-500">×</span>
           <input id="calc-pax" type="number" min="1" max="99" value="2" onchange="calcCommission()" oninput="calcCommission()" class="w-16 px-3 py-2 border border-gray-200 rounded-xl text-sm text-center focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           <span class="text-sm text-gray-500">pax</span>
         </div>
-        <label id="calc-hotel-pickup-wrap" class="hidden items-center gap-1.5 text-sm text-gray-600 cursor-pointer select-none">
-          <input id="calc-hotel-pickup" type="checkbox" onchange="calcCommission()" class="accent-brand">
-          Hotel pickup
-        </label>
         <div class="flex items-center gap-2 bg-white border border-brand rounded-xl px-4 py-2">
           <span class="text-sm text-gray-500">=</span>
           <span id="calc-result" class="text-lg font-bold text-brand">—</span>
@@ -1193,6 +835,7 @@ tailwind.config = {
                 <th class="text-left px-4 py-3 font-semibold cursor-pointer select-none" onclick="sortCommTable(0)">Tour name <i class="fa-solid fa-sort text-white/40 ml-1 text-xs"></i></th>
                 <th class="text-left px-4 py-3 font-semibold cursor-pointer select-none whitespace-nowrap" onclick="sortCommTable(1)">Price <i class="fa-solid fa-sort text-white/40 ml-1 text-xs"></i></th>
                 <th class="text-center px-4 py-3 font-semibold text-brand cursor-pointer select-none" onclick="sortCommTable(2)">Commission <i class="fa-solid fa-sort text-brand/60 ml-1 text-xs"></i></th>
+                <th class="px-4 py-3"></th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100" id="comm-tbody">
@@ -1351,7 +994,7 @@ tailwind.config = {
                   <input type="hidden" id="td-phone-prefix" value="+48">
                   <div id="td-phone-prefix-list" class="hidden absolute z-50 top-full left-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden" style="width:250px">
                     <div class="p-2 border-b border-gray-100">
-                      <input id="td-phone-prefix-search" type="search" placeholder="Search country or code…" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')"
+                      <input id="td-phone-prefix-search" type="text" placeholder="Search country or code…"
                         oninput="filterTdPhonePrefixes(this.value)"
                         class="w-full text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-brand/30">
                     </div>
@@ -1398,17 +1041,6 @@ tailwind.config = {
           </div>
         </div>
 
-        <!-- Discount code -->
-        <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Discount code <span class="text-gray-400 font-normal">(optional)</span></label>
-          <div class="flex gap-2">
-            <input id="td-discount-input" type="text" placeholder="e.g. SUMMER20" maxlength="40" style="text-transform:uppercase"
-              class="flex-1 text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-            <button type="button" onclick="tdApplyDiscountCode()" class="text-sm font-semibold px-4 py-2.5 rounded-xl border-2 border-brand text-brand hover:bg-brand/5 transition-colors">Apply</button>
-          </div>
-          <div id="td-discount-msg" class="text-xs mt-1.5"></div>
-        </div>
-
         <!-- Pick-up point -->
         <div id="td-pickup-section">
           <label class="block text-xs font-semibold text-gray-600 mb-1.5">Pick-up point</label>
@@ -1418,9 +1050,6 @@ tailwind.config = {
               <div class="flex-1 min-w-0">
                 <div class="text-sm font-medium text-dark">Pick-up from Hotel <span id="td-pickup-transport-price" class="text-xs font-normal text-brand hidden"></span></div>
                 <div class="text-xs text-gray-400 td-pickup-hotel-address truncate">—</div>
-                <input id="td-pickup-address" type="text" placeholder="Hotel name or address…" maxlength="200"
-                  class="mt-2 w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
-                  onclick="event.stopPropagation()" style="display:none">
               </div>
             </label>
             <label id="td-pickup-meeting-label" class="flex items-start gap-2.5 cursor-pointer">
@@ -1520,7 +1149,7 @@ tailwind.config = {
       <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
         <div class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">FAQ Quick Links</div>
         <div class="space-y-2">
-          <button id="help-link-commissions" onclick="setTab(document.querySelector('.tab-btn[onclick*=\'tab-faq\']'), 'tab-faq'); closeHelpPanel();" class="w-full flex items-center gap-3 px-3 py-2.5 bg-gray-50 hover:bg-brand-light rounded-xl transition-colors text-left">
+          <button onclick="setTab(document.querySelector('.tab-btn[onclick*=\'tab-faq\']'), 'tab-faq'); closeHelpPanel();" class="w-full flex items-center gap-3 px-3 py-2.5 bg-gray-50 hover:bg-brand-light rounded-xl transition-colors text-left">
             <i class="fa-solid fa-percent text-brand w-4"></i>
             <span class="text-sm text-gray-700">Commission rates &amp; calculator</span>
             <i class="fa-solid fa-chevron-right text-gray-300 text-xs ml-auto"></i>
@@ -1564,13 +1193,9 @@ tailwind.config = {
   </div>
   <!-- Reply form (hidden when ticket closed/resolved) -->
   <div id="tp-reply-wrap" class="border-t border-gray-100 p-4 shrink-0">
-    <textarea id="tp-reply-input" rows="3" placeholder="Write your reply…" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand resize-none mb-2"></textarea>
-    <input type="file" id="tp-attach-input" accept="image/png,image/jpeg,image/webp,image/gif,application/pdf" multiple class="hidden" onchange="tpHandleFiles()">
-    <div id="tp-attach-preview" class="hidden mb-2 space-y-1"></div>
-    <div class="flex items-center justify-between">
-      <button type="button" onclick="document.getElementById('tp-attach-input').click()" class="flex items-center gap-1.5 text-xs text-gray-400 hover:text-brand transition-colors">
-        <i class="fa-solid fa-paperclip"></i> Attach <span class="text-gray-300 hidden sm:inline">(max 3 · 5 MB)</span>
-      </button>
+    <textarea id="tp-reply-input" rows="3" placeholder="Write your reply…" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand resize-none"></textarea>
+    <div class="flex items-center justify-between mt-2">
+      <span class="text-xs text-gray-400">We usually reply within 1–2 business days.</span>
       <button onclick="sendTicketReply()" id="tp-reply-btn" class="flex items-center gap-2 bg-brand hover:bg-brand-dark text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors">
         <i class="fa-solid fa-paper-plane text-xs"></i> Send
       </button>
@@ -1715,17 +1340,8 @@ tailwind.config = {
     try {
       const { data, error } = await db.from('tour_commissions').select('*').eq('active', true).order('sort_order');
       if (!error && data && data.length > 0) {
-        const partnerGroups = currentPartner?.tour_groups || [];
-        let allowedTourConfigIds = null; // null = no restriction (partner has no groups → sees all)
-        if (partnerGroups.length > 0) {
-          const { data: configs } = await db.from('tour_config').select('id, groups');
-          allowedTourConfigIds = new Set(
-            (configs || []).filter(t => (t.groups || []).some(g => partnerGroups.includes(g))).map(t => t.id)
-          );
-        }
         data.forEach(c => {
-          if (allowedTourConfigIds && !allowedTourConfigIds.has(c.tour_config_id)) return;
-          const entry = { pricePln: c.price_pln ?? null, priceStudent: c.price_student ?? null, priceChild: c.price_child ?? null, priceInfant: c.price_infant ?? null, priceSenior: c.price_senior ?? null, commPln: c.commission_pln || 0, transportPricePln: c.transport_price_pln || null, transportCommissionPln: c.transport_commission_pln || null, cat: c.category || '', originalName: c.title, tourConfigId: c.tour_config_id || null };
+          const entry = { pricePln: c.price_pln ?? null, priceStudent: c.price_student ?? null, priceChild: c.price_child ?? null, priceInfant: c.price_infant ?? null, priceSenior: c.price_senior ?? null, commPln: c.commission_pln || 0, transportPricePln: c.transport_price_pln || null, cat: c.category || '', originalName: c.title, tourConfigId: c.tour_config_id || null };
           const key = _normComm(c.title);
           // For name-based map: prefer entry with more configured category prices
           const existing = COMM_MAP[key];
@@ -1783,11 +1399,10 @@ tailwind.config = {
       const rows = commData.filter(c => (c.cat || c.category || '') === cat);
       if (!rows.length) return;
       tbody.insertAdjacentHTML('beforeend',
-        `<tr class="comm-group-row bg-orange-50/50" data-cat="${cat}"><td colspan="3" class="px-4 py-2 text-xs font-bold text-brand uppercase tracking-wide">${CAT_LABELS[cat] || cat}</td></tr>`);
+        `<tr class="comm-group-row bg-orange-50/50" data-cat="${cat}"><td colspan="4" class="px-4 py-2 text-xs font-bold text-brand uppercase tracking-wide">${CAT_LABELS[cat] || cat}</td></tr>`);
       rows.forEach(c => {
         const commVal = c.commPln || c.commission_pln || 0;
         const priceVal = c.pricePln || c.price_pln || 0;
-        const transportCommVal = c.transportCommissionPln || c.transport_commission_pln || 0;
         const isTop = commVal >= 100;
         const name = c.originalName || c.title || '';
         const normName = (name).toLowerCase().replace(/[^a-z0-9]/g,' ').replace(/\s+/g,' ').trim();
@@ -1795,10 +1410,8 @@ tailwind.config = {
           <tr class="comm-row hover:bg-gray-50" data-cat="${cat}" data-name="${normName}" data-comm="${commVal}">
             <td class="px-4 py-3 font-medium">${escapeHtml(name)}</td>
             <td class="px-4 py-3 text-gray-600" data-price="${priceVal}">${priceVal} pln</td>
-            <td class="px-4 py-3 text-center">
-              <span class="font-bold text-brand ${isTop ? 'comm-top-badge' : ''}">${commVal} pln${isTop ? ' <i class="fa-solid fa-star text-xs"></i>' : ''}</span>
-              ${transportCommVal ? `<div class="text-xs text-gray-400 mt-0.5">+${transportCommVal} pln w/ hotel pickup</div>` : ''}
-            </td>
+            <td class="px-4 py-3 text-center"><span class="font-bold text-brand ${isTop ? 'comm-top-badge' : ''}">${commVal} pln${isTop ? ' <i class="fa-solid fa-star text-xs"></i>' : ''}</span></td>
+            <td class="px-4 py-3 text-right"><button data-tour-name="${escapeHtml(name)}" onclick="quickBook(this.dataset.tourName)" class="text-xs px-3 py-1.5 bg-brand text-white rounded-lg hover:bg-brand-dark transition-colors whitespace-nowrap">Book</button></td>
           </tr>`);
       });
     });
@@ -1851,18 +1464,6 @@ tailwind.config = {
     if (!words.length) return null;
     for (const [k, v] of Object.entries(COMM_MAP)) {
       if (words.every(w => k.includes(w))) return v.transportPricePln;
-    }
-    return null;
-  }
-
-  function lookupCommTransportCommissionPln(name) {
-    if (!name || !Object.keys(COMM_MAP).length) return null;
-    const key = _normComm(name);
-    if (COMM_MAP[key]) return COMM_MAP[key].transportCommissionPln;
-    const words = key.split(' ').filter(w => w.length > 2);
-    if (!words.length) return null;
-    for (const [k, v] of Object.entries(COMM_MAP)) {
-      if (words.every(w => k.includes(w))) return v.transportCommissionPln;
     }
     return null;
   }
@@ -1923,7 +1524,6 @@ tailwind.config = {
 
     await buildCommMap();
     renderPartnerCommissionsTab(Object.values(COMM_MAP));
-    renderCalcTourOptions();
 
     if (isInviteOrRecovery) {
       const { data: { session } } = await db.auth.getSession();
@@ -1978,20 +1578,8 @@ tailwind.config = {
     goTo('screen-login');
   }
 
-  function applyCommissionTabVisibility() {
-    const enabled = currentPartner?.commission_enabled !== false;
-    document.getElementById('nav-btn-commissions')?.classList.toggle('hidden', !enabled);
-    document.getElementById('help-link-commissions')?.classList.toggle('hidden', !enabled);
-  }
-
   async function initPartnerDashboard() {
     const p = currentPartner;
-    applyCommissionTabVisibility();
-
-    initDatePicker('booking-filter-from', applyBookingFilters);
-    initDatePicker('booking-filter-to', applyBookingFilters);
-    initDatePicker('booking-filter-created-from', applyBookingFilters);
-    initDatePicker('booking-filter-created-to', applyBookingFilters);
 
     await db.removeAllChannels();
 
@@ -2008,7 +1596,6 @@ tailwind.config = {
           return;
         }
         currentPartner = { ...currentPartner, ...payload.new };
-        applyCommissionTabVisibility();
         bokunProducts = [];
         loadToursFromBokun();
       })
@@ -2051,7 +1638,7 @@ tailwind.config = {
     }
 
     // Reload commission map now that user is authenticated (RLS requires auth token)
-    buildCommMap().then(() => { renderPartnerCommissionsTab(Object.values(COMM_MAP)); renderCalcTourOptions(); });
+    buildCommMap().then(() => renderPartnerCommissionsTab(Object.values(COMM_MAP)));
 
     // Prefetch tours in background (no await — doesn't block dashboard load)
     loadToursFromBokun();
@@ -2262,7 +1849,7 @@ tailwind.config = {
         ? `<div class="w-10 h-10 rounded-xl shrink-0 overflow-hidden"><img src="${escapeHtml(tourPhoto)}" class="w-full h-full object-cover" loading="lazy"></div>`
         : `<div class="w-10 h-10 bg-brand-light rounded-xl flex items-center justify-center shrink-0"><i class="fa-solid fa-mountain-sun text-brand text-sm"></i></div>`;
       return `
-      <div class="booking-row p-4 flex items-center gap-4 hover:bg-gray-50 transition-colors" data-status="${s}" data-start-ts="${b.date ? new Date(b.date).getTime() : 0}" data-created-ts="${b.created_at ? new Date(b.created_at).getTime() : 0}" data-search="${escapeHtml(b.id)} ${escapeHtml((b.guest||'').toLowerCase())} ${escapeHtml((b.tour||'').toLowerCase())} ${escapeHtml(displayId.toLowerCase())} ${escapeHtml((b.phone||'').toLowerCase())} ${escapeHtml((b.email||'').toLowerCase())}">
+      <div class="booking-row p-4 flex items-center gap-4 hover:bg-gray-50 transition-colors" data-status="${s}" data-search="${escapeHtml(b.id)} ${escapeHtml((b.guest||'').toLowerCase())} ${escapeHtml((b.tour||'').toLowerCase())} ${escapeHtml(displayId.toLowerCase())} ${escapeHtml((b.phone||'').toLowerCase())} ${escapeHtml((b.email||'').toLowerCase())}">
         ${thumbHtml}
         <div class="flex-1 min-w-0">
           <div class="text-xs text-gray-400 mb-0.5">${escapeHtml(displayId)}</div>
@@ -2390,7 +1977,6 @@ tailwind.config = {
         : errEl.textContent = 'Incorrect login or password.';
       errEl.classList.remove('hidden');
       document.getElementById('login-password').value = '';
-      db.functions.invoke('log-failed-login', { body: { email, error_message: error.message, user_agent: navigator.userAgent } }).catch(() => {});
       return;
     }
 
@@ -2407,13 +1993,6 @@ tailwind.config = {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(screen).classList.add('active');
     window.scrollTo(0, 0);
-  }
-
-  function instrScrollTo(id) {
-    setTimeout(() => {
-      const el = document.getElementById(id);
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 50);
   }
 
   function setTab(btn, tabId) {
@@ -2559,7 +2138,7 @@ tailwind.config = {
     for (const entry of TOUR_PHOTOS) {
       if (entry.kw.some(k => n.includes(k))) return entry.url;
     }
-    return 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNTAwIiB2aWV3Qm94PSIwIDAgODAwIDUwMCI+PHJlY3Qgd2lkdGg9IjgwMCIgaGVpZ2h0PSI1MDAiIGZpbGw9IiMxYTIzMzIiLz48aW1hZ2UgeD0iMTUyIiB5PSIxNjkiIHdpZHRoPSI0OTYiIGhlaWdodD0iMTYzIiBocmVmPSJkYXRhOmltYWdlL3BuZztiYXNlNjQsaVZCT1J3MEtHZ29BQUFBTlNVaEVVZ0FBQStnQUFBRklDQVlBQUFERElOUWpBQUFBQ1hCSVdYTUFBQXNUQUFBTEV3RUFtcHdZQUFBZ0FFbEVRVlI0bk94ZFo3Z1VSZFl1RlRPbU5XZlhnRnp1dmMzbDVsQTFKQlVWVEdCWUJUR0NvaGd3b1F3NVk4NDVycnFycmpubnVPcWFjYzFyenNnWVVGQkJ4UG1lMDFNTjdYd1RPbFIxbmU0NVA5N25FbWRPVmIxZFhXK2R4REpwaXhIaVBRZmZqN1ZZZGtvMU8zV3ZWclpodldCQ2NBTE5BWEVBQndjbUNjSG5DOEVYQzhGL0VZSXZFSUxmSndUZldRamVYUWkrS2dJYkNUUUh4QUhpQUhHQU9FQWNJQTRRQndTT09UQXVMZ2trMEUwL0JBU2FBMDBjZUZ3SW5pMkQvd3JCNjRtRHhFSGlBSEdBT0VBY0lBNFFCNGdEeEFFUzZBbTVJQ0FQT2ozTXRLR2o0c0RxUXZEWkhzUzVHLzhSZ3ZkRFlEdUI1b0E0UUJ3Z0RoQUhpQVBFQWVLQU1EY0h4c1VsZ1FRNmJZSzBDU2FNQS8veEtjN2RlRU9HdnBzZUE0SG1nRGhBSENBT0VBZUlBOFFCNG9BZ2dVNkNuVHpvdEJIUXl5RE9ITGdwaERoMzR3d0VZeUhRSEJBSGlBUEVBZUlBY1lBNFFCd1EwYzRCQ2VJRWVQRXB4SjAyRG5wNW9PREFRRVhpM01FblFuQUx3YmdJTkFmRUFlSUFjWUE0UUJ3Z0RoQUhCQWwwNDhJM0xpQ0JUaHNHdlRTTWMyQVRJZmc4eFFMZHdTeGFYK1ByUzZBNUlBNFFCNGdEeEFIaUFIR0FSVEVIeHNVbGdRUTZQZXkwNFNlQUE0OXFFdWNPUGhhQzF5RVlKNEhtZ0RoQUhDQU9FQWVJQThRQjRvQWdnVTVDbmp6b3RCSFF5d0FyQjhackZ1ZHVuSTFndkFTYUErSUFjWUE0UUJ3Z0RoQUhpQU5Denh5UThFMkFGNTlDM0dtRG9KZUVNUTcwakZDY08vaFNDTjVPYTA3UFBYR0FPRUFjSUE0UUI0Z0R4QUdldURrd0xpNEpKTkFyQ05WQzhIMkY0SHNKd2YrS3dCNUN1RGxZVFFqK3FRR0I3dUFLV2tQaU1IR0FPRUFjSUE0UUI0Z0R4QUdlcURrZ2daeUFTd0x5b01jQ054UVFXUGNKd1RkR1lCc2gyQnpjWWxDY0E3NFNncTlFNjBmOEpRNFFCNGdEeEFIaUFIR0FPTUFUTXdmR3hTV0JCSG9GNEo0eVFtc2dBaHNKL3ViZ0ZNUGlISEFpclJ2eGxqaEFIQ0FPRUFlSUE4U0JHSEtnc3hCOHVCRDhkQ0g0dWZKY3RSNEN1eGdHa0VCT3dDVUJlZEJSWTBNaCtLOGV4TlowQkxZU3ZNMkJRQ0RPUHhTQ2Q2STFJODRTQjRnRHhBSGlBSEdBT0JBekR2UVdnaThxY0xaWklnVHZRR0NmY1JnWGx3UVM2QlVnMEJkNkZGMFhJYkEzS29DNFhGMEl2bzRRZkNNaCtHWkM4QzJFNEZzSndldUY0UDJFNEhzSXdmY1JndTh0TjNOb005WlZDTDZ0ek9IZlJzN3ZjaEhiL2o4RUF2MW9CR3RJb0RrZ0RoQUhpQVBFQWVJQWNjQVBCd1o3T09OTXF2UTVKWUdjZ0VzQzhxQ2p4Z1llUGVnT2JrUmdjekdzSWdUL2l4QjhVeUY0RHhtYWY1d1FQQzBFUDBjSWZwM010UWY4VXdqK0x5SDQzVUx3SjRYZ2J3ckIzNWVBbnQ1ZkNNRXpRdkFmNWZ3c0ZvTC9FVUNvTHBTZjk0WVEvRDlDOEdlRjRDL0llYnhXQ0g2OUMyRFgzNFhnRndyQkp3akJUeEtDbnl3RXIvRXhCMU1RaUhNWTd3b0krRUNnT1NBT0VBZUlBOFFCNGdCeHdDc0g2bnljZFg2V1o2N2xLM0Yrall0TEFnbjBoR1BqSW1FOHBmQ205Q2Fyc21FTjZaa0c3M01YNllHdUZZTDNFWUlQRW9JZkxnUS9RWXBXQ0xXZktRUy9WQWgrbXhEOFVTbDQzeEdDZnlNRVh4QlFTR01IRkh6YnVzdzg3b3JBVHNCUkNIaE5vRGtnRGhBSGlBUEVBZUlBY2NBUEIrNExjT2I1VHA1Vks0cHJKSkFUY0VsQUhuVFVBSS96L0FBYjBtTHBmUjR0TjZZZGhPQmNlbnNodkh0ekNmaDFOeUY0aXhCOFQvbnZMNUdGNlY0VWduOGtCUDhKZ2FpTUMvb1ZXY2YxaGVEZklyRHZUUVNjSnRBY0VBZUlBOFFCNGdCeGdEamdod05EUXA1L1pzc1V5SXJnblhGeFNTQ0JYZ0Y0VDROUSt5T2hubXpUK0U2RzhPZXY0WU1JYkFQc2k0RFBCSm9ENGdCeGdEaEFIQ0FPRUFlOGNtQk5JZmdjUmVlZ2UyWGRva1R6andSeUFpNEp5SU9PSG5jaUVIWUU3M1B3ZE43NmpVRXlmMDhnNERLQjVvQTRRQndnRGhBSGlBUEVBVDhjbU9hcTBxN3FUSFJ1a3ZQVGpZdExBZ24wQ3NEcENNUWR3ZDhjakpkcnR4ZWl1Uk1JdUV5Z09TQU9FQWVJQThRQjRnQnh3Q3NIbHBmRmJYV2NpejRYZ20rZnhMVWdnWnlBU3dMeW9LUEhZUWpFSGNGL3FEdFVxUDhVeWR4ZGo0REhCSm9ENGdCeGdEaEFIQ0FPRUFmOGNHQmtCR2VrTTVLMkpzYkZKWUVFZWdXZ0hvSEFJOFIzRGhaN3FEQlBvRGtnRGhBSGlBUEVBZUlBY1FBVEI3cEZlRmI2SWtsRjVFZ2dKK0NTZ0R6b3NjQkhDSVFlSVo1emtFYkFYd0xOQVhHQU9FQWNJQTRRQjRnRGZqaHdqWUV6MHpWQzhFNXhYeWZqNHBKQUFyMUNNQXVCMENQRWJ3N2VRc0JkQXMwQmNZQTRRQndnRGhBSGlBTitPTENsRUh5Um9iUFRVM0ZmS3hMSUNiZ2tJQTk2TEFBaHl0UVd6YnpnalJ2NkkrQXVnZWFBT0VBY0lBNFFCNGdEeEFFL0hMamU4UGxwVXB6WHk3aTRKSkJBcnlDY2owRHdFZUl6QnpjZzRDeUI1b0E0UUJ3Z0RoQUhpQVBFQVQ4YzZJWGdEUFdPRUh5VnVLNGJDZVFFWEJLUUJ6MDIyQTdCaGtXSXh4ejhKQVRmQ0FGbkNUUUh4QUhpQUhHQU9FQWNJQTc0NGNBakNNNVJXU0Y0WTF6WHpiaTRKSkJBcnpDUUY5MzhoaDBISEltQXF3U2FBK0lBY1lBNFFCd2dEaEFIL0hDZ040SXpWRmFpT2E1clJ3STVBWmNFNUVHUEZib2oyTEFJeStaZ2lSRDhMa1Q5emdFUEkrQXBnZWFBT0VBY0lBNFFCNGdEeEFHL0hIZ1F3VGtxS3dUL1JnaStlbHpYejdpNEpKQkFyMERjaUdEanFuUzhKQVEvVHE2SFFHQ1B1K2Y1ZGdnNFNxQTVJQTRRQjRnRHhBSGlBSEhBRHdlR0lUaEhaVjN0MW1MTFh4TElDYmdrSUE5NjdGQ0RZT09xTkN3UWd0OHVCRDlJQ0w2ZWF5MDJFSUovaDhBK0I2TVE4Sk5BYzBBY0lBNFFCNGdEeEFIaWdGOE92STdnSEpWTmdyUER1TGdra0VDdlVOeURZQU5MT2lDODZVS1pEN1Zpa1hWNEZJR2REaTVGd0VzQ3pRRnhnRGhBSENBT0VBZUlBMzQ1Y0FpQ2MxUldDRDVQQ040ajd1dEhBamtCbHdUa1FZOGx1c29iUHRNYldkTHdrUkQ4WWlGNHlzTWFYSUhBWGdjTGhlRGJJT0FsZ2VhQU9FQWNJQTRRQjRnRHhBRS9IRmhYQ21QVFo2blpRdkMxa3JCMnhzVWxnUVI2QlFORG44aTR0aUI3WEFoK25xeDIzbDhJM2xNSXZxV1B1VDhId1RqY29LcnQ1cDlIQXMwQmNZQTRRQndnRGhBSC9ITmdGSUp6MUlOSjRpNEo1QVJjRXBBSFBkWklJZGpVTU9OM0lmaWJzckFldkFBNmhPQXJoNXp6a1FqRzVjYS9FUENRUUhOQUhDQU9FQWVJQThRQjRvQmZEblJDMEFubi9LU3RtM0Z4U1NDQmJ2b2hRSUN0aGVBZkloQ0tHUEN1RVB6dlF2QmpwVmQ4SGNWejNRWEJHTjJZTHdUZkNBRUhDVFFIeEFIaUFIR0FPRUFjSUE3NDVjRHhoczlSZHlSeHpVZ2dKK0NTZ0R6b2lRR0kwaDhRaU1hb01FY1d5NXNnQkI4Z0JOOHdnamwrQ2NHNDNSaU9nSGNFbWdQaUFIR0FPRUFjSUE0UUIveHlBR3JuTERGY3YrZXZTVnczNCtLU1FBTGQ5RU9BRE1zTHdYY1FncDhwQkg5ZUNQNExBaEdwSTA5b0F3TnpleE9Dc2J0eERnSytFV2dPaUFQRUFlSUFjWUE0UUJ3SXdvRkxESitqams3cXVwRkFUc0FsQVhuUUU0M1ZoZUFOUXZEOWhPQW5DY0hQRUlKZkpRUy9SUWgrcnhTNzBDcnNLU0g0MHhLUHlaQ2ZLNFhnNXdyQlR4ZUNUeFdDLzBNSS9pVUNZZHJMd0R5T1FUQnVONTVHd0MwQ3pRRnhnRGhBSENBT0VBZUlBMEU0VUd2NEhQVlNrdGZOdUxna2tFQTMvUkJVR0lZWTNsQ2ZOVERtSFJFSWNqZStvN3h6NDg4QmdlYUFPRUFjSUE0UUI0Z0R3VGx3citHelZKOGs4NWNFY2dJdUNjaURidjVCaWhFZU5yeWhIaEh4ZU5jV2duK05RSlM3c1NNQ0hoQm9Eb2dEeEFIaUFIR0FPRUFjQ01LQmRzUG5xR3VUdm03R3hTV0JCTHJwaDZDQ3NKUGhEZlZoQTJPK0hZRWdkK01VQkR3ZzBCd1FCNGdEeEFIaUFIR0FPQkNVQTY4WVBFZk5xNFFvUkJMSUNiZ2tJQSs2K1FjcEpualFzRGpkdDhKYWYrVGpSZ1FjSU5BY0VBZUlBOFFCNGdCeGdEZ1FsQU9EREorbFJsVEMyaGtYbHdRUzZLWWZnZ3FCNlR6c3o0WGduU0ljYnlNQ1FWNHh4VXdJTkFmRUFlSUFjWUE0UUJ5b0NBN01ObmlXK2plQzhVY0NFc2dKdUNRZ0Q3cjVCeWtHZU55d1FKMFc0VmhYRUlLL2cwQ1VPOGhFMU9PZFFITkFIQ0FPRUFlSUE4UUI0b0F1RGh4bCtEelZWQ2xyYTF4Y0VraWdtMzRJS2dDbXc1RUFWUkdPOTJvRTQ2MllTcU1FbWdQaUFIR0FPRUFjSUE0a25nTVFCZm1ad2JQVTZRam1JREtRUUU3QUpRRjUwTTAvU01oaDJwdDhSWVJqSFlwQWtMc3hBY0g2RTJnT2lBUEVBZUlBY1lBNFFCd0l3NEZoQnM5U0h3dkJWNnFrOVRNdUxna2swRTAvQkFsSGY4TUM5VmNoK0tZUmpYVWJJZmhDQktMY3dlc0kxcDlBYzBBY0lBNFFCNGdEeEFIaVFCZ09iRzc0ZkxWbnBhMGZDZVFFWEJLUUI5MzhnNFFZTnhzV3FWTWpIT3R6Q0VTNUczc2hXSDhDelFGeGdEaEFIQ0FPRUFlSUEyRTRjTGJCczlUTmxiaDJ4c1VsZ1FTNjZZY2d3ZWh0V0tCK0x3UmZKNkt4emtJZ3lOMmdsbXJtK1UrZ09TQU9FQWVJQThRQjRrQTREcXdqejNNbXpsSS9TKzk5eGEwaENlUUVYQktRQjkzOGc0UVVMeGtXcWVNaUd1ZXVDQVI1Zmt1NU5SQ3NQNEhtZ0RoQUhDQU9FQWVJQThTQk1CeVlZUEE4TmJKUzE4NjR1Q1NRUURmOUVDUVVXeHNXcVhPRTRKMGpHT2ZhOHJ1eWlOQVh3Zm9UYUE2SUE4UUI0Z0J4Z0RoQUhBakRnVzJGNEw4WU9rczlWOGxyUndJNUFaY0U1RUUzL3lBaHhCRERJdldFaU1aNUJ3SkI3c2FaQ05hZVFITkFIQ0FPRUFlSUE4UUI0a0FZRHF3cEl3Sk5uYWNHVlBMNkdSZVhCQkxvcGgrQ2hPSnVnNXZxUjBMd0ZTSVk0eWdFZ3R5TmQ0WGd5eUZZZXdMTkFYR0FPRUFjSUE0UUI0Z0RZVGh3aHNIejFGT1Z2bllra0JOd1NVQWVkUE1QRWpMc2JWaW9EbzlnakUwSUJIaysraUZZZXdMTkFYR0FPRUFjSUE0UUI0Z0RZVGl3bWVHMmFvMlZ2bjdHeFNXQkJMcnBoeUNCdU5YZ3BqbzdndkV0THdSL0c0RWdkK01xQk90T29Ea2dEaEFIaUFQRUFlSUFjU0FzQjY0eGVKNmFXY25yMXp2RldVc0hDZlJFWEJDUUI5MzhBNFVJQXcwTDFVRVJqUEV5QklMY2pYZUU0Q3NqV0hzQ3pRRnhnRGhBSENBT0VBZUlBMkU0c0xQQjg5U0hRdkFWSzNYOVVvS3p4ZzdPR3RwSW9Cc1gxeVRRelQ4UUNjTzdCamZXSnlJWTMyQUVndHlOQlVMd2JSQ3NPNEhtZ0RoQUhDQU9FQWVJQThTQk1CeFlTUWorZ2NFejFSNlZ2SDQ5VTV5dGFLWFllUWMwVTRpN2FYRk5BdDM4QTVFZzdKM3c5bUpiRzg2SktvUzlFYXc3Z2VhQU9FQWNJQTRRQjRnRHhJR3dISmhrOER4MVU2V0h0cTlmTDlpZ3Z1MHNPNldhQkxwcGNVMEMzZnhEa1NETU5yaXgzaHZCK0o1RklNamR1QUhCbWhOb0RvZ0R4QUhpQUhHQU9FQWNDTXVCN1ExSEkyNWF5V3ZZM01IWmVqMEVlLzZZSGl3N2d3UzZjWEZOQXQzOFE1RVE3R3RZclBiU1BMNFpDQVM1R3o4S3dUZEFzTzRFbWdQaUFIR0FPRUFjSUE0UUI4Snk0QjZEWjZxakt0MTd2cnlWWXRQMmFXSFptZFcyTmpRdUxnbmg1NENLeEpsL3VCREFwSGY1SWMxajJ3V0JJS2VYaVhtT0UyZ09pQVBFQWVJQWNZQTRvSjREZ3d5ZXA1NnVaRTZuVXB4dDF5VHNYLzh3MW1KL1RLNWhjOGVRUUUvRUJRRUpkRjdwR0daWXJQYlhPTGIxaE9EZklCRGtianlQWU0wSk5BZkVBZUlBY1lBNFFCd2dEb1Rsd09aQzhGOE5ucWtxdXVkNWgrQnN1ZG9VdSszd1JwYWRWY1htak1scE8rUGlra0FDM2ZURGtRQzhZWEJqL1UrQ2U3b1hBMGV3NWdTYUErSUFjWUE0UUJ3Z0RoQUh3bkxnWHdiUFUyZFZldFgyOVhvSWRrVC9OcGFkV3MxK0hMZE1FNUpBVHNBbEFYblFLeG9tdzVLeU12ZGQxOWdPUXlERzZXVmludU1FbWdQaUFIR0FPRUFjSUE2bzUwQmZnK2VwejRYZ3ExVnl6L1A2dGx4NCszc24xN0hzdEdyMmpmU2VrMEJISUs1Sm9KdC9TR0tPTncxdXJxOW9ITmRXUXZCZkVBaHlOMTVDc040RW1nUGlBSEdBT0VBY0lBNFFCMVJ3NEZXRFo2b0RLcjB3SEt0TnNiTVBhTFlMdzgzTjA0VEd4U1dCUE9pbUg1SVk0MmpEZ25XSXhyRTlpRUNRNTZNYXdab1RhQTZJQThRQjRnQnhnRGhBSEFqTGdWTU5ucWNlclBUUTlpMGFCZHV4WndmN2VVSXRXenlwaGdSNkVpOEVLTVM5SXJHeURBOHl0Ym0rclhGc0l4R0k4WHlNUUxEbUJKb0Q0Z0J4Z0RoQUhDQU9FQWZDY3FEUjhKbXFycExYc0oxenRrYWRZQThjMFdCN3o1M0NjT1JCUnlDcVNhQ2JmMEJpanZHR04xZGRQU3UzRllJdlJpREkzYmdad1hvVGFBNklBOFFCNGdCeGdEaEFISWg3ZW1URkY0WmJwNGRnUiszV3lyTFRxKzNXYW9VMG9YRnhTU0FQT20yMnZqZldqWVhnUHh2Y1hMOFFncStrYWQwZVFTREkzZmhhQ0w0bWNaUU9oY1FCNGdCeGdEaEFIQ0FPSklBRFV3MmVxYjRTZ25kR01BZk1WR0c0dWxiT3VqUUo5czVKZFhibGRuZGhPQkxvQ2JzWW9CRDNpc09GaGtYcmFFM2pPZ2FCSU0vSHJnaldtMEJ6UUJ3Z0RoQUhpQVBFQWVKQVdBN1VHajVUSFY3cHVlZWRyUlNidG0rTEhkcGVTdHNaRjVjRUV1aW1INWlZd1RLOHVYNmxxUzNHTmdoRDI4OUVzTjRFbWdQaUFIR0FPRUFjSUE0UUIxUnc0RzZEWjZybktua05VNm1jNTd5TmM5dXgrbnVCd25BazBCTjJNVUFlOUlyQzdZWkY2NG1heHZVQUFrSHV4c3NJMXBwQWMwQWNJQTRRQjRnRHhBSGlnQW9PN0d2NFhOVzdrdGN4SlRoYnJVNnc2dzl1c3IzbnhVTGJ5WU9PUUZpVFFEZi93TVFNdXhqZVhEK1gxZU5WajJzRUFrR2VqMW9FNjAySTN4eXNLdHNmbmk4RVA1VHFGeGhmRHdMTkFYR0FPRUFjRUh4RklmaUhCczlVMTFkNmFQdUc5WUlON052T3NsT3EyWUx4NVRXZ2NYRkpJQSs2NlFjblJualJzR2c5VE1PWU5oT0NMMEFneU4wNEZzRmFFK0k1QjAva2NlazNJZmpGa3VlbWJTUFFIQkFIaUFQRWdjcmt3QVVHejFTUXZyZ1ZnamxncGdCaDdTRFFIenVxM3E3Y1hzNTdUZ0k5SVJjRUZPSmVFUmhtYUdOZEluKytwMmxjdHlFUTVHN2NnMkN0Q2ZHY2czUEtjT3NTVFJFb2hHam1BQTZZdThrMG4ybEM4TWxDOEVueUoveitCQ0g0SUNFNEY0SnZMZ1JmZ2RhR3VFa2NJQTRnNEVDNzRYUFZOQVJ6d0V5aGR5b1gyajRTMnFyTnFMWTFteGR0WjF4Y0VraWdtMzU0WW9DVlpYaDUwdnFlSDRCQWtMc3hUd2krSVlMMXJtU2VkNVpGQ09Gbkp3UTJlY1dSSGpuMnMweFZNVzB2b2ZRY3JDMEVyeE9DN3k4RXYxRUkva25BZ3BvUHlaNi9nNFhnNjlPOEUrK0lBOFFCQXh4NHhlQzU2cHRLYnFzbUJHZjFiWnhWTlF2MjFvbWwyNnFSUUUvZ3BRQjUwQk9QOFlhRjYyd05ZMXBMQ0Q0WGdTaDNZMThFYTEwSmdMVnZFSUx2TFZ2cmdlZjUzMEx3YitVbENmeWNMd1QvVkFoK3YvUlFOaUt3VzZWMzRod0VkaFArZi8yQUliSmdwWTZPRW44SXdaOFdncWVGNE52Uy9CUC9pQVBFZ1FnNFlMcDk3VEdWbm52ZXFWYXc2ZEJXYlZZVm0rdFJuSk1ISFlHNEpvRnUvZ0ZDam8ybDE4M2tCcnVIaG5GZGprQ1F1M0VGZ3JWT0VwWVRnbTh2QkQ5UUNINjhFSHlLRVB3T0lmamJRdkJGQWRmb015SDRxY2h1NDFjUDZGMEZQQ2JueWZRWUtoMGdsczhWZ3Y4YThaN3psQkM4QnNINHcySVZJWGdQV2FFWnd2dDdDc0ZiaGVDYnlrdVBOZVJQMDNZU2FBNHFqUU9yR282K2ZCUEJIRENUVmR1N3QzSlcweUxZUjZmVTJjWGhTclZWSTRHT1FGQ1RRRGYvNE1RSUZ4b1dyZzlxR05OT2hzZVVqL2RqRms2TkVaQnYyMVY2eGFGYTYvZWE2eUtNUnpCbUpndkFoUm5MLzRUZ0d5QVlSNldHc1lkZHYwckx6OXhlcG5PY0xnUy9Td2orVVlsbmZiSDh1eC9sVDJoZCthZ1EvRkloK0hCNThkc2tMMGhXUWpBMkFzMUIwamh3bHVHOWJkOUs5NTUzdGxMczBnT2JXWGFtUCs4NWVkQVJpR3Z5b0p0L2lCQ2pCc0hoc1YzRHVONUVNQzQzVWdqV09xN1lRUWgrc3d4TmozcmR2cFlIZkZOamIxRTBqdmt5MzluMFdsWVMwcHJDMklQaUZWbDdnU0VEUktzTWxCZkYvL01SeXU5My9HL0o5b1NiSWhnemdlWWdDUnlvTnJ5blBZRmdEcGhKNzNtWFpzSDZwRGo3YVp6RkZrK3M4ZVU5SjRHT1FGeVRRRGYvSUNIR1B3MXRyTTRCNjA0Tlk1cUk0RERzeGhRRTZ4dzNiQ0VFbnlvRmNoWUJqak0wRDZvdm1uWkRzTFpKUjE5WjJ5Q0xFRzhocWZJUE5TSU9sYm40djRYby9KR1AzMHY4blJzZlNzL2ZtZ2ptZ2tCelVJNEQ4TXgyazhVL2g4cUNrRkJjOG04eTJ1UVVtWWNOZjc2akVQeXZFYzNwUlliM3N6NlZYcm1kMWFUWUZVT2JXSGFtOThKd0pOQVJpR29TNk9ZZklPVG9NTFNwL3V6eUxMVW1NQ0xBaldjUnJIT2NzS2NRL0VrRTYxWUlzeUtlaXpNMWphT2lDK3BveExheWhXSVdPZTQzT0VmTk1qMUYxOWlXRkJEb2Y1VHd1UDhpdy84clhhZ0xlYkVOYS9PQ3JNWHhrYXg5OGFIa3pEK0U0R2RJVVZnbEJGOFJnZDFKQm9qc3NVTHdGMlVLaDk5bjRTUFpIZUlZNmVsV2JWOHZ3L3ZZN1FqV2lKbENLc1haVm8yQzdkNm5uZjB5M21JTEo5UUcwbnpHeFNVaC9CeFFGZmRFNG41REcrdHo4dWZMR3NiMG9PR1hSdjdCc0N1Q2RjN1A0KzZFckhEWUd0SURrRUd3WnVVd01TR1haMmNqV1BjazRSUUUzUFNERVJFWGVJTncveThNalhXSjlLeVgremVISStCUjFEZ3VSS2VUZVZMTVh5MEVQMVlJM2liZkw2YkhGSGY4VGRhc1VmMGNmQ0FFSHljOThTcnN2TXZ3SHRhQVlLMllTYXhkSjlnRFJ6YXc3S3h1YkU0QTd6a0o5SVJjRUpCQVR4eDJOYlNwenBkaGxsa1pDcXB5VEFjYmZtRkUwZGM5U0VUQkNIbUltaTM3aFg0bHE2NUN2dWZ6c3ZMNTN3d1ZnN291WUQ2cFNld2R3ZHk4Rk1FNEt0b0RvUWliU1E5WE5tYjRMS0pRZDNqUGZJZGd2Rjd4UW9Ya3FMZks5NERxK1FOUDc4a0l4aGMzckN5TGtrYlY1ZUZqdVU1QmExSWNZdmc1dlFUQm1qR1R1ZWRiTmdnMnRGODdXeks1eHM0L0Q2cnRqSXRMQWdsMDB3OFVRamhlYkZNWXE4RUxPOGZ3bU55NDIyQkxybjJFNEg4UGNBQjdXVmFkanNMTzdnaldLQ2ptYWc2SkhSZHg0YkRWRWV4SGNRUzAvRnFJZ0k4WXF4OHZoOERERmdZbkllQ1hybEQyMXlLWXYzY3I1S0pEbFdQQjFENEMzenNtUUxxQzZTSzhmU3E5Y2p1clRiSExEb1RjODZwQXVlY2swQk4wT1VBZTlFUmhQOE9iNndjYVF1SE9OendtTjM2U3ZlV2pYRk1vSG5OYmlQN2ZEcDdYYk9meU1vOHhHM05NMG5pQWpub3NVSWh2R3dUN1VweHdFZ0lPQnNXSDB0TjV0YWE1Z1g3bDN5SVlaMWpjZ1lCbnF0ZWxYS2kvU3NDRitWOFFqQnNyb0h2TjZ3aDQ3Z2oxVXozYVBjV3dyUThqV0R0bU12ZDh1eWJCZXZYc3NGdXFMWnhRRTByYkdSZVhCQkxvcGg4cVpJamlCcjBVRHRJUXJwZEZoQU1qV3NkMXBWQU1ta01ZZGV1UzFwamttWHU5WkZJOVA2dkt3ajRteHZPN0xPQmxlbS9Dams0eUREb2JZeXlRUDkvWE1ELzlFSXhQSlc1RHdEbFY3d29URVdaWFJmQThiaS9ibVBhV2VmQmQ1WGd4MVZuSnh5VUl1RjBJR1ZrRnZ0UWxqMmtiQllMMVl5YXhaZy9CN2hqV0dMaHlPd24waEYwTWtBYzlNUmhxZUhQVjRhRjlDc0ZMdzhFL0kxakRMWVhnTjJnZXh5akZOazlBc0RhcW9hcllqdW1XaHc0V2E2cjI2d2ZieVZaQjB5VEhIeEtDUHlZRXYxbTJ4VHBScG5EVUd3ak5oOVpnYnlQZ25VcWh2cTdDK1RrSXdaaDBZSnpoWjBJRjdqTFlzV1Y5eFdQWlZMNmY3aWh4T2IxSXRqcDhWdTRqa0ZJM0FJRkh2MDRJL2lVQ1RnZTlXTG5Sc0YwM0kzaVdtTW5jODgwYkJEdXdYenZMVHFsbTg4ZUgxM2JHeFNXQkJMcnBCd3NSM2pDOHdmWlRQQjdUeFVyYytFYnpBUUR5bnErTmFDeXFDb2o5SlFFZXgySVlxWEJ0UnlBWUQrQTk2WldLY2svYVJMYXc4OXZ6SGdvcS9VY0lmcTdjVjNUYXZiSEx2aWpEaEhYaVI0VTFKMDVBTUI2ZDJEYmlaMElsSmhtZXUyYUZGMEFxaW1mK1crNjNuU05laCtNUjhOZ1Azc2c3enpRZ3NLbmljODg3MWFiWVB3NXBZdGxaNFhMUFNhQW42SEtBUE9pSndNRUpDeGRjQzFsaHVFRWExKzYwQXYxOWRlSkpCVFpEbGY3ZkVLeUxManlrc05KK0ZoSDJqSEJQbXFpNFE4UlYwa3VsMHNhMVpkWGpiTUtneW9OK0dZS3g2TVlWRVQ0VFNSTG44TTdhUXNFNEx0ZGcyKy95YzZNb1puY1dBZzRIelUxdk1OeVcxOEV6Q0o0blpoSlZ6WUwxNjlYTzVxYUQ5ejBuZ1k1QVVKTkFOLzh3SWNTN2hqZllWc1hqdVFEQkMweDNydDFBUTVjUTc0UzBPd21GNE1vQndpZzNWTERHcnlBWWl3Tm9lYmQxUlB1UnpqU05WMlhoUkJWMlBvTmdYWFRnV3dWcEFsRkY5R1FScEg5c0Z0RnprUlJ4RHJoVHdUZ2VpY0JPNkhxeW5xWjF1QmpCT29UQkhIa1piZHFPL1JBOFU4d1Vla1BsOXBvVXUzQ0lPdTg1d0xpNEpKQUgzZlREaFFBakRXK3VOeW9lVHoyQ0Y0YUR6eldFeTNWejlZczNBUWpuWFNtQTNSc2lhTUVTSmRwQ3J2TjVDTWFnV3JTVnd3WVJwdHE4RjdLbzBHTUkxa1FYWGtsUTU0d29zSmZtNTBJbERrY3dYOW1RTlMzV00xRHpZWUxpM3VaUElGaURKT0ExQk04VU01bDdYdE1pV0VzSFp4K1Byck43bjZ2U3RTU1FFM0JKUUNIdXNjWXFVa1NhMmx3L0NTajJTZ0hEamE2RDNSV1BiU3lDTWIwZXdPNHVRdkR2RWRnZUpmWVBzYzU3SUxBL0grOXEzb3YybE43SXFNYzFLNEN0TnlGWUQ1MTRQTVE2SmozbnZCRE8xdnhzcU1JT0NPWUtrQTR4aGwwTXBrZjlVMUZhak9tSXhTUmhJSUxuaXBuc2U3NmlsV0xYSEpUem5zOVI1RDBuZ1k1QVhKTkE1NVdPTVlZMzF4bUt4ek1Fd1F2RHdaVUt4MVdMcUVyMExUNXQzMFlXbmNwV0dJYUhxSi9ndHloYUZEZ3F3YTJGL1BTdXJ3UUJlbm5BZFp5SndIWVQwTlYrVWlWcWtCUXgvRytJTVp5SndQNnhJZGZoUlFSalNBckNYQ1Ftd252ZXBVbXd2ajA3Mkx4eEZsczBVWjMzbkFRNkFuRk5BcjJpQVMxTzVobmVZQnNWaDQyWmpBWnc0MHVGb2UzWWNyYjlpSmxOTmZSaVZ3RzRNRGhkQ1A0L2pkOHhKdUI2L3gzQi9PVGplazE3ME5xSTh1emJQZGpiaXNET0tMQnZqRU9uVGUzM3FpUEJWR0piQk85NkJ6MEQyTCthYkl1V1JZQTNRNnpENHdqc1R4SlUxUktKc2ZkY3NLdkJlNjZnN3prSmRBU0NtZ1M2K1FjTENVeFhENzFCOFhpbUlIaGhxS3gydmJ3US9Ha0VZd2w2ZUY5RENQNFJBbnZkK0VFSWZwTEx4bmVSUlljTVFqQkgrWml0YWY5cGxOWFZzMGh3WEF5OVg4L0ljT0VEWkMwUlZaRXFUblZtcitpRllDNU00bmZFaGVLMlFKUmVkR25BNkRFczlqdTFPRllMTUk1ekVOaWVKS2pvSmhOcmRHMFdiS2RlZXJ6bjVFRkhJSzdKZzE2eDJGWldaVGE1d1ZvS3g3TWRndkU0dUZaUmIrVVBFSXlsRUx5MHFscEpDcnNzRWl3cDR0SFc2VUUvemVlYXJ5b0UveFRCWE9YUFc1V0cvV2QvQkdQemU2RXlGWUdORG02U2UxNitqZU1WZkRhSW9UVjlSc2xnRWxDbXNJM0I5M2t4ckk3b1BmSjlnR3JvZXlPd094OVFKMk1UbitQWUY0SGRTWVBPMXJVc0xuM1ByeGlxdG5JN0NYUUVvcG9FT3E5MFhKZXcxbU8zSW5oaE9HMUgxbEZRaFg0QmdyRVU4MENYOHg2c2dNelRlTGZNNnk1azY4c2F2M2Rvekt1MloyWFlzdXE5NXhRRTQvSmJ1R3BiUXdYczhuRnZHWEZRbytBN0x2U3hscDAxWDNMRkNkc2JlcGNYdzRxeXBXQVdDVWI2dFA5VUJEWVh3dnMreDFGbHNLaGRVdkV5Z3VlTG1hN2MzdERHMmVaL0taNEFBQ0FBU1VSQlZLZWp1N00vRkZadUo0R09RRlNUUUs5b3RDRFlZTHNvSE04QUJPTlJVYm1ieVp5cUxHTDgyOE1ZbmtKZ1oxWWVpc3Jkc3V2MDh2ZnlzZTdOQ09Zckh4ZG8ySHN3RnhFcmxZTittV0hiZnZhWWJ3bVJLMStGL0s3ZGZLem5YUWpXRFF0VXZ0UENBdHNscWQrMmZSY2dzTGtZVHZVeGp0VVFwbmtsQVFNUVBHUE1kTzY1N1QzWGtIdnV3TGk0SklTZkEycXpGanZjbTdDRC8reVlWamZQeHlFSXhsQU9NOHVNNFRZRU5nS2Vsd1hJeXMzNXg1cSsvdytmT2FuWWVtby9yR0hmd1h6b3ZybUUzVHNadHUwbG55SG5uNFQ0cnU5OGhDR2ZobURkc0FCVERqcEVOYnlCWUU3YzZKMlFGb1pQKzF5TEJ4SFluRFE4aU9BWlkwWXJ0emZuS3JmL09NNWl2MDJzWVhNMWFWa1N5QW00SkNDQkhpdVk5dEQrS25NV1ZZM25PQVF2RE1mRHRXa0N3Mzd6MFJ5RElqaG5lcHp6elRTMkhYckh4OW9QUlRCbmJud284K0ZWN2pzWElSaFhNWHhkSWkxbEJibVdwbXc3M2VjOGJ4UXluTmJyczlNZHdicUZ3UU5DOE5GQzhENXlINENvc2xtR0tudXJ4RWFJT3BrRXVaQTM3VHdvaGJteTgwMmNXc0lGQlJTYnZFWmVEbWFSSVlYZ09XTW12ZWVzSnBXcjNLNHA5NXdFT2dKaFRRSzlJdkc4NGMxMXFzS3hyQzl6b3JNSWNHU0ljY1RsUmY1c2lURU1SMkFmWUxDUGVlK20wWTdiZmJRRy9BekJ2RG1BUE91dWl2Y2NMQmMzeGNaYlU4TDJndzNhNWlmVTNFSHZDQW9DcmhUVHZQUDNoT0NIQ2NFM0tERzJpelZmYk9qRVgyV0Y4U3dpZkNFTDFjWGQyN3hFMW9ieHVoWUhJTERaNzZYczdkSlJ3RjB0QXpkQmxqOS9CNExuakpsQ0tzWFpGbzJDRGV6YnpoWk5yR1cvVHFqVnF1Mk1pMHNDZWRBckNFTU1iNjdmbGlqV0ZRU1hJSGhoQUI2TmNiRStQeml3eUJqYUVOaTJTTnJoWis1MzFtalBOSTgyVEVRd2QyRkZJZE1nZUtMQ0htWHMvNStoYXRkQksrZUhLYXgxamNmdnVBWEJ1dmt0RXRua2NXejlBbncrUk9Gc3FmaTU4UXZneTA4STVqb2ZleWVrbHNHdVB0ZGlDUUtieStHZk1wZDcyeGhkTkxRYWZzNllhYXhSSjlpRFJ6YXc3S3h1Ykk1Rzd6a0o5SVJjRUZDSWUyeWdzK2V6RjV5aXVJZHlGZ2xLZWVCSzRRNEV0bnZGVzBYR3NIckluRmRWZ3FiVUlhTVlqdFpvMHhBUDM3K3BUUG5JSXNISml2ZWJxeENNcVJUT1F0amk2ZE15SGw2ZEVWSTdlZmo4TVFqV3pTdG0reERtWWRKTkxsSDgzUGdGdEN2OUJjRjhGeEtBY2M4NTk5SitNUitZS3VjWEFxUWIvU1dHaFV2L1lmZzVZNlp6enpkdEVPekFmdTEyMVhiSVA5ZXQ3WXlMU3dJSjlBckJLTU9iNitldXNDa1ZlQURCQ3dNd0lhRDk5eUd3WFVVSS8wMEk4b2VENXY3ZnJkR3VnVEh6TGw5WFllTDhEY1A4S05hK0tVeUUwZUFRMzMyUGg4L0g1azNURVFxN2Y0REx3WFVWUHp0KzBFTkdEMldSNFFlUEYwM1hJTEMxWE5GRVAyMVR6MGRnY3pFOEl3VGYyT000TmtPWUx1RW54U0NSV0tlSFlQY09iMkRabVhwenowbWdKK2h5Z0R6bzZMRU9nczMyT0lYakdZVGdaVkhLcTF3T0R5T3czUS9lTFRLT3d3emI5VTBJY2I2QzV0enYzY3Q4ZngyQ2RYV0wxZVVVUHA5WEloaFRtSlpxVEJZUGk5S2UveWxJLzNrOVJNZUJiV1BRbWxOVnA0bHllTUZnMUlrZjFDRVY1NENEUE5oL0tRSTd5K0hFbUxaN3pjY1JQc2F4aGhEOEF3UTJ1MUh4bGR1M2F4S3NYNjljNWZhZk5lZWVrMEJISUt4Sm9GY016a0JRZ0dRRmhlTjVHOEVMSXl2ekZmM2EvaVFDdTFVY3RyWTBIRllKVldhM0RzRWhuUVhpdkxRVndwUnoyVVBoczJtNlg3Z1hYSXpNcy9lSng1QlRYZWthNVFxY2dZZDREb0oxSzRlRlF2QWRGSEI0d3hLOXEzOTE1WG8vcnZDNThZc2FPZDRzUXR6cXdmNXpFZGhaRGkvNVdBOW9nL2dsQXBzTFhhNXY0Wk5ienlLd094OTdHWHpXR0lid2RzZzl2eFlxdDgvUTEvZWNCRG9DUVUwQ3ZhTFFKV2EzdCtWd01vTHhBSzcxYWZkeVNGOTg1ZkFxMG5ZNHBkcTltVzdQQng3SnpXUGlhUmxWSWEzVTNDSEo1ZnA4MTBjY1F1djNBRjBJNzJnVUlVOGdXRGN2NGJ1ZFBjN1ZDakxVZHhzNTk2c1YrWGZEaE9BdkY3bUl2RjN4cGJNZlZDUE5PWGN1VGpjcFkzK1lkblpSZ3Z0WUU0eWgrbGNGNE5iZkVkanQ5UXhTTWFodEZheUZjL2JWYVJiN2ZWSk5aTnJPdUxna2hKOERDbkZIalJzTmI2NHErOE51Z0tSUzdUenBaZkZxOTRwSSs0a0diVnMyekxCTmd4Unc2U25OaGI1S2hZeS9pR0Jkc3pMVlF0V3plUjZDOGFocWgzZ2FvbEI3THpoRVkxN24yUWpXckJ6Tzl6aFBNTmZYeTM3Vzd2Ly9rMHp6dUVGZUpuZkorMytkNWYrRnVoTENjTVYycUJDK0FNR2NGOFBCWmV5ZmlzQkdMempYeDVyc2djRGVmQndXZ0Z0cEJIYjc2UjVUTVgzUFY3RlNiUG8rTFN3N3ZWdWttcFVFY2dJdUNVaWdvMFZId2piWEN4Q01KeXZEU2IzYXZLb1EvTDhJYkZaVlNHc2pJZmg4Z3phTlZ0UXZXS2VORHltdUVxMERpMEttQ0xoeEpvTHhlUFd5bXI2OFVYM1JGS1k3UjdsQ2h2c2dXRE1WdFUzV2xSWGQvWHJ0Z25ibnFGUnhmbHNaKzhjaHNORUxJUCs2azhjMTZZUXNYL3VIZ0NsTEF4SFlYZ2ovUmZEY01aT29hODNobzFPNnMreVVhamFYQkxwNTBSc25rRUJIQzlQRnlGNVIzRW9taXdBditpeTJFalQwRkd2dStUOE4ybk9ESWk3cERHOHY1MzE1RDhHNmV2VWtlMEZjd2xVQkRSN0YzTThSMkhLaG92ay9JZUQzSDE3bWM3ZEFMZ1lCdTNpWW41MEtlTXpkbDFUbDhyZ3ZWL2dPQzRPdVNLTEhpbUcrdkx6Rm5wcm1CZjE5ck1zTUJQYTZ6MXRyQnF6SHNoaUIvYW9pQVJMbFBlOVVtMkl6OW0xaDJablJpbk9BY1hGSklJR2VVR0FJdTlwUDRYaitoV0E4WG5zRk81WHpNZDJzcTBoTjJDTWhOK2szRy9LTTZ1eTc3Z2QzSzVySG1Rakc0aFZUUEk0cEZWRWUvTm9LNW45dCtWazZDaTQ5aldETlN1VTUxeWhvQzdkRUNQNjdoKzk3UXVIZUV3VGJ5REZuWXhyYVBoS0JmVjV4ZVF5ZEJsNmlGMHBGK0wyUHdQNUNtRzM0dVdPbUM4TkI3bm4zVnM0K0dWMFh1ZmVjQkhwQ0xnaklnNDRTcnhyZVhKOVNPSllvRHMxZThFOGZ1ZktmSXJCWGRXcUNxV2lBMzJWNHB3b3ViUlpCaUg2M0F0KzdncXpXYlhwZHZ5L2o2ZktLNlFqR29xTWE4NmdJN0RsVkVaZUR0SUliRVBPTGw0ODg5dGZlWGhaclZQVzlGeWw4bi9uQnBpVWlBT0xRYy81UUJQWjV4YWNsQ2dZV3d1MEliQTdMemZzUjJCOW1yMHEwOTN5NTJoUzcvTUJtMjNzZVZlVjJFdWdJUkRVSjlFVERkQkd2ckJUVlNRblZkMFRpMWg0RjRGY0k3RlV0YUtJc25CV2twNjVYSEs3WjFpK0xWSGVPUXZoRjFhNW1Hb0p4K0VHZGo3R2RFaU92a0I4UDNqY2V2YzY3SWxpdllvQ0s2cXQ0R01QNkpkcWtoVUdid3JYemdyV0U0QjhqbVBkU21DOHZFUXJaUHdTQmZicEMyNE5janVuQTFJUVc5Z3dhRVpBSXBGS2NiZDRnMk1DKzdXenh4RnEyY0VKdDVONXpnSEZ4U1FnL0IrUkJSd1U0d0h3ZXN4WmtjVGd3VHZSZ0t3ajRieEhZcWxyRXJXOHd4UElheGMvSFhRYnk1S0dLLzJjSTF2VXNCZk0zR2NFNC9HQ3N6L0hwenBVZG9walBEM3I0emdkbEtLdVgvUHNNZ2pVcmhNZDh6TW1kbW13NFcvSGFsY0tLTVNrdVdpeEhlRGdDMi96Z1lwL3I4eWdDbThORTRveEFZSCtZN2hLSlJvZmdiUDE2d1I0WjBjQ3lNNnZZSEFQZWN4TG9DYmtnSUlHT0NoTU5iNndMRmZYMWRmQU1ncGNGaENhdjVDR2tFbnVlWU5BSzVPTU4yZktSUjQrWlYvUXdsSXM1RW9uM01lejhUVUl3RGwwRkhhTm9LeGJFbm5KWVhnaCtTWkh2ZTh2bmhjQXRDTmFzRU83eU1ZYTdZMUwwdEJSV1JaQ2lGcWFXUmREQ2hhYndnYndROGJvK0F4RFlmR0lJZnZXT0thOHFKdmQ4NjBiQjl1emJ6aFpPckdIeng1dlRkc2JGSllFRWVvS3d1UkQ4VjhPYjYzaUY0OWtMd2N2Q1MyOVhLNkxLejFHZ3FjQmg4VXZrQmZrd1hWNXRWZUI3TVJUaHFhNHdjUTVvRGpET216VGFjN0xHdlg5RDJTcnBFQm1xV3l6c3VCaitobUM5Q3VGZlBzYWd1OFBFMnhyWHo4R1dNYXBmc24yTVc2bTUwZGZuR2tYVmhyRVlUZ25CcjAwQ0ZwYU04M3MvbG4zUHJ4amF4TEl6b2k4TVJ3STlZUmNENUVGSGc4c01iNnlRNTloWjRYaWVSL0N5ZUxxTWpZMUM4TjhRMkttcjJJeXBVTGp6RlQ4YkswZHc4SDBFYVQySW8wTE8zUlFFWS9DTDZRZ3IvRnNJM2hHRkFLMlo1aUJZczN6YzVHTU1WMGRnajI2QnZyUEhxdkpZdXlKZ0xpNm9LbTFoUU13ZElDOGdtUE5TZUJiQmZtZ1VWUzI1M1BONTR5emJnMjVTMnhrWGx3UVM2QWxCTFlMTmRhYkM4UXhFTUo1eXhlNDZFTmluQ25Oa1VhTDhNWnJJZy94VWNXaDdGTDNQaTRVZHZoN3pZanVuSStDbVg3d1ZZcngvajFGNHV5cGNpbUROd3RReGlhb0Y1ek1hMStBc0JIUHVGZitUcVJWdSt5OUFZSmRmZk82eE5vTWJUeGkwOS9TUUhMc0t3WnpyRE4xUEJOYW9FMnc2OUQyZllhWnlPd24waEYwTWtBZmQvRU90T1RTekZKd2JmeWlPdGw3Q3ZPZWxDcFR0Z01BK2xkZ2ZVZC96Z1JxZWo1Y2pzRHUvdmRxK2h0YzBJd3QvQloyekN4SHdNZ2o2aEJqekdacHNlaFRCTzZJUStpSllyM3hjZ0RSdi9oZ044OStncWVKOGxFVkVyME5nVXhBTTlibFdPOFNrUDNzaEhJdGd2azI5KzJNVjNyNmlsV0tuNzlmTXN0T3JqV3M3NHdZUVNLQW5BQjBHeGJsVE1YNVl3bkxQZjVQNWdJWHMyMDFoaTVyRkNNYjZZSkZ4M291c3AyNVE3RzZvQ052VGh0ZDF6eEJ6ZGowQ1hnYkJlU0c1TWhwQkZmSW9NUnZCbXJseG9RL2JveFNHQzJRM0MxWHp2cEdNYnNuR0RQa0YrKzVCWUZOVWhjaDBGaUFzaFFkQ2NxMFhndm4yV293M1B6S2pvbERYeGxsZEsyZHZuVmpIL3Boc05yeWRCSHBDTGdqSWcyNzh3WDdBMEliNnM4SUswWmlFVFZZV3hTcGsyejRLMHdFT1FURE9yS3h1bmovT0drU0ZoOElpaXBZNEp5QTdGRjBTWXI3dVI4REpJUGpRWnpYbVF0aEprMjFQR241SG1HZ3BwN1BWbGE1VWhISVhCMUI0OE5BUWM5NUZ0bUxNeGhUTy9yd2lraWkzb0pmdmhZcDVsa0t6SVZ2ZmxmVlRndkp0QThTdEUvTXhHc0dlYUx3NDNOUjlXdXpXYWlhTHc1RkFSekQ1Sk5BVGdWME1iYVlMWEJ2LzdnckgweC9CaStMVEltM1ZEbFJjZU80OHhFVnlaaG13WlZwTVEzaWh0ZUJtRVZlVUxvWDNRd2hWTDMyMXNXSm5CWHo1aThaMmlTcWpqTUppQ3dRZFA5eTRDa2todjJMWU5pOTY2bk5ac1J4QzFGY29ZZXY2TWpRYUxueGZRekRQWVREUkpmcmlGcFlmTmxYaEdrTVhDVjBUNE96d1dnTm5kUVQ3b2pIVVMrLzVCeWZYc2V3VXM5WGJTYUFqbUh3UzZJbkF2dzF0cUYvSjhPd1hFeElOVUM0MzdRaEZudzF6dG83OHpGOFF2QlRYS0REV2xlWDZSbWtMdEhKYlRjUHpFY1hCNm9xODc5elc4THJ1RUhDdXJqUnNONWFxLzVkRklISk1BNU1YOTBZZmR0OW9PQ2UrVzRHLy8xNTZrKytTbHdkM3lGWmNIeUJKWVZKWndiNkx2SnpQeGhRUEJiek1XbUxBMW4xRFB1TnhLdHczQnNHZWFOaDdMdGo0UWEwc094T0hPQWNZTjRBUWZnNG94TjNZZzcyZm9jMTBnZXpGQ2I4K1FPRjRPSUlYeFZNRjdEcEJRd0dyd1FqR2VrU1JkVGpjZ0MxSGEzZyt0amZVYjN1NndUVTlKK0JjbWJRNUxONFJnaStua0RlNkNzVTVPTXZnT3dORCtvVWJkL3F3ZTdJQit4WkxnZWJ1TjQ4cDhpQXF3QnpVSTdBamJLVFRYMlBTWnZMY2tNLzRZUWptMjA4dEhwWDFIV0tITnM3WjFvMkNQWGRNUGN0T0k0Rk93cHc4NkVtQWlSWllUbDdVZFJyYXpwZ0lYY3lIeUxOcG5LYVdiYmNiSHVlL0VZWEZ2UjNqOWxFdjVIMW5KeUg0WndhZnl5QkZkazQxek1XdzZJaGgwYzBYaXJRMVRITFVWVDZlOEdIekRFTTJYcHFnR2cxaHZNNFRFTmhoSXNWa1ZRUFJaR0ZyK3BqS2x3K0tLdzN0Z3lpUUVweHRYQy9ZRWYzYjdkRDJIOGJpMGFmR0RTQ1FCejJtVUJWeUhWUUlMSkg1ZUVucTQzNjl4anpzZzEyZnU3RVFmQkZTVWROaXdKYURORHdmVzdoYUFPckU4WnJxRkFUQmpnSG1hWVJoSG9iRkZFVjhhWmZoNTRmSTN4OGFrVWN2YURwQ1VCeU1ZTTBBcjh2TExDODJtNmlIa1pVcFNQbTFKUURISVppL0tMRXdBYUg2ZDhUb25GVVQ0dmxlUjZhTFpXT0VJTyt0eEloeklUaGoxU2wyelVGTnVlSndobnVmazBCUEdDakVQZklIZTBYWmtzTEVadnFnN0QzN25PSXhYV1Q0SmZGYlh2amIrUW8vKzlhOHNacXUzbDZxcCtyTWhIalByNDdBOWk4S1ZOaDlLQVlWc0RGY0pxZ1NlU291Y2w0dDBvdjNrb2pHTVRQQzk4YkhDTllObnB0MVBkcDhzVUU3SnhTeHFiTVEvQnNFOHhnWC9DRmg2dnZCbWJCZHdHY21mMi9RaldORFB1T1BJMWh2UDNndG9yMFBaZDU1UXh0bnk5ZWsyRjQ3dE50YWF0RkU4NjNWU0tBam1IZ1M2TEdHaVZ3OEIrZkxFTDhCaW52Q09pM2JNQnpHenRYY1h1bE9nK05jSUQzNHhkYmkzWWp0R2FuaCtXaUt5UGFKU0tKQXZncFFBVGRzdDRRZlplNWcxaUQ2aHVRSnRGcWFWNllYZDFRSDNpY2o2QUdzTWwwbktINzFVWmxhNVNWcGtFdUVWVXZZTmhMQlhNWUJid2pCYnpKc3cxaGtMUmVMNGQ0S0tncW42a0lpbHVpZDRtelRCbUdIdHAremZ6TmJPS0dXTFo1VXcrWWc4cDREakJ0QUNEOEg1RUdQOU9HdU4zemIrVUpBYjEwcGpEWDhrdmpBWmN2cG12TzhONVhlZWxOanplL1g3VVlxWWxzeVJhckl4NkVUUUtIV2FsTU5yZWtCRWVkWS95NzdVTStKU1Z1dVFsaXVSQTBQZCtHeWJTSXNDZ1lSQVp0b2VtOXNpT0JDeGMrbHlsbUc3VHpPZzQwdklwaFA3T2htT0gvOXpSRFB6RDhpdEJQMm1DMWptdklZRk44WnJNTmh6R3Zld25OZTgxMTZkYkJYUi9Xd3c5cC9tMWpEdmtFbXprbWdKd1FrMEN1bXdNOUZzcVZVcmNMeExJY2c3SEkvRFI2bXVVVXFrdzVISEU0VzVZRWtUTVh4VXRneEl0dG5GZmp1RDJLUVcxbXZJRGNmV3VJTU1zampuNlRnRE1PVE8wcDgvdWw1LzNhWGlNZDN1SWJuUXVYRm8rNGlYUmNhdHZNVGovbnhXd3ZCZjBBd3IxaXh0NXluN3d6YXNFZkE1MldEaUtQNmpvcDU5NXNnT0VQRFBvZmFhNzVWbzJCcjF3azJkbUFMV3pTaGhtVm5WTnNhQ2xQZU9RbDBCQk5QQWoyV09ObmdadnErRFAzZVJmR1lUT2ZCUGlMdEdLYjRjM21SOGQ1amNLeTl5NnhGT21KN0xBM1B5QXNSMlY1bE9QckFRUmVmNGp4c2NVS245c1IxQm5sOFVraU9qQzd6K1MwRi9zL1JFWThSd29KWFVQUk1iSUdnS09YWk1hbEY0cGRmMjh0MGp5anRnd2lzZnhxb0xoNmtyc0lBZ3piY0hoT1A5QU1oN054QU9nT3lNY01mTWpxSlZZTFh2SjF6dGxxZHNILy82SWdHdTlmNTc1TnEyZGVubWRkdkpOQVJURFFKOU5oakUrazVNaWxrZGVRTFJkM1NLeDlyYUdpck5NQndaZkZDdU1ERFd1d2ZvVDJGY3ZQRFluaUU0aW4vdTg4MHNLYmpmTXhORHdXcEZSKzZQcy9Vb2ZEZGtCenBDTkdYKy9pSXh4cm00STVKOUQ3bzBjNm5ETnZwWEVRdkg2RDQzaTBSMlhlUC9NNDZCSFBscFNpcXliem8vRXRVUDdnMUloc1hoZ3h0ZnhiQmVnZkJ0UnJlL3lpOTVsMmJCVnZSU3JGamQyOWw4OGZWMk9JY29vNHhoclRudzdnQmhQQnpRQ0h1a1R6c0p2dG1QeVFQSUQwVmo2bmQ4RXZpTUJrcXEvSXpuUXJRbUFvTFFWL3VWVHlzeDdISWU5S1d3dW9SVmxadXl2dnVGUXgwVlpqdFkyNWFGRjBNOVpPZjE5Y1FqNFBrMjd1eHRpeitWZXJ6R3owVWpvcXlJdlZMVWdBR0hYTlhnMnNGK054am51a3podTBzMUE3VEwzcHFLckw1cml3TXUxbkVkVGFDNEw5NUZ4eHZHYkxqckpEdmtxZ3VJSThNWWVjMUNOWTdLSm9Wdi8vUmVjMDdCR2VkTGNIcTJqaTdZMWdEeTA2dlp0bkorQXJCa1VCUE9FaWdhMy9nQnhyY1NLR3cwTU5DOEdreGJZVlZEQzlJcjZMS01NSFR5b3ozQWNPNWdPVVFWVnVwMzR2MEZ3NkRxQW9SM1ZmZ3UzYzFzS1plTDh0MjFwQXZPTVVRajU4TnlaSEh5bnorSlI0L0IwSXozMEhvZ2NaNGlDK1c2bU1pTGFVY1h2VTV0MzFrZE1KaGVYL2VXNjVaMEl1Y0grVEZ6QXhaWkszUWhWc1dJY0FidkszTHpoNkc3UGlwU1AwWGhxeTEzME1oYkJ5RFlMMU5Sd2FoOVpwM2F4RnNGVXV3a2J1MXNxOVBxMlBaV2QzWWorUGk0VFYzdzdnQkJCTG9NY0NiQmpmVFgrU0JJV2dmVWF5dDFWNHJVY1U1Q0c0ck05Nk5EZVdCL3N2SG10d2RrVTBQSytaUzl3am5zMUNFeEZVSTB4V1lMRGFtSXgzQlZLSEtNUFV2TGduWmZyQVFvcnlvT0NqQW1FMjEvWE53b29lSUJwUHZ0akFGeFc3SSs3OWJGUGczYThtb3BKdGw2c1R6MGhzK1B5L0M0QjZaSXJPbkZMZ3JsL251cVBlYm9IdmpLR1Q5NjdGMWxLa09hT08rQ05ZNkRIWlg5TjVIaFpURWVqMkVYUXp1Mm9PYjdDSncyU25WdHRkOGJnejFwbkVEQ0NUUWtlTTRneHZwRXZsenNvWnhuWXJnUmFHeTErdEtDSXZoTGNuemFKVEQreEhaTlVveGwyNDE2R0ZiTStJcXhWNTduazlUOUgxZlNDSGxmTzdtcm4waFN0eXZlYTg1SmNSRll4VGgyUjhIS0JwblVzZ1ZxdE9RWDdEUVpFMlZvRkVLc0FhUEYvai9mZ3BlclNsenlHdGtGeE8vdFdpaWF2dm5CMU1LMkhxbkFUdSt5OXV2L0NES1FwQVRBOXFJTlhwQ1IycFdyTHptOVczZ05VK3gvWGRxWisrZDNOM09OZjhwaGw1ekV1Z0pBNFc0YTN2dzEwUlFvZk56RHpmNlFhQWpWODhFb0xWV1p3L2pqYnFGR1dDOGovVllWM29SbzdDcnUwSWU3UkhoZkI2SUlQM0VTdzcybFFxL3J6WHZzNGNZNExHZi90bEJvZ2plVnNERC9aRzFZdHJTMEVVSzRMMHllZk5SRnFOVUdZcS9tdXhWbi85L0g5Zndmb3hUYVBNRFJlWXFZOENXU1FIbmRXakV6NGZmaXhubm1aNkhZTDFONWR5alEwcm1tMjljTDJ6UCtTVkRtbGwyYWpYTFRxdTJoWGtjdmVZazBCRk1QQW4wV0dBeWdnMjFrQ2dKaTkwUWpFdFZ6cDJYMFA5TzhxSWpTdHMrOU9seGE0cndRa01sbDE3VmJLK1RSL28rQWkrbFU4RzVGRzVUK0gwakMzeiszeVBtY1ZaVzl3N0NqYjhwcnRGUURoRG1QQ2VDbHBCZU1NbkFPbmtwdEJkMUpYeFY3YmhXa1JjNWhmNy9FUnJla2NYd0FZTDV5by9vV2FlQW5TWUtTZjRhSUUzRnhJWFJ2Z0ZzWEEzaDJnZmhpcGRpdGJGQXp4Um5qUjJjZGFvVnJIK2ZEdmJ5OFQxWWRtWVYrM1ZDYmF3S3daRkFSekRSSk5Camh3M3pjdFZNNEZGTlkvc1hncGVGQ3ZSSFhLM2V6OFhLMnZKV1B3cTdibEhJbzRzanVvVEpTbUZSNk9LbFhGVndsYWd0TXg5UGFBNVJCcS9vbHpHcDNMNjNCdEhyQmR0cTdDYXdRRWE2ZUxIalF3UHJsSlVwV1lYc1dkVnd5NjFTRUdYbXNyRkVyL1B2UEZhcFZ3R011Y2M5RVRrWExnMHdwd2RFYkdQUS9lWjVCR3R0S3JvQlpVajdWbzJDL2FWT3NOUDNhMmEvVDZxeDg4MUJaODFOaURnSEdEZUFFSDRPS01SZHl5WndCb0lOdFZ6TG9TRFlWQWkrR01IWWRCZEFjdU9raUcxN0NmSEwvK1FZaHJaL1crUVFMaUswWVZhWlZKZzNGSDdYZTBWcUt2U09tTWVBandKd1l6OGZuOSt1WVk5VFZUay9xTDBEREt4VHFRaVBUU0tzYitFWDVjTFRPMlNoVk5XMUM0TGdFUVR6NWNhWUVyWVd5dFBYamZ4MG5ISTRGT0ZsVUNIY3B5a3lMTXFpdFF2bFBzRGk3alZ2NGR6dWF3NXQxQjRmMFdEbm12ODJLVjd0MDBpZ1Z4QklvQ3ZmQ0RaeGVlNU00VnhObTl3SXcrTlNBYS90bUJ6Y2dqaUU3cTRZSEZEeTBRUEpzM0JLUk4vL2hReHhMR1RETm9yRHFxRUZYbFdSN3hvWDhid1hLejZsNnRCOW5jYkQzQjJhNXVOdkhyNzdlZ1ByOUlNc21KZHZpMVhDKyt3VjhQOC8xV1QzOEJBVnZUL1V5SjlDUmZXeWlGQ3FhT05ha2c5UjJ2TzB6L2s4d2NDYzNSRmczWFhWcmxrUzhSbno0Z2lmRmExZTh6WHFCQnN6c05WdW13WmU4Ky9TOFM0RVZ3ckdEU0NRUUVlSUdRWmVIdmxlS3gyRjRVemRySnV1SnYwKzBpcXBVVjhjUU1yR2VpSDVzM3FFNGZnT0dneFhqOC92cyt5Z2x4VFVLcjlyY0ltNXZ6ZmllUWRzNzRNYm8zMTg3bTlDOEswMDd1RTdhcHFQdzh0ODd5cWE4K0Q5cENGNFRUUHdrcTV6bWdhYmZ5eFM4YnZaNDU0ZHBmZjhYQU5yV2d6Znl4UzhZclkySTBxdEtJUlpodWJOYjdUTzdacnQrVnBHaDBVeDlpNFJQaXRLa1VweDFzNjUzZGNjdk9hUGdOZDhSalg3WTNJeXZlWWswQk1HOHFBcjNSRFdSVkNwTTBnUkU2LzVtZGtZNDYwQXJZNjJqOWpHVWg0aE42NDFNSC8vVmNDaC9QN0RKajB6VVhRaWVMSElkeCttNGJ1dUtESFc1UTBVT3N6dnY2NnlIb0dPMXBGUlBQZWxMbEFBTzBXOFJsbjVUT3E2WkhaQzBCL1VZUGZMZVdraUI4am5YWGM3TDc5WUsrSldqbjc3blVleE41WEM3MFg2MEJmQ1RZYm16RXVCVHplZWpNQW1LSTczV0FUZjgvZUluaE10WHZPdXpZSjFxazJ4MFh1MnN2bmphK3lRZHRBOFNmV2FrMEJITVBFazBOSENaUFhkTUJXVHZlQW93Mk1MNnpYWUxNQ1k5NHJReGc4OHRtKzUyZEFjM2hXU1B5WnlCdHRLcEtGRVVVdGhRSUh2UGt2RDk3eU84SEt0VUJYNWZLd2dpMW42K2R6UEk2Z212Sk9oZG1DblI3eEdJQnpYMXhTVys0T3JoZVVIR2lPaXJnL1FXN3hVVFFqVjhOSXFNQ3BjNU1IZTh5SzI2VDRQTnEwcEwyUk16ZHZPSHRjYVVwbGVpekJ0NjF1RGhRUlJ0MDlMQ2M3VzZTRlliU3RudHg2Vzg1cG5wMVFuM210T0FoM0J4Sk5BUjRrTkVGUnU3NjF4ZkRxS25VU0Zsb0JqSGgraGpjTThpSmxuRE02aGw4TmRNWFF6VUZ5d1ZLMkJLTm9JUFZ6QWkvMlFodStCZWUxcXNQQlpNWlFMUWQ4dVlGWDVjczhKNXIydXVzejNQbVc0VzhRVEdrUU5wTVg4YklCL3BXcENPQmNIVWVCWkJHUE95alp6WGk2QTc0N1lybVBMMk5OZ0lDZmVqZGM4cnZQNkVYVmZlRk4rMytZeGQvaG84NXFES0djMUtYYklMdTIySU0vT3FySnp6aXRKbkFPTUcwQUlQd2NVNHE1c2N6RGRodVpPalJ2ZnhoRlhEY1Z5YVJGVm5uSTVEeWdjS0Y4b0VTSUlMV3JtYXJieC9CQjU1KzlFdk9Zd0oxdVdzT21RQ0d6bzVmcStyVFdHbU8vcFlRMkdSenovejJscWovUktCSWU4NHpWeXNsd1V6LzhpWEtNSFhkKzdrZUtVRDNkT2U1ZUl1VmNPUjBYQUlRY3RDTWJydDBwNkZLay9idFNVc09Wb0JQUG1KVDkrUzVrVEhvVTlPMFRZL25YL0NKK1ZVRWpKS3UzcjlSRHNyMDJDWFQ2MGlXV25WdHNBWVQ2M0F2V2ljUU1JSk5DUmdDTjRrZlRST0w0REVZd3ZDSFlQT2U1WElySno3eEkyZEJlQ2YxWGkvNTR0K3hUL3B0bkdDd0xNMzRxeThGM1U2MTZ1NnV5VUNITVdXeld1alZleEVYVmY0K2tsYkxreXhPZnVwbmtmUDA3am5Id21veWl3WElKMmM3WE9EQkxKVUF6VEVGY3dmMGd6Zi9KeENZSXhaMlZGZTY4aDJyb3ZldDE0cDRnZDhKemNobURlbGtoUGRibElvQjhNOUNJZnJQbTczb3Y0V1FubE5XOW80NHpWcHRnK083YXo5MDZ1WTltWlZleVg4WlhuTlNlQm5qQ1FCMTNKSnFHeWozRVEvRXZ6Sm5nMWdwZWxYeHdkY3N5clJKVGpWYXFYNzZneS8vZFQxNy9WZmJDNkxNQWNYbVZvN2N0VkQ3OWY4L2QzUkhDeGRiN0dJbXc2Y3UrM0N1a2hEdEtCd1ErbVJaenlVS2lsV1ZUck05VlZzVnRsdTZiYkM0d3JGVEgzU3FGT000ZmNXQ1BDS3R1cWlqVnVLWHRzUjJYYlZRVnNhSXI0a3FBVUhpc3pYNUJhOUpPaENFbmQrOVZKRVQ0cmdkRW54ZG1XRFlLdFh5L1l6UDJhN1R6ejdQUnF1d2hjSlhyTlNhQWptSGdTNktoZ29pZG5QcmJWUE1hb1cyT0Z4UXdGWTk0a0FxOTBWdVpERi9yK00zd1dOMEcrSGdBQUlBQkpSRUZVY0hsVnM1MFArSnkvVXcydC9Wa2ViSHN0QXVGOFRrVGh5UmhhL3VUbnhHK2E5LzBxTGlvYU5lNXZVWGpyeHBXeFlXREVYc3ZESXNwWDdSMGg5M1NrNkFSRjFHa2x4WjVGUDJlRDZvanR5NjhuTVIzQm5MbHhjb201NmhWaFhaV1BaSFNEKy9zZjF2aDlQNWRweFdjY0VNN2V4bk5lOHo0OU85aEx4L1pnMlZuZDJLS0p0Ulh0TmMrNFlOd0FRdmc1SUE5NnFJMWlkVU45YTZPc1NOc1Z3WXZTUkM1K1RRUzJQaG9pOXowL2JIRnFCRzNxdk02ZHFoN0twZkJIZ1FOU3NiWm1VUXIwZ3pYWExvQWMwWlY5Y2xubllhNWNPejRWVmNFdjFiUzNiYWV4d25nKzZwRlUrKzZoNGZrczFWdDcxd2k1VnlyU1NIZmxmeE90dHNyaFNKODJSeG5GNFg0bXVrVmNmeUZzRjVBeEVkcndvNnhoNHY3K1RtWFMzc0xpeW9pZkZkOGg3VjJhQk90c0NYYnFYcTFzd1hqTGJwOEdlbVl1aVhOR0FqMUJsd01rMEVOdEZoTmprQ01WRnJwem5WVGlEb1hqYm9yQTNzTUxmR2Ntb0FkMWhHWmJmL1Y0cTk0UWcycjl1Z1Q2UW5tZzBqVytuOG9VdjhOUUhkeUpZQkFldVZ3T0VDYThUc3hiWXY3UGd6MVJDUFNYRmJaUmN4ZS9hMGRldjJRUHplOUlUSHRnbUxhWXRSSGE5NW4wQ285VmVCWlNHWjcvZm9INTJheEVzVlpkNkZmQWpub2tCUVdOdEU5Ym8wNndiaTJDM1Q2czBjNDEvMk55RGZ1YWhEa2pEem9DUVUwQ0hRMjJNdEE2cXRDQlMvYzR2WVJhWXdCVVVWMWI0YmpiSXhhOFhsdTZ6Wld0aTB5MDBoSmw1Z3pDS2VjaERtMTNZS0p3WFJUelh3eVBSMmpqTk1WRjZZWXEzcytPVUhSeEVDVG4yN1JBbjY4aGJlZGdEL09kUlY2Rld6V2k3bWVmang5bFpYNi9kbThUb1kzZkNjRS9Wdmg1RjhzV2VycUtwSjFpWUIzekwvQWRqS3kwMW1yZ05lL2VLdGh5dFNrMmJOYzI5dFZwVUFpdW12MHcxckx6elUzcnFBeENHRGVBRUg0T3lJTWVlTk80eHNDR25ZOURJdGdjZFJmVVVwVXpWYTdITURhQmZyUDhuanJabzlici85dXBpTDFyeWtPUHljT3V6dER4VW9BcXVuL3hzYlozSXVDc1grd1Rnc3YzUm1pblNpL1dyWXFlNVhXa3AwNzM4MUVzNnNGTDVNa3VDRGptRjVkNEdGZTVRcGM2Y1cwRTc4ZDhyS1JZS0FiQmtJQzJiNENzWjcyZklybWRORnk4UFMwdnpxTktnL0dhMW5POXh1ODkwTUF6VXhRcEtjNDNyaGRzcTBiQkxqdXdlV243TkNvRVo1RkFUL29sQUFuMFFCdEhQd1F2SmQxVmpSMUUzY1BhTHhacnFzNnJPMHp4MEFBMzRhTU5YNmI4cTBRaEtKTVZpd2Y1WE5zMEF0NUc2UVc4RHNFWS9DSlRKRkxFSzFhVmhkZnVNanlPL0xaanhmQlhCSE91b3pxNENjOWpWaGIrWXdZUVJmMk5VdmhIQ051aHZkbm5DTGpsRjl0SSswMElhUk9wZXJyeTliK1FGMHdNQTBDWU4zWncxcWsyeFhiczJjRm1qK3JCc3FkWDJUbm5WQWpPSWcrNmFmRk1BaDB0bmtPd2lhc08vVFJaeVZ4MVN5ZnN4ZkYrQzlCSzV1OGViUFlhSmg4VVgrVVZLRnRmQ0g1TERLc3o5MExBVzlVQ3J4Um1JaGlIWCt3ZVlKeGRaUGVBeHhXM0R3c0s4Tml2NjhOK2pJV3lDZ0hzN094eFRGRVcxSEx3WEFUdnhtSzR4K0M2ZktPZ1hvUHViaUNxTWNabCszMEk3TkhScWpBcXg4RjBnOC9OL3hQbld6UUt0bVlQd1diczI4SVdUNnF4MjZkQkViaEtiNStXOFFqakJoREN6d0Y1MEgxdkhuc2gyTVNmam1pajNCYkJXRXRoUDQxalh4ZFJ1TitUaUlSbmg4RVVqeVd5S0pXN29ubVF0VjFSQ1A0bGduVlZFVUxzQmFiemdQMWlrc2R4YlNUM2dJdVJlczlHSW02SEZ4UUxmYmJ1VWxVRXpDcytrRDNJbVFGc0xBUmZGS05Jb2tLNEVRSEh2T0tobUVkR0ZVclYycXpNK3Fpczd4RjF1OTZ5U0tVNGE1ZUY0Rm82T0h2MHFIcmJhNzU0RXJWUHk1QkFyenpSVHdMZDl5YnlLSUtOL0lBS0N1WDMybVpNTmJDRSszMVFvQWRxS2J5czJaNFhESHI2L3NqTGNVNkZXTityRUt4dEtkeWlrTXR4aWhoNE9LK041WnF5Y24xZklmalpNdi95TGxuRVNXVyt1MnE4RW1DZGprRmdkemtNOWptbUtFUGNQL0paaTBJMW9tcVZwN00xMXFrSU9PWUZueFNJNHRnUmdWMWgzdk5lb20zK28rbjdWZFg3Q09VMXIyb1Jka2o3aUFIdGRnRTRLQVQzSGJWUFkrUkJSeUNXU2FDalIyK0V0OFk2Y1E2QzhSYkN4QXE2ak9udTAyWlRPWjlSSTJ3eG14U0NNUlRENDRwNXZMN3NHcENOQVY2U2U5elBNZzlkWjlzNm5SZ1JZSjAyUkJTMVV3aWpBb3hwV0VTMkxYTGxJcHZDL1FiN3ZLK3VhQXg5RVBETVR5U1hHMytSUlJtek1ZaENjYWNPdnVYeEVuNWpqU21ITzV0NmJucW1jai9CYTE3VHd0bk5oeld5N0xScWxwMWNRN25tNmVDNjBMaTRKSkFIdlVKZXdGNWFiK2pBK1FqR200L0xLMmo4UVVRb0hGSytSN0JPR0VLZ01WVTM5NG9YWmZTR2FpNC9nV0JzU2NjUytmUENFT3QwSVlKeEZNS3B5Qy9DOW96d3ZZQXR2SDAzaGVPQTRvcHpFUEF0NkFVOXhqMjlVQ2o3cnk3UHVkZW9qOE9TVnJNQnZPYTFyWUt0YUFrMnZIOGIrM3gwcm4zYS9QSFVQaTBUVXQrUlFFN0FKUUdGdUh2ZVRQb2oyTml2aUhnRFBSZkJtTjI0SitMeDcyOXdyRk5DMkgwUmdyWFNCUy9GOHJ5aUhzRjQzSGhkWXhYZEl4R01MOG5DZklIODlZTWgxMmx6dzNuTXFzTmYxeGFDejlOczN4NFJ2eGNLWVhETTYxUmdheUZiRExQTDJING9BaHY5MUJKYXpzZTZYSTJ3aFdmZzltbmdPVisvWHJETkd3Uzc4c0FtdXdnY3RFK0RDdTFVQ000aWdXNWFIR01BQ1hRMHViMWVNQ3ppalJTVE55ZkswSDczWWRsZGxDd3FuS2VnK240Y1F2MU1oMzR6V2JrMml3QnZTTytWTGk3L0pRS2hWS240elZXMGNCVUZhM1U2Z2pFNXVBOXhaZk92WkxjTmhnQTNHRmliLzhuKzMwbE01U3VHWFQzWS94NENPOHZoSnA5cnNxcXMwcS9ham8ramZsWkFtRGUxY2JaY3JXQ0RkbWhuYjU5RVh2T01CbTFuWEZ3U1NLQkh0S2tjakdCRC8xWVdUSXB5TThWeVVQek1SMXNmMVhnNDRyRVc2elh1RnhNUXJKdHF6NG1PMEc4bXErU2JITnVIRWZIN0xBVHJHSGNVSzB6M3RvSVdWdzdXUlhLWjhvU2k4ZXlqMks1RkFmUGhkVUdYZUNvSG9YRk16eURnWHo0dTgyajd5UWhzVlYxRHAwT1RMWk9qRG1uZnVsR3dEZXNGbTc1dmk1MW5ucDFSYlh2TXlXdHVrVUFuVVU4ZTlBQWJ5N3R5TS9zMTV2MlEvYUlWd2N2c2Era1Jab1p3UUlSamZVYXg3YzhqV0Q4Vm1LZVpBNnNiOUxvQXY3ZUlpTXRiQ2NFWEkxalB1T0wzSXVIblljUGFDMkcwNGJFK29IZzh0eXIwR3BkclJSVTFHZzJzendUTlk5b1Z3Zk1XdEN0Q0ozbnBtVVdZZXk2UVJUTjJqU3FrSFZxb1FTRzRoamJPbmo2Nm5tVm5WYkZGRTZrUVhFYVRzNW5FYmdLOCtCVGlYblp6R2VJNm5DMDB0TEgvYWtpa2JvbmdwZFpvWU56NWVEV0NjYjZyd1l0YWgyRDk0cEpqMmptaWRYYmpNWTA1NTloRCtwMldmYVlMTWZyTk5YY0t3VGs0UytOYXZSVnp6M2wraGZvd2FUYy9JL09hbTd6SWppcmRDMHRQZElnZTNOU243VU1SMk8zR3N5RWpJTitNSzQ4Z3BMMnhnOXZ0MDRiMmE3TjFoOU0rN1pzeDVqVlFKcUV3YmdBaC9CeVFRQys3d2J5QVlIUFhlUWdzaC9jTmpucy9nK09PMHB2d3NjTHcyTGlGKzVYQ05RYlcrcktJeGpiZUVKZFhrdjJpc3doUUpRUmZHWUVkUVhHWTVyWGEyY0NZN3RZNG51NEJPa3g4TGd0LzZjaTFWb1cxSWt4SitDckNYdTlyeU84eitZd3RDdEJxMU1GMUNQYUlySUtMcGI4aWFnWHBPNlI5bXliQjF1c2gyTGtITk9mYXA4bENjS1RmTEJMb1JBSVM2Q0UybUg0SU52ZGZEWWYwWFdwbzNDY1lISE9VUllBZ2QzVTl6YmJITWZmWWxJQjFpaVRwYWpYMEFvTENWaWFFWHo0R0ltdGY2UWNQU285dzBqcHBuQnpCZU5hUmd1VVc2UldjbTJjRDVITC9SMTZVN1dUNE9jRlkrYndsNG5IdFl2anNVeC9TL3RrRzdaK3RhSzlYWGNQQndYWTZROXJoNTlwMXd2YWVQeWxEMmhkT3FDVnhuaVlQT2dsejhxQ3IyR2h1TWJpNU81aGwrT0N4bzRFeG4ydDR6SVd3bmd5MVV6bk9seU8wSDB1NFlqbDhpeVN0QVhCOGlhSmdRY0lKMnhHTXljRkVRK3Y3YzRGNTJNelZwZ3c3Tnc4MnNGWTNSVEMyZ3d4R2RHd2pCTzhoQkxka1JBV0xJVFlRZ21jMHIxSGs3YkFreGhycWFyR0JBdHUzTUJBRkFIdmNJT1NYZEtycjNmd3BwQjN5ekNHay9aQmQydTNpYnhEU0R0RzZGTkp1VVlnN2VjMHB4RjFSL3JXSkZsdHV6SS9RVTFNS1VZYkVYb2hndk1Xd2g4SngzbUVnL3hoVDI3eDh6SlA1MFNvT1phb0x5QTJYK2VKK2FsQkFNYmIveXVLT215TVlSeUg4SStJMWZrUUl2bG9SV3l5RE5UNjhYcFN1bU1DMVdpd2pLa3h6TVFuUVdTenVVTU5qdXpqQ1oyMkdoaFNFVnlLeWZicUd1WDlhZzUzSDZnNXBQMy93c3BCMkV1WVc1YUNUTUtjY2RJV2J6UmhYQ0hMV0VFNUhOaGR4ZkxtcHh2Z1k5clBQRDFuOHppQ25pK1hnYjQ5Z2JjdGhOVm1GZHkvcElUbFJIaWFoVmMwVXlkK1JzbWlVcWJhQWZuRjNSS0dxQjNpd0pZV0FpMjc4SWdRL0I5R2wwVFRGNDN2ZVFPdE9GR2pobkhYbytldytHbmhvSW1xakVDN1IvTHk5RnlMZjNBc3UxK2hJT1ZXVHpldHFpaTdhV2xkSWUzTUhaOCtNeklXMC8wd2g3VlFram9RNUZZblRzREcrSXd2YVJIR0FMWVl1Q0Y3S2dGVmtzUjZkWXgyTllKeGVjWDZJMExmZUNPd0hIS0VoWkQvSXdlWWt3NTVKZ3VCWGExempjMzFHaXVnUU9NWHdSNEdxN0ZtNTE1MHBveWV3OFlNTHdUOVRNUGFyRVl3bFVrRG9iVjBidDNzdzE3Wnl0bW1EWU4xYWhQM25pci9MVWhqdXZwdnBlY3ZEcVpxRStWNFIyUStwRks4cHNCbjJqVWNqV0ovK0d1YjdhZFZlOC9vMnpwYTNVdXpRWGR2WTNER1czZHNjcXJURHIwbWZXVlRGblVoQVZkd1ZianA5WFI2VW55TThNTHJ4VHdRdlkxM2gzWkdFV3lIelp2MWRDTDRxQXJ2ek1jSlFqaDRVcEZvZXdmZ0p1VGs0VE9INmdzZm5naEN0SWFzMTdidS9sZWdERDM5M254QjhRRXc0Y1Z6QVNKZ2ZoZUNERWRnZnNUQVhiQlZMc080dG5KMnpmelA3NEpRNmR0M0JUYXlkYzdhaXRVeW9PNTVBQllCTHg5dERjQldLVkhZelBYZEZBSVhxdmxSVU1ITW5nN1YxSGdqUSt1OExHZG5vdCswYnB2ei9VU3JGK1dhTnVaRDJDd1kzMmVIczJTbFVwVDJEb011WWNRTUkxR1pOMDZhSW9UZHZBNElYY1Q1R2F4am5VQjIyd2tHcnRsV3crall0SGhJSCt4VHh3TG54WHdXVmFLUHl6SjB0QlArM0ZDdXExL2wzV1ozNXVDZzg1cHJDVjQwQ2VOelNrZk1BZG0xV0xpaWNjTW9iUWtaRW5LTW9iSHA5ZVlEV3VjZitJdnNUSHhEVDRtVExTWUZ6aWhEOE5wbG5DOC9ZY3pKOEhhTEFQcEVlTTZnL3Nic1FmQVVFZGtjbnpGc0ZXOUZLTWF0RnNHbjd0TEFQVHVsdWUvZnMzTmdaT1NGeHdlQm1LZFJUT29RNlhQWi80Sk9YZHlKdksrZmdtQURkTHQ2UUtVR3FvZ08za0RWQ1lOKzVXUWorcEN5QUJyK2VLYzhzTzVlb2ZkRkpwbGNOa0trRWtPdC91UHdKU0V0QkRoZlp0ZktaaTNLT1ZSZUlXeUxySzRWK3R0bzRaNTB0WWYvZUNXbi9aYnhGVmRyVE9MU3BjUU1JSk5BMWJZb3ZhejRZeHMxNzdzWTRSV1A4WElZQ0tyVVBYaHhOYlp5dFh5K1dDcG8xNm9UOVo1cUUrbHJ5RVBDTUREMzlSQjRTNE1YYWdXQzlnbUJ2R1hiNFJVaFA1bXlaOTNlZ3hqN3ZmMXA3V0c4SVhZVTE3OUtVTzJnckZyR1J3eGtYNVBkMWFSYnM1RDFiMmFBZDJtMUIwYlU1OS9lS3g3aWhyUEwrcVljMS9rYUtlbDNpcjBsZUdxblljeUJsNlhFWnZkRVFsUWlDOVlHUWF1QmtsWjcxaWhUT013WEZvSUNUVUxGWjR5Vm9vUG11YTgxNXhtdGFCSnU2VHd2NzhKUTZscDFaWlh2M0lPejJHNG5mSjlYWXdzSXQxQ0ZVdDFyOU92V1ZIdldGWlM2TURzUXdod0V1ZDJmSUM3VTNaRTJSaitTdm9URGtSVUx3UTFRSVE0bk9NdFQrVFovOTFLSFFZaHVDK2ZJRDFTbVdONnZ3bW5kcHlsMThIYmQ3SzVzL1BsZWxIZlFZVkd3blhXYWhtQVBqQmhCSW9HdllFRmVWaDA2VEFoMjd4M1gva09PYnBOb21PRXhCY1pMVjZvUXQwQ1lPYXJWem9PQmdOblpncTMyWWhCQkg2TW1KNlREcEIzQlloRnRyS0hBVTRRRWZQQS9OTWl6dVJubDU5WjBVN203eERtTCtWdW5KT0NUS3dscTJnT1U1QWJSNWcyQlQ5bTVoZHd4clpIdExFZnZYSnNGU01SUkZ6cmpXbHVPQ3c5Qkx4L1pnMmVuZDJJL2pMSGJGMEdiN3NBVHRiRFFKZFVDVkZBMWpaWVFGaEs1UEVJSVBFWUxYUk56bWNHY3BCTjZURVJrTDhqeERIOHUvKzA3eTlENTVrQjhvYzA4alh6OFE1ckErZlh0MnNQTU9hTFl2VnVEM1hXSW8xRzFobnVKc3EwYllTMU5zMks3dDdLejltKzM4VTloYlRRdDFKOGNjaERuTSsvUjhZVjVBUU1EdnYwbURVSysxL3gwSTlZc0hOek11UGVyd1hDbSs1RnROUmoyTWw4TDFVdWxSaHVLVGxQSlRmZzhBai9ZUEljOGY3eHNNcmZjTDFkWG4yOE04WCswaTk2ekRNMy9uc0FhV25WN04vcGhjUTE3ek5ENDlhdHdBQWdsMERSdmlab2JicS8wRHdVdkJhempzdFFIR3RwRktPOXhlOHEwYmM5N0YxMGFCaUtsbTJjazE5c0VNUWhuZk9LR09uYlpYSzl1dVNkaGhXWEVTNm82NGhJUHhObzI1OEdZSWN3WnZqNkV4ckNiRG1NRXIzbE5XMzQ0OFJOZ0pzd01CdTJXRFlLTjJiMlV2Z29DRjhOWFRxOWlDOFJiN3h5Rk5ySC92RHZ0UUFmem9GUU9QdW50Y2pqQzN4d1djbnBZVEdnc24xTmlDNHR1eHk0VDZ5clhhUXQreG9aT01YRmxUVm4zdUp5dm5ieWdMMG5VMkdjb05hMkcxNU5ZRExnMGg1L25MMHl5YmsvUEdXZXlxb2Myc1Q0eld5eEdvc1AvQTNybEhudzUyeTZHTmJMSDBQcjk3VXAxOUlRcmg0WTVRaHptSXlqWjRwcnUzNW9SRDkxYmhFdWJWUllWNXBwQlF6L09vUTVzb1dDZDREbUhzemdXRjZmV29RS3locVJmNGZVanJ3cmp4dXVMV3JzRzk1czI1aTdsamQydTFudzk0VHVDaW1GcW9XU2kxcUhFRENPb0UrdWk5V3UxRFA0SU55VFQrWmxDY3g4RjdYa2lvRDVkRjBQNHRROWQvbEVWa3dJdDFuY3psV2xlSHh4d09UK0FoUFhIUFZ2YnE4Y3RFREhqUDRjWGhWQkcxaTVmTXFHYXYyMEs5aFczYm5BdUR4aXpVM1FkamlBellzMjg3ZTJ4RUEzdnQrQjdzeUFHNTV4VkMrVUhNWVQ3ZzYvSXNyOU5EMkFWcWpzMFRzTEQyWDU5bXNWOXRFVnR0NThYWlFyMVBPMXU1VHRqUkZCaEQzeDFoRHVNQ1lYNnMrOEpoV2pYN1huTGEyYnZoMTc5TnpJMFIvdTd5b1UzMlo0QUhNUTdDTDJtQStZYjlCUGFWaGc1dWU1ZS9PRFVYL3Jsa1VvM055VVZ5dlg2d0wxYWE3SU12MXZWeW5wR3Q1ZjZ6Vzk5MmR2TmhqV3poQlBBMlY5dWhyZlpCWFY2QzJrSjk3eFpXMVpMNzl6bzk2bzV0WFZ6N3VCM0tmckpMbU1QKzcvTTg5Q2VoUGlQM1hOMTJlQVBiYTRkMmUweExoVHFDOWFrUXFFcXBLNGE1eUZ0OHZxRndySzErdngrZVg0Z21BZTY3dmVaVUNNNUNyeitORzBCUUpOQ25WclBoL2RzWXEwM1pOOFlJTmlXVHVONmdPTDhoQVVXelZwUTMzbHJDOVJ4aDduak1UOXF6bGIxU1FKai92NE9YVzZoUGQ0UTZlTlJ6THg4NFVHUHhqamllbWkya3h3cUUrYTJITmJKRkUydHo0d1JNcldaUEhsM1BodTNhWnYrN05Ydmt4b0Qxc2tIVnZNRFBEUnFXZVpiL2MyeDlUc0JPcjdhOXlmbHJEd0xpVnlrb2JJLzZvWTJzZis5MjI5dUdKZlRkdVhDQU5keFNqdXVGWTBxUHl3MjNVSWQvZS9tQklQemEwUXEvcE1HOUo0R0Fnd3ZBejZRd2gvQlArNkt3eUhwOXYxU281OWFyQzRMMWN2YWZMV1ZhMEI1OWNzTGNlWTd5ZXhzN1F0aTVCSDNIRWVyTnk4SmhWZXhMenB4c0x5OEFvSEwwVHIzYTJkVUhOYkhQVHExYktoeThlTXk5Q0hVN1VrV3VFK3k5c0FmRFhneDdNdXk1R1BhT0JLUEtaNDU1R0N6U1VROUhBVllOMkttaFdPRkJYOThQbDRkdzJRYlA4REdPMTN4bU5Ybk4wL0hRbnNZTklLaVpBemhFUEhGMHZSMHFETGZlQ0RZbWsxaE5Wc0UxSWREclZJL0gyV1RCMHd3ZVY2aHFqa1dJK3M1L2ttRy9XMGxoL3VxbzhzTDgveDI4Q25qVVQ5MnJsVlUxdzZFdlpSY1ZNblZBZGp3emNQaGJ4UkhtaDRNd3Ixa3FNSjNpUnVDQnM2c1JUNmxtTHgvZnd6NFFkNVVoYUtaelFaWFBpeHdMMUJZQUVYUFFMdTMybUozTENpOXJEMy92RmhnZzFIZVZvZSsyVURmZ0ZZTnhOYlNKd3FIc0hzZVZLU1Q4Wm5YTENYWHBvZTFVbXhNVTdya2tLSGhXN1J6ejNETUhVUm1RWGpQN0JDa1VDd2p6VXV1MVRLZzd1Yy9SNzBQT2QrVnl6QVhiZmFrd1h4YUpVb3FQanFqOS8wSTlOMGNRZnU3M09ZT0lFdmgvWUJNOEp4dlhDL3U1aGVpRSs0NW95TzNsTWtMQnNVSDF1UkRHREh0dlRxalgySHN5N00yck9FS2RQT3FxdVRqSndObnJTMFhkSi83MFBBRjNuZUtlQWRNKzNsWTB2aDM5N2dOZ04reER0eC9ldVBTc0FTS2RDc0Zac2RDZXhnMGdxSmtEKzZWNmVoV2JzVytMSFY1Smh6ZCtpWUVYeEZWS1h3N3laZUFJdlllUGJMRGJ6RFMxNVVRTzFqRGZRdU1BN3orRWNxL1pJOFdPMzhPVll5NkZ1U082ZlhIZUVlb3lmQmpDTXlIbnNFMVc4ZTNXRXAzSS9iTXdUN0dCUzRYNU1zOXZvWVB4VXFFdVd3YTlmVklkR3orb1ZRcDE4MFdid3E0N3JBVjQzM0pWMlZQc2J6dTJzM3VHTnl3TnFRVlI0emYvYlpsUXo3V0VBYUUrb0UrSExZcmdBZ3N1S1ZNUnJEVVVuM0txVE9jaUFaWUo4eURqY3UvbE9lRlhhK2NJd3E5dlBLU0pEZDZwM1o1RG1FdG5mazJ0YlZ5cm1qdHJCeFhDZ1N2Z3hZVzlhZHlnbG1VWFJnSDJKUGQ2dVlVNjdFTlJGSk56T2wvQWdSejIyRDM2ZHZ3cGxCMHV0UHp3TVYrb3Z5djNwWmFPWERqNkJqSlNaSE1KRU4xUUd3UzRBTCtHUDROekNQeGJTRVhxTFRnYjBpOVhrTzZ4bytwem53MWg3RFA4MjZaT3FOZmFlelRzMWJCbnczaDB2VS9oTStGeXVrSlNtUjQwNUJ6SnlvSjlvZXlIZFlMdUljQmQ0REE4eDhEYi9YWnN0MzhmZ0NQM0t4alg4MTYvRCt5dGFja1Z0anl3WDN1dWxzT3NYRkZTeWpXM1lxVTVqUnRBVURjSDhESWRNN0RWRGh0RHNFbWJ4Z3dETDRldXFrTXVWNUhlUmp1TjRjeXU5dUh4ZzVPN3M2c1BhbDZhVXdjSElyc3FPREloNTlnRDlrSG9MN3dzSGpsUzVqOU55NFh5QmhIbStZRFBnTSt5UmQvTUt2YlZhUlk3LzRDY1VJZVhGTHlzdE9aUnlsQjJPT1E1b2V4TytHc3hZVjVvRE00em5KMVJ4ZDQrTVUrb3h5ajBIZVlEOGtsaEg0SVVCcWdhQzRlYnU0YzEyRjR5bUplZlBNNkxWNC82L1BFMTlyd2Yzci9kOXZhQlVJSERGRnpTd1BlSGZUYmdNK0N5QkVRSUhOemd1WVBDZFJjUGFXWnZuVmkzTE1jOGhERC9mNXlRWTdRdmVXWjFzM05xNFhJRExqbkFocVZDUGNKMWhYMEd1TDVjYllydG1GZlZYR01WK3RCMjU3eTRPVkcrdGhUbGtGb0NvZFYyanZtTUt2dlpDN01uL2VsaVplWXlvUTRwWjNCNXRHM3pzajFEeWJqa1QrQzQwLzhiOW93SGoyeGdDOGJubnJPdzR0Znh0RGxwUlIrZDBwMWRkM0N6WGN6eHNGM2EyTkVEV20zQUJSVmNJTUgrZC94dXJleUkvbTNzOVAyYTJlVkRtKzJhR3grZjBqM254WmQ3UHp5M0pyMTRicUVPZS9WdExxR3VNdlRkK1F5NFRIZnFBNW5ZeDZFREFmQmpjNzE3eHNZUmhyUVh3NjkraXRnNnFVbndub0wzQlFEMmVPZ2VBdnlGVGlMQTNld1pWWGE5aG4xMnpFVmRnSWozTVlkbkt4algvbDY1dHFZY3c3VUhOZVdlMjJuVlpTT0JDQmJLT1RCdUFFSGRITUNEZU1iK3pVdHYrVVJsNDZDSVh3elhxcklkYmtEaFpRcUhZUENZTytHV0lEeGhuVzJSTTZ1Yi9jSzQvNGdHTm1KQXUzMEFnRU03ZUxWTUg1SWRqemtJODNXa01JZERZeGl2cVo4RGNrNEVWdGtGbmM2VEh2V2NwMVBkNFdocGdhT20zT1hEbm4wN2JHOU1UcGhEOWZGY2VHeVFNV1Jjbml0SHFPZkM5d1dyYjhVbmdKejVBQUVMQjBEZ0lYak5RU3cvTXFLQmZURzZ6aFlLSUlKKzBuQ0xENS8zaXhRazhKeEFvVUh3cWtOclBnaWxoZERFZGFVd0ExRUx2NGZucFJUZzN6aGpnWXNHK0RQZ0VWdzBUTnk3MVY1cjhMTENjd2pmNlRlVVBjZ1lZZTZBVzhEdmU0WTNzci90MUw0MHRONTU3blNzTFZ3VU9rVU9ZVitDNS9uQ0ljMjVIRzJvYWk2cjBQZnAyWUVpWng3Mm5yYU9aVjd5emk2Ymp0cXRuZjN6MEViMkVYaVY1SDRFRng4cWNwNExoNzVYMlJFeUlGVDc5ZXF3dVFSN0l0Z0dkdklBYXdiL0I2SkV3SXNObndmelBtRlFhKzZpQ01KWVoxUUgzbi9LN1V1TFlVd3lWQlpDeGFFS1BPQ1BLZFUyRCtBN0lkM3VOOWlEWlZRUTdHVXdGK0RCd3lZU2NrSTl0MmVEamZCY3c4WDNPbm5ybEFwNHdRNXJCSkZqRU9IejZJZ0dObTVncS8wc1JmMU13TGxnZVA5MnUyaWx3MEdJL0FuS3dTS2RjejQxTE00ZHBMMmVzMkJlWUcrQVBRMmNXemNkMXNpZUcxbHZjOWw1bG9EemNKYXc5NHVwMVhiZEd6aWIyZEVRM3VadWNNanh6UFl5RmpqZlFNUU9qT1VES0xRNEs5Y0Z4VjFyZ21ERmFnNk1HMEJRTndmd1FvUURzZU5acVhCczdkcmdGZ3ZCLzlEOFVsRFNUeGcyV3JqQmgwTTNIQ1JCMUVDWVl2NG02L1lBZ0VDQWtQRkplN2ZZMVRwTjVlVENvUVJlK0JzMTVBbHphSlUySTdyQ0pJV0VPb1MrdzYwM0NBZ1FHVUdGT3N3bjNMakRHRUdZUTNzZ0VJTjJ4V0JibUtzWlk3NVFmK2ZFT2pzTUY0UXZmQzhJVHFoTEVIRS85VC9OQXh4UVlDNXpxUXU1MFBLaC9kcHRyeXJrcnRvSG1tblY5Z0ZlaHpBdm1pNGdoUmZNSGZ6WnYwZlcyNTVTOEloQTNRUHdnZ0EzU3dFOEtDZnMwV3FuREYwNHBNa095NFUxK0hIc011RUJIc0dvUXdiZFF2MFBsMGNkRHQyZDdZaUJjQjR5K0grd2gwQmVOaFR5ZzdVRmtUSmtwM1oyeVlGTjl1V0hJOUlXLzZtcWVVNklPaDVqWncveTZXbnlaU2Q4Tm9nZ2dITUpBNEJuRXc2cjhHOWdEYzhmM01TZUdWblB2aGpkZmVsZUJNOHJWUGZXTFJoekVSQTFTeStuN2hyZVlCZHJjdEpoSENFSXY0Ym5HY2FSRHlpb0JoZEVNRFpZRDFocnVMQURMelZVWkxiM0NWbGN6YjEzNkFSY3N2N2dBc3dsWEJqRE13Ry9oaitEUzZzb240Mnc2NVI3bitiU1ppQTNIZ1FiUEF0d25yS0xQemJCQlhodW44c1g3VzQrd2xyQmV3YldDQXIzd21mOUNwOTliaGY3SFcwaUJSRXVHaThhM0d5TE5raVZnMzBRdk9vUTF1OXdFQzRPWUU4UDhHNXNFb0xQUnlETUhieFhkditRdFNmZ3VYdmdDSEFlZEZ2NnJvV2ZFSkdWSDBrenh6bFR6S2hpNHdlMU1GYVQ4aHJaZG5qSThleGI3c3dGbDZld1Y1RFgzRW9VakJ0QVVEY0g4SUtCSHEzOSszVFlJVHNZUFcwUjQxN1hEYVRLWHBUNXVEaXNyWTZZdG0vdDJ6aDc2Zmg2VDNsRFMwV0pmTGw4Y1dxZFhRRWF2QUR3VW5aYWVPa01xM1A2MkRwaFlnZnU4bWVQdWFuY3B6OEw5ZXFsUWowWCt1NHRoOS81dXhhWEZ4R0V4MUc3dGRvSEwvaDhuWG1VZjZxdVBMMmF2WDl5SGJ2KzRDYjdnQVV0a3lDOEZRN3NBTWoxaEVNK2lEUTRXS3A2L3AyRFowMXI3anNjengyRU5PL2FKeWRrNFdBQWVhcUxKOGtxOVpOcjdFTzhLWStaODcwL1ExaXRuRHZBa3NrMTloNEpZcUlVNE4vODdveEZocThEanlBMDMvMzVwbUFMOWFVaHVyVjJKQTFjNEVCRmJCQ29Ua0ZKT0xRNW9xSVFZRTJCTTNBaDZQRElxWXdQSEx0N1dDUDc3NmdldVZRQzZUbUZ1WmxicGxqYXBRYzJzUUY5MiszUGNtd0JvUW1BU3lhSFUvQXM1dk1Odk4vd2QvQnY0Tjl1THprTlFnbTRCNThGK3d4OE51eVZBSWhzR0RQMkxMeENBQUFnQUVsRVFWU3d4YjZFZ1ZTSEY0N3A4U2N2T1hBQWhMSXBUc0w4MkZ5VTNScytHVjFucC91QXZWQ0VEZmFUQVgzYTdjdWpmRURZK05CZDJ0bUVRUzFzMnI0dGRqMEN1L09CSEJ0VUtjZkF5U1FBMWdtZWY1c3owNnJaeDZQcjdFc3dtSHU0dU51aFY0ZnRkUVZodDU3a29zTkhlSjlZYlp6dHZXTTdPMmYvWnZZS3ZNUGwzbU9IOTAvSmVWOU50TUtGNXdhaUxCeXZNTmdGRVhrZzFpRWFCZ1Rud2J1MjVaNi9BczlrQ1J5SlFKQVhRbzlTNzNUWVc2RGpFUlRoZE1MWHZUeERjNXg5Ym5xMWZYa0w1NEdxOHNYakJvWVl4eVBGeGdCbk90Z0Q0WndIK3dlY0RXRC9KYSs1bFJnWU40Q2c5dVVDbXk5NDlHRHppZm9sZ0JDOTVTYjNreEQ4TlUwdmdwOWw3bFZnTzUxd09MaVJCVytZblc4K3cxOFBXRHRFMCtuOU9xdWJmU0NBZytwaHU3WXZGWlpRL1YybFVIZGVkQ0RNSVFjVndva2ZRQ0RNU3dyMVdkM1lsNmRaOXFGa2p6NGRTM09Wd1ZzSW9XNVFzUlVBd2diK0RMeFdjQkN6V29TZFl3azV4eTlCTVNrNzM3MmFMWlJlVk4ySFkrZnpJWHpVT1dEQm4wRmhzbXNPYXJMRHVTSGtHUTc1QUJCY0VOcnJIQ0xYYThnSkdoZ2JoRFlDcXVWNFlRM2hGaDc0MFUzKzNTYU51Y3NkSnlldnJsV3dmcjNiN2UrQVF5WjRTcDg5cGtldWJZdmplUUR4TzliOGVwZWFRN2pNbWo4dTU0VXVCZmczOEcreGk1NmxIblY1QWZIMW1GemF5d1dEbTltSmUrU2lCVUMwdzdvNmF3dHdmcjl6NzNhMlI5OTJPMDFtMXI0dDdMcURtK3hEdXgyK0xqa09QKzN3WkEvUDhsS2hQaU5YWitEcG8rdnRTekhJV1laTHd6MTNhTGNGQUhES2ZzNmtnSGN1QjRCdnpuTUkvd1o0T1hESEhLZmhNMGJ2MldvWGJMcmhrQ1oyN3hFTmR1UVF0R2gwV28wNmJlM2cxK0RwdDR1OUllTWcyT1FjOHAwTElLZ3o4STMwVE9jRC9vOTlHZU9NVDE2VTZFb1ZJaXhiSjRnU2NkWUlMbUUvR2QzZDN2K2hLalpFNVFBUEFWY05iYkxmZmRCUjVBYzd3aVhIUVh2OVhEVlN3Q3Z2UTZDdksrdmFkRkloME1GN0R6Wmw1TmpzQW9JT0IrVXpNMkpBcTU4SVRCVzUxYnB3VUxFekN3RE9XaU4zYTdYSERZTFd6eDRCN3p3N1pXdFdGYnRqV01QU1Fva2x6bFova1dkUUpWMkI0RElBMHNrZ3pCNStEelk0RjBxVWEyNGxhdjh5YmdCQjdSell0NzlUcXRraHUrVHlFd08yaFVnU0xwWWIzUkpOWWU2anc5Z0g0YUJPYTYycCs3UXV6WE1La3plME5GeHZ4ckplMitBTnM5cHlCY2VnV0pMenNnb3F5cUhLS1lqK3pScHorWFZ3V0hHK0U0c3dMeWJVYmMvb3pDcjcwSHZUb1kyMkJ4Z3F5ME5ZTStSejl1clpZUXRSK0RObzN3YXBCcStPcXM5NXdPVGhHTVNicVRFNmgwY0l4YlQ1SWc5WGprMEF1Snk1YUhDVExiakFzd3BpN2RCZGMrUGJ1WGNPc0c3d2UvRDhnRWNJQ3FGQjlBMWN0TUJCRFVRL0NIRUk3MzVsVkQzNzhsVExYdHVsSHVtcHVVTXJOaEZVaVhEbTMvWjBPeUp1Y28zTmlVOUhkMmZQSGxOdjR6a0o1L2NneE9ILzJXSHJycHhoT0x3SExaam01SFBiN3lMWDVZM0QyemRPcUxQM0pQQXdRa3JXcFVPYWJKNEJJUHJuOGFQcTJjdkgxOXR0UXlHdkdzWXc1elI1d1FhZjV3cEZ0VVBXSjlmWTN4V25rR29IWVBPM1kzSVJHd3NtMUJhTTVvQjlGUzVoNE4vR2NZeEpBTXc3ckpGZHNIR3k2MWx4eEsyTGo3Qm0rYytOZllFMHBkcmVoejBJOUtGQzhGZUU0TC9KTThaWFF2QjNwVGYxUENINGZrTHdkWUlLOUVJY3NuT3VwMWJieGY0OEN2U2JFWWp3VWhoVjZPd0NnT2c1ZUJmQ1dvRkRJOGg3SFA3UFBIa1I4K2FKZGZhN0V6NFhvcEtLQ1BVbnc1NHRuWHgzdU1TRUM0R1orelhuMW0zbXN2b1BwcDhUZ3FWMERtaENFMFlxMjZNMUplZGRnMUFzQ0hlRVF6Z0NvV3dTLzliMEVuZ3BxRTN3b29ETEU4aHRBM0VFNGRJZ0dpRkVHTHhnS3JoZ2g3L0RTOFQyS25XelE2QW03TjFxNXkwN2VXZHdPUUMzc1U1WVcwY2VJTVFVS25KRFRpZTh1SjBRV0FpN2hQQk04SkROSDVjVHJnc24vdjljZWF3QWJ4VWNpQjJoNmVSdmZuSktkeHRMYzVrZE1UcTVodjNvODZZOVVvQm5lSHp1WnY5UElrM21wZ0tnR0JLTURZUTJBUGp4NFNuZGJVSDAwSWdHV3d6Qm4zMTFxb3pFY0FseEdEK3NyeDBLaU5oTFRsZzJCeUN3WWIxc1VTRTVrQTlZVTNnT1lKL1FPWGNnVU9CN0FIWVVpSHptM09rSGJrK2U4M2NneW5PNXpkTEdzYmx4MFRyVEhNU0pBM1pCeVdrNUR6cGNiSmZ3dGw3cDhld0J6b2E3WlFHeXpjSUtkSGpmd1o0UDlSR2NvcE5GMEM0RWZ3ZUJBQytINHdxSjgrVXRLYzdsL2hmbXJMVzBGZUgwYXZzQ0RkYlc2YTVSb0VqbWdVRkQyNTF3ZG9nb2d2TWlkTTJBdWlwUW9CUE9pM0U1Y3hFczMzTkFrNWJVVVBmcDFlek5FK3JzaHhvRUlIaHFFUWhsVTFoWkNQNjJocGRBYlJCNzdOWWVFTkplbSt1WGJlY095U0pMdXFxYncwL0gyd3I1ajFDdEZyenFVSDBjaERnSWRiak1BYTQ0UmVvZ05CNXltVUhRUTB1cGcyVWYyeGVPcWM4SmZ4bFdaUmRVUWNEN29JQURQd0FxZ1MrYVVHT0huNEtZZGY3Y3RIMnF4Z2VIQ01qRGhiQjhBSXpYOXB6SzBGa1FRL0JuOEhjL0pHVHNCSm9ENGdCeEFBTUg0UDM3NHJFOTdIUXBTR2tyY0RiWU04Ulo1RDRwbm5VSjlKV0U0QThnRU41ZWNheGI0TUpQU01PRGxEL25BbENWSThSMmlzR2w0OHhxdTFJL1JLQkIrRG5rcHVjSjlTYzgydjZCRUh4VlI1aER1aDFjTElCREI5cStPWmVhcWp0UEVDeDBjMkRjQUlKR2tUNnp5ZzYvSVpGdWI0NFFFdmFod2hmQTM0S0ljOWhrSVdjYjBnL0c3TlZxRjYwQ29SdGxIdlBTVmpueVpRMFhCT0JGdmZYd0Jyc2dEZ0NxQTk4N3ZNR3V4ZzJBdk8ybFliRFRjdDVZZWtIUS9rWDdOM0dBT0VBY0lBNlU1MEN1OEdTTlhXeXVRS3UxdFdRb2U5aHp5Y3VGSEFjUStUWU9pc1FGRStqVlF2RHZFSWh1UHpqQmNZYllCZUZxVW16WXJtM0t4Ym43dkcybk1jeXNzb3MyUXRvT0NHeTdtci9zR3BNU2ZBc2hlS2FNM2Ura0JOL1lFZWJ3LzNkSWNUdUYwQTZwbjVFcmFFZmg3RlpGN0RuR0RTRG9GdW5WZHM0ZmlIUm9xVUdlOUVDNVFDWERwN3g2emVGRkFTRlE0TEdHM0V1N0FqTzBLakpVNFJ3OHBKRGZhQmZDY1VKTnAvMFo4TklHL0RLeHh2YWFVNzR4N1ZtMFp4TUhpQVBFQWVLQWZ3N0FPeFVLbEVJQnpyd3p3cldLQmVxRjRJVjFQTWpnRUlCdUFmRDlQZ1Y2b3hCOElRTEI3UmZEd0JrQ3hTWkI1RUp1dmUzbG5oS3V2azg1d0dmYktXYXp1dGxuckV1R05Obno2TFRkNjVuaWE2VUVmNnlRelNuQjc0ZTFnc0taOE8vNzlteTNpdy9hNlhhenV0blJieVRNcllyYWQ0d2JRSWhHcElNbjNTa0dWZUVpblVtQkhYVGpIeExFYXc0Vmt5R2tIVjZBdVQ3R1ZJV1hubjNhLzRnRHhBSGlBSEdnVWpnQWwrQjNEbXRrRy85Wm9KK3NTYVRlN0h6SGFuVXBkamRVKzU2V3E3WGlVYUIzRVlML2lrQnMrMGJ2Rks4SHB4UmNURURMUjRnWVhCeVJNOFFwUm1zN1BrQ29qN0hZeGRLakRxSHFrS1BldlZYczJNTDVKZTJjMzlYTytkWDFiYUl2L0RrNGNIYnMyVUhDSE1Hem1rRUE0d1lRSXRndzhrUTZlZEtYaHBUTkVJTFA4N2pwLzFjSTNpMklPSWVORitZZEtvYmJudW5KTlZUWWc1NTkydnVJQThRQjRnQnhvTUlFK20ySE45cjFYbHdWMjdXSTFGUU9MUkRlRFIxS29JQW9STXg1Rk9oYkM4Ry9OeTIwZzR5NVo0cC9CQmNnVUZjSFV2ZWdIUnFNTzJydjg1K0Urc3dxdSs4OGhLcERIanhFVkc3ZmtpdTRDeGNKVFZ6WXFRL1F2cy8ybU0rc1lyOUI2MFVxQU1jcUdjWU5JRVJYdFJwRStsdnVuSFNxN2c0dm91Vmx2M1FRNjg4THdkK1FMVTVBa004V2dwOHJCTGY4Q25PbmFtZ3VWS21EZlFDRjRHWjFzMXQ3MGFaTHp6M3RlOFFCNGdCeGdEaFFXUnlBRGdhelQ2aHp1cU0wNmhLcVBWTTgyOUxCczUwdDBURjRwL2FsYmQ2S2hYYzdBaDE2ZzIvZUlLcDhPQzdRQ2ZSMWVvaC9RQnRSYUNFSm5uT25GNzJwTmJlRmV0cXlCYmZqeWY5a2RIZjJ6TWg2dTZnY1hDSzhlM0tkWFp3Vy9oNUM1T21NYVA1WnhRRGpCaENpTHh3SElwMDg2ZnBDNk4xVjJvL28zMjczRkk2cUVCeUI1b0E0UUJ3Z0RoQUhpQVA0T09BSTRlTjJiMTE1eXdieGtTNmgyaTU0ZHF0RzhjWFlnYTNMMjFGN0hncWpnWGYvdEwxYXQ5MndYdndVVjNHK1JhUElIajJnZlpUZHluRmE5ZnJmakxFMm1KdTJOc29zdzRhWnRMVkpKbTF0bmtsYm03bXdSU1p0YlpWSlcxdTZzSFVldHNta3JTNHViSmRKVzl0bjBsWlZIcW96YWFzMms3WnFYT2llU1ZzOTVxYXR1bm5qckxwRkUydnFzbE9yRzdMVHFodmc1KytUYWhwK0hHYzFmRFBHYXNpa2JUUmwwbFpMSm0wMUY0RHpkKzBsMEpaSld5S1R0bnBtMGxhcUNPRHYrcFJBNzB6YTJqR1R0dnBsMHRaT0llRjh6cTVsRU9ZNyt1U2hieVp0OVpMejRCNnp5SnVyamt6YWFwWHpDdlBiS05lZ1BwTzI2bURkTW1uTGNxMWx0MHphNmlvNUFKejRxK1RQNXBKYndMSDFNMm5yTDVtMHRVWW1iYTJhU1ZzckJOa3ZqRzlZQkFNaWZSWlZkOWNwenVGMkhIS0pUdHVyTlJmU1ByV2FmWDBhY1oyZWRlSUFjWUE0UUJ4UXdvSGw1YUZ2eFV6YVdpbVR0bGJPcEszVkpOYVFXRE9UdHRhV1dGY0NEbzRiU0d3aXNhazhYRzR1UmNwVzh0QzVUWjRvNlNvUHA5M2tRYlZXSGx4N1NEVEl3MjJUUFBDMnlzTXZsNGZpWGhKd2NON0JkV2gzRHU3OU0ybHJRQ1p0N1NFeE1KTzJCbVhTMXQ2WnRMV2Z4QUdadERVNGs3YUdaTkxXVUlsRE1tbnIwRXphT2l5VHRvWkxISkZKVzBkbDB0YUlUTm82T3BPMmpzMmtyV015YWV1NFRObzZNWk8yUm1YUzFrbVp0RFU2azdaT3pxU3RVek5wYTR6OG1jNmtyZkdadERVMms3WW1adExXNUV6YW1wUkpXMU16YVd0NkptMU55NlN0bVptME5Vdml6RXphT2t2aTNFemFPay9pSWhjdUE4eE5XNWRsWjFXZGVlYit6YytzMTBOb0ZhcEQrclhQeTg2b2V1RDNTVFdQenhsalBaRkoyM2c2azdiK25VbGJ6OGlmejMwenhub3VPN25tMlhuanJDY0g5bTJmMjdWWmoxMWUwUkh3L3pXMDhXejNWdjdIRjZkYTMyZG5WQzJZTThiNk9aTzJmc21rcllVdS9KcEpXNHN5YVd0eEhwWmswbFkyazdiK2NBRitUNkE1eUhxWUErREw3NW0wOVp2a0dIRHZwMHphK2lHVHRyN05wSzJ2TTJucjAwemErbDhtYmIyV1NWdFBaZExXSFhKZkdDLzNNZGd2TzVOQXIvQkRrcnR3SEZWM1Z5dk82MXB6WWUxWERHMWFXbmxUWjlWUUFzMEJjWUE0a0VsYnkyWFNWaWNwMWxhUlFtMzFQS0cyamhScDYwbUJ0bEdlUU5zaVQ1dzVIaUpIbUxrRldiM0xrOU1xUFJGY2VpbDZTUS9HanRLenNZc1VZQ0MrZHMra3JUMmwrQUxodFc4bWJmM05KYnpnb0hKd251QTZVb3F0a1ZKZ0hTOUZsaU93VHBPaWFsd21iVTJRWW1xS1MxRE55S1N0MHlWQVJKMHRCZFQ1bWJSMVlTWnRYWnhKVzVkbTB0YmxtYlIxUlNadFhTM3hkNGtiTTJuckg1bTBkVk1tYmQyY1NWdi95cVN0MnpKcDYvWk0ycm9yazdidXpxU3QreVFleUtTdEJ6TnA2NUZNMm5vMGs3WWV6NlN0SitXQkRBVFJzNW0wOWJ6RVN4S3Z5a1BiNjVtMDlVWW1iYjJWU1Z2dlpOTFd1L0pBQi9oUTR1Tk0ydm9razdZK3k2U3R6ek5wNjh0TTJ2cEtIZ0RuU253bjhYMG1iYzJUbUMreFFJcVdYNlJRV1NRUGxiOUxrQ0RSTkFkenhsalo3UFRxN0xNajY3TWdncHM3OUluY05lcEU5bzVoamRuc2pPcnMzREhGYmZwbWpKVmRPTEVtbTUxV25SM2V2eTBMbHdZUUhoKzU5MXQrNStZTndnYjgycThkbXphSTdQRCs3ZGsvSnRka2Z4aExQS1puMllyakhNQWwwblB5c25CZE90eFY2T0V1WDZSRFlSREtTVmNoemxQc21vTkFuRk8vU3RNY0owUStCNDVIYjJVWjF1VUl4TFZsdUpkYkdEcWljTXM4TWRqTkZSSllMNzF5elRKa3orMko2eXNGNE00dThlZjJ1b0h3MjkvbGFRTXYyK0ZTOExtOWFpRDJUcEJlTkVmc2paVzMybzdRbXk0OVpvN0FPMGVLdXd1a2Q4d1JkMWRsMHRZMVV0VGRrRWxiLzVTaTdoWXA2TzZRZ3U3ZVROcTZQNU8ySHBKQ0xsL0V3UXY2aFFMaTdVMHAza0M0dlpkSlcrKzdSSnRic0lGWSs4WWwxaHloOW1PZVNGc292VWNnek1oclpQNXdSa2pvSE14Tlc5bEZFMnV5aXliV1puZnQzV0dMeWQ0YWhEQ0lXdmpzL1hkcXovNDJzU2E3WUh4cGNRNS9EeUord3FBV3lOM090dk9jQno1S2NRN3pVTitXdTFRWU03QWxlOE1oVGRrMnptMTRGdmp5VXVLS29VM1o3SXdxZTc1TnJ6bUI1aUFUYmc1K29FTnNCUi9rSFpIdUZJNmo2dTdoeFBrcWxtRFhTbkVPcmRTbzBFY2l3MG83dWNKSlFYeXVKYjJTVG03YkZqSmZiVHZwZVhTTFRTZjBrN3Z5dnh3UDR3RHBXUnprQ3VWMGhPVXc2VVVjNmZJZWpwYTNyR09sMTlBUmtrN0k1VGxTUUY0c3c2aXVkSW5IRzZVbjhGWXBHdTkyQ1ViSDYrZUl4ZWVsV0h3NXo4djN0aFNKam5mdkV5a1F2M0I1ODc2VklWNC91VVRoSXBjZ3BFTU16UUZ4Z0RpUWVBNkFZTXpPck1wZWVtQlRka1ZMTFBVWXF4Ym5JSFJYc1VUMmhXUHFiZUVOWHZ0aTlzd2JsN1BwaXFITjJWV3NsTzNSLzcvMnJqTk1pbUpybHlobWpLdm9CYk9neSt3V20zZlo3VnFTZ0NLZ0tHQUFBeUJKQVVVeVJVNExLbDV6em41bXpIck42U3BYeFp3UXMySkNTNklpSW1HKzUvU2N4bkdjMloyWkRsVXpjMzY4RDZDNzNhZFB2OTFkYjUxVVd4dThPRzlWS2V6SS9aVjlLOExoK2ZsMmxrSHZUdFhoRnVYSnA5cUQ3WVZWVnZpZFVjWGg4S3lROXZ0TklCOG85ejY0VC9lQ2wyQ1lTS2Z1N3VtbnRkOXlKb256SkNLc08yQ2REVVJVOThjSTZ1SFlYSVdqa0sxRUVkc09vNlJRbTlnVG82TDlVTFFPUnNFNkNxT2ZrNktFNmp5TWRGNktBdlU2VEZtOUhhT2FDekdTQ1NtcFQwZlY1a0hrY3JHUy9LMm9pT1ZTakZSK2hRTDBCNHhPcnNDSTVHOVJkVzJVSWtvZlpscWNFUWVJQThTQnYwV3FRVFF1bTFCa2k4aUNTdUY1bEJxT0IxM2JHM0VSdnVUVWluQjRkaWk4TWtHYXR4TmRCakg4d0ZtbGR1UzVwQ3IxbEhJdnhEbWsrdTliTE1JUER5NE5oeS9JdHpNTUlQSi9ibytxcmFudXllRFFza2pXd1BwcGhlRTFVK2o1bytlUFo1b1Bmc1YxNTgyWTZRZFpodFFrVHJkQU5sR2syK251dGY1MU9jOUdjWDVyZG9qejdUQUYrWENzTTIyTDRyZ1Axb1NPUURFOERTTzFsMlBONW0xWWwva29wdXkraEpIWHR6RGErZ2tLWEVpL1ZaaHV1dzVySDNXL0dBbmtBK0lBY1lBNFFCendoUU5RRHcwMTNtT09yd3J2VWVSOWpUZUljMGhOMzVVTE8xVWRJdERycGhYYUd3TUpOd3pxUXVFM1JoYUg5eThSNGZ3S2Y5THRHeExuTFN0RWVKOFNFWDVpYUttOVdiQjZNZyt2a0R5OGVXWnFBaDJpL25EdEMwNnBzSytMZUV6dk1tV0dEMzdIVEVMSU1Id1h5OWdnT0hRMU5wOGNoTm1UcmJBazhCOXJjdDJDZ0dEZ0NEWktkODg2Y2I0blJxamJZK3IwdVpnT2ZST0s2a1VZS2Y0SjYxSjF2OWdJNUFQaUFIR0FPRUFjeUdnTzJHSjRiaWo4L05rbDRUMkxhOE9WS2RSVkp5dE9vVmFiRmRUYW9oYk9CYlh1aWNTNTNhaHVEa1R6ZWJpZ01oSjUxaUhPNGJ4TlMwVDRxV0VSY1E3UmZvanN3OFlDL0hsQ3gycDc0eUNaNDBIbUFJaDkySENBekFIZDk1emdxdysyUkhWSy93MkRQYi9nMnZVSDdNWHlGV1k5Zm93Qm9uZXduOHYvTUhqMExEYnlmQlJML083RnNyOWJNTnZ5Q2l3Um5JOFptVk54dXNQNW1MVjVGbVp5OXNhbXAxMXdiVjJOZ2EwanNML08zdGl3TmUyMXUyN2hRRERJQjFTVG5tNWFleXZkNG54bjNJWHJoaStRQzdERytILzRzb0tkUFBwd2tBK0lBOFFCNGdCeGdEZ1FFQWQraFNac013dnM5R3VJVm5zWlBZZGp3V2l4SFFvaGNsNWxwOUZ2bkZHUXNPNGNSUHZtR1FWMmhMcGJoMnE3N2p0b2NkNmhiWTN0QjZpVnQrdkY2eUtwK0Q5SGJXYThQYW80M0xKY0pOMGtEcHJpamVnZXVmNHM2OTd1ak8zNkkycHMxMnBzK2dtWmlNdFJsSDZMSTd4Z3JmYzU5b1g1R0V2MDNzTkdvNHN4cTNFUmx2TzlnTm1PVDJML21VZHdLc1Y5Mk5nVW1wemVpbzFQcjhWU3djdFF1RjZFWllSenNKSHFGQ3d4SEljaTlseHN3am9VeFN4TTVUZ05nME45c00vT2NiaGVQUWJMR052akJCQm5KbmtwOXU0Sm9lQTlIS2VMUk04YXo4UGcwMjRZZ2Q0KzNYbmpwa0s3QVlRTVNIZHZXNk05bmR6RWJ1MGFHc0x0akkzR1RzZVg0d080US9pckFSOFRBdm1BT0VBY0lBNFFCM0tlQXlBNFlieFplTUdSZG4zMXprVzFub3RkRUxEUVNPM0t2cEhPNVluRStWWmI1b1RDNFF2ek40MDl2bklMTkpMVE1VNE42dStQYmwrejdvdHhSZCtGNStXRHVQenVaOG0vV1Q2SmY3bHBSc0ZYNFF2ekY4L3RVN2tjUkh5eVBvQm8vS0xoSlMrRjU0YnUrbW1TSFJGZGlBR0tPN0h2ekMwb05LL0hpUnRYeElqTitaaFJPQXRUajZmZzJNYUpXTkozUGpabkhZSGpIb2VnOE95UGE3RitPREhFRVovUTdMVTdUaGVCNk9wUk1RSVVldXlVWWIrZDFqaStFZ0lzTFZHSUhvcmpMcVBGNkQ0WWtkMERCZWt1R0oxdGpLSjBHeFAwQTRGNzZnTnlLSkdxUVpGTzNkM2pkR3YzUDYyOU1ZcnhZZmh4ZVJOM1VYTis4VU0rSUE0UUI0Z0R4QUhpUUJMcHNFNFVjZ09teGE3RERlMDFPR0hDaVViK2hOTW52c2MwV1loSWZvbXBzcC9nMUFxSVNMNlBLYk52WTlyc2E1aXA5Z3Ftejc3dzB5VCszTm9wL0xudy9GWjNMaGxUOUZpTnNPeUlzTmNkMGlGeVBMdDM1Y1hoQy9JSHI1dFdPSHI1cEswaTBvNWUvaXo1b0o4bEh4aWVGZW9mbnBkLzZySUp2TlhFbmxVUHcrKzEwVEJPRGRDa1NDeTU5Y3p5ZmNJWEhRbnJwbTEvbWhRUmx1RzZFTnM4czRCTk9iR3kwVUdsNGt1b3FVL21lUEJ6elVyRk80OE9Mck16R1plYldXSklJQjh3RXVoRUFzOUYraEpxSFBlUHlMbFBOZWVOc0labEtuWVdod1VFTFVMSkI4UUI0Z0J4SUxORjR1YVlkTlgxQ1ZKV1kwWGkxeWdTbzlOV1A4S3NxZmRRS0w2SjZhdi9FSXBZYXduZmtpZHdZZ1hVWEQ0VWs4cnFSQmx2eFo0a04wU2x0RjZCa3pBdWpvbzAxaW5KWjJOcTYvU285TllKTWRIR2tWRnByakJ4WTJCVXhMRXZSaHhobkdRdkpma0pVU212VHRTeEU0NmhiQmNWZVd5RDBjZHlqRDRXNGVTUEVFWWduVlRZdzZJaWtNMXhXc2krR0lYY0t5b0t1U3VteHU2STZiSGJ1WWxHL2l5NUxSRERzME1zUENmRTdocFFCZ0dPV1llVmlYQUg3NlBWRy9jdEZtMXZoaXkrdXBCOTd0ajEyNS9UQzFtNExwOTlQYjZJMWZXcFpJVlZvbVNQSXJFSlJLMk82TGtRMWd0NXhZSmQzYStDaGVlRzJJK09qZlB5MmVLUnhlem85alVRL09oWG1ZSjlzTW5RcWxLY1h5MnN5SnAxVnNqVVBrQUU4Z0ZMMVFkRUdpSk5VaUs5WlE1M2QyOWZhN0g4U3NHMks2eGx0M3NyenB0Z2V0Uzl1RkRUdlpna2tBK0lBOWtmVGZ3alRpUnhCWGFjalZmWCtBVUt4S1V4a2NSM2NWSURpTVRYVVNBNk5ZN1FzZlk1RkloT25XTzBRRnlJNzcyN3NON3hOaHd4Y3lNMjZvRk90MWZpcEloTGNHemloWEZFSWt5VW1JenBxT09WNUdQaXBLUU94WTY1QTZQcUlVRWtuaHlWbHRvVFJXTDNHSkhZTVNZOXRUcEtKSmJHaUVSb3hIbWtrcndGcHFsQ3plU0JTdkptS0JLYnhvakUzZkVic0V1TVVHeU1HN2EwUHNzUUg4QmFZTzFVYmtkeGwwM2diUEN4MWJDWlh3cU4ySHlvOC81R0NPdkEvVXNFdTZKZnViMFpzQUx0Z0EyQzlkTWlvdmZYcVp4ZGVtb0ZhMVVwb0Y5TzJ5SU5vOVNpOENTc3BmWXRCcHNySXBzWWMwTnM4NHdDTnI5UEpXdGFJbGl6VWdHQmtDV3BSdmJiMTFxSFFGYmpxQjVWOWpGWFRkYlBCd0w1UUhuZ0F5SVNFYW5CRHcrODdKZEVwN3ZuU0UxNkxZcHorQkRDQitTK2dXVzJMendRNTExeHNVcHpzL1VMRjRJNXd0SHB6TG8yU2pSR1J4YS9peE5aZE5KUG5jaWlJeHFqMDA5ZmpoS01UbU9jeDdFeERnakcrekdpZUE5MmM3ME42eFp2d3JwRko2TG9pTVdMc1JHajB5aG5KZ3BGSjVvNFBpcWFlRzVNN2VJZ0hGbDRabFEwOGVTWStzVWVPTjd3bUpnYVJvZ21DaFNKMEVpbkFrVmljWUpJWW5RdFk2eEkzQnNiN0RnaWNWZnNjYkZEVkRTUjZocHBmVUJyeEJTajVxMHFMZGFrcUJiV0VMZjRJSWdmZE5ZbjBRTDk1MG1jclprUzJTQllQNjJBM1hCR09ldll0b2J0eW1zaGN0NjhiYTIxUnBNdzN5ck9BWHZhRWZSeUZyNjhKZnQ2Zkd2V28wTTFZd1cxckxTTnZkWTZNWTFqUHdUSHJiWWkyWTFQRHkyMTEyaVU2azdQcmNvQ0gyZzNnSkJaTmVrdGM2UW1IVkxheTl0WWJMdEN3VHExcldidmppcTJmYkE2ZlhFT1VaSFJLRFpJRk9hR0R6Wmo3ZVB2R0syTUhRbnliWlRZZEdvZFA0cXFjM1JFcHBPMitqd0tURWhaZlV4Si9uQlV1dXBkTWFtcVRoVFNFWlZPaXFvaktLZGlJNXdKTVdKeU9QWTlHSndnNHRnYlUxSVROY0pwcXlTM1VFQkdSeG1kUmpoSHhvakg2QWpqdnRpWmRhODQwVVVRanRRUXg0RHZBWUY4UUJ5SXJBTmdQUURyZ3U4bUZMSEJ4N2F4MXd2NUZRTEVab0VId25hekVOYVdxSDlQaUY2amdFQy9yRytGbmNZT05vUm5GckFuaDVheTR6dFdNMVpZYTYvVllCMVRLNngzTllyenA2SnRoaFQzaFFQTDdMUjcyTWpZbzJpcmpmRC9GNlp4L0M3T2VnMGk4SER0a09hK2NVWUJwYnJUZTRwbHVnKzBHMERJWUpHZWhaRjBlTkhEYml4OE9DQnFQcmRQSmZ0emVvR2RPZ1c3MUxHMVhra0NvbWJVNEUydldQNE5henMvUXNIN0NBcmFxekY5ZGpaR1FDSDZPUXJySitHK25ZSEMxQmtOQW9LME00cFJSNGlXWWdTelZUMGpRWndPckx0bTYwZ1FBdm1BT0VBY3lBVU9RSVIyMDR3Q3U5enQwY0dsdGlodlVpUzJyaUdFc0c3eVFKeHZ4cisvS1lUVkluYXRBbXVVZXlDcjcrSWoyUk5EU2xtL0x0VzJEUWVYL1UzMDNxMVJuSDhvaE5VbzJ1YktHb3VkMXFXYUZiV3hXTXVLdndWNmpramorTy9IcnQwZ1FqKzlWNldkVlVDcDd2cWZFd0ozNVFOeUlKRW83WnAwRUxENE1jcDQxQ0pnVnhycXBJWjNxMkp2akN5Mkc3QnNuRjZRYnNyVUh0akFSM2NrTjF2eEI5Ykp2bzZDKzFvY2xYSXV6dHpzaE9tL0IrTzlvSlJkZXQvUk40ODRRQndnRHJoYkI4MkpkQjJmMXF1Uzdjb0ZPeklTTlhmV0UvOFN3dHJnZ2NCZEtZUjFacUkxQy9URnVmQ2tDcnNCSE5SZzcxY3FXQTJzWS82eTQxS040dndySWF5OVltMEdIeFZVV3F5a3pkYU5EQWRUMHpqSG1OZzFIR3dBc0FKaFp4SlFxanU5NTFTRyswQzdBWVRNamFTWHdjdXdzTlpPVldxWDRjTDhrUEpJRFJPa1NObDFUSE1qTldWd3pXbEd6US9DZEdiZElqYlRBYlhJcjJLMGV3WjJBdTZJRFpuMk1PR1pJSkFQaUFQRUFlSkFkbk1BTXVpZ0dSdEV6VDhiVzJSbkVJSXdyclQrSVRZSGVpQnc3eFBDYWxMZjJnWE8zN29xa3RwdHIyWCtic05wR3NYNTEwSlllNmV3RHR0ZUNPdTdGTSt4Q1JybHhSNEw3Z05rRUhSdVY4UFdUU3UwVTkzVFhMOFJ5QWRNdHcrMEcwREkzQjNrbFpNNXU3eHZoYjFyQytMMnNIS3hWZkNLRElDem03dHprV0JkMjlld08vcVgyeTkwaUpwRGVwVExSbkJ2R1NCdU14SExjTHpQcVNqQ3R6T0I4d1R5QVhHQU9FQWN5RTBPZ01pRDlRNnNEWjRhVm1xdmRhQ2VPaXFWUEJyL2NTRnVsd3BoVlNXN2hvRnl2SnAvL3ZkV0tHQjFpUFAxOGRMeEc4QTVhWnpuanZyV2RUQng1NUpUSytLT29DT1FEMVNHK0VDN0FZUU1yOEdhbDg5K25NaHRjZHZycUdvNzNRdDJNR1M3eS9VQUFDQUFTVVJCVkdFM3Q5YndPdlBkdUxEcm9HQ1c2SWJwZjQwbThXQjgya2tHQ04xTWhHVUN0d25rQStJQWNZQTRRQnh3T0FBaUR6cTFRNzE1SXd4RzFOTW85L2swNjdXRlIydWM5elZHejdzR1pHOUNYOEc2czZqS3Nzc3dsNDRwc3B2R2tVaW5aMWxsb0ErMEcwRElYQi9BU3cvRXJCMTFudCtLL1RHdGtDMDhxOHhPRTRkbUpWRFBEVUxZbERwMWVIR0RMWWVWUld3YjBxMktmUW92OFBuNTdJL3BubmI5bkdtQTJNMUVuR2tDcndua0ErSUFjWUE0UUJ4d09BQ05Zcitad08yVThrUEwvbFp2SGcrRFV4Q2F6d2hoZGZCd25YT2pSbkdlc0Y2K0hxU1RpdjlzTWtFWUtEK1lBUTNqNXJjaWdVN1BNc3RFSDJnM2dKQWRQZ0J4Kzl2VVNIMzZiOU1LMlNORFN0azUzYXJ0Um5LUUN0YkdzbGkxc093L2RRRlN3YUFCSEh4Y1h6eW5KRkpuUGp0azIrN3hEdXNwQm9qZFRHNzg5aWgyVWhjNGJrczd2d25rQStJQWNZQTRrUDBjY05ZQ0cyQjZ5NXhJTHhyb2xQN1Z1TloyU1Z4RlRWTENzd2Jtb0F0aC9VOEk2NGVZY1dtZkNtRk54ODdsWGdZaHp0SW96cWVuYWZPU05NNTFmRExIaHRucUxjb0Zld2RHNU02SnJQTjBjMHNub0VRRHNHWktaTVBKem9CMStGMGY1b2JZbHBrRmJNTzBBdnVaV0kzSDBYMDlLZ2VnM1FCQzlncDFFTDh2RFMrMjU0UENydk1oNVpGdXA3cXdJNjlsSTN0VXNUK21SZXJNNFVYajQwdjdIUVBFYmpiZ1R5WDVoempyZXc1RzJkdGlaL2JHSm5DZVFENGdEaEFIaUFOWjBnUnVka1NVd0t4dUdGOEdXRFM4bUQwenJOVGUzQzl2azVZUUJUSGVYUWpyWUo4eUJBczFpdk5iMHJRNW5kcnpkNUk5UHR3cjZDOEU2ODljR3J2bTlFdjRmV29CQzgrTWpBaUc5Uzc4SFlUMittbVFEVkxFUGhsYlpEZEVCbjdEbjRudzJPQlM5c0g1Uld6WnhDTDc5K3l4dzdQd21ITkRiUE9NQXZiTFpNK0RYSXhBQXAxSTROT0RBTUlYWG9qTzd0dWk0U1hzK1dHbDdPVnpTclRocVNHbGJPMlV5QWM0Z04xVW1JTzl3Z0NCbTgwQS83NnJKSDljU1g0TnpqRWZvQ1EvV2tsZW9pUnZSaUtlM25IMG9TY09FQWVJQS9XdFZSU3NWZXhvWVN2MjFubkZiT0lKVlhhYWRQTXl3UTRzRS9hZkVEbUh6dWsrQ2V4TXJUdS9MMDE3b1hQN2wybWNiMUFxNTRFU1M4amlYRFNpeEJhVTJScEZkOFF4aUdWYk9FUGQvU1J1QzJzb080Vm16bU9PcjJMRHVsZXhnVjNic0k1dGEzQjZrV0FIbFVlQ1o0a0EzSWNNMUU1dGExaVhkalZzNExGdDJQaWVWZll4NGRpZmoyMjlWYkN2bjFhWXRUNVdHcURkQUVLT0NIWFlsWVlQNEd5Tm1CT3lvL3ZRMUM2ZzY0Y3hZSzhZSUdSekZWdVU1RXBKdmtSSi9sOGwrZjFLOHF1VjVOT1Y1R2NyeVh0aE5MNUFTYjQvaVhuOTd3c0MrY0J2RHF4SUVzVEZISW1ZWXhydjIrY1ZzN0hIVjlrTjRLQitHZExab1N6T2d2STh5N0xIeXNicG1HNENydElrem1FMDJpNXAybHlYNW16MTdWSTVEMnl5UUlubGdLN1ZFZUVLOXhxaXlvQlpJVHNhdkhZcXR3TTNtZmpjcjU2Q3pacHhMREEweFlPR3plT1ByN0luRTVXMGlmUmIycU5JMk9QNEFOREVHWG9wRkxXSjhMb2hBUCtoWEFCK3A3REtZZ2VWL25WTTJQeW90QVFiM3IzS1BxODk2V0JldnQyUGlvUTZkMzEvdFJPTVFEN0lBUTZBRVB6ZUFNRktTT3lEVFNqbWx5ckpYMWFTUDZna3YwNUpQbHRKUGtKSjNrZEozazVKSGxLU04xV1NiMnNBcndqa0ErSkFFa0xNWGpoaTZuS3ltN24yZ241MnlHNGdDbldiSzZNaVZUb0FOcXlaakxYUnMwSnM4OHlDcllCL3c2SVl5clpBYkRnQXdVR3BwekY4UUU3WVViKzVJYnRHR1lRNWxPRkJTalJFeWsxcGJKc0VlbWxNYlM5TDArWkRoTEQrVE9OODU2ZnJwLzFLQmJ2bXRITDIzUVJ1WjBnQS9qZWltSDA1cm1qcnM3TDEyWWQzeE55UTNmd1lucWVmRFV4Zmg2eFVlRC9COUNHSVlEODh1SlJON0ZuRkttc3NlNUxTM2lXQzVWY0llMVBKYnc3Q0pzQStKWUkxNXBINTg3ZWNXVzYvcSt6RzBkTkpxQ3NYOTFzNzRRamtneHppUUhjbCtVc2tsTE9pTHY1SEpmbjdTdkpubGVSM0tza3ZWcEtQVTVLZnJpVHZyQ1J2VFZGNTdjOGJJWWQ5QUJFY2U2R0lvdnpOa1NWMld1YWtFeXJaOUY2Sk1hRm5wZjF6OXc4c1k4OE5LN1VYOWV1bUZmNVZkems3eE5aTjg3ZnVFbXlINDIrdElaMEQ1eXkwVTBpL0dWOWtDd3hJWDNVQS8vNStJb2ozUW50VXFCMFZoRjR3anVEQWhrOGJjN2hlMUprNlkyOW96RzlsMTlOTzZGbGxSeFNiWko0d0J6UVh3bHFqU1p5ZjdzTHVTOUk0bnhMQ2FwTE8rV0RrTDZSbzUxZUFtUHdMclNvamFkc25kNnBtcDNlcFpyTjZWOXJ2aHN0T3JiRExJVDhiQy9YV2hWdWZIM2gyUUJ6RDVvNk9keGswWDNiUzE4RzJxL3FWczM1ZHFyZW04ZTlaTEZoSmxjWGE0Y1NpSUxrSTU0UHp0c0Rzazg3dHF0a3RaNVRiRVg1NDF1Q1pzemZHREhnUHFBeUNkZ01JNUlNYzVNQkJTdkpaU3ZKdkRCQ2JCSCtqOHN1eHlSMEkrZHVWNUJjb3ljOVRrcCtFNmZWSFVLZDY3YzhqSVJ1Rk9UUXFuVm5BSGg5Y3lnWjFyYllqU2lERUlOcFRIeUQ2MUJUL0RyT1VvZTRTRnNLUU5ncHBuSzhNTDdITHBCekJEbldmWGtYWHdYYTdpZW44VnJhNEJ2RU41NXpkdTVJTk9LYWFuWDVNTlR1bVhZMDk1eG1pWlE3ZzM5MDZWTE9CWGF2WmFWMnFXYi9PMWF4djUycDd3MkZ1NzBwMjZha1Zkck1uZTZ3b2luVVFHMTZrb1VJSkd4d0xtazlCdXEzVElScit2VExxLytzVzVuYlVjVjYrdmVHeTRKUUtPMjBYSXVabG1TZk1IYnlVWVIzYkFRVnBubk8yV3dIcGxDbFVJRUMwUTlyMjRSWENMbXR3bm4xSWlUK2dWREJoV2F6L01kWHMxalBMMlhObmw3Q1BSeGRGTnJ6cVF2Yjd4ZThVYm9lM2RncjcvSHo3bkE4TktyWFR5V0dEWWJmaVNIMDQvTjI1UmxOR0dZTlBRYWdmM2I3R2Z2ZllkZXJ6L3FxTko2SE9rK0tBOW84cGdYeVE0eHhvb3lTL1NrbitFNG5sbk4wcytGMUovcFdTL0hWTXJiOVNTUzZWNUdjb3lUc3B5UXVWNUhsSzhtME00Q3VCZkdDMk1LL0x0eGVDVHc0dHRjVXFMTGhodkNZSVdZaW1wYkxnaEVWOTY4cElNeVVuU2dXTFR4RHRJM3RVcy8vclg4NCtIL3ZYd2gxRWFUb0xkL2dkdXp2eXZIeDc4UXJIaFlranJhc2lnZ0hPNjB4QzRaVVJVUTdkeEIzQXYxdFZSdXBMUVd3NGFJcTFvbkFNU1BPRm56dTNSeFY3ZVhqSjF0cnJWSVE2L0J5a3pUc3B0azRxTUVUSWZwekU3Y2plVitPTDdEK1hveWorRS8rL2t6cHNuM2RXaUsyZld1QnJaKzIvQy9QUVZtRU9JZzNTY2NHUEdTck1HUXBXSGVMOFlaZDJ2NUxHT1g4Vndtb2FwSCtoMTBBSjFsdURjSWRHZ1NEcTRabUV6dWFSemJsOFg0UjZMRysvbmNqWjdXZVdzeDRkYXV3TlJuaW1ZWFBKQkVIZWtGQ0g2VW5iRk1JbWdtRHorMVRhN3dabjQ1U0VPbStRQzlvL3FnVHlBWEZnS3dkcWxlUlhLTW1YR1NBYUNXYjVZS09TL0ZzbCtSdEs4a2R3VThjUjhVZGhiVHcwSmFUbmlYeVFvOEk4c3ZDRHNVRWd6Q0hDQk0yTTdBV2pSMElNamxNdExMdUJHSWgrT0FjczNDR3E5ZUNnc3EyUisyUnJMeVBDdk5BVzVpQldyeis5M082dzNJalgyc2VIWTN0bHUxVWJhUXdGaTN4b0ZuVk90eXA3dWtveVF0MzJNYVRNWTZPdDkwY1ZzMnRPcTJBWG5WTEJobmVyWWlPNlY3RWVIYXB0WVFPZHp1SFA0enBXMjVzQmc3dTJZYU9QaTNSOXZ2NzBDbHZnTEI1WnpINmF5RzF4LzFmTmI2SGRUZDF0Q3JFdGNKeE5oSG41YkZtVU1BZS9RcU9yREJibWdISk40bnhwcWszYVlqQWx6ZlBPMU8xejRET0lZdGdvQThEN0JkNHpkZ21LUnhIMVdON0NodEsvVDZsZ2xSWnNLTlhhNmVQd0xqQlptTWNEUEd1UTRRT2JZdkQrcVFPaFBnNGk2cEdOVkxobWlxanp1SnpRL25FbGtBK0lBM0U1VUtRa240WlJWZDNpa0pBWlB0aUFrZmhGU3ZLRlN2SkxsT1Nqc2NGZE5jNk8zNTZlTjNyblptTXFPeXlZSVJWOXQrSmFXNWpEb3RvcmNac0lzRmlHRk5PSVdLKzFVem9oMm1VM25hcW5tL0ZXWVQ0L0lzeHZQTDNjRnJhd0VHOVpIbG5VK3JVUWgyTkRldStlR0ZVL3UzdDhvYjYxeXpsRUMrZm4yODNwbmhoYXlzNDdMaExaaDJaVWUySTZNQWgrcU9rRlgwRGFNUHlaWDJuWjk4SDUvM3NWUlRJWklNcGZXQ1ZZdHc0MWJHaTNLbmJCU1JYc1AwTksyUmZqL2txL3Q1dmJUWEtYeWc3Q0hEWVF5bXBFTmtUTW8vR0dKb0ZlN3NMbTZqVFArWVVRVm1NRGZCNTUzbXNqWWgxNHZXZHhyZjIrZ1dmQ2ZrYm1wU2ZVNDVWZ2dEQ3ZRTjRXWkFsdjRScmczV0EvaTIwRUN2V2lyVUtkSXVxY0JMcnVSUVdCZkpBR0J5Qzl1YStTL0RZbCtYY0dDRUZDNXZwZ0pUYTNlMEpKZnIyU2ZLcVN2RDlHNFk5VWt1OUs3eWg2UjJWVXhIeG9SSmhES25kUXd2d2ZDM2Y4RTZKY3NBQ0ZGSGhicUUvRmJzYlRDdTJVYjZoZHQ3dXd6MjlsQytIcm80UTVwSVA2S2N5VEVlcFFYeC9keVJyRThrZWppOWpWcDFYWU5lMU9CTEcwVFNTYWw4NTVJUU9oQWxQeW9ZYldHZGNFL3cyNnFiODlxamh5N3JxUTNXU3FJY0VUbXhMc0NIT0llSUpmWVRNZ0d3UU9ZcFltY1M0MXpXbnZaWURQNnhYcWtFWHpONkdlWkVROWJnbkdxVTRKUnRieE5pYWlEdS9KV2x1dzE1MVV3YjRjVHpYcWlnUzYvc1VGZ1h6Z0FRZGE0ZWl2QjNBMG1HN1JSOGdlSC95S28rYWVVWkxmakRQakIyQm4rbndTOFBUK01rV1lROVRWRWVZZ01HdXdrN0RXaFRzdTNnL0ZKa2xkMmxYL0pkVEI3bmtodTh2NmRhZVZzL2ExMWJhWWJ4bXdNSzlQcUlQZ2dIUjltQW4rNm9nU2RyNGRMYmZZRG9XQ0hWU081UUkrK0F6K0xHb1RhZUozV0xsbE4rUjcvdXlTU08xNkFzSHpUMkZldExYNUcvZzFDd1ZPcFNaeGZwTkx1eGVrZWQ1SERmQjVnODhPdkhmMnd3eVJmazdxZXdOQ0hUYnJZSHdqOFBiN2lVVjJ4TnpwalZDUWZieE42RHVJcE51cDd5RFUrMVRhWSsrMjFxaExTbjBud1VnTEx1SkFabk5nRzB5SEg2NGt2eHZybEhXTFBFSjJDL2dsU3ZLbk1BSVBkZkQ5c0g4Q3BOQTNOdUNaSUdTUkQ3YW1Xcy81dXpCM0lyL09Zay8zZ2pOZWt5Um43QkIwWG45c1NDbGJOS0tZSGRlaG1ySEM0Q1BteVFwMWlHYkRTQ3JZT0lDdTFpQjRnL0l2bkFjaTZYQnZvVGtYakwrQ1puL1J0YjRnYnVLbnNqdkMzRHcrZUlSWE5kV2R1N0c1bzR0ejV4dmc4NVNGK3RZYTlSamVBbWVCdTlCSUVuZ0xmMTdaTjZzM2xGSk9mZjlMcUdORVBjZWJ5V2szZ0VBK0lBNTR6b0hEVVRSZGhqWHNHd3dRZG9UYzhNRXZTdkozbE9RUEtjbi9yU1EvVjBuZUErZkNVeE03ZXQ4bi9SNzdLVnFZend2WjZkZW5kS3EySTFWZU4zOExRcWhETFRaMGhZYS90emRJbVAvRDV0cElWM2dRNnpxaittSnJyVytNVUllRmU5MWZxZXpReFI0aS9DRE13YThlMndKMTF5Y0pZVlVJWWUyaThiNk0xU0RPb1h0NlN4YzI3eVdFOVhPYTV4NXJ3ck9RS21xamVBdnZLYWVaM05hcEIvTkM5anp6Ty91WHM2N3RhK3pOTytqZDRBTnZNdzd0bzV2SlZVVzZ2bStOcUdOZkNyOUgyNWtHN1FZUXlBZkVBZDg1MEFSbmJwK0hzN2doQXJyRkFERkh5QzBmd0ViUlowcnk1NVRrTnlqSkp5dkpUMUdTVnluSm05SjdnTDRGd0FHSW1Qd3lHWVg1M0JCNzY3eGlOdWI0S3J2UkdJd0xpMTRJWndxY09jd0FVNFc1eWJXK3pvZzdtR2NQR3pVM24xSHVkMWYyYllXd0hvb1JqZXN3aWwwbmhCVUswQTh0TmFXMjkzUnA5OU5wbnZlQmJPQ3RJOVNoQkdmQU1kWHM1WE5LN095ZmJoMmd0S1hXSHBsb1VnYU5VVFhxbUZWUTJzWmlNM3BWMmVVMlRnUEpWTVpDWmpxMEcwQWdIeEFIdERXZWd4bmJZMUMwdjB1UmR1MENOcGV4QmNzelhsS1MzNExONi9waDkvbjk2QjJSWTZuc2MwUHN6Zk9LN1JwbzZQb050Y2tRMWMzRkZGRENYMElkc2hBZ2pSaUVqNDlkMmZjV3d2bzh5UTdqMDRXdzhueStSK2tLWFRlWTU5TG11alRQK3hORzNyT090OUFRRVRZWm9jZUMzYXZDQVB2UTEyMkVzRG9MWVhWQXdOK3JoTEFPRU1MYTNvVHhiTTNMQkJ2WnZZcTlOaEliU0RZd0ZqSmJvTjBBQXZtQU9HQU1CM1pUa3Rjb3lZZmhQUGJubGVUTERSQnZoTnoyd1dZbCtUZklSNmg3SDY4a1B4RjdMK3htd0hORDhDcVZIU1BtTURmN1FCVG1VSk5Nd2x6N1F0NFlRQlpDalgvSEIwR3lKQTFoQ1lLMGtRLzJqTkFnenA5MmFYTWZGK2MrTnB0NXF6bURaaWNockJaQ1dMMkZzRzRXd3ZwUUNHdGpBL2RqaFJEV08wSlkveWVFTlVFSTY2aWdSWHRiTExtQlRBVFk2RGkzUnhWYkhDWFVzem4xWGJzQkJQSUJjY0Q0Sm5TSEtjbTdvVEM2VlVuK0dvN3IwaTNjQ09TRDlVcnlqNVhranlySkZ5akpCeXZKMnl2Sm14bnc3QkJTRU9adm9qQjNJdWJsRmdsejNhSWlCM0cvQzNHNVdnanJCQTl0T1ZRSWEwUEE0dndYSWF6OVhOaTh2eERXcWpUUGZia0I5ejhiMFZVSTYyNGhyTFVlY1FSNGZwOFExbWxDV0RzR0t0UXR5eDVyZHhBSzlkZWQxUGU1SWJzc0t0dUV1bllEQ09RRDRrQkdjZ0M2ZFIraEpPK09hZkpRVS95eWt2d0hFbzIwY1dBSUI3NVRrcitnSkw5V1NYNitrcnlya3Z3UUpYa2pBNTZmbkVXOGlMbVR5ZzZMTDBwbDE3Nmd6MVZjNUpHQWVkeWpLT01kQVl0elFGdVhOcitkNW5rL0VNTGF4Z0FPWkF2QWw2T0VzTDczbVM4YjhEeGF4a0llVUNyWVNDZWk3dFNvWjFGRVhic0JCUElCY1NEckl1NEhZRk82Z1VyeU9pWDVRdXpzdmNZQTBVWWdIL3lFdGU3WFl1UEVMa3J5QXcxNGRySWF6dHpxOE94SUYyNG5sUjJFT2FRdlFuUWtnRlQyRUtaM1BvTk53QUNQSUM0V3docUtvNkYyTjJDUlRRak9CMDk0TEZ5V0NXRWQ1c0tlRGhyRStUU1hQdngzbXVlRnlPNUJ4SGZQdUF5UjdaVUJjd2MyWnY2bFE2anZFUy8xZlU0b0srYW9hemVBUUQ0Z0R1UU1CM2JBcURzMHB4dWlKSituSkw5WFNiNVlTZjR6Q1VmYVBEQWc0djQwam9lRHphVUtKZmt1Qmp3M0dZL0kvTjlDRnA2Znp6NGNYY1JHOWFoaUI1ZGk4N2ZnVXRubnA3RGczQ1NFOVlvUTF2bENXUHVRZU1qcXpZSXpmSXd1OWsweit2bHh3QUxyVlkyMThoME40RUEyb0xVUTFpY0I4eVlhdndjODNZQkZwNzQ3UW4xRTl5cjIxcWhpZTlaOGVGWm1DM1h0QmhESUI4UUI0Z0NtSFIra0pLOVZrdmRWa2svQ0NPY1RTdklQS2ZwTzRsMlRhSWNhOTdleDk4SW9KWGtISmZuZTlNNUs3cDBGRWZOVk1ESnRYb2h0bmxIQWJqcWozSjRERG5PckEyNytOdDNsNHZNNUlheHVHaGZmamJHKytVSWhyUDlnZ3llSTBuNk42Y0d2WXhUNEtpR3NjNFN3ckd6cWh1MHpQZ29ndXBoS3AvZExBaFpXRzEzT094L2s0dHhEZmJxblVFZmZYd2pyR2lHc0YvQVorUUNmbTNleERPRVczSUJySjRUVnhBQWVwZ3Q0em0vVktNeGp1L0R2cmNNUGJiR1ozSzVjMkZsWmMzdFhzcS9zT2VyNWJNUDBRbnVUT05PKzI5b05JSkFQaUFQRWdTUTRzS09TdkFVS3BETndodlkxU3ZMSE1IMGUwcFpwdGpzSitTQkUreVlsK1FkSzh0dVU1T2ZpSEhmb3lVRHZzbmpwN0hORDdMbGhwYXpQVWRWc204SmExcnJLWXUyREhaZFc3dUVDOUJzaHJHRkNXTnNGYVA4STdLYWNxcTJRQmZBcHB1OVB3QVpldXNXRWFSZ2VrSEQ1S3NtR1dwMDBpS3JUWFBqdkJCZm5uZTdESmxZdklheW4wckRsRHlHczk3SDVHV1E5YkdzQU41UEJXVUpZV3pSd3BqN2NwOU1uN1dzdGUzNDZ6SnB2VlNuWWdsTXEyS1laQmZaM0NMNUptUlJOMTI0QWdYeEFIQ0FPZU1DQjdaVGt6VEV0dWFlU2ZJU1MvQUlsK1IxWWIveVprdnczRXJBVWlmZUpBMnR4czJna05xTEwyZmNhTElMK21GWmdwN04vTWE3SWJ1SURxZXd3QXhpaUhBR1BHZG8reVpuV3FXS2RFTmJaUHR0ZTdFUEs2Z3dEUklVcGFJd1pDRUVKbDRhaXhUc0lZWDBXc0ppNjFZWC9qbkp4M2tjOXZJKzdDV0hORXNMNnpVTy9RS2Z5aWNnUlppQjJ4ajRhWVVOUnJkdEhiV3N0VmxnbDdFM2hydTJyMlVlaklab2Vzak82ZnM2UWFMcDJBd2prQStJQWNTQWdEdXl1Sk0vSEd2aXpsT1F6TVhYNVJTWDUxMHJ5alNUZ1NjQjd4SUgzbE9UamxPVDc1Wkl3WHczcDdIVWg5c2UwUW5aVnYzS1dYeW5ZRGtYQ252K3JhWmI1VlQ0dlJDRkNmWVFQZHQvam84MFBHU0F3c3FscnUxY0MvZUtBN2ZuVXhaZ3NOMDNzbG5pWWdUTFVaeDlCRi9TQnVBbkFERUcrRU5ieWdMbVNTdFlPL0RuUEFEOHgyQXlHNzg0K0paRU40Z2NIbGJId0JmbHMzYlRNU0huWGJnQ0JmRUFjSUE0WXdvRjlsT1JsU3ZMZVN2S0pTdkliVWJ4L1owQURNMExtK3VCSm5HckFzanFkSGNlbVBUMjBsSFZ0WDhNYWMyRkhNQUpPWjQvR01RRXVUTS9NTU9FNDNxZTYzMktNbnBVSllUVVh3bXFrZTVHZUFFY0VMRnkrYmtBTUYyb1FVejNTOUYyTnk4WjVMVHk0ZjRkZ1NucFF2dnBUQ0t1ekFid2RwWUVucVdLOUVOYnpCdmlLT1lCdjBKRVZ3aDdOZHZHcEZYYnAxY1laQmNhTGRPMEdFTWdIeEFIaVFBWndvRG5Xdnc5VmtsK3FKSCtXWnI1ckY3Nlpoayt3L0lKbEMwQ1lyNTBhYVFMMzFmaldkZ2RkU0dlSEpqMjF3YWV6eDZZTGZ4bnd3dlJLRCt6dUVaQ3RIM2pVbk9wVWpNZ3ZTM0FlaVBUOUZ6TVpvRnY2QWJvWDY0aUhBdVRGejBKWWh6Wmd6MXNCYy9YLzB2UmJyY3VhNTVNOHVIZWpBL1pWTk9acjVPeGxHcTg3Vld3MjZGbG4wYlhwckZVdG05Q3p5czcwTWwya2F6ZUFRRDRnRGhBSE1wZ0QwSG0rRzNhZHYwZEovcWtCUXBCZ3RnOCtWNUszTTRDN2FjTWVYUk0xMC95dUFXWHMwREpoZDlDRmRIWVE1NW9YWkg2bnRpZUNtOGhSY1lCMmZ1dkN6cDJFc0I1MmNlNlBzUnQ5b1NadTlBNVlxRFIwblZjR3pOSHZoTEIyQ2JnaFhCaHJ1dDNjTjBpTGZ6SmdYOFhEN1JvNGU0Y0IxNTFxcW50elRjODNTd1RZTUlidkU5U2xqejIreXM3NE1sbWthemVBUUQ0Z0RoQUhzb3dEKzZOb240Rnp0VmNiSUFvSjV2bmdxVXdjMlFhTEdhZ3hoMXErcFdPSzJNQ3ViZXpVd2Z3S3JlbnMwVGhhOCtKMFRCbzJOOE5JYTFBMlBwT21idy9DdWx5djdGaU16Y2FDNHNidUFmdTVhd1AydE5mQXo2UFQ4TnZ4THM5NWljdjdkbUE5V1JvNjRFZUpTQ0xjWU1EMXBvT0RBdlFSeTBhUnJ0MEFBdm1BT0VBY3lJRU84ekNLYXp5S3N2VUdpRU9DT1Q3b2J3QkhrMHBuWDRsTjREYllUZUFxV0g2bFphZTAxMkF6SHQyTEwwU1F0YW54OEhDSzl1NnBJUjMvbURUOCtpOGNNK2VIUFV1eHR0bHZiZ1E1WTN4U0V2YThGUEI5dnpnTm53MTBlYzU3UGVnWHNEcGdQeVdEN2dId2RhWUIxNWtPMXVCN2paa3Uwc2VnU045a29FalhiZ0NCZkVBY0lBN2tHQWQyVnBKM3hUbnVQeG9nRUFuNmZYQ2ZBYnlzTjZWOTlaUklTdnZpa2NYc2hJN1ZqQlZvbVduZUVNNHpZSEg2WUlxMThrc0N0dS9hTlB4NlNrQzJUZkNSRyswQzlQSGJBYVNNcDlPMVBkV21mVzQ3eXk5eWVjOEtjS1JoMkVCODZmTVl0b2tHWEtPYkRUZG1NbXFqUkxwZGt6NDdaSGQzTjJrRW0zWURDT1FENGdCeElNYzVZQ25KYjZMSU9zOTFRUCtDZlEzZzR6OEE0aHpTMmk4OHFjS09tQitnWjZaNU1tbmlYczVDVGhmalVyRDVPUTBkbGxPdERiMDFZQnRQOUlrZmJ3ZDREY2xrQTd3Y3NGKzdwZUNyYllXd0huTjV2cmRkQ3RoV3lOZXd3WmpoRTFlN0czQnRidkNxQWQ4RGxxeElaNkZhZG5uZkNoYWVuODkrbWF6L2UrdEF1d0VFOGdGeGdEaEFITEE1c0wyU2ZJaVMvRnNEeENKQmp3L1dLTW56VFhzZVZrRnErOHdDMXE5enRUM1gzS0IwOW1qY1o4RENGTkF5U1h1RFRtOU90WFlXVXRvLzBXRGpwUm1lS2p6Qm9Jd0VCN2VsMkl6TmJWZjVkNFd3dG5GeHZ3NFR3bHFsZ1h1cDRuY2NMK2dsVnc4MFpLUFJEZW9NK0I2d1pFVTZkSGVIaldjWUVScGVjR1NrQ2FvQjMxM3RCaERJQjhRQjRnQng0QjhjR0tBay81MkVjazV1RkVDUGdnS1RuZ2xZckVDZDNpMW5sck45U29UMlJWVWM5REZnVVpwS2grZi8wMkJiS3VuR0FtYy82L0Roc3hrODgvenVKRzFhRXJDSWJKYWtYUWRnbDNlM005LzNjbkcvV21JTmN6aERNTmRqdnJxWmtPQUd2MkQ1eXpEY1pQclZ4Ykg2Ry9CTllNa0N5clJhbEF0N1Z2b3J3MHZzYngzMFhOSDkzZFZ1QUlGOFFCd2dEaEFING5KZ0p5WDVJZ01FSXlGNEg2ekNFWDdHUEJ1d2FIbHlhQ2s3c0N6U0ZFNllnNTBNNmZBTUM5cjlrN0IzcWliN1NwUDBaOURSM1ZnODVqRS9uZy9JN25jTTllLzVTZHBWN2tGSytWcVg0N1VnR3YyVFp2NmxpaCtFc0hiMGlLc0ROTmovb3hEVzREZ1pEeGU0T0dhWkFkOEZsZ282dEsyeHYyMTV4Y0tlVGhLZUU5TGVORTc3UjU5QVBpQU9FQWVJQS9WeTREVVN5VG01U2JCRVNkN1lsR2NERml3UERTcTE2ODhORStnTERGaWtyMDV5VWFyTDFsbEorbktJQWI0ODJVTnVCSFU5ZndoaEhaNWsrdmlpQUgzNWZwSitPbG5qZElCb3VFMnQxNFcrSG5CMVp5R3NidzNxbDlFMnpXTytaTUEzZ2FVYlNZY01zYVBiMTdEd3JCRGJyTG16dS9hUFBvRjhRQndnRGhBSDZ1VkFSd1BFSWtHUEQrNDBLWUorMzhBeTF0U3NGUGNxQXhibjBHVTZsSVN0VjJteWIwbVN2cHhtZ0M4Znl0Q1o1NzJUdE9rYy9QbmZEQktPZFI2Y1o0c1FWaHVYOStzV0EvZ1gxR2pGZUpnUmNKZjE1a24wQVVqbjJGTU4rQzZ3ZEFIOVZhQWVmY3FKVmJaSWgvNHJKTkFOV0lBUXlBZkVBZUtBZ1J3b0pvR2MweHNFQXd6Z29MMVlnZm84WG1teHlocjlDeW5FYTVvWDVpQUFEMDNDenJzMTJ0Z2hDZnV1MGV4SFp3ellMaDV5NDhxQTdKNmZnazN2QnVqUDF4cXdaVGNQR3hWV3VieFh3d3pnbjFzVXVyaitvZ0R0dkRsSm0wcDlicEpwYk5PNHlocUxOZVpRajE1c2IwenJHcjJtL2FOUElCOFFCNGdEeElGNk9YQzlBU0tSb004SEs1WGtlNWtnMEY4YldjS0txaXhXWVlaQUg2UjVRZjZHRUZhVEpPeDhScU9ObHlWaDM2T2EvUWhZTG9TMXQ0ZmNxQTdJN3VjTUhwMVYzOFpNZTQvbWkwTXp0eEtYOXlwZElXZ2F4cmp3d1owQjJYaG1DamIxODdGSm92RWlmYzlpd2NiRGZQUzZFRnVoNlp0TEMyTVNSOFFCNGdCeHdGd096Q0Z4VEpzRFN2TExkSE1SSWduM21KUGl2cE1IM2FiZDRPb2s3WHhSbzQxZkNXSHQwSUI5RDJvV05RNk85cGdmUVl5d1d5bUUxVFFGbTU0TzBKOVgxV1BIZVI2ZEE3cTE3K1B5UHUyZmdVM2hFdUdtTkgxUUVZQnRHOU1vUWJoYVF5YUZNU2h0WTdIOENzSGVPcS9ZM3B6V01YWk45K0tUUUQ0Z0RoQUhpQVAvNUVBckpmbWJKTTVKbkVkeDRGQ3RBdDJzSm5Gek5TN0ViMDNTeHBjMUM0YmpEVTY3ajhaMUdacFowUzBGbXpvRzZNOHRDY291b0NiL1NZL09zUmlibW1YQ1JrcFFlTlBRVW94Vk9Hb3dGWnQyUzJQakpHT2J3NGtFdGVoN0ZBazIrTmcyOXJkdnBZWmFkRm9Za3pnaURoQUhpQU5tTllSN2pvUTVDZk00SEZpZ1c2QS9Qc1NJTVdzdFVJVG9xcE51bklTTi85VXNGbTR6SktXMklYeUQyUkJlY1dNUElTd1ZnTjBYcG1oWGtHVUUxeVFZN2JiSm8rTmY3OUc5bW1BQS8zUjB6SS9Hdnp3cU5haHZ0dmtoYWRnMUtZMXp0ZFA0VFdCK0FHclJEeXZIS1BxYzRHZWo2MTZNRXNnSHhBSGlRSzV6d0ZLUy8xdEovaU1KY3hMbTlYRGdleVg1OXJwNENndVVoUVBMVElpZzM2RnhFZDRtQThRNVJNejJyY2UrMnd3UU13NU84WmdibHdaZzg0c0dOd0Riak4yM25YUHZpeDNHdlRxK1Z4MjZ5dzNnWGpUZUU4SmE2SExqN3ozRE1vRldKdG5BTWw3WkNQRHZ6UUFBSUFCSlJFRlV3YThwbnV0MmpkOEQ1bmRIOTRsUWl6NG54SDRKT0lxdWUyRktJQjhRQjRnRHVjYUJmWlhrZlpYa2R5akpWNUFvSjFHZUFnZE8wTVZiV0tETU82bkNicDZqY2RFa05DN2l4MlpBV2p0Z2dJR2ozdUxoYVkrNXdRT3lPOVdtYUZNMFJjOWh0dmtHRDQ5OXRvZjM2azBEK0xjYU81clhvazBIdUR6ZUV5bjZZSGNmNis4M0pEbjYwWXROQTJqd3VKZkdid0x6RXlWdElrMVJQeDlieERiTktBajBtNnQ3b1VvZ0h4QUhpQVBaem9FbVN2SXVTdkk2cWlzbk1lNXlRK1pHSFJ5R0xyYmgyU0UycTFjbHk5TXIwSU5zdEJXTnh6SkVuRDlaajMwTERMQXZHcTA5NW9hWGtXSzNJNnFpOFU2QWduTjduQ3p3Z3NmSDd1SGhmYnJBQU81ZEZNZXUxaTZQT1M1RlAvUTFzT25pM3NpalZNN1ZVK1AzZ1BrTnlCYURzcTdIaHBUYW05UkJmbmQxTDF3SjVBUGlBSEVnbXpqUVNFbCtwSkw4RkNYNUpVcnlWNVhrR3loS1RzTGNJdzU4cElQWHE2ZHd0bjVhSVJ2UXRab2RXcVpOb0ora2FURy9Jb2x1MVNhSTgwMVlueC9QdnBrRzJCZU5PUjV6STRnUlppc2JLQjNRbmZFQm16TjFIaC96ZHlHc01nL3ZVeXVOL1NNY25KVEF0czR1ajlzNVJWL2M2dFAxRFhSeGYxS05uby9TOUMxZ1FRS3l4aGFjVW1GUE1nbnl1NnQ3TVVzZ0h4QUhpQU9aS3NRUFZwSjNVSktmclNTL0FwdTdLUkxqSk1aOTVNQVdKWG56b1BtK1lYb0IrMlo4RWV2WXRvYTFydEt5U05vZXh6cVoyQTFkZDgyNWc5RUo3QnRuZ0czUitOQUhmcndWZ04ybnAySFhWUUhYbjIveGVHTXF1cDZkWlhqWDloK0VzQTZ2eDdZQkxrY2FicE9pTDViNmNJMFB1TGczaHlPSGtqM1hSQTNmQWFaTG9GOXdVZ1ZGMEExWWVCUElCOFFCNGdCd1lCY2wrUkhZV1gyZ2tudzIxbzB2VXBML1JFS2NoTGdtRHJRTit2bUU5UGJuaHBXeUZ1V0NWVnRhRmtrekRCMEI5cGhHd1JHTmx4UFlOOElBMjJKUjZURTMrZ2RnOC8xcDJMVkxCcy80ZmhuVG5iMjhUNE0xWHM5bk9EcXNQdnV1Y1hIOEJTbjY0bUJEK2lORTQ2SVV6bk91aG04QTA0VThKNEpPS2U0a2prZ2NFUWVJQTRGd1lHOGxlWUdTL0dnbCtWbEs4aGxZNC91MGtueUprbnd0aVhBUzRRWnlvRy9nQXIwdXhPN3NYNjZyL3J3WnB0b0d2YWovRmtXV2lkM2trNm5uUHQ4QXUveE9iV2M0M3NwUG16OUlJenJLTVBNaW5JR1k3OE05T2x4amF2dVBRbGo3TldBZjNOOHZYSnlqVTRyK2FHdmdmYnM4eWZQMDB2QU5ZRHBCQXAxRUdZa3k0Z0J4d052b2R3dU1Oa0k5K0ZnbCthVks4b1ZLOHRlVTVGOVRiYmgyb1VsSXp3ZkRBaGZvYzBMc3dwTXFkQW4waXpVdDdFK3N4NlliTmRrVUQ1TmRSc09Dd3VkQ1dOdDZ6STFUQTdDN1BFM2I3amJBNTZtaXYwL1A4SFdhcnVmWEpFZU45WEp4anFWcCtLUEs0K3Y4VFFpcnFjdDcxRkFOL2pJaHJId043MyttR3lUUVNaeVJPQ01PRUFlUzR3RE1najVRU1Y2Rlk2ZEdLc25uWS9yNWkwcnlUNVRrdjVFQUpBR2NwUndZRmVTN2NzMFV6dFpOSzJEOXVtaHBFQWVqai83UXNMQy9JMFBFK2V0eDdMdlFBTHZTcWVWUEZUdGhsb09mTnM5TzB6WVlPN1hXQUo4bmk5VXVOaUpNalo1RDA4VFNBTWErelVyREo4ZDZmSzB6UExwWFhlTThVMUJmUHgzN2dMQmNSQjZsdUpNNElZRktIQ0FPOEcyVTVQc3B5VXVVNU4yVTVFT1U1TE9VNURkaDZ2a0hTdktWQm9na0F2bEFGd2VHQkJvOW4xbkF2aHhYWk0rQ0xXMmpMWG9lNUFKL2JUM1JxSnNNRUZQUmlCVlZjd3l3S1I1dTg0RWJRMzIyK1QwWHR2VTJ3T2ZKNGdhZm4rRnJOVjFYZFpMMkRYTjVublFhNloxaCtNakNJNFd3YW9Td212dk1qWXhBSGdsMEVtY2t6b2dET2NDQjNYQU1HWFEvUDExSlBrbEpmcldTL0ZFbCtWdEs4aCtWNUp0Si9ORUdBSEVnSVFkT0NWU2d6d214NjA4dlovdVVCQjQ5UDBRSWE2T0doZjJnQlBiY1pZQ1lpa1pkakgxZWo5anljanhabnNmYzJBWlQ1djIwVzdpdzczb0QvTjRRRnVJejV1Y3pmS1NtYSt1UXBIMjdDbUV0ZDNHZUs5UDBpNXVPOGJGWUhQQjdPZWVRUndKZHUzQWdrQStJQSs0NDBGaEpmb0NTdkVKSjNsTkpQa0pKZm9HUy9FNGwrVXRLOHMrVjVPdEllSkg0Smc2NDRrQjFrT250ZjB3clpDZDByR1lIbFFwV0crekM2QkVOQy90bkV0anlvQUdDS2hxZkNtRTFpckx2M3diWTVPVjRzb1l3eW1lYnIzSnAzMmNHK0QwUjNrZmhITVF6ZklsQmM4N2p3YzJtRmpTdTNEOU52L1RNb0F5SW5FY2VDWFFTUnlTUWlRT0djMkJQSlhrckpmbFJTdkl6bE9TVGxlVFhLTWtmVTVLL2c2UEhZRTR6Q1REeUFYSEFIdzc4cVNUZlA2aG5QandyeEQ0Y1hjU0sybGgyaW51QWk3VWVtc1JMUVJ4YmJqZEFWTVdpVzVSOU54dGdUeUk4NkFNM29QYjhleDl0L3NYbGlERTNEY2Y4em1Ud3VnOUFRL2ZwaDRDdmNYb0s5b1Zjbml1ZDJuTUhiVHk4WmhMb3dsOHVrMERYTHo0STVJTmM1TUIyU3ZKOU1PMWNZT1I3cUpKOEdxYWVQNGhkejc5U2txOG40VW5Da3ppZ2xRUHZCUFZ1K0hrU1orRjVJWGJ6R2VWczU2TEFvK2MzRzlJTi9kcW9obE5oZzFLVGRXWVpKSXQxUHRXd2p2Zlo3b0V1YkR2ZEFML0h3NzFDV0xzSCtQd0cwU01nRnMrbmFOOExMczcxcmt2ZjdJdlBoeGZYZlV2QTl6WG5rRWNSZE8xQ2hVQSt5SFFPTkZLUzc2NGtQMGhKenBYa3RTaTRZY2IzZUV3M2gyWnJEeW5KWDFhU2Y0ZzEzeENWSStGRlBpQU9tTStCeTRONm42eWFISW1nbjNWc05XdFdHbWo5ZVlFR0FmTk9QYU9oZmpGQVlEbllHQ1cwM2pEQW52b3d4QWR1N09LeVpyZ2gvTWVGYmRNTThIa3NQaFRDNnFoSjJMd2Q4TFVXcG1EYm1JQWEwTldINXoyODlpQXpJM0lPZVNUUXRZc2JBdm5BRkE3c2pHbXNSeWpKeTVYa0haWGtKeXJKQnlySlJ5dkpaK0pDL2YrVTVQOVJrdjhQeGZiM05GNU11NEFpa0EvODVFQ1hJTjVCUDJOenVKZlBLV0VIbGduV3hzcjY2SGxzUTdETDhMOXZjSEhNVFQ1RTNrOUYrL3hNOGZZQ2ovbkVqUWsrMnJ3SlI0S2xZOWR0QnZqY3daZENXTGNLWWRWcUZEVmRBcjdtYVNuWTVuWU00ZlVlK2NqdEprRXNCbWk4MzFtTlBCTG8ya1VSZ1h6Z0JRZTJWWkx2b1NSdmptbmpaZGl4L0hpczJ4Nkp0ZHNYS3NtdlY1TGZxeVIvRWtVMmpCRDdSa20rU2ttK2lZUU9pVjNpQUhFZ2lnTmZCdldPdGdWNlhZaE5QcUdLN2NvRmExc2IyR0xJYlYxb09yZ2l4b2FaSG9tOUZ6MmVoUTNSMEpPRnNIN1c0S05Vc01wRjh5eWR0ZWRqMHJCcEJ5R3NWd3p3OS8rd1VXQTc3SEFmMVBQYVdBaXJVZ2hyUjQwVEQxNUowdFlUaExCV0dEU1I0S1FBSmpzUWhIc2ZrRUFuY1VnYkJHYlVZKzhaSmE2ZDZIVlBGTmZEY1N6WWZLelB2Z1BIZzcyb0pIOWJTZjRacG95dnBWRmhKS3hJWEJNSFBPYkE5S0RlaFpEYS91bVlJbFpVRmZqczg2Qm5KbitIbzVhYzgwLzI2TGpRUUdxMHg3YitLSVNsQXZaUE91aVg1cjNmQjhkV2ZTMkU5VldjYVBaNVB0cThLQTE3RDBIKzZQRHgwOWdKdkZ3SWEzdU5RdXhVTEx2WU4rcS9IU3lFdFNWQVh5eU5zMEhnWUUrMDhTMlB6dFhMWS8vZDdZTS9YaFBDMmswako3SU9lUlJCMXk3T0NKbnRneDJVNUhzcnlRL0VUdU5WU3ZKT1N2SVRsT1JuNHNpdnlWaUhmUTJPL25vVXgzODU0dm9ISmZrYUV0Y2tyRWhjRXdjTTQ4RHZRWFZ2L3dtYXc4M1BaMWYzSzJlTmVXMlEwZk9EaExEKzFEaVNhWXBIeDd4ZkNHdG5JYXh2QXI2V2VQZzE0RTdhRDZSNTc4dmp6THcvUDhEUlpXVXAydHRPYytQQUkzU0xGaUdzZjBYWnMyZUFUZnppNFNkTWM0ZE5pKzZZRFFFWkxKczlQTWM4SDN6WUNQdGZlTzJQOVNuTWdpY0lFdWk2QlJ6QjdQblpUdVFheEhWbGxManVyeVEvVjBrK1ZVbStRRWwrblpMOGJxeTlma1ZKL3A2Uy9Bc2wrWEthc2ExZFJCRElCOFFCZnpnd0s2alU5bzB6Q3V5L3Q2KzFXS3ZLUUp2RHpRNTRVWDkvMUxtSGUzVE10L0I0WXpXSWxIZ1lKNFExTjZCemJjQk5sbFR2KzRFSlNnR21SUDNNYVQ3YVBjZnc3dVN4dU1zUVVmVkdnaFR6OXczZ3ZkZDQyMGMvSHVCeEtVdzB4aHJBazR4SEhrWFF0WXRFZ3Z2VWNPZ2VYcWdrcjFHU0g2TWtQMWxKUGtSSlBsWkpQZ2NibTkydUpIODRLaTM4VTB3TFgwZmloc1FOY1lBNFFCejRCd2UrVlpMdkdNUTNhamxFenkvSVo5ZWRWczYyS3d5MDlueG5uN3R6eCtKM0lheG1lTzR6UERybXAxSFhzOHFRMFZwZ3k1S0F6amNoelh2LzN3VEhHeEgxTTYvNVpQT1NGRzI5M0lEN2Vwb0JvbVZoZ3RualZRYjR4NCtOcHhZKysvTmtIKzIvTWVDK0JGbUhQQkxvSkpBTmFHNEdJdnNRSlhtUmtyeXRrdnc0ckwwK0YrZGlYNHhqdWg1UWtqK25KSDlEU2Y0SlJxOGhCWk1XMStRRDRnQnhnRGpnTFFkNkJoVTlEODhzWUQ5TTVLelNpa1RQQTV4OVBqamdSZmM1ZU42ZUhoM3ZCNnloWmhpMTFpMHFQa0piU2dJNjM0ZHAzdmZwQ1k2M0NXdTg0V2M2KzJoMzV4U2FvYm1abSsxbHZiVnV3Ukxic1Q0VTlmK21HdUFqcjNGVVFINU45Q3g0QWVpVjBOSUE3bVFrOGtpZ2swRDNhS0cxVFl6UWJvOGp1Z1lweWNjcHlldXdCdnNlSmZsVFN2TFhsT1JMU1dTVHFDQmhTUndnRGhqSGdVdUQycVMxQmZyOGZEYS9UeVhicHJEV1RuRVBjQkVVNUV6dlovR2N3cVBqcmNUR1dNNjFmS0ZaVUt5TlNqV2ZIOUE1ajB2am5oOVR6L0V1U2hDdDlSSTNKV2xuaTREcitFMU9XWDRveHA0M2ZaenRIUS9RbzJKMWdQN3VuWVJQb01ua29VSlkyM3JnMzJzTWZFNXpIbmtrMEVtZ0oxZzROY0hHWjYxUmJQZFdrZy9GaG1mL1ZwTGZpczNPb0I3N0k1cUZyWDFCVFNBZkVBZUlBMTV3NE1XZ3hMbWQyajQzeE40K3I1Z2RYQ1pZV1UyZ2k3Sk9BWXVjM1hBTW1CZkhnc1ptaFZIWDRsVzZ2RmNSdi9jQ09OK1RhZHp6RnRqSUt0N3hvTlNoQ2Y3Y2tUN1p2RElxNDZFK2VKVmg0UlhTbmRQdUZ0QXAvdFU0OWt5SytwazlBaERQaTdFaDNXS2Z6N01GMzBzTitlVXNUSUVQNHdRS0wzdzkwZWRyNjB1aTIwcnBucEJBengyQkRyV0V6WlRrSE9kajkxR1NuNE1qZEs3RUJtalBZSDMyVnpnVGV3c3RlRW4wRUFlSUE4U0JuT0hBNTByeVhZT0tuSytmVnNnMnpTaGd4M2VzWmsxTFJORFI4M3NERkRpbjRqbC85ZWg0N1dLdUpaNklDUktqbzJ3cER1aWNOU25lNzcwYUdFODJKT3BuNS9oazg0QWs3SnlwK1Y3RzRpRk40cnk1RU5heUJDSTJ1aW1nRldCcEN1QlNuODd4U1pMTkRoK0k4N3V0UFBKNU55R3NQM3owWTFjUzZSWUo5QnhCSXh6eGxZKzEyNzF4WnZaczdEcitvSko4RWRackt4cmpwWDN4U3lBZkVBZUlBNlp5QU1ZOTdoZlU5OHNlcTNaQlpLd2FLd2gwckpxZkVkTDZ1clovNUZNazZxZ0FyeVVlL2kvR252R0dkaFIvc1o3anZSSVR0ZjNXQjV2LzA0QjlFTDEvTHNWajNpbUVkWHVBSXdHRGdsV1BVTHdqNW1lSCtIejlYMk12QUQrYnF5MUl3aWVReXY1U0FQZW9pWS9sSFU2UENvSm8yQWNVUVRjWEVNVm9vU1MzVUhpZmkzWGNOeXZKbjFTU3Y2TWsvMDVKL3FjQkN6c0MrWUE0UUJ3Z0RtUXVCMkJrWkY2Z3FlMXpRdXlyOGExWnEwcUw4V0Fid3dVNVdtMHRScFJqYTJqVHhRek5tUUR4RnR5Tll1eDVOb0R6VnFkNHYrOW80SGh0b242MmwwODF6SWZXWTErYk5MSXJ2c0hmdmQzbk9kOHc2U0RJWjNOUUF6YlZ4dno4SlQ1ekxUcWRQblllZTZKSkFNbmlIc3dVYU1nblRldnBNUUc4MmRlblRaSjRHUXh1Y1M0SmRDdXBlMEFDWFkvNDNrRkpmcWlTWE9CSXNOSFlxZndlck9tR05FTWEvNlYvMFVvZ0h4QUhpQU81VUhQZU9LanZINlMyYjVoV3lMYk1MR0M5anFwbSt4WUhudG9PK016blJiMkRSekNDN3NXeFlpT0hnQ01DdW81NDJCelRTUnV3WHowMTNsN2grUlR2OVkwTkhPLzZtSjkvMkFlYmg5VmozOWxwSEErNnplY0hVTzkvUzhEUFphSm1aVnZxdWZjMytYajlmMFNOUlV5RThoUXlIMkNqNWlzaHJDdGlHanpXaDBvY3o1am9tQU45dmljM2VPelREd0xtVk1ZaWo1ckUrVmJ2ZmJpU3ZCMk9DNXVxSkw4UnU1ZC9xQ1JmYmNDaWpFQStJQTRRQjRnRHVjMkJDM1JzVWtQWDlrdFByYkJUMjJ1REYrZmRmVnpReDJKOWxMaHdnOWNTWE11RkFWNUxMTTZNWTA5dncrWngzNXhFczcxb29YU0lSL2NyMlEyRmE5TTQzdXFvQm9GNURZZzN0emdsb0dleVNaSU4ySHJGK2QxSGZMeit1MVBzY1hBaWppMnJFOEs2VHdqcmFpR3M0VmpiSGNMTzY2bjRaVUFhbTNaK3dPc3NoYUtBN001bzVKRkFkNVdDWG9nenU4L0RzVFNQS01uZkl3R3VmZEZKSUI4UUI0Z0R4SUhFSEZpQmZVc0NGZVkvUW1yN3ZCQjdmMVF4YTFZaVdFa2JLK2pVZG9aMXUrRU13bmU0K0krOWpsMHdCVm1IVFRjbThPMWxQcDhYT3EzdmxPUjl2aXVKNDgyTitaM0pQdGdjYnc3MG5qZ3FMSjNqVlVZZHA1a1BHd3JSbXhmSnBGKzdSYWtRMXBvazdIazl3ZSsvNGlQZmVtZ1VhSmMzWU5zdnlLT2c3UEdxVENmWlpvazVqendTNkEzTzlvWlJZeDF4eE5qRktNSWhDdjRiTFlCcEFVd2NJQTRRQjRnREdjYUJLN0RCYUtEaUhKckNiWnhSd0g2Ynlsblg5dFZzLytDN3RqTWNjZldiand0NnIvRnJQU091Qm1xeTZlTjZaaSsvN3ZPNUwwL3lQaitSeExHK3gwMk82Tjk3MTJON3A4U3g3ZWcwTzJWdmpOTzV2c1JIWHk4SzRIbE1oY1BIcHRIOHp3MitqOU1jTGdqc2hoa3pwbVEzT09BZStuYXFCcjltSFBKSW9HOWRRTUFJc2s1SzhwRks4cXVWNUM5Z1YxdmRpeWtDK1lBNFFCd2dEaEFIM0hMZ3Ywcnl3M1NrdEFOK21jeFp1QzZmalRtK2lySENXaDNpSENCOUZEUmVZd3RHRnhOZGk2N1JhaFVKN05uTHd6RnlpV0ExY0g5M1RDRXlmVmJNNzdiMTJOYkg0dGgzbll2anRZOXpQRDhhMmptbzgvbFp2RElGV3g2dDV6aUpPcHU3eFUwYTNrL1ZTVDVEc1pNVGdzSlRIdmwydmliN013cDVPU2pRSVhMUVNrbmVWMGsrVDBuK21KTDhhMXI4a1FBZ0RoQUhpQVBFZ1N6a3dCTHNoNkx0dTJ1UFZKc2JZb3RIRnJNRFNnV3JxTkcyNkhuUVIwSGpOZUlKTWdlMW1td2EwNEM0OFBQY256WndiNXRqWjNNbjJoeE9jcXlhSDNXMmE3SEx0M05zNGJJYzRmZ0UxenphUjM4bmlsaTd4YzVwaUdxbjVqNGVYdmJwK21QSEdmcU5TU21VdkRUUjlQNk1ONE05SFl6WFpIOUdJUzhIQlByQlN2SStTdktMbE9UUEtjbC9NV0RCUkNBZkVBZUlBOFFCNG9EZm85TjY2QlRtVHRkMlNHc1B6d3F4a3p0WHM2WWxJdWlaNXpxNnQ3dEZ2R1pZUVhXdVRvUW5HN0RKNzVUN1MrbzVkNmNrUkhsRFk5cThtbE1QNkkvSGJPTEJHRHpuV1BGd3ZVKysvZzBiMEhuOS9CMkxuY3k5akxiZXJXR0R6RXZzbU9Kb3drNmEzcDE3Q0dFcGozeExOZWdpOXdRNlJNZExjV2I0dlVyeVpiUUFKQkZBSENBT0VBZUlBem5FZ2MrVTVNZnJGdVovaTU3UHoyZTNubG5PZHVWQ3g4TFNqeHBLUHpHa2dldllFenQ1QjJuVG1waUljRHhNODltR3pnbk9PemZGNDF3ZDV4aWxIdHI1SEI1enVBY04zTzVxd09kUCsrVHJlQmtHYmpFeERUdStTNklwNElVK1RWL1lPNEIzVXJFUTFvb1U3SnFoOGYxNVE1WTAzOHNZNUdXQlFHK0ZkZU1QS2NsWEdiQTRJcEFQaUFQRUFlSUFjU0JvRHJ5cEpPK3NXNUQvUTV6UERySFB4aGF4SXlzRUs2Z1VPc2FxT1RqZkp6SGpKU1lsY1IzRE5OaDFjaEoyWGUzaitYL0dTR1AwK1ZwZ3c3cFVqZ1AxdlUxOVRoVi9DRWVydVQwT1JQUWJOZUR6ZTN6eTkyVWVQbmZiSk5tMEx4NzZhWG9lVnNScElPZzFVczA0Z2ZwdlhlL09CUjc3dDFqanRXUU04akpRb08rZ0pEOVdTWDZOa3Z3YldnU1NFQ0FPRUFlSUE4U0JIT2JBbzByeU10MWlQQjVXUW1PNHVTRTJvbnNWMjVGcmF3em40R0dmeEl4WHVDako2L2h2d0hZbDJ5ekxiU3AzUTZJMytseG5wWG1jQ1Fsc3Y5OGpPeUZpdnNtakNPNFJHdVpUSjVOV253b09pZW9Ma0NyaU5kbUxoNDQrWFA5U3c2TFJQd1VVMFE5aUxPVUtqVFgwR1lXOERCSG8yMkl0M1QwMDNrejdZcEJBUGlBT0VBZUlBM281QUdNK0wxR1NINkJiaENmQ2NvaWUxK1d6TjdBeFhLV2xmY0h6cFU5aXhnc2syNVc1UEdDN3ZzYW1Yc25ZOW5nQXplbDJkQ0dtUDZuSDlxVUdjQ0FhWFpMMCtTaWZ6bC91d2ZOV0pZUzFMczN6cnhMQzJpL0o4K3lGVGZtOHZQNDNmWG9IMWVBemxhbzlRc1A3Y25jaHJMZDg0Rlo5SGZrSkluTUVlZ2hIbnEybEJURXRpSWtEeEFIaUFIRWd4em53b1pKOGdKSjhPOTBDdkNGc21GN0FmcDNLMmJFZGF0akJaVm9id3ptTHpWVUdDSzk0K0Y4SzEzRnh3TFlkbllKdDZhWXhKNFBXbUJhN3djVXhUa2hnOTc4OGlucDdoZUVwK1B4MEg4Ni9DbWR4cC91c2JldHluQnpneEJUUDZmWG0wUHNldjM4T2NUR2lyS0dlRkg3Z09Nemk4SVBmUXpWY1QwWWl6MUNCZm95Uy9BMERGa01FOGdGeGdEaEFIQ0FPNk9UQUJpWDVUVXJ5MXJwRmQycU40VnF4NjA2cllLeWdWcmM0Qnh4bGdQQ0toMThTMUVUSEF6VExXaDZnYlplbTZHT3Ywc1JqQWQzWjN4UEMrc1BGTWU3TkVHN2NtS0xQaTMyd1liR0w1NndzeGFabjhYQnhHdWNkNUxFUDREbmJ3WVAzenY0dSt3UXNDUGc5V2VEalhQa3dickExRC9pYU1oWjVoZ24wVHRpQmxoYkU1QVBpQUhHQU9FQWN5R1VPdktva1AwTkp2cU51d1ozcVdMVk5Nd3JZcXNuY0Z1YlFISzVXLzJLbmx3SGlLeDQ2cEhBTnB3Wm8xOGZZM0NzVkgxOXFnRC9qNFhjaHJJUHFzZnNNQTJ3RTNKNEdyeHRqcDNNdjdYZzh6V2RzdW9jZDhGUEZ6aDV2WG0xRWNaM3UreVlQTjF2Q1BtMHFlWTMyUHM2VGo4YTFBVjVUeGlQUEVJR2VweVIvd1lBRkVZRjhRQndnRGhBSGlBTzZPUEMxa255R2t2d1EzVUxialVBUDE0VllYWjlLdXpHY0FkRnpobW1WWWNOd1Rvclg0TmRJTGE5cVhzY1o0Tk4wWmk1UE1jREdoUzY0Zlp2SHRqeWY0dmxyaGJDV2VYRGVQeHJZU0dFQjM4ZEVZLzBTNFdBaHJKRllZNzNaNWJsZkNPQ2RHTUxSaU9uVXhLZmJRUEhRQUs0cmE1Qm5nRUR2VG90QkVnVEVBZUlBY1lBNGtLTWMrQVdua2xUcEZ0ZWVpUE5aa2JGcStSV0NGVlVaRVQwUFlrYTMzMk9zamd6UXRndlQ5SEYzQS95YVR2TzlxWnB0WE9TUzI5MDh0dWVqSk0vYjNPUGFiN2V6c2FFRTVBY1A3YmtsaVhOeTNKaDYxZU1HZGZIRzYwRVg5MnBzaXBlT2YzYkYybktZeXZDOUJwNy8yNER2UUVZaFQ3TkE3Mi9BNG9oQVBpQU9FQWVJQThTQklEbndxNUw4Tml6cjBpNnNQUlhvODBKc1ZpK0lubXR2REJlTmVSb1dwRjUyTVo0V1lHcDd1ajV1WVlCdm83RVVVOENEU00xT0Y1Q2V2b2RMYm0vdnNlQ0Nobm5ONmpsZmtSRFczUjc3WVp4SHovazVIdHMxQWxQZDk4ZUljenNockxQeCtyM2NESER3SVU0cWlIZHRZL0JuSUpYZmFxQkpYek8wOTFoOGQ3em9zc0dpV3l4MzJYZ3dKNUduVWFCYnRDQWtVVUFjSUE0UUI0Z0RPY0tCVlVyeVc1VGtYVE9oQzd1YjZIbXJTc0ZLMnVoZjRFVGhDbzJMMDJpOGs2Yjlid1JrWHp1WGZ2N1lBQjg3NEVuYVBFR1RmUnN3TThJTGZrdWZNangyd05SdGFFWjNzaERXZnpPZ0x0bkxhSGFRZUwrQmtZYXhtNHpRRlg0d1pvQmNpQkhxMjNHY1lOZ3d6RERnRzVCeDBDblFYekZnd1VRZ0h4QUhpQVBFQWVLQVh4ejRYa2wrcFpLOG81SzhrVzRSN2J0QXJ3dXhHYjBxV1dPem91YzZSVmcwbHFXWm5scGdlR3A3Tks0eHdNOWhqQm9tYTNNbkRmWnR4cG5ZWHZFYk1nVSs5V0hDd0VxZi9mQ3NEODk2cVFIOFN4VXZKVWhyajhaa0EreE1CVTRkL2lzR3ZQOHpFbmthQlRyTk5xZEZNUWtqNGdCeGdEaVFiUng0VDBrK1cwbGVwbHMwQnlyT1p4YXdMOFlXc2RaVmxtblJjejlTWDlOWnJCYWthZnVzQU94NzJ5TS9tekN5N00wVWJkNWRDR3Qxd0RaVytzRHg0d3p3ZlNwWWduWGpmanp2b3cyNHZtUnhad1k5VzhuQ0dZbjRQVDVmdXQvL0dZazhFdWphRjNNRThnRnhnRGhBSE1oY0RxeFRraittSkIrbUpEOUF0MWpXSnREbmhkalYvU3BNNnR3ZWpWTTBMMWpkTk1CNkxRRDcybmpvNjFjMCs3b29EWnZkektwT0JXdGNiTlFrZzdzMCt6NFZBZWQzUis5YkRiaE9MMU8vZFd3a3VjRjZJYXhDVGUvN3JFQWVDWFR0aXpzQytZQTRRQndnRG1RV0J6NVdrbCtzSk8rc0pOOUJ0MERXalhYVEN0bkt5WngxYVYvTldsWUk3UXViT0tqTW9IRnFzWjJYL1Y2VVQvZlkxenE3dVU5SzArWU9BZGkyU2dqcnNBQzQvcEZHL3ljcnpzc0RldTZmTmVCNkU2RlBHdGZ6SHdQc2pwY2R0Q1htdjYwUXdtb1YwRDNPV3VScEZPaHZHTERJSXBBUGlBUEVBZUlBY2FBaERpZ2wrZDFLOHJPVTVBZnJGc1RHUmMvbmh0aFR3MHBaMHhMQmFneFkyQ1RvYlB5TmhzWHJWSmQyNzRMQ3ppLzdIdkhKMy9kcjhMWGIyZEZlamd5THhSY05kRWIzRWwwMCtENVpyQlBDeWcvNDJmZWpzWjBiZkN1RWRVU2ExekxVQVB2amRmMlBudnYrbG90UmNBUmhoa0R2U1l0Q0VnYkVBZUlBY1lBNFlPZ1l0TWVWNUdPVjVLVzZSYkRwQUlFK3ZWY2xhMUprek56emVQaDN3QXZYZVlaM3BmNnNucEZPYnJFL3BuTUg1ZXRYY1JQR2pjM3RmTEx0WVNHc2JRTG0raG1hUlZzOHZLaHgxTlpqQmx4L0dFc1EzRDVYVG4yM2lWaW82ZjVtSmZJMHowRy8wb0NGR0lGOFFCd2dEaEFIY3BzRGE1VGtUeWpKSlk0QWJheGI5R1lLMWs3bGJNMFV6azQ4cXBxMUxEY3l2ZDNCRVFFdVZHL3gwTzdCUHRqM084NHQ5OVBmM1EyZUs1OEk5eG82M3pzZFRESkFzRG00M0lEbmY0SEc2NGVPK0VkN2RCMlBHbkEvWXdGbE9DY1pjSSt6Q25tYUJUcmdYZ01XWndUeUFYR0FPRUFjeUIwTy9LUWtmMUJKUGs1SlhwV05jOG1EQW5SdmYrTzhZdGE2U3JDS0d2MkxtZ1l3TjhNRW80TUhQTFJ2UzRBMXdDTjk5dlZRaisyRm12K3ZQYkJydVJCV2hRRjgxeDFKL3p5RmVmUkJvSVBQSlNQeG5qVzNaUzZ4YUM2RXRWYnpmWTNOQ3RqVGdIdWJkY2d6UUtBekhFdWplOEZHSUI4UUI0Z0R4SUhzNU1BU0pmbE5TdkpCU3ZLUWJsR2JiZW50Qzg4cVkvdVhHQjA5ajhaOVBpNVc3L2ZKNW0xeEZKb1hObllOMk44WCtlQm5FTkd0ZmJLM3ZRZHB2cnNZd0hNSEhiR2pkdEIxeVJNTXVQWkV6OUoxUGwvL24wSllGd3BoTmZIcEdqajZPS3dSci9yNERCS0VPUUs5alFFTE9BTDVnRGhBSENBT1pENEhmbEdTUDZra242a2s3NjRrYjZwYnhHWXpZUEh3NEtCU2RrQ3BzUTNpNHVGcUh4YXNnMzIyZVhzUDZ0R0RGdWNPUm5nb3pFOEl3TjR5SWF5TktkcTJXQWdyWkFDMzQyRVBiS0xudDJpRGtZQW5DMkh0Yk1BMU53UVFseC82a0RGd2JrRFhYeFBBL1l3SDZJeGZhc0Q5eTNya0dTTFFBUzJWNUo4WnNMZ2prQStJQThRQjRrRG1OSE5icENTL1hFbCtocEs4UUVuZVNMZG96U1hBNHVHaHpCUG9ESVdlRjVIRlp3S281M2JiN002RXNVY2dYcGVtNmVNM3NhWTlTSHNyc090NFE3WXQxYmp4a1U2SDl5ODlGbXpBclVzTTRGZTZxRVg3VlpyWHYwUUk2K0lBeTBhaVVZNzlKUHpveGg0TmFQaDRnY0ViVUZtSlBJTUV1b1BUbGVUZkdiRHdJNUFQaUFQRUFlS0FPUnhZaTJMOFNoeDNWcVlrMzFHM1FNMTFaTEJBZDlKZHAySVRwMVFYdERjS1lSVnJzaHRHVlQyZlFzVExyMjd0NmVCWUlheW5rN0Q3UFNHc1N6Vkg2eG9MWWMyTzB6a2JOblp1ejJEQmNoWm1ZNnhMVThqQjcwNUVjZHZZZ092eEFyc0xZUjBsaE5VZm05ckIyTDA4YTZ4WEFBQUdUa2xFUVZTWGhMQmVGc0o2QmY4T2M4aHZ4bmZHaVZnUHJ0dnVnNFd3M3ZkNDA4VzV6M2NJWVhYQzdCM2QxNWx6eUROUW9EczRTa20rVUVtK3dZQ0ZJWUY4UUJ3Z0RoQUhndVBBdDloVmZiNlN2SytTbkN2SnQ5Y3RSZ2xaSjlCakcwaEJEZmt5akFwR0wxWkJ3SDhraFBWL1FsajloTER5RExBWDBGSUlhdzRLaUYvakNOeWVCdGlZQ0h1aFdCK0RJK25tQzJHTkY4THFJWVRWMUFEN29yRVRSdkRyMEdhV0pXaU1td3pRZ2Z2MU9GSFRqMUNVUWtuSWVVSlluWVd3L21XQTNZVDRHVUdmdVJEa0s0V3duaExDT2g4ajh5WnQ2dVVrOGd3VzZBNTJWcEtmZ0ExK3ZpZVJRQ0tCT0VBY0lBNWtEUWRXS3NuL3B5Uy9RVWsrU2tuZVdVbmVuSVJ3NW13R1pKRkFqMFlqRkw4OWNENTJKa1FKUVVRV1lQMjBhUUtYWUw0UGRzQlVmWWlLTjBNKzZiYUprTG9QbW1GMEg3cXJmeUNFOVE1dXR2d21oUFdHRU5hVG1CVndEMjd1SFl2dkRYam5rYitGT1Q3SUJJRWVDK2pBZTQ2Uy9DNGwrWmNHTERBSjVBUGlBSEdBT05Ed1dMTkZ1TkVLbzgxNllOOFJHbTltZ01nbWdhNS9NVVlnSHhBSGlBTStjV0JYekZnaEVaNUJITXZMUUlFZWk0T1Y1TDJWNUhPVTVJOWphaVF0bHNrSHhBSGlBSEVnV0E3OGp1UE1IbE9TWDZva1AxdEoza2xKZm9pU2ZGdmRRcEpBQWwzM2dvdEFQaUFPRUFlSUE4UUJrU01DUFI0T1VKSWZveVFmclNTL1hrbitrcEw4UnhJc0pGaUlBOFFCNG9BckRxeFJrbitBSXZ4S2ZNY2VqelhpVFVnRTU5NUdRSmFtdUJQSUI4UUI0Z0J4Z0RqQUtJTHUvMEppR3lYNWdVcnlka3J5Z1VyeU9pWDUzVmovK0lPU2ZBc3QzRW04RVFlSUF6bk9nWFZLOGsrVTVNOHB5Vy9CV2VLRE1CSitoSko4SjkyQ2tHQ1dEMGlnMHlLZUZ2SEVBZUlBY1lBNFlGR0t1MC9pL1Y5Szhnb2wrWWxLOHZPVTVCY3J5ZTlWa3IraUpQOEMwemQxTDU0SjVBUGlBSEhBamZpR3ZoMnZLc2tmVUpKZnBpUWZqMTNTWWVQeVNDWDVycm9GSHlHemZFQUNuUmJtdERBbkRoQUhpQVBFQVlzRXVxYUZ5RzRZUWFwVmt2ZFJrcCtySkorSFVTWVlCL1Nta3Z4clhBU1RpQ0lmRUFlSUEwRndBREovVmlqSmwySVR0Z2VWNU5jb3lXY3B5WWZqaG1PTmt2eHdTa0hYTDJhekVTVFFhV0ZPQzNQaUFIR0FPRUFjc0VpZ0c0N2RsZVNIS3NrcmxlUmRsZVJuS01uSG9KaS9IaU5YLzhVNnptVks4bDlKeUpDWUpRNFFCMUJzUTQzM04vaCtnUGZFUTByeW01WGtDNVRrRXpIZHZLZVN2SzJTdkFBemYzWTA0TDFIeUZFZmtFQ25oVGt0eklrRHhBSGlBSEhBSW9HZVJXaWtKTjlEU1g2UWtyd0kwMHloNFZKL0pmbjVHQVc3UWtsK3U1TDhFU1g1aTByeWR6Rk5GY1lXVWRvOUNUc1M5Mlp4WUIwK20xQVc4NTZTL0dXY0xuRVhSclpobzI2Q2tueVlrdnhVM01TclZwSzNVcEkzdzB5ZGJReDROeEhJQnlUUWFkRk5pMjdpQUhHQU9FQWNFTUg3SUZ1N3VPY0NJR3EyRDQ2Wks4QTAxcU54NU53QUpmbElKZmxrSmZrRlN2S3JVT1JEOVA0cFRJVUY4ZkM1a3Z4N1RKRmRiNEM0SVpBUGd1VEFaaVg1YjByeVg1VGszeW5KUDhNTk1HZ2MrWXlTL0dFVTF0ZGpUd3BvbURZV3hmVnB1Sm5XRVh0WHRNS050andsK1E0R3ZCOEk1SU5BT0VBUmRGcThrb0FoRGhBSGlBUEVBWXNFT2kyOFBJL2lRMk9vZlZGZzVDdkppekdxZDVTU3ZMdVMvQ1NNNnArTjZmcFRNUklJVGFadVVKTGZvU1JmcUNSL0ZJVU5wT1l1eGsyQVR6QmxkN21TZkNVS29nM1VOWjgySXhMVVUyL0FzbytWeUJuZ3pxZVk4djBtYmk0OWozMGZIc0pKRERmaHlLK0xVRVJQeEVhUFE1VGtwK09tVlRjVTA4RHIxa3J5bGppT0VRVDFMaFMxSmtGUDN4VVM2TFRBSkpGQkhDQU9FQWVJQThJQUgxQUVuUmFtUVMxTXQwVWh0SmVTZkg4Y2VYYzRSaDVCTUpXamVJSTAveTY0TVhBaXBnR2ZxU1FmckNRL0I0WFhXQlJoVTdFTVlCN1c2TUtHd2RXNGFYQ2JrdnhPN01TL0VNWGNveWpzbmtHUjl5SjI2WDhWTnhUZXdrMkY5NVhrSHlySmwyRHpyVTh4dXZvRk5nSmNoaEZYR00vM281TDhaNHpDS3Z3N1pDU3NRcEc1RXYrOUdvWG4yaVR3Sy83K2lxaGpSTU01MTNJOC8vZG96ekswNzB2TWp2Z01OMGcrVnBKL2hDTDNYYnpPeFhqZElIaGZVcEsvb0NSL1ZrbitwSkw4UDFoU0FRM0g3c01vOG0wb2hLL0Zzb3RMbE9RWEtzbm5vaWllZ3Zka0REWlFISWJqREUvRERaNmVLSkk3WS8xME5kN3oxc2lCRnJoQnRKK1NmRThsK2M1Szh1M28rU1RoVEJ3d213TVVRZGUva0NPUUQ0Z0R4QUhpUUhaeElFOVRpdnYvQXhsYWd6R082Q2JKQUFBQUFFbEZUa1N1UW1DQyIvPjwvc3ZnPg==';
+    return 'https://images.unsplash.com/photo-1476224203421-9ac39bcb3df1?w=800&q=80';
   }
 
   function formatDuration(mins) {
@@ -2606,12 +2185,11 @@ tailwind.config = {
 
       bokunProducts = await Promise.all(visible.map(async (t, idx) => {
         const base = {
-          id: idx, configId: t.id, bokunId: t.bokun_id || null, title: t.title, dbTitle: t.title,
+          id: idx, configId: t.id, bokunId: t.bokun_id || null, title: t.title,
           description: '', photo: t.photo_url || getTourPhoto(t.title), cat: (t.categories && t.categories.length ? t.categories : (t.category ? [t.category] : [])),
           durationMins: null, maxPax: null, pricing: [],
           hasPackage: commConfigIds.has(t.id),
           hiddenSlotIds: (t.hidden_slot_ids || []).map(String),
-          hiddenCategoryIds: (t.hidden_category_ids || []).map(String),
           emailBlocks: t.email_blocks || [],
           meetingPoint: t.meeting_point || null,
           bokunForceRateId: t.bokun_force_rate_id || null,
@@ -2620,9 +2198,6 @@ tailwind.config = {
           allowHotelPickup: t.allow_hotel_pickup ?? true,
           allowMeetingPoint: t.allow_meeting_point ?? true,
           pricingType: t.pricing_type || 'per_person',
-          requireGuestNames: t.require_guest_names || false,
-          bookingCutoffHours: t.booking_cutoff_hours || null,
-          slotCapacity: t.slot_capacity || null,
         };
         if (!t.bokun_id) return {
           ...base,
@@ -2651,7 +2226,7 @@ tailwind.config = {
               photo,
               durationMins: d.durationInMinutes || null,
               maxPax: d.maxParticipants || null,
-              pricing: (d.pricingCategories || []).filter(c => !base.hiddenCategoryIds.includes(`cat:${c.id}`)),
+              pricing: d.pricingCategories || [],
             };
           }
           console.warn('[Tours] Bokun returned error for ID', t.bokun_id, det?.body?.status, det?.status);
@@ -2703,8 +2278,6 @@ tailwind.config = {
     tdRateSelections = [];
     tdCategorySelections = [];
     _selectedNonBokunPkg = null;
-    tdAppliedDiscountCode = null;
-    tdAppliedDiscountPct = null;
 
     _modalOpener = document.activeElement;
     const modal = document.getElementById('modal-tour');
@@ -2832,82 +2405,31 @@ tailwind.config = {
     container.dataset.month = month;
   }
 
-  const TSA_SLOT_CAP_EXCLUDED_STATUSES = ['cancelled','refund_failed','cancelling'];
-
-  // Turns a slot's date + Bokun's raw startTime field into a ms timestamp for cutoff comparisons.
-  // startTime is sometimes a short "HH:MM" and sometimes a longer datetime-like string with the time
-  // embedded at position 11-16 (same ambiguity already handled by the display code elsewhere).
-  // Returns null when no time can be determined — callers must skip cutoff filtering in that case.
-  function computeSlotDepartureMs(dateStr, startTimeRaw) {
-    const t = startTimeRaw || '';
-    if (!t || !dateStr) return null;
-    const timePart = t.length > 8 ? t.slice(11, 16) : t.slice(0, 5);
-    if (!/^\d{2}:\d{2}$/.test(timePart)) return null;
-    const ms = new Date(`${dateStr}T${timePart}:00`).getTime();
-    return Number.isNaN(ms) ? null : ms;
-  }
-
-  async function fetchSlotBookedMap(tourTitle, start, end) {
-    const map = new Map();
-    const { data: bookedRows } = await db.from('bookings').select('date,start_time_id,pax')
-      .eq('tour', tourTitle).gte('date', start).lte('date', end)
-      .not('status', 'in', `(${TSA_SLOT_CAP_EXCLUDED_STATUSES.join(',')})`);
-    (bookedRows || []).forEach(b => {
-      if (!b.start_time_id) return;
-      const key = `${b.date}|${b.start_time_id}`;
-      map.set(key, (map.get(key) || 0) + (b.pax || 0));
-    });
-    return map;
-  }
-
   async function fetchAvailabilityForMonth(tour, year, month) {
     const firstDay = `${year}-${String(month+1).padStart(2,'0')}-01`;
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const lastDay = `${year}-${String(month+1).padStart(2,'0')}-${String(daysInMonth).padStart(2,'0')}`;
     if (tour.bokunId) {
       try {
-        const [{ data: avail }, { data: overrideRows }, bookedMap] = await Promise.all([
-          db.functions.invoke('bokun-sync', { body: { path: `/activity.json/${tour.bokunId}/availabilities?start=${firstDay}&end=${lastDay}`, method: 'GET' } }),
-          db.from('tour_slot_overrides').select('slot_date,start_time_id,max_guests,disabled')
-            .eq('tour_config_id', tour.configId).gte('slot_date', firstDay).lte('slot_date', lastDay),
-          fetchSlotBookedMap(tour.dbTitle || tour.title, firstDay, lastDay)
-        ]);
-        const overrideMap = new Map((overrideRows || []).map(o => [`${o.slot_date}|${o.start_time_id}`, o]));
+        const { data: avail } = await db.functions.invoke('bokun-sync', {
+          body: { path: `/activity.json/${tour.bokunId}/availabilities?start=${firstDay}&end=${lastDay}`, method: 'GET' }
+        });
         const items = avail?.body;
         if (Array.isArray(items) && items.length > 0) {
           items.forEach(entry => {
             if (entry.unavailable || entry.soldOut) return;
             const d = new Date(entry.date).toISOString().slice(0, 10);
             if (!d) return;
-            if (tour.bookingCutoffHours > 0) {
-              const depMs = computeSlotDepartureMs(d, entry.startTime);
-              if (depMs != null && depMs - Date.now() < tour.bookingCutoffHours * 3600000) return;
-            }
-            const ov = overrideMap.get(`${d}|${entry.startTimeId}`);
-            if (ov?.disabled) return;
             if (!currentTourAvailability[d]) currentTourAvailability[d] = [];
-            const hiddenCatIds = tour.hiddenCategoryIds || [];
-            const rates = (entry.rates || [])
-              .filter(r => !hiddenCatIds.includes(`rate:${r.id}`))
-              .map(r => {
-                const priceInfo = (entry.pricesByRate || []).find(p => p.activityRateId === r.id);
-                const cats = (priceInfo?.pricePerCategoryUnit || []).filter(c => !hiddenCatIds.includes(`cat:${c.pricingCategoryId ?? c.id}`));
-                return { id: r.id, title: r.title.trim(), price: cats[0]?.amount, pricesByCategory: cats };
-              });
-            let availabilityCount = entry.availabilityCount || 0;
-            if (ov?.max_guests != null) {
-              const alreadyBooked = bookedMap.get(`${d}|${entry.startTimeId}`) || 0;
-              const remainingUnderCap = Math.max(0, ov.max_guests - alreadyBooked);
-              availabilityCount = Math.min(availabilityCount, remainingUnderCap);
-            } else if (tour.slotCapacity != null) {
-              const alreadyBooked = bookedMap.get(`${d}|${entry.startTimeId}`) || 0;
-              const remainingUnderCap = Math.max(0, tour.slotCapacity - alreadyBooked);
-              availabilityCount = Math.min(availabilityCount, remainingUnderCap);
-            }
+            const rates = (entry.rates || []).map(r => {
+              const priceInfo = (entry.pricesByRate || []).find(p => p.activityRateId === r.id);
+              const cats = priceInfo?.pricePerCategoryUnit || [];
+              return { id: r.id, title: r.title.trim(), price: cats[0]?.amount, pricesByCategory: cats };
+            });
             currentTourAvailability[d].push({
               startTime: entry.startTime || '',
               startTimeId: entry.startTimeId,
-              availabilityCount,
+              availabilityCount: entry.availabilityCount || 0,
               rates,
             });
           });
@@ -2915,41 +2437,17 @@ tailwind.config = {
         }
       } catch(e) {}
     }
-    // non-Bokun tour: all future dates available with manual slots, respecting per-day overrides
+    // non-Bokun tour: all future dates available with manual slots
     if (!tour.bokunId) {
-      const baseSlots = tour.manualSlots?.length
-        ? tour.manualSlots.map(s => ({ startTime: s.time || null, startTimeId: String(s.id || 'manual'), label: s.label || s.time || '' }))
-        : [{ startTime: null, startTimeId: 'manual' }];
+      const manualSlots = tour.manualSlots?.length
+        ? tour.manualSlots.map(s => ({ startTime: s.time || null, startTimeId: s.id || 'manual', availabilityCount: null, label: s.label || s.time || '' }))
+        : [{ startTime: null, startTimeId: 'manual', availabilityCount: null }];
       const today = new Date().toISOString().slice(0, 10);
-      let overrideMap = new Map();
-      let bookedMap = new Map();
-      try {
-        const [{ data: overrideRows }, bm] = await Promise.all([
-          db.from('tour_slot_overrides').select('slot_date,start_time_id,max_guests,disabled')
-            .eq('tour_config_id', tour.configId).gte('slot_date', firstDay).lte('slot_date', lastDay),
-          fetchSlotBookedMap(tour.dbTitle || tour.title, firstDay, lastDay)
-        ]);
-        overrideMap = new Map((overrideRows || []).map(o => [`${o.slot_date}|${o.start_time_id}`, o]));
-        bookedMap = bm;
-      } catch(e) {}
       const cur = new Date(firstDay + 'T12:00:00');
       const end = new Date(lastDay + 'T12:00:00');
       while (cur <= end) {
         const d = cur.toISOString().slice(0, 10);
-        if (d >= today) {
-          currentTourAvailability[d] = baseSlots
-            .filter(s => !overrideMap.get(`${d}|${s.startTimeId}`)?.disabled)
-            .map(s => {
-              const ov = overrideMap.get(`${d}|${s.startTimeId}`);
-              const cap = ov?.max_guests != null ? ov.max_guests : (tour.maxPax ?? null);
-              let cnt = null;
-              if (cap != null) {
-                const alreadyBooked = bookedMap.get(`${d}|${s.startTimeId}`) || 0;
-                cnt = Math.max(0, cap - alreadyBooked);
-              }
-              return { ...s, availabilityCount: cnt };
-            });
-        }
+        if (d >= today) currentTourAvailability[d] = manualSlots;
         cur.setDate(cur.getDate() + 1);
       }
     }
@@ -2996,10 +2494,6 @@ tailwind.config = {
       if (!existing || (s.availabilityCount || 0) > (existing.availabilityCount || 0)) slotMap.set(key, s);
     });
     const slots = Array.from(slotMap.values());
-    // Store the exact filtered+deduplicated list used to render the buttons below — selectTimeSlot(WithRate)
-    // must index into THIS, not the raw currentTourAvailability, or a hidden/duplicate slot upstream shifts
-    // the indices out of sync with what was actually rendered (matches abCurrentTour._abSlots in admin.html).
-    if (tdCurrentTour) tdCurrentTour._tdSlots = slots;
 
     // If only one slot and no startTime label (or manual non-Bokun slot), skip picker
     if (slots.length === 1 && (!slots[0].startTime || slots[0].startTimeId === 'manual')) {
@@ -3078,7 +2572,7 @@ tailwind.config = {
   }
 
   function selectTimeSlot(dateStr, slotIdx, displayTime) {
-    tdSelectedTimeSlot = { ...(tdCurrentTour?._tdSlots?.[slotIdx] || {}) };
+    tdSelectedTimeSlot = { ...(currentTourAvailability[dateStr] || [])[slotIdx] };
     if (displayTime) tdSelectedTimeSlot._displayTime = displayTime;
     tdSelectedRate = null;
     tdRateSelections = [];
@@ -3136,7 +2630,7 @@ tailwind.config = {
   }
 
   function selectTimeSlotWithRate(dateStr, slotIdx, rateId, displayTime) {
-    tdSelectedTimeSlot = { ...(tdCurrentTour?._tdSlots?.[slotIdx] || {}) };
+    tdSelectedTimeSlot = { ...(currentTourAvailability[dateStr] || [])[slotIdx] };
     if (displayTime) tdSelectedTimeSlot._displayTime = displayTime;
     tdSelectedRate = (tdSelectedTimeSlot.rates || []).find(r => r.id === rateId) || null;
     tdRateSelections = [];
@@ -3204,7 +2698,7 @@ tailwind.config = {
   function changeCategoryCount(catIdx, delta) {
     const sel = tdCategorySelections[catIdx];
     if (!sel) return;
-    const maxSlot = tdSelectedTimeSlot?.availabilityCount ?? 999;
+    const maxSlot = tdSelectedTimeSlot?.availabilityCount || 999;
     const totalOthers = tdCategorySelections.reduce((s, x, i) => i === catIdx ? s : s + x.count, 0);
     sel.count = Math.max(0, Math.min(maxSlot - totalOthers, sel.count + delta));
     document.getElementById('cat-count-' + catIdx).textContent = sel.count;
@@ -3283,26 +2777,8 @@ tailwind.config = {
       ].filter(Boolean);
     }
 
-    // Bokun tours: use Bokun categories filtered by configured PLN prices.
-    // Prefer slotCatPrices — the SPECIFICALLY SELECTED rate's own pricesByCategory — since
-    // tdCurrentTour.pricing is a tour-wide list across ALL rates and its ids can belong to a
-    // different rate entirely (e.g. "Basic" instead of the actually-selected "Ranger" package),
-    // which Bokun then books under the wrong pricing category even though the guest picked the
-    // right label. Only fall back to tdCurrentTour.pricing if the slot has no category data at all.
-    // Note: slotCatPrices only carries id+amount, never a display title/age range — enrich each
-    // with the matching tour-wide entry (same id) for the readable title, falling back to 'Guest'
-    // only if that id genuinely isn't in the tour-wide list either.
-    let allBokunCats = (slotCatPrices || []).length > 0
-      ? slotCatPrices.map(p => {
-          const id = p.pricingCategoryId ?? p.id;
-          const tourWideMatch = (tdCurrentTour?.pricing || []).find(c => c.id === id);
-          return tourWideMatch ? { ...tourWideMatch, id } : { id, title: p.pricingCategoryTitle || p.title || 'Guest' };
-        })
-      : (tdCurrentTour?.pricing || []).filter(c => !c.internalUseOnly);
-    // Match the tour's configured category order (e.g. Adult, Student, Child) rather than whatever
-    // order this slot's own pricePerCategoryUnit happens to list them in.
-    const _tourWideOrder = (tdCurrentTour?.pricing || []).map(c => c.id);
-    allBokunCats = [...allBokunCats].sort((a, b) => _tourWideOrder.indexOf(a.id) - _tourWideOrder.indexOf(b.id));
+    // Bokun tours: use Bokun categories filtered by configured PLN prices
+    const allBokunCats = (tdCurrentTour?.pricing || []).filter(c => !c.internalUseOnly);
     const configured = allBokunCats.filter(c => {
       const pln = lookupCategoryPricePln(tourName, c.title);
       return pln !== null; // strict: undefined=brak konfiguracji (Bokun fallback), null=wyłączone
@@ -3358,7 +2834,7 @@ tailwind.config = {
   function changeRateCount(rateIdx, delta) {
     const sel = tdRateSelections[rateIdx];
     if (!sel) return;
-    const maxSlot = tdSelectedTimeSlot?.availabilityCount ?? 999;
+    const maxSlot = tdSelectedTimeSlot?.availabilityCount || 999;
     const totalOthers = tdRateSelections.reduce((s, x, i) => i === rateIdx ? s : s + x.count, 0);
     sel.count = Math.max(0, Math.min(maxSlot - totalOthers, sel.count + delta));
     document.getElementById('rate-count-' + rateIdx).textContent = sel.count;
@@ -3475,17 +2951,9 @@ tailwind.config = {
       if (hotelRadio) hotelRadio.checked = false;
     }
 
-    // Update hotel address label — partners without commission (agents/DMCs, not an actual hotel)
-    // get a free-text input instead, since their guests can be staying anywhere, not at a fixed address.
-    const isAgentPartner = currentPartner?.commission_enabled === false;
+    // Update hotel address label
     const addrEl = document.querySelector('.td-pickup-hotel-address');
-    const addrInput = document.getElementById('td-pickup-address');
-    if (addrEl) addrEl.classList.toggle('hidden', isAgentPartner);
-    if (addrInput) {
-      addrInput.style.display = isAgentPartner ? '' : 'none';
-      addrInput.value = '';
-    }
-    if (addrEl && !isAgentPartner) {
+    if (addrEl) {
       const addr = currentPartner?.address && !currentPartner.address.includes('@') ? currentPartner.address : currentPartner?.name || '';
       addrEl.textContent = addr || '—';
     }
@@ -3544,10 +3012,6 @@ tailwind.config = {
   function tdGetPickupDescription() {
     const val = document.querySelector('input[name="td-pickup"]:checked')?.value;
     if (val === 'meeting') return tdCurrentTour?.meetingPoint || 'Meeting point';
-    if (currentPartner?.commission_enabled === false) {
-      const typed = (document.getElementById('td-pickup-address')?.value || '').trim();
-      return typed || currentPartner?.name || 'Hotel pickup';
-    }
     const addr = currentPartner?.address;
     const validAddr = addr && !addr.includes('@') ? addr : null;
     return validAddr || currentPartner?.name || '';
@@ -3588,19 +3052,18 @@ tailwind.config = {
   function renderAdditionalGuestFields(totalPax) {
     const container = document.getElementById('td-additional-guests');
     if (!container) return;
-    if (totalPax <= 1 || !tdCurrentTour?.requireGuestNames) { container.innerHTML = ''; return; }
-    const req = ' <span class="text-red-400">*</span>';
+    if (totalPax <= 1) { container.innerHTML = ''; return; }
     container.innerHTML = Array.from({ length: totalPax - 1 }, (_, i) => `
       <div class="pt-3 border-t border-gray-100">
         <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Guest ${i + 2}</label>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1.5">First name${req}</label>
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">First name</label>
             <input id="td-extra-first-${i}" type="text" placeholder="Name" maxlength="40"
               class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Last name${req}</label>
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Last name</label>
             <input id="td-extra-last-${i}" type="text" placeholder="Surname" maxlength="40"
               class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
           </div>
@@ -3734,7 +3197,7 @@ tailwind.config = {
   });
 
   function changeTdGuests(delta) {
-    const maxGuests = tdSelectedTimeSlot?.availabilityCount ?? tdCurrentTour?.maxPax ?? 16;
+    const maxGuests = tdSelectedTimeSlot?.availabilityCount || tdCurrentTour?.maxPax || 16;
     tdGuestCount = Math.max(1, Math.min(maxGuests, tdGuestCount + delta));
     document.getElementById('td-guest-count').textContent = tdGuestCount;
     renderAdditionalGuestFields(tdGuestCount);
@@ -3754,64 +3217,6 @@ tailwind.config = {
   }
 
   let tdPayment = 'driver';
-  let tdAppliedDiscountCode = null;
-  let tdAppliedDiscountPct = null;
-
-  function applyDiscountToTotal(total, pct) {
-    if (!pct) return total;
-    return Math.max(0, Math.round(total * (1 - pct / 100)));
-  }
-
-  function computeBaseInsertTotal() {
-    const hasPackages = tdRateSelections.some(x => x.count > 0);
-    const hasCategories = tdCategorySelections.some(x => x.count > 0);
-    const pickupVal = document.querySelector('input[name="td-pickup"]:checked')?.value;
-    const rateForTransport = tdSelectedRate?.title || tdRateSelections?.find(r => r.count > 0)?.rate?.title || '';
-    const transportPln = lookupCommTransportPln(rateForTransport) || 0;
-    const transportSurcharge = pickupVal === 'hotel' ? transportPln * tdGuestCount : 0;
-    const pkgPricePln = _selectedNonBokunPkg?.pricePln || 0;
-    const pkgIsFixed  = _selectedNonBokunPkg && tdCurrentTour?.pricingType === 'package';
-    return (_selectedNonBokunPkg
-      ? (pkgIsFixed ? pkgPricePln : pkgPricePln * Math.max(tdGuestCount, 1))
-      : hasPackages
-        ? tdRateSelections.reduce((s, x) => s + x.count * (lookupCommPln(x.rate.title) || 0), 0)
-        : hasCategories
-          ? tdCategorySelections.filter(x => x.count > 0).reduce((s, x) => {
-              const pln = x.configPln !== undefined ? (x.configPln || 0) : (lookupCommPln(tdCurrentTour?.title || '') || 0);
-              return s + x.count * pln;
-            }, 0)
-          : (lookupCommPln(tdCurrentTour?.title || '') || 0) * tdGuestCount) + transportSurcharge;
-  }
-
-  async function tdApplyDiscountCode() {
-    const input = document.getElementById('td-discount-input');
-    const msg = document.getElementById('td-discount-msg');
-    const code = (input?.value || '').trim();
-    if (!code) return;
-    msg.className = 'text-xs mt-1.5 text-gray-400';
-    msg.textContent = 'Checking…';
-    const { data, error } = await db.functions.invoke('validate-discount-code', { body: { code } });
-    if (error || !data?.valid) {
-      tdAppliedDiscountCode = null; tdAppliedDiscountPct = null;
-      msg.className = 'text-xs mt-1.5 text-red-500';
-      msg.textContent = 'Invalid or inactive code.';
-      return;
-    }
-    tdAppliedDiscountCode = data.code || code.toUpperCase();
-    tdAppliedDiscountPct = data.discount_pct;
-    const before = computeBaseInsertTotal();
-    const after = applyDiscountToTotal(before, tdAppliedDiscountPct);
-    msg.className = 'text-xs mt-1.5 text-green-600';
-    msg.innerHTML = `✓ ${escapeHtml(tdAppliedDiscountCode)} applied — −${tdAppliedDiscountPct}%${before > 0 ? ` (new price: ${after} PLN)` : ''} <button type="button" onclick="tdRemoveDiscountCode()" class="underline ml-1 text-gray-400 hover:text-gray-600">Remove</button>`;
-  }
-
-  function tdRemoveDiscountCode() {
-    tdAppliedDiscountCode = null; tdAppliedDiscountPct = null;
-    const input = document.getElementById('td-discount-input');
-    if (input) input.value = '';
-    const msg = document.getElementById('td-discount-msg');
-    if (msg) { msg.textContent = ''; msg.className = 'text-xs mt-1.5'; }
-  }
 
   function selectTdPayment(value) {
     tdPayment = value;
@@ -3991,12 +3396,7 @@ tailwind.config = {
     for (let i = 0; i < tdGuestCount - 1; i++) {
       const ef = (document.getElementById(`td-extra-first-${i}`)?.value || '').trim();
       const el = (document.getElementById(`td-extra-last-${i}`)?.value || '').trim();
-      if (tdCurrentTour?.requireGuestNames && (!ef || !el)) {
-        errEl.textContent = `Please enter a full name for Guest ${i + 2} — required for this tour.`;
-        errEl.classList.remove('hidden');
-        return;
-      }
-      if ((ef || el) && (!isValidName(ef) || !isValidName(el))) {
+      if (!isValidName(ef) || !isValidName(el)) {
         errEl.textContent = `Please enter a valid first and last name for Guest ${i + 2} (letters, spaces, hyphens and apostrophes only).`;
         errEl.classList.remove('hidden');
         return;
@@ -4008,7 +3408,7 @@ tailwind.config = {
     btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Saving...';
     errEl.classList.add('hidden');
 
-    const tour = tdCurrentTour?.dbTitle || tdCurrentTour?.title || '';
+    const tour = tdCurrentTour?.title || '';
     const guest = `${firstName} ${lastName}`;
     const extraGuests = Array.from({ length: tdGuestCount - 1 }, (_, i) => {
       const f = document.getElementById(`td-extra-first-${i}`)?.value.trim();
@@ -4055,16 +3455,6 @@ tailwind.config = {
           { questionId: 'firstName', values: [firstName] },
           { questionId: 'lastName',  values: [lastName]  },
         ];
-        // A "package" line's own pricing category — each rate in tdRateSelections is a distinct Bokun
-        // rate (not a category within one rate), so passengers built for it must use ITS OWN category,
-        // never a different rate's or the tour-wide first one.
-        const buildPassengersForRate = (rate, count) => {
-          const cat = rate?.pricesByCategory?.[0];
-          const pricingCategoryId = (cat?.pricingCategoryId ?? cat?.id) ?? rate?.id;
-          return Array.from({ length: count }, () => ({
-            pricingCategoryId, groupSize: 1, passengerDetails: mainPassengerDetails, answers: [], extras: []
-          }));
-        };
         const buildPassengers = () => {
           if (hasCategories) {
             return tdCategorySelections
@@ -4074,24 +3464,10 @@ tailwind.config = {
                 passengerDetails: mainPassengerDetails, answers: [], extras: []
               })));
           }
-          if (hasPackages) {
-            // Combined view across all selected rates — used only for the options/checkout-methods
-            // probe below, which doesn't need to know which specific rate each passenger belongs to.
-            // The actual submit further down sends one activityBookings entry per rate instead.
-            return tdRateSelections.filter(x => x.count > 0)
-              .flatMap(x => buildPassengersForRate(x.rate, x.count));
-          }
-          // Prefer the pricing category tied to the SPECIFICALLY SELECTED rate — tdCurrentTour.pricing
-          // is a tour-wide list across ALL rates, so its first entry can belong to a different rate
-          // entirely (e.g. a per-person "Adult" category when the guest actually picked a flat
-          // "Group Offer / Private Van" rate), which Bokun rejects as an unsupported pricing category
-          // for that rate. Only fall back to tdCurrentTour.pricing if no rate-specific category exists
-          // at all (an empty passengers array is rejected by Bokun).
-          const fallbackCat = tdSelectedRate?.pricesByCategory?.[0] || tdSelectedTimeSlot?.rates?.[0]?.pricesByCategory?.[0];
-          const pricingCatId = (fallbackCat?.pricingCategoryId ?? fallbackCat?.id) ?? tdCurrentTour.pricing?.[0]?.id;
-          return pricingCatId != null
+          const pricingCat = tdCurrentTour.pricing?.[0];
+          return pricingCat
             ? Array.from({ length: tdGuestCount }, () => ({
-                pricingCategoryId: pricingCatId, groupSize: 1,
+                pricingCategoryId: pricingCat.id, groupSize: 1,
                 passengerDetails: mainPassengerDetails, answers: [], extras: []
               }))
             : [];
@@ -4139,27 +3515,6 @@ tailwind.config = {
         const pickupAnswers = forcePickupId
           ? []
           : [{ questionId: 'pickupPlaceDescription', values: [pickupDesc] }];
-        // One activityBookings entry per DISTINCT selected rate when the guest booked from the
-        // packages cart (tdRateSelections) — a single entry can only carry one rateId, so mixing
-        // e.g. "1x Ranger" + "1x U.S. Army Weapons" into one entry silently drops to whichever rate
-        // happens to be first, which is exactly the "registers as Basic" bug this fixes.
-        const buildActivityBookingEntry = (rateId, passengers) => ({
-          activityId: parseInt(tdCurrentTour.bokunId),
-          startTimeId: tdSelectedTimeSlot.startTimeId,
-          ...(rateId ? { rateId } : {}),
-          ...(forcePickupId ? { pickupPlaceId: parseInt(forcePickupId) } : {}),
-          date: dateStr,
-          passengers,
-          note: bookingNote || undefined,
-          answers: [],
-          pickupAnswers: pickupAnswers,
-          dropoffAnswers: [],
-        });
-        const activityBookingsList = hasPackages
-          ? tdRateSelections.filter(x => x.count > 0)
-              .map(x => buildActivityBookingEntry(x.rate.id, buildPassengersForRate(x.rate, x.count)))
-          : [buildActivityBookingEntry(effectiveRateId, buildPassengers())];
-
         const submitPayload = {
           source: 'DIRECT_REQUEST',
           checkoutOption: 'CUSTOMER_FULL_PAYMENT',
@@ -4168,7 +3523,18 @@ tailwind.config = {
           directBooking: {
             mainContactDetails,
             promoCode: 'HOTELBOOKING',
-            activityBookings: activityBookingsList,
+            activityBookings: [{
+              activityId: parseInt(tdCurrentTour.bokunId),
+              startTimeId: tdSelectedTimeSlot.startTimeId,
+              ...(effectiveRateId ? { rateId: effectiveRateId } : {}),
+              ...(forcePickupId ? { pickupPlaceId: parseInt(forcePickupId) } : {}),
+              date: dateStr,
+              passengers: buildPassengers(),
+              note: bookingNote || undefined,
+              answers: [],
+              pickupAnswers: pickupAnswers,
+              dropoffAnswers: [],
+            }],
           },
         };
         const { data: submitRes } = await db.functions.invoke('bokun-sync', {
@@ -4220,12 +3586,16 @@ tailwind.config = {
     const _pkgPricePln = _selectedNonBokunPkg?.pricePln || 0;
     const _pkgCommPln  = _selectedNonBokunPkg?.commPln  || 0;
     const _pkgIsFixed  = _selectedNonBokunPkg && tdCurrentTour?.pricingType === 'package';
-    const _originalInsertTotal = computeBaseInsertTotal();
-    const insertTotal = applyDiscountToTotal(_originalInsertTotal, tdAppliedDiscountPct);
-    const insertDiscountAmount = tdAppliedDiscountPct ? (_originalInsertTotal - insertTotal) : null;
-
-    const _transportCommPln = lookupCommTransportCommissionPln(_rateForTransport) || 0;
-    const _transportCommSurcharge = _pickupVal === 'hotel' ? _transportCommPln * tdGuestCount : 0;
+    const insertTotal = (_selectedNonBokunPkg
+      ? (_pkgIsFixed ? _pkgPricePln : _pkgPricePln * Math.max(tdGuestCount, 1))
+      : hasPackages
+        ? tdRateSelections.reduce((s, x) => s + x.count * (lookupCommPln(x.rate.title) || 0), 0)
+        : hasCategories
+          ? tdCategorySelections.filter(x => x.count > 0).reduce((s, x) => {
+              const pln = x.configPln !== undefined ? (x.configPln || 0) : (lookupCommPln(tdCurrentTour?.title || '') || 0);
+              return s + x.count * pln;
+            }, 0)
+          : (lookupCommPln(tdCurrentTour?.title || '') || 0) * tdGuestCount) + _transportSurcharge;
 
     const insertComm = (_selectedNonBokunPkg
       ? (_pkgIsFixed ? _pkgCommPln : _pkgCommPln * Math.max(tdGuestCount, 1))
@@ -4235,7 +3605,7 @@ tailwind.config = {
           ? tdCategorySelections.filter(x => x.count > 0).reduce((s, x) => {
               return s + x.count * (lookupCommCommissionPln(tdCurrentTour?.title || '') || 0);
             }, 0)
-          : (lookupCommCommissionPln(tdCurrentTour?.title || '') || 0) * tdGuestCount) + _transportCommSurcharge;
+          : (lookupCommCommissionPln(tdCurrentTour?.title || '') || 0) * tdGuestCount);
 
     const bookingId = crypto.randomUUID();
 
@@ -4248,25 +3618,23 @@ tailwind.config = {
       return;
     }
 
-    const detectedLanguage = (() => {
-      // 1. Z tytułu wybranego rate (np. "English Adult")
-      const rateTitle = tdSelectedRate?.title || '';
-      const fromRate = LANGUAGE_KEYWORDS.find(l => rateTitle.toLowerCase().includes(l.toLowerCase()));
-      if (fromRate) return fromRate;
-      // 2. Ze slotu — jeśli wszystkie raty w slocie mają ten sam język (np. "English Adult" + "English Child")
-      const slotRates = (tdSelectedTimeSlot?.rates || []).filter((r, i, a) => a.findIndex(x => x.id === r.id) === i);
-      const slotLangs = slotRates.map(r => LANGUAGE_KEYWORDS.find(l => r.title.toLowerCase().includes(l.toLowerCase()))).filter(Boolean);
-      if (slotLangs.length > 0 && slotLangs.every(l => l === slotLangs[0])) return slotLangs[0];
-      return null;
-    })();
-
     // Insert booking first so create-stripe-session can read bookingRow.total from DB
     const { error } = await db.from('bookings').insert({
       id: bookingId,
       tour,
       date: dateStr,
       time: tdSelectedTimeSlot?._displayTime || tdSelectedTimeSlot?.startTime || null,
-      language: detectedLanguage,
+      language: (() => {
+        // 1. Z tytułu wybranego rate (np. "English Adult")
+        const rateTitle = tdSelectedRate?.title || '';
+        const fromRate = LANGUAGE_KEYWORDS.find(l => rateTitle.toLowerCase().includes(l.toLowerCase()));
+        if (fromRate) return fromRate;
+        // 2. Ze slotu — jeśli wszystkie raty w slocie mają ten sam język (np. "English Adult" + "English Child")
+        const slotRates = (tdSelectedTimeSlot?.rates || []).filter((r, i, a) => a.findIndex(x => x.id === r.id) === i);
+        const slotLangs = slotRates.map(r => LANGUAGE_KEYWORDS.find(l => r.title.toLowerCase().includes(l.toLowerCase()))).filter(Boolean);
+        if (slotLangs.length > 0 && slotLangs.every(l => l === slotLangs[0])) return slotLangs[0];
+        return null;
+      })(),
       guest,
       email: email || null,
       phone: phone || null,
@@ -4286,10 +3654,6 @@ tailwind.config = {
       additional_guests: extraGuests.length ? extraGuests.join(', ') : null,
       package_lines: packageLines || categoryLines || null,
       created_by_name: currentPartner?.name || null,
-      start_time_id: tdSelectedTimeSlot?.startTimeId != null ? String(tdSelectedTimeSlot.startTimeId) : null,
-      discount_code: tdAppliedDiscountCode || null,
-      discount_pct: tdAppliedDiscountPct || null,
-      discount_amount: insertDiscountAmount,
     });
 
     btn.disabled = false;
@@ -4307,25 +3671,6 @@ tailwind.config = {
       btn.disabled = false
       return
     }
-
-    db.functions.invoke('send-office-notification', { body: {
-      booking_id: bookingId,
-      bokun_confirmation_code: bokunConfirmationCode || bokunReservationCode || null,
-      bokun_booking_id: bokunBookingId || null,
-      tour_name: tour,
-      date: dateStr,
-      time: tdSelectedTimeSlot?._displayTime || tdSelectedTimeSlot?.startTime || null,
-      guest_name: guest,
-      extra_guests: extraGuests.length ? extraGuests : [],
-      guest_email: email || null,
-      phone: phone || null,
-      pax: tdGuestCount,
-      total: insertTotal || null,
-      pickup: tdGetPickupDescription() || null,
-      language: detectedLanguage || null,
-      payment_method: payment || null,
-      package_lines: packageLines || categoryLines || null,
-    }}).catch(e => console.warn('[TD] office notification failed:', e?.message));
 
     // Create Stripe session after booking is in DB (so edge function can read bookingRow.total)
     let stripeSessionUrl = null;
@@ -5018,15 +4363,14 @@ tailwind.config = {
       .eq('partner_id', partnerId)
       .gte('date', from).lte('date', to)
       .in('status', ['confirmed', 'paid', 'arrived', 'no_show']);
-    const commEnabled = currentPartner?.commission_enabled !== false;
     const salesByDay = {}, commByDay = {};
     for (let d = 1; d <= days; d++) { salesByDay[d] = 0; commByDay[d] = 0; }
     let maxComm = 0;
     for (const b of rows || []) {
       const d = parseInt((b.date || '').split('-')[2], 10);
       const isNoShow = (b.status || '').toLowerCase() === 'no_show';
-      if (d) { salesByDay[d] += b.total || 0; commByDay[d] += (isNoShow || !commEnabled) ? 0 : (b.comm || 0); }
-      const commVal = (isNoShow || !commEnabled) ? 0 : (b.comm || 0);
+      if (d) { salesByDay[d] += b.total || 0; commByDay[d] += isNoShow ? 0 : (b.comm || 0); }
+      const commVal = isNoShow ? 0 : (b.comm || 0);
       if (commVal > maxComm) maxComm = commVal;
     }
     const labels = [], sales = [], commissions = [];
@@ -5374,7 +4718,6 @@ tailwind.config = {
       });
       if (error) throw error;
 
-      logPartnerActivity('tailor_enquiry_submitted', `${clientName.value.trim()} · ${enquiryType} · ${pax.value} pax`).catch(() => {});
       document.getElementById('tailor-confirm').classList.remove('hidden');
       document.getElementById('tailor-confirm').scrollIntoView({ behavior: 'smooth', block: 'center' });
     } catch(e) {
@@ -5563,162 +4906,12 @@ tailwind.config = {
     });
   }
 
-  // ===== DATE PICKER POPUP =====
-  const _dpopMap = {};
-  const _DPOP_MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const _DPOP_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  const _DPOP_DOW = ['Mo','Tu','We','Th','Fr','Sa','Su'];
-
-  function _dpopFmtLabel(val) {
-    if (!val) return 'Pick date';
-    const [y, m, d] = val.split('-').map(Number);
-    return `${d} ${_DPOP_MON[m-1]}`;
-  }
-
-  function initDatePicker(inputId, cbFn) {
-    const inp = document.getElementById(inputId);
-    if (!inp || inp._dpopDone) return;
-    inp._dpopDone = true;
-    const wrap = inp.closest('.dpop');
-    if (!wrap) return;
-
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'dpop-btn';
-    btn.innerHTML = `<i class="fa-regular fa-calendar" style="font-size:10px;color:#9ca3af;flex-shrink:0"></i><span class="dpop-label">${_dpopFmtLabel(inp.value)}</span>`;
-    wrap.appendChild(btn);
-
-    const panel = document.createElement('div');
-    panel.className = 'dpop-panel';
-    wrap.appendChild(panel);
-
-    const state = { inp, btn, panel, cbFn, curMonth: new Date(new Date().getFullYear(), new Date().getMonth(), 1) };
-    _dpopMap[inputId] = state;
-
-    state.render = function() {
-      const m = state.curMonth;
-      const today = new Date().toISOString().slice(0,10);
-      const curVal = inp.value;
-      const firstDay = new Date(m.getFullYear(), m.getMonth(), 1);
-      const startDow = (firstDay.getDay() + 6) % 7;
-      const daysInMonth = new Date(m.getFullYear(), m.getMonth()+1, 0).getDate();
-      const CELL = 'display:table-cell;width:14.2857%;text-align:center;padding:2px 0;';
-      let cells = [];
-      for (let i = 0; i < startDow; i++) cells.push('<td></td>');
-      for (let d = 1; d <= daysInMonth; d++) {
-        const ds = `${m.getFullYear()}-${String(m.getMonth()+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-        const isToday = ds === today;
-        const isSel = ds === curVal;
-        const todayColor = isToday && !isSel ? '#E8751A' : isSel ? '#fff' : '#374151';
-        let inner;
-        if (isSel) {
-          inner = `<div onclick="dpopPick('${inputId}','${ds}')" style="width:26px;height:26px;border-radius:50%;background:#E8751A;color:#fff;font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center;margin:auto;cursor:pointer">${d}</div>`;
-        } else {
-          const todayBorder = isToday ? ';outline:2px solid rgba(232,117,26,0.5)' : '';
-          inner = `<div onclick="dpopPick('${inputId}','${ds}')"
-            style="width:26px;height:26px;border-radius:50%;color:${todayColor};font-size:11px;display:flex;align-items:center;justify-content:center;margin:auto;cursor:pointer${todayBorder}"
-            onmouseenter="this.style.background='rgba(232,117,26,0.12)';this.style.color='#E8751A'"
-            onmouseleave="this.style.background='';this.style.color='${todayColor}'">${d}</div>`;
-        }
-        cells.push(`<td style="${CELL}">${inner}</td>`);
-      }
-      while (cells.length % 7 !== 0) cells.push('<td></td>');
-      let rows = '';
-      for (let i = 0; i < cells.length; i += 7) rows += '<tr>' + cells.slice(i, i+7).join('') + '</tr>';
-      panel.innerHTML = `
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <button type="button" onclick="dpopNav('${inputId}',-1)" style="background:none;border:none;cursor:pointer;color:#9ca3af;padding:3px 8px;border-radius:6px" onmouseenter="this.style.color='#374151'" onmouseleave="this.style.color='#9ca3af'"><i class="fa-solid fa-chevron-left" style="font-size:10px"></i></button>
-          <span style="font-size:12px;font-weight:600;color:#1f2937">${_DPOP_MONTHS[m.getMonth()]} ${m.getFullYear()}</span>
-          <button type="button" onclick="dpopNav('${inputId}',1)" style="background:none;border:none;cursor:pointer;color:#9ca3af;padding:3px 8px;border-radius:6px" onmouseenter="this.style.color='#374151'" onmouseleave="this.style.color='#9ca3af'"><i class="fa-solid fa-chevron-right" style="font-size:10px"></i></button>
-        </div>
-        <table style="width:100%;border-collapse:collapse;table-layout:fixed;">
-          <tr>${_DPOP_DOW.map(d => `<td style="${CELL}font-size:10px;color:#9ca3af;padding-bottom:5px">${d}</td>`).join('')}</tr>
-          ${rows}
-        </table>
-        <div style="display:flex;justify-content:space-between;margin-top:10px;padding-top:8px;border-top:1px solid #e5e7eb">
-          <button type="button" onclick="dpopClear('${inputId}')" style="font-size:11px;color:#9ca3af;background:none;border:none;cursor:pointer;padding:0" onmouseenter="this.style.color='#4b5563'" onmouseleave="this.style.color='#9ca3af'">Clear</button>
-          <button type="button" onclick="dpopToday('${inputId}')" style="font-size:11px;color:#E8751A;font-weight:600;background:none;border:none;cursor:pointer;padding:0">Today</button>
-        </div>`;
-    };
-
-    function openPanel() {
-      document.querySelectorAll('.dpop-panel.open').forEach(p => {
-        p.classList.remove('open');
-        p.closest('.dpop')?.querySelector('.dpop-btn')?.classList.remove('open');
-      });
-      if (inp.value) {
-        const [y, mo] = inp.value.split('-').map(Number);
-        state.curMonth = new Date(y, mo-1, 1);
-      }
-      state.render();
-      panel.classList.add('open');
-      btn.classList.add('open');
-    }
-
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      panel.classList.contains('open')
-        ? (panel.classList.remove('open'), btn.classList.remove('open'))
-        : openPanel();
-    });
-    panel.addEventListener('click', e => e.stopPropagation());
-    document.addEventListener('click', () => { panel.classList.remove('open'); btn.classList.remove('open'); });
-  }
-
-  function dpopNav(id, dir) {
-    const st = _dpopMap[id]; if (!st) return;
-    st.curMonth = new Date(st.curMonth.getFullYear(), st.curMonth.getMonth() + dir, 1);
-    st.render();
-  }
-  function dpopPick(id, ds) {
-    const st = _dpopMap[id]; if (!st) return;
-    st.inp.value = ds;
-    st.btn.querySelector('.dpop-label').textContent = _dpopFmtLabel(ds);
-    st.panel.classList.remove('open');
-    st.btn.classList.remove('open');
-    st.cbFn();
-  }
-  function dpopClear(id, noCallback) {
-    const st = _dpopMap[id]; if (!st) return;
-    st.inp.value = '';
-    st.btn.querySelector('.dpop-label').textContent = 'Pick date';
-    st.panel.classList.remove('open');
-    st.btn.classList.remove('open');
-    if (!noCallback) st.cbFn();
-  }
-  function dpopToday(id) {
-    dpopPick(id, new Date().toISOString().slice(0,10));
-  }
-  // ===== END DATE PICKER POPUP =====
-
   // Commission calculator
-  function renderCalcTourOptions() {
-    const sel = document.getElementById('calc-tour');
-    if (!sel) return;
-    const prev = sel.value;
-    const entries = Object.entries(COMM_MAP).filter(([, v]) => v.commPln);
-    entries.sort((a, b) => (a[1].originalName || '').localeCompare(b[1].originalName || ''));
-    sel.innerHTML = '<option value="">— select a tour —</option>' +
-      entries.map(([key, v]) => `<option value="${escapeHtml(key)}">${escapeHtml(v.originalName || key)} (${v.commPln} pln)</option>`).join('');
-    if (prev && COMM_MAP[prev]) sel.value = prev;
-    calcCommission();
-  }
-
   function calcCommission() {
-    const key = document.getElementById('calc-tour')?.value || '';
+    const comm = parseInt(document.getElementById('calc-tour').value);
     const pax = parseInt(document.getElementById('calc-pax').value) || 0;
-    const entry = COMM_MAP[key];
     const result = document.getElementById('calc-result');
-    const hotelWrap = document.getElementById('calc-hotel-pickup-wrap');
-    const hotelCb = document.getElementById('calc-hotel-pickup');
-    if (!result) return;
-    if (hotelWrap) hotelWrap.classList.toggle('hidden', !entry?.transportCommissionPln);
-    if (!entry || pax <= 0) { result.textContent = '—'; return; }
-    const base = entry.commPln || 0;
-    const transportPerPax = (hotelCb?.checked && entry.transportCommissionPln) ? entry.transportCommissionPln : 0;
-    const transportTotal = transportPerPax * pax;
-    const total = base * pax + transportTotal;
-    result.textContent = total + ' pln' + (transportTotal ? ` (incl. ${transportTotal} pln transport)` : '');
+    result.textContent = (!isNaN(comm) && pax > 0) ? (comm * pax) + ' pln' : '—';
   }
 
   let bookingActiveStatus = 'all';
@@ -5742,21 +4935,11 @@ tailwind.config = {
 
   function applyBookingFilters() {
     const q = (document.getElementById('booking-search')?.value || '').toLowerCase();
-    const fromVal = document.getElementById('booking-filter-from')?.value || '';
-    const toVal   = document.getElementById('booking-filter-to')?.value || '';
-    const fromTs  = fromVal ? new Date(fromVal).setHours(0,0,0,0) : null;
-    const toTs    = toVal   ? new Date(toVal).setHours(23,59,59,999) : null;
-    const createdFromVal = document.getElementById('booking-filter-created-from')?.value || '';
-    const createdToVal   = document.getElementById('booking-filter-created-to')?.value || '';
-    const createdFromTs  = createdFromVal ? new Date(createdFromVal).setHours(0,0,0,0) : null;
-    const createdToTs    = createdToVal   ? new Date(createdToVal).setHours(23,59,59,999) : null;
     const rows = document.querySelectorAll('.booking-row');
     let visible = 0;
     rows.forEach(row => {
       const status = row.dataset.status || '';
       const search = row.dataset.search || '';
-      const ts  = Number(row.dataset.startTs || 0);
-      const cts = Number(row.dataset.createdTs || 0);
       const statusGroups = {
         paid:      ['paid', 'confirmed', 'arrived'],
         pending:   ['to_be_paid', 'pending', 'payment_pending', 'pending_payment'],
@@ -5765,27 +4948,12 @@ tailwind.config = {
       };
       const matchStatus = bookingActiveStatus === 'all' || (statusGroups[bookingActiveStatus] || [bookingActiveStatus]).includes(status);
       const matchSearch = !q || search.includes(q);
-      const matchFrom   = !fromTs || ts >= fromTs;
-      const matchTo     = !toTs   || ts <= toTs;
-      const matchCreatedFrom = !createdFromTs || cts >= createdFromTs;
-      const matchCreatedTo   = !createdToTs   || cts <= createdToTs;
-      const show = matchStatus && matchSearch && matchFrom && matchTo && matchCreatedFrom && matchCreatedTo;
+      const show = matchStatus && matchSearch;
       row.style.display = show ? '' : 'none';
       if (show) visible++;
     });
     const noResults = document.getElementById('booking-no-results');
     if (noResults) noResults.classList.toggle('hidden', visible > 0);
-  }
-
-  function clearBookingDates() {
-    dpopClear('booking-filter-from', true);
-    dpopClear('booking-filter-to', true);
-    applyBookingFilters();
-  }
-  function clearBookingCreatedDates() {
-    dpopClear('booking-filter-created-from', true);
-    dpopClear('booking-filter-created-to', true);
-    applyBookingFilters();
   }
 
   function filterVouchers() {
@@ -5948,66 +5116,6 @@ tailwind.config = {
     list._hiddenCards = '';
   }
 
-  // ---- partner attach ----
-  let tpAttachFiles = [];
-
-  function tpHandleFiles() {
-    const input = document.getElementById('tp-attach-input');
-    const newFiles = Array.from(input.files || []);
-    input.value = '';
-    for (const f of newFiles) {
-      if (tpAttachFiles.length >= 3) { showPartnerToast('Max 3 attachments per message.', true); break; }
-      if (f.size > 5 * 1024 * 1024) { showPartnerToast(f.name + ' exceeds 5 MB.', true); continue; }
-      tpAttachFiles.push(f);
-    }
-    tpRenderAttachPreview();
-  }
-
-  function tpRenderAttachPreview() {
-    const wrap = document.getElementById('tp-attach-preview');
-    if (!wrap) return;
-    if (!tpAttachFiles.length) { wrap.innerHTML = ''; wrap.classList.add('hidden'); return; }
-    wrap.classList.remove('hidden');
-    wrap.innerHTML = tpAttachFiles.map((f, i) =>
-      '<div class="flex items-center justify-between px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs">' +
-      '<span class="text-gray-600 truncate max-w-[200px]"><i class="fa-solid fa-paperclip mr-1 text-gray-400"></i>' + escapeHtml(f.name) + '</span>' +
-      '<button onclick="tpRemoveAttach(' + i + ')" class="ml-2 text-gray-400 hover:text-red-500 transition-colors shrink-0"><i class="fa-solid fa-xmark"></i></button>' +
-      '</div>'
-    ).join('');
-  }
-
-  function tpRemoveAttach(i) { tpAttachFiles.splice(i, 1); tpRenderAttachPreview(); }
-
-  function tpClearAttachments() {
-    tpAttachFiles = [];
-    const inp = document.getElementById('tp-attach-input'); if (inp) inp.value = '';
-    tpRenderAttachPreview();
-  }
-
-  async function tpUploadAttachments(files, ticketId) {
-    const results = [];
-    for (const file of files) {
-      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-      const path = ticketId + '/' + Date.now() + '_' + safeName;
-      const { error } = await db.storage.from('support-attachments').upload(path, file, { upsert: false });
-      if (error) { console.error('tp upload error', error); continue; }
-      const { data: urlData } = db.storage.from('support-attachments').getPublicUrl(path);
-      results.push({ name: file.name, url: urlData.publicUrl, type: file.type, size: file.size });
-    }
-    return results;
-  }
-
-  function tpRenderAttachmentBubbles(attachments) {
-    if (!attachments || !attachments.length) return '';
-    return '<div style="margin-top:6px;display:flex;flex-direction:column;gap:5px">' +
-      attachments.map(function(a) {
-        var isImg = a.type && a.type.startsWith('image/');
-        if (isImg) return '<a href="' + escapeHtml(a.url) + '" target="_blank"><img src="' + escapeHtml(a.url) + '" style="max-width:200px;max-height:140px;border-radius:8px;display:block;object-fit:cover"></a>';
-        return '<a href="' + escapeHtml(a.url) + '" target="_blank" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:5px 9px;border-radius:8px;text-decoration:none;background:#f1f5f9;color:#374151"><i class="fa-solid fa-paperclip"></i>' + escapeHtml(a.name) + '</a>';
-      }).join('') + '</div>';
-  }
-  // ---- end partner attach ----
-
   async function openTicketPanel(ticketId) {
     openTicketId = ticketId;
     const ticket = partnerTickets.find(t => t.id === ticketId);
@@ -6029,7 +5137,6 @@ tailwind.config = {
     document.getElementById('tp-reply-wrap').classList.toggle('hidden', isClosed);
     document.getElementById('tp-closed-notice').classList.toggle('hidden', !isClosed);
     document.getElementById('tp-reply-input').value = '';
-    tpClearAttachments();
 
     document.getElementById('panel-ticket').classList.remove('hidden');
     document.getElementById('panel-ticket').classList.add('flex');
@@ -6063,12 +5170,10 @@ tailwind.config = {
       const name      = isAdmin ? (m.sender_name || 'Thousand Miles') : (m.sender_name || 'You');
       const bubbleBg  = isAdmin ? 'background:#FFF3EA;border:1px solid rgba(232,117,26,0.2)' : 'background:#F8FAFC;border:1px solid #e2e8f0';
       const nameCls   = isAdmin ? 'color:#E8751A' : 'color:#1a2332';
-      const atts      = Array.isArray(m.attachments) ? m.attachments : [];
       return `<div class="flex ${isAdmin ? 'justify-end' : 'justify-start'}">
           <div style="max-width:85%;${bubbleBg};border-radius:14px;padding:10px 14px">
             <div class="text-xs font-semibold mb-1" style="${nameCls}">${escapeHtml(name)}</div>
             <div class="text-sm text-dark whitespace-pre-wrap leading-relaxed">${escapeHtml(m.message || '')}</div>
-            ${tpRenderAttachmentBubbles(atts)}
             <div class="text-xs text-gray-400 mt-1.5 text-right">${time}</div>
           </div>
         </div>`;
@@ -6080,22 +5185,19 @@ tailwind.config = {
     if (!openTicketId) return;
     const input = document.getElementById('tp-reply-input');
     const msg   = (input?.value || '').trim();
-    if (!msg && !tpAttachFiles.length) return;
+    if (!msg) return;
     const btn = document.getElementById('tp-reply-btn');
     btn.disabled = true;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i>';
     try {
-      const attachments = tpAttachFiles.length ? await tpUploadAttachments(tpAttachFiles, openTicketId) : [];
       await db.from('support_messages').insert({
         ticket_id:    openTicketId,
         sender_type:  'partner',
         sender_email: currentPartner?.email || '',
         sender_name:  currentPartner?.name  || '',
         message:      msg,
-        attachments:  attachments.length ? attachments : null,
       });
       input.value = '';
-      tpClearAttachments();
       await refreshTicketThread(openTicketId);
       await loadPartnerTickets();
     } catch(e) {
@@ -6111,7 +5213,6 @@ tailwind.config = {
     document.getElementById('panel-ticket-backdrop').classList.add('hidden');
     document.body.style.overflow = '';
     openTicketId = null;
-    tpClearAttachments();
   }
 
   function stToggleForm() {
@@ -6124,44 +5225,18 @@ tailwind.config = {
       : '<i class="fa-solid fa-plus"></i> New ticket';
   }
 
-  function renderRecentBookingsForSupport() {
-    const container = document.getElementById('st-recent-bookings');
-    if (!container) return;
-    const recent = (partnerBookings || []).slice(0, 3);
-    if (!recent.length) { container.innerHTML = ''; return; }
-    container.innerHTML = '<p class="text-xs text-gray-400 mb-1.5">Recent bookings — tap to fill in:</p>' +
-      recent.map(b => {
-        const ref = b.bokun_booking_id ? 'TM-' + b.bokun_booking_id : b.id;
-        const name = b.guest || 'Unknown guest';
-        const tour = b.tour ? ' · ' + b.tour : '';
-        return `<button type="button" onclick="document.getElementById('st-booking-ref').value='${ref}';document.getElementById('st-recent-bookings').querySelectorAll('button').forEach(x=>x.classList.remove('ring-2','ring-brand'));this.classList.add('ring-2','ring-brand')"
-          class="w-full text-left flex items-center justify-between px-3 py-2.5 bg-gray-50 hover:bg-brand/5 border border-gray-200 rounded-xl transition-colors">
-          <div>
-            <div class="text-xs font-semibold text-dark">${escapeHtml(name)}</div>
-            <div class="text-xs text-gray-400">${escapeHtml(tour.slice(3))}</div>
-          </div>
-          <div class="text-xs font-bold text-brand shrink-0 ml-3">${escapeHtml(ref)}</div>
-        </button>`;
-      }).join('');
-  }
-
   function handleCategoryChange() {
     const cat = document.getElementById('st-category')?.value || '';
     const bookingRefWrap = document.getElementById('st-booking-ref-wrap');
     const filesWrap      = document.getElementById('st-files-wrap');
     const priorityWrap   = document.getElementById('st-priority-wrap');
-    const showRef    = cat === 'Booking cancellation/issue';
+    const showRef    = cat === 'Booking issue' || cat === 'Voucher';
     const showFiles  = cat === 'Technical';
     const showPrio   = true;
     bookingRefWrap?.classList.toggle('hidden', !showRef);
     filesWrap?.classList.toggle('hidden', !showFiles);
     priorityWrap?.classList.toggle('hidden', !showPrio);
-    if (!showRef) {
-      const el = document.getElementById('st-booking-ref'); if (el) el.value = '';
-      const rb = document.getElementById('st-recent-bookings'); if (rb) rb.innerHTML = '';
-    } else {
-      renderRecentBookingsForSupport();
-    }
+    if (!showRef)  { const el = document.getElementById('st-booking-ref'); if (el) el.value = ''; }
     if (!showFiles) {
       const fi = document.getElementById('st-files'); if (fi) fi.value = '';
       const fp = document.getElementById('st-files-preview'); if (fp) { fp.innerHTML = ''; fp.classList.add('hidden'); }
