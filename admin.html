@@ -3889,7 +3889,7 @@
     const ALLOWED = {
       'admin':   null, // null = all sections
       'manager': ['bookings','hotelbookings','sellerpanel','customtours','tailormade','hotels','settlement','tours','suppliers','support','notifications','activity','createbooking','staff'],
-      'staff':   ['bookings','hotelbookings','sellerpanel','customtours','tailormade','tours','support','createbooking','hotels'],
+      'staff':   ['bookings','hotelbookings','sellerpanel','customtours','tailormade','tours','support','createbooking','hotels','notifications'],
     };
     const allowed = currentAdminRole === 'admin' ? null : (ALLOWED[currentAdminRole] ?? ALLOWED['staff']);
 
@@ -6635,7 +6635,7 @@
     const SECTION_ALLOWED = {
       'admin':   null,
       'manager': ['bookings','hotelbookings','sellerpanel','customtours','tailormade','hotels','settlement','tours','suppliers','support','notifications','activity','createbooking','staff'],
-      'staff':   ['bookings','hotelbookings','sellerpanel','customtours','tailormade','tours','support','createbooking','hotels'],
+      'staff':   ['bookings','hotelbookings','sellerpanel','customtours','tailormade','tours','support','createbooking','hotels','notifications'],
     };
     const allowedSections = currentAdminRole === 'admin' ? null : (SECTION_ALLOWED[currentAdminRole] ?? SECTION_ALLOWED['staff']);
     if (allowedSections && !allowedSections.includes(name)) return;
