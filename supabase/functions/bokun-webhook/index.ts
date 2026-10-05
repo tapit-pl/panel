@@ -2,13 +2,6 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type' }
 
-// HMAC-SHA256 — Bokun webhook signature verification
-async function hmacSha256(secret: string, message: string): Promise<string> {
-  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'])
-  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(message))
-  return btoa(String.fromCharCode(...new Uint8Array(sig)))
-}
-
 // HMAC-SHA1 — Bokun REST API auth (same as other edge functions)
 async function hmacSha1(secret: string, message: string): Promise<string> {
   const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-1' }, false, ['sign'])
@@ -16,17 +9,13 @@ async function hmacSha1(secret: string, message: string): Promise<string> {
   return btoa(String.fromCharCode(...new Uint8Array(sig)))
 }
 
-async function verifyBokunSignature(headers: Headers, secret: string): Promise<boolean> {
-  const received = headers.get('x-bokun-hmac')
-  if (!received) return false
-  const parts: string[] = []
-  headers.forEach((val, key) => {
-    const lk = key.toLowerCase()
-    if (lk.startsWith('x-bokun-') && lk !== 'x-bokun-hmac') parts.push(`${lk}:${val}`)
-  })
-  parts.sort()
-  const computed = await hmacSha256(secret, parts.join('\n'))
-  return computed === received
+// Bokun does not sign these webhook requests at all (confirmed by inspecting a real delivery —
+// no x-bokun-hmac or any other x-bokun-* header is ever sent). The only auth mechanism this
+// webhook product offers is a custom header we choose ourselves, configured in Bokun's webhook
+// settings under "Custom headers" and echoed back verbatim on every call.
+const WEBHOOK_HEADER_NAME = 'x-webhook-secret'
+function verifyWebhookHeader(headers: Headers, expectedSecret: string): boolean {
+  return headers.get(WEBHOOK_HEADER_NAME) === expectedSecret
 }
 
 function bokunDate(): string {
@@ -128,14 +117,15 @@ Deno.serve(async (req) => {
   const topic = req.headers.get('x-bokun-topic') || ''
   console.log('[bokun-webhook] topic:', topic || '(none)', '| keys:', Object.keys(payload).join(','))
 
-  // Verify signature — always required; reject if env var is missing
+  // Verify shared-secret header — always required; reject if env var is missing
   const webhookSecret = Deno.env.get('BOKUN_WEBHOOK_SECRET')
   if (!webhookSecret) {
     console.error('[bokun-webhook] BOKUN_WEBHOOK_SECRET not set — rejecting request')
     return new Response(JSON.stringify({ error: 'Webhook not configured' }), { status: 500, headers: CORS })
   }
-  const valid = await verifyBokunSignature(req.headers, webhookSecret)
-  if (!valid) return new Response(JSON.stringify({ error: 'Invalid signature' }), { status: 401, headers: CORS })
+  if (!verifyWebhookHeader(req.headers, webhookSecret)) {
+    return new Response(JSON.stringify({ error: 'Invalid signature' }), { status: 401, headers: CORS })
+  }
 
   // Skip non-booking events
   if (topic && !topic.startsWith('booking')) {
