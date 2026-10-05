@@ -2036,19 +2036,9 @@ tailwind.config = {
     document.querySelectorAll('.td-pickup-hotel-label').forEach(el => el.textContent = p.name || '—');
     document.querySelectorAll('.partner-type').forEach(el => el.textContent = p.type || '');
 
-    // Filter payment options based on partner config
-    const allowedPayments = p.payment_options && p.payment_options.length ? p.payment_options : ['driver', 'hotel', 'link'];
-    const payGrid = document.getElementById('td-payment-grid');
-    if (payGrid) {
-      const visible = payGrid.querySelectorAll('.pay-opt[data-payment]');
-      visible.forEach(el => {
-        el.style.display = allowedPayments.includes(el.dataset.payment) ? '' : 'none';
-      });
-      const count = allowedPayments.length;
-      payGrid.className = `grid gap-2 grid-cols-${count}`;
-      const firstVisible = payGrid.querySelector(`.pay-opt[data-payment="${allowedPayments[0]}"]`);
-      if (firstVisible) selectTdPayment(allowedPayments[0]);
-    }
+    // Filter payment options based on partner config (tour-specific restrictions, if any,
+    // are additionally applied per-tour in openTour() via refreshPaymentOptionsUI()).
+    refreshPaymentOptionsUI();
 
     // Reload commission map now that user is authenticated (RLS requires auth token)
     buildCommMap().then(() => { renderPartnerCommissionsTab(Object.values(COMM_MAP)); renderCalcTourOptions(); });
@@ -2136,7 +2126,7 @@ tailwind.config = {
   function updateBookingStats(bookings) {
     const total     = bookings.length;
     const confirmed = bookings.filter(b => ['paid','confirmed','arrived'].includes(b.status?.toLowerCase())).length;
-    const pending   = bookings.filter(b => ['to_be_paid','pending','payment_pending','pending_payment'].includes(b.status?.toLowerCase())).length;
+    const pending   = bookings.filter(b => ['to_be_paid','pending','payment_pending','pending_payment','link_expired'].includes(b.status?.toLowerCase())).length;
     const cancelled = bookings.filter(b => b.status?.toLowerCase() === 'cancelled').length;
     const noShow    = bookings.filter(b => b.status?.toLowerCase() === 'no_show').length;
     document.getElementById('stat-total').textContent     = total;
@@ -2182,15 +2172,18 @@ tailwind.config = {
       if (stripeErr || !stripeRes?.session_url) throw new Error(stripeErr?.message || 'No session URL');
 
       await db.from('bookings').update({
+        status: 'payment_pending',
         stripe_session_id: stripeRes.session_id,
         stripe_session_url: stripeRes.session_url,
       }).eq('id', bookingId).eq('partner_id', currentPartner.id);
 
       const bIdx = partnerBookings.findIndex(x => x.id === bookingId);
       if (bIdx !== -1) {
+        partnerBookings[bIdx].status = 'payment_pending';
         partnerBookings[bIdx].stripe_session_id = stripeRes.session_id;
         partnerBookings[bIdx].stripe_session_url = stripeRes.session_url;
       }
+      renderPartnerBookings(partnerBookings);
 
       if (!b.email) {
         await navigator.clipboard.writeText(stripeRes.session_url).catch(() => {});
@@ -2223,6 +2216,7 @@ tailwind.config = {
     const pm = b.payment_method || '';
     const s  = (b.status || '').toLowerCase();
     if (pm === 'link' || s === 'payment_pending' || s === 'pending_payment') return 'Payment link';
+    if (s === 'link_expired') return 'Payment link expired';
     if (pm === 'driver' || s === 'to_be_paid' || s === 'pending') return 'Pay at driver';
     if (pm === 'hotel') return 'Pay at reception';
     return '';
@@ -2243,6 +2237,7 @@ tailwind.config = {
         pending:         'bg-gray-100 text-gray-600',
         payment_pending: 'bg-orange-100 text-orange-700',
         pending_payment: 'bg-orange-100 text-orange-700',
+        link_expired:    'bg-orange-100 text-orange-700',
         cancelled:       'bg-red-100 text-red-700',
         arrived:         'bg-green-100 text-green-700',
         no_show:         'bg-red-100 text-red-700',
@@ -2251,6 +2246,7 @@ tailwind.config = {
         paid: 'Paid', confirmed: 'Paid',
         to_be_paid: 'Pays at driver', pending: 'Pays at driver',
         payment_pending: 'Link sent', pending_payment: 'Link sent',
+        link_expired: 'Link expired',
         cancelled: 'Cancelled', arrived: 'Arrived',
         no_show: 'No Show',
       };
@@ -2276,7 +2272,7 @@ tailwind.config = {
           <div class="text-xs text-gray-400">${partnerPaymentLabel(b)}</div>
           <div class="flex gap-1 mt-0.5">
             <button onclick="openBookingVoucher('${b.id}')" class="p-1.5 text-gray-400 hover:text-brand hover:bg-brand-light rounded-lg transition-colors" title="View voucher"><i class="fa-solid fa-file-pdf text-xs"></i></button>
-            ${['payment_pending','pending_payment'].includes(s) ? `<button onclick="resendPaymentLink('${b.id}')" class="p-1.5 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="${b.email ? 'Resend payment link to guest' : 'Copy payment link'}"><i class="fa-solid fa-${b.email ? 'paper-plane' : 'copy'} text-xs"></i></button>` : ''}
+            ${['payment_pending','pending_payment','link_expired'].includes(s) ? `<button onclick="resendPaymentLink('${b.id}')" class="p-1.5 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="${b.email ? 'Resend payment link to guest' : 'Copy payment link'}"><i class="fa-solid fa-${b.email ? 'paper-plane' : 'copy'} text-xs"></i></button>` : ''}
           </div>
         </div>
       </div>`;
@@ -2473,8 +2469,8 @@ tailwind.config = {
       const pickupLine = b.pickup ? `<span><i class="fa-solid fa-map-pin mr-1"></i>${escapeHtml(b.pickup)}</span>` : '';
       const phoneLine = b.phone ? ` · <a href="tel:${escapeHtml(b.phone)}" class="text-brand hover:underline">${escapeHtml(b.phone)}</a>` : '';
       const bs = (b.status || '').toLowerCase();
-      const payBadgeColors = { paid: 'bg-green-100 text-green-700', confirmed: 'bg-green-100 text-green-700', to_be_paid: 'bg-gray-100 text-gray-600', pending: 'bg-gray-100 text-gray-600', payment_pending: 'bg-orange-100 text-orange-700', pending_payment: 'bg-orange-100 text-orange-700', cancellation_requested: 'bg-amber-100 text-amber-700' };
-      const payBadgeLabels = { paid: 'Paid', confirmed: 'Paid', to_be_paid: 'Pays at driver', pending: 'Pays at driver', payment_pending: 'Link sent', pending_payment: 'Link sent' };
+      const payBadgeColors = { paid: 'bg-green-100 text-green-700', confirmed: 'bg-green-100 text-green-700', to_be_paid: 'bg-gray-100 text-gray-600', pending: 'bg-gray-100 text-gray-600', payment_pending: 'bg-orange-100 text-orange-700', pending_payment: 'bg-orange-100 text-orange-700', link_expired: 'bg-orange-100 text-orange-700', cancellation_requested: 'bg-amber-100 text-amber-700' };
+      const payBadgeLabels = { paid: 'Paid', confirmed: 'Paid', to_be_paid: 'Pays at driver', pending: 'Pays at driver', payment_pending: 'Link sent', pending_payment: 'Link sent', link_expired: 'Link expired' };
       const payBadgeHtml = payBadgeLabels[bs] ? `<span class="text-xs font-semibold px-2 py-0.5 rounded-full ${payBadgeColors[bs] || 'bg-gray-100 text-gray-600'}">${payBadgeLabels[bs]}</span>` : '';
       return `<div class="bg-white rounded-2xl shadow-sm p-5 flex gap-4${borderClass}">
         <div class="shrink-0">${timeBox}</div>
@@ -2623,6 +2619,7 @@ tailwind.config = {
           requireGuestNames: t.require_guest_names || false,
           bookingCutoffHours: t.booking_cutoff_hours || null,
           slotCapacity: t.slot_capacity || null,
+          paymentOptions: t.payment_options || null,
         };
         if (!t.bokun_id) return {
           ...base,
@@ -2705,6 +2702,7 @@ tailwind.config = {
     _selectedNonBokunPkg = null;
     tdAppliedDiscountCode = null;
     tdAppliedDiscountPct = null;
+    refreshPaymentOptionsUI();
 
     _modalOpener = document.activeElement;
     const modal = document.getElementById('modal-tour');
@@ -3830,6 +3828,25 @@ tailwind.config = {
 
   function updatePayOptStyles() { selectTdPayment(tdPayment); }
 
+  // Payment methods shown must be allowed by BOTH the partner's own settings and the
+  // currently open tour's settings — recomputed on partner login and again every time a
+  // tour is opened, since tour-level restrictions can differ from tour to tour.
+  function refreshPaymentOptionsUI() {
+    const payGrid = document.getElementById('td-payment-grid');
+    if (!payGrid) return;
+    const partnerAllowed = currentPartner?.payment_options?.length ? currentPartner.payment_options : ['driver', 'hotel', 'link'];
+    const tourAllowed = tdCurrentTour?.paymentOptions?.length ? tdCurrentTour.paymentOptions : ['driver', 'hotel', 'link'];
+    const intersected = partnerAllowed.filter(x => tourAllowed.includes(x));
+    const allowedPayments = intersected.length ? intersected : tourAllowed;
+    const visible = payGrid.querySelectorAll('.pay-opt[data-payment]');
+    visible.forEach(el => {
+      el.style.display = allowedPayments.includes(el.dataset.payment) ? '' : 'none';
+    });
+    payGrid.className = `grid gap-2 grid-cols-${allowedPayments.length}`;
+    const currentStillAllowed = tdPayment && allowedPayments.includes(tdPayment);
+    if (!currentStillAllowed) selectTdPayment(allowedPayments[0]);
+  }
+
   // ── Bokun field-error helpers ──────────────────────────────────────────────
   const _BOKUN_ERR_RULES = [
     { match: ['not a valid phone', 'phone number', 'phone'],     field: 'phone',     msg: 'This phone number is not accepted. Enter a full number with country code, e.g. +48 600 100 200.' },
@@ -4051,33 +4068,47 @@ tailwind.config = {
     let bokunFieldErr = null;
     if (tdCurrentTour?.bokunId && tdSelectedTimeSlot?.startTimeId) {
       try {
-        const mainPassengerDetails = [
-          { questionId: 'firstName', values: [firstName] },
-          { questionId: 'lastName',  values: [lastName]  },
-        ];
+        // Each passenger sent to Bokun must carry ITS OWN guest's name — guest 0 is the main
+        // contact (firstName/lastName), guests 1+ come from the per-guest "Guest N" fields
+        // (td-extra-first-*/td-extra-last-*) rather than all reusing the main guest's name.
+        const _getGuest = (idx) => {
+          if (idx === 0) return [
+            { questionId: 'firstName', values: [firstName] },
+            { questionId: 'lastName',  values: [lastName]  },
+          ];
+          const ef = (document.getElementById(`td-extra-first-${idx - 1}`)?.value || '').trim();
+          const el = (document.getElementById(`td-extra-last-${idx - 1}`)?.value || '').trim();
+          return [
+            { questionId: 'firstName', values: [ef || firstName] },
+            { questionId: 'lastName',  values: [el || lastName]  },
+          ];
+        };
         // A "package" line's own pricing category — each rate in tdRateSelections is a distinct Bokun
         // rate (not a category within one rate), so passengers built for it must use ITS OWN category,
         // never a different rate's or the tour-wide first one.
+        let _tdGuestIdx = 0;
         const buildPassengersForRate = (rate, count) => {
           const cat = rate?.pricesByCategory?.[0];
           const pricingCategoryId = (cat?.pricingCategoryId ?? cat?.id) ?? rate?.id;
           return Array.from({ length: count }, () => ({
-            pricingCategoryId, groupSize: 1, passengerDetails: mainPassengerDetails, answers: [], extras: []
+            pricingCategoryId, groupSize: 1, passengerDetails: _getGuest(_tdGuestIdx++), answers: [], extras: []
           }));
         };
         const buildPassengers = () => {
           if (hasCategories) {
+            let gIdx = 0;
             return tdCategorySelections
               .filter(x => x.count > 0)
               .flatMap(x => Array.from({ length: x.count }, () => ({
                 pricingCategoryId: x.category.id, groupSize: 1,
-                passengerDetails: mainPassengerDetails, answers: [], extras: []
+                passengerDetails: _getGuest(gIdx++), answers: [], extras: []
               })));
           }
           if (hasPackages) {
             // Combined view across all selected rates — used only for the options/checkout-methods
             // probe below, which doesn't need to know which specific rate each passenger belongs to.
             // The actual submit further down sends one activityBookings entry per rate instead.
+            _tdGuestIdx = 0;
             return tdRateSelections.filter(x => x.count > 0)
               .flatMap(x => buildPassengersForRate(x.rate, x.count));
           }
@@ -4090,9 +4121,9 @@ tailwind.config = {
           const fallbackCat = tdSelectedRate?.pricesByCategory?.[0] || tdSelectedTimeSlot?.rates?.[0]?.pricesByCategory?.[0];
           const pricingCatId = (fallbackCat?.pricingCategoryId ?? fallbackCat?.id) ?? tdCurrentTour.pricing?.[0]?.id;
           return pricingCatId != null
-            ? Array.from({ length: tdGuestCount }, () => ({
+            ? Array.from({ length: tdGuestCount }, (_, i) => ({
                 pricingCategoryId: pricingCatId, groupSize: 1,
-                passengerDetails: mainPassengerDetails, answers: [], extras: []
+                passengerDetails: _getGuest(i), answers: [], extras: []
               }))
             : [];
         };
@@ -4130,11 +4161,12 @@ tailwind.config = {
           nationality && { questionId: 'nationality', values: [nationality] },
         ].filter(Boolean);
 
-        const bookingNote = [payLabel, packageLines || categoryLines,
-          extraGuests.length ? 'Guests: ' + [guest, ...extraGuests].join(', ') : null, notes
+        const pickupDesc = tdGetPickupDescription() || currentPartner?.name || 'Hotel pickup';
+        const bookingNote = [currentPartner?.name ? `Partner: ${currentPartner.name}` : null, payLabel, packageLines || categoryLines,
+          extraGuests.length ? 'Guests: ' + [guest, ...extraGuests].join(', ') : null,
+          pickupDesc ? `Pickup: ${pickupDesc}` : null, notes
         ].filter(Boolean).join(' | ');
 
-        const pickupDesc = tdGetPickupDescription() || currentPartner?.name || 'Hotel pickup';
         const forcePickupId = tdCurrentTour?.bokunForcePickupPlaceId;
         const pickupAnswers = forcePickupId
           ? []
@@ -4155,6 +4187,7 @@ tailwind.config = {
           pickupAnswers: pickupAnswers,
           dropoffAnswers: [],
         });
+        _tdGuestIdx = 0; // reset before the real per-rate passenger build below — buildPassengers() above already advanced it once for the options probe
         const activityBookingsList = hasPackages
           ? tdRateSelections.filter(x => x.count > 0)
               .map(x => buildActivityBookingEntry(x.rate.id, buildPassengersForRate(x.rate, x.count)))
@@ -4325,6 +4358,8 @@ tailwind.config = {
       language: detectedLanguage || null,
       payment_method: payment || null,
       package_lines: packageLines || categoryLines || null,
+      discount_code: tdAppliedDiscountCode || null,
+      discount_pct: tdAppliedDiscountPct || null,
     }}).catch(e => console.warn('[TD] office notification failed:', e?.message));
 
     // Create Stripe session after booking is in DB (so edge function can read bookingRow.total)
@@ -4967,10 +5002,11 @@ tailwind.config = {
         const st = (data?.status || '').toLowerCase();
         const isCancelled = st === 'cancelled';
         const linkPending = st === 'payment_pending' || st === 'pending_payment';
+        const isLinkExpired = st === 'link_expired';
         const isNoShow = st === 'no_show';
         const isPaid = st === 'paid' || st === 'confirmed';
-        const color = isCancelled ? '#6B7280' : isNoShow ? '#DC2626' : linkPending ? '#2563EB' : (isPaid || data?.payment === 'hotel') ? '#16A34A' : data?.payment === 'driver' ? '#E8751A' : '#94A3B8';
-        const label = isCancelled ? 'Reservation Cancelled' : isNoShow ? 'No Show — Hotel Charged' : linkPending ? 'Payment link sent — awaiting payment' : (isPaid || data?.payment === 'hotel') ? 'Reservation Paid' : data?.payment === 'driver' ? 'To Be Paid at Driver' : 'Payment status unknown';
+        const color = isCancelled ? '#6B7280' : isNoShow ? '#DC2626' : isLinkExpired ? '#ea580c' : linkPending ? '#2563EB' : (isPaid || data?.payment === 'hotel') ? '#16A34A' : data?.payment === 'driver' ? '#E8751A' : '#94A3B8';
+        const label = isCancelled ? 'Reservation Cancelled' : isNoShow ? 'No Show — Hotel Charged' : isLinkExpired ? 'Payment link expired — resend needed' : linkPending ? 'Payment link sent — awaiting payment' : (isPaid || data?.payment === 'hotel') ? 'Reservation Paid' : data?.payment === 'driver' ? 'To Be Paid at Driver' : 'Payment status unknown';
         return `<div style="margin:0 32px 26px;text-align:center;padding:13px 16px;border:2px solid ${color};border-radius:8px;">
           <div style="font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:${color};">${label}</div>
         </div>`;
@@ -5759,7 +5795,7 @@ tailwind.config = {
       const cts = Number(row.dataset.createdTs || 0);
       const statusGroups = {
         paid:      ['paid', 'confirmed', 'arrived'],
-        pending:   ['to_be_paid', 'pending', 'payment_pending', 'pending_payment'],
+        pending:   ['to_be_paid', 'pending', 'payment_pending', 'pending_payment', 'link_expired'],
         cancelled: ['cancelled'],
         no_show:   ['no_show'],
       };

@@ -35,15 +35,23 @@ function bokunDate(): string {
   return `${now.getUTCFullYear()}-${pad(now.getUTCMonth()+1)}-${pad(now.getUTCDate())} ${pad(now.getUTCHours())}:${pad(now.getUTCMinutes())}:${pad(now.getUTCSeconds())}`
 }
 
-async function bokunGet(path: string): Promise<{ ok: boolean; status: number; body: Record<string, unknown> }> {
+// /booking.json/{id} GET 404s even for valid bookings on this account — booking-search by
+// confirmationCode (the plain numeric id, no "TM-" prefix) is the endpoint that actually works.
+async function bokunFindBookingById(numericId: string): Promise<{ ok: boolean; status: number; body: Record<string, unknown> | null }> {
   const accessKey = Deno.env.get('BOKUN_ACCESS_KEY')!
   const secretKey = Deno.env.get('BOKUN_SECRET_KEY')!
+  const path = '/booking.json/booking-search'
   const date = bokunDate()
-  const signature = await hmacSha1(secretKey, date + accessKey + 'GET' + path)
+  const payload = { confirmationCode: numericId, pageSize: 1, page: 0 }
+  const signature = await hmacSha1(secretKey, date + accessKey + 'POST' + path)
   const res = await fetch(`https://api.bokun.io${path}`, {
-    headers: { 'X-Bokun-Date': date, 'X-Bokun-AccessKey': accessKey, 'X-Bokun-Signature': signature, 'Accept': 'application/json' }
+    method: 'POST',
+    headers: { 'X-Bokun-Date': date, 'X-Bokun-AccessKey': accessKey, 'X-Bokun-Signature': signature, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(payload),
   })
-  return { ok: res.ok, status: res.status, body: await res.json() }
+  const data = await res.json()
+  const item = (data?.items as Record<string, unknown>[] | undefined)?.[0] ?? null
+  return { ok: res.ok, status: res.status, body: item }
 }
 
 // Returns true if refund was issued successfully, false if booking was not in paid state,
@@ -152,9 +160,9 @@ Deno.serve(async (req) => {
     } catch {
       numericId = String(payload.bookingId)
     }
-    const resp = await bokunGet(`/booking.json/${numericId}`)
-    console.log('[bokun-webhook] fetched booking from Bokun API, HTTP', resp.status)
-    if (!resp.ok) {
+    const resp = await bokunFindBookingById(numericId)
+    console.log('[bokun-webhook] fetched booking from Bokun API, HTTP', resp.status, 'found:', !!resp.body)
+    if (!resp.ok || !resp.body) {
       return new Response(JSON.stringify({ error: 'Bokun API fetch failed', bokun: resp.status }), { status: 502, headers: CORS })
     }
     confirmationCode = String(resp.body.confirmationCode ?? '')

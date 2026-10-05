@@ -13,6 +13,7 @@ function officeNotificationHtml(p: {
   guest_name?: string | null, extra_guests?: string[] | null, guest_email?: string | null, phone?: string | null,
   pax: number, total?: number | null, pickup?: string | null, language?: string | null,
   payment_method?: string | null, package_lines?: string | null,
+  discount_code?: string | null, discount_pct?: number | null,
 }) {
   const now = new Date()
   const pad = (n: number) => String(n).padStart(2, '0')
@@ -45,6 +46,7 @@ function officeNotificationHtml(p: {
         ${p.package_lines ? `<tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold">Package:</td><td style="padding:8px 4px;white-space:pre-line">${escapeHtml(p.package_lines)}</td></tr>` : ''}
         <tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold">Number of participants:</td><td style="padding:8px 4px">${p.pax}</td></tr>
         ${p.total ? `<tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold">Price:</td><td style="padding:8px 4px">${escapeHtml(String(p.total))} PLN</td></tr>` : ''}
+        ${p.discount_code ? `<tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold">Discount code:</td><td style="padding:8px 4px">${escapeHtml(p.discount_code)}${p.discount_pct ? ` (${escapeHtml(String(p.discount_pct))}%)` : ''}</td></tr>` : ''}
         ${guestNames ? `<tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold">Participants:</td><td style="padding:8px 4px">${guestNames}</td></tr>` : ''}
         ${p.phone ? `<tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold">Contact number:</td><td style="padding:8px 4px">${escapeHtml(p.phone)}</td></tr>` : ''}
         ${p.guest_email ? `<tr style="border-bottom:1px solid #e0e0e0"><td style="padding:8px 4px;font-weight:bold">Email:</td><td style="padding:8px 4px">${escapeHtml(p.guest_email)}</td></tr>` : ''}
@@ -85,7 +87,7 @@ Deno.serve(async (req) => {
   const {
     booking_id, bokun_booking_id, bokun_confirmation_code, tour_name, date, time,
     guest_name, extra_guests, guest_email, phone, pax, total, pickup, language,
-    payment_method, package_lines,
+    payment_method, package_lines, discount_code, discount_pct,
   } = await req.json()
 
   let resolvedBokunId: number | string | null = bokun_booking_id || null
@@ -98,6 +100,7 @@ Deno.serve(async (req) => {
     booking_id, bokun_booking_id: resolvedBokunId as number | null, tour_name, date, time,
     guest_name, extra_guests: extra_guests || null, guest_email, phone,
     pax: pax ?? 1, total, pickup, language, payment_method, package_lines,
+    discount_code, discount_pct,
   })
 
   const emailRes = await fetch('https://api.resend.com/emails', {

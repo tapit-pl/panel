@@ -197,7 +197,7 @@ Deno.serve(async (req) => {
     .from('bookings')
     .update({ status: 'cancelling' })
     .eq('id', booking_id)
-    .in('status', ['paid', 'to_be_paid', 'pending', 'payment_pending', 'pending_payment', 'confirmed'])
+    .in('status', ['paid', 'to_be_paid', 'pending', 'payment_pending', 'pending_payment', 'confirmed', 'link_expired'])
     .select('id')
     .maybeSingle()
 

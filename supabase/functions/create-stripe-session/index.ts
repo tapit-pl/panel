@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
   const { data: { user } } = await authClient.auth.getUser()
   if (!user) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...CORS, 'Content-Type': 'application/json' } })
 
-  const { booking_id, custom_package_id, bokun_reservation_code, pax, tour_name, date, guest_name, guest_email, rate_selections, pickup_mode } = await req.json()
+  const { booking_id, custom_package_id, bokun_reservation_code, pax, tour_name, date, guest_name, guest_email, rate_selections, pickup_mode, send_email } = await req.json()
 
   const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
 
@@ -198,7 +198,7 @@ Deno.serve(async (req) => {
       .eq('id', custom_package_id)
   }
 
-  if (guest_email && session.url) {
+  if (guest_email && session.url && send_email !== false) {
     const emailRes = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {

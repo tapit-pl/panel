@@ -46,6 +46,7 @@
   .status-confirmed       { background:transparent; color:#16a34a; border:1.5px solid #16a34a; }
   .status-pending         { background:#fef9c3; color:#ca8a04; }
   .status-pending-payment { background:#fef9c3; color:#ca8a04; }
+  .status-link-expired    { background:transparent; color:#ea580c; border:1.5px solid #ea580c; }
   .status-cancelled       { background:transparent; color:#dc2626; border:1.5px solid #dc2626; }
   .status-arrived         { background:#ccfbf1; color:#0f766e; border:1.5px solid #0d9488; }
   .status-settled { background:#dbeafe; color:#2563eb; }
@@ -1345,7 +1346,7 @@
             <button onclick="ctClearFilters()" class="text-xs font-medium px-3 py-2 rounded-xl transition-colors" style="color:#64748b;border:1px solid rgba(255,255,255,0.08)" onmouseover="this.style.color='#e8751a'" onmouseout="this.style.color='#64748b'">Clear all</button>
           </div>
 
-          <!-- My month stats card — visible only to staff role -->
+          <!-- My month stats card — visible to staff and manager (own numbers only), hidden for admin -->
           <div id="cp-my-stats" class="hidden mb-4 rounded-2xl p-5 grid grid-cols-3 gap-4" style="background:#1a2332; border:1px solid rgba(255,255,255,0.07)">
             <div>
               <div class="text-xs text-slate-400 mb-1">My packages this month</div>
@@ -2855,6 +2856,7 @@
             <option value="paid">Paid</option>
             <option value="to_be_paid">Driver pay</option>
             <option value="payment_pending">Payment link sent</option>
+            <option value="link_expired">Link expired</option>
             <option value="arrived">Arrived</option>
             <option value="no_show">No Show</option>
           </select>
@@ -3452,7 +3454,7 @@
       const cntOta    = todayAllB.filter(b => !DIRECT_SOURCES.has(b.source)).length;
       const cntHotel  = todayAllB.filter(b => b.source === 'Partner Panel').length;
       const cntSeller = customToursLoaded ? cpData.filter(p => (p._creationTs||0) >= todayStart && (p._creationTs||0) < todayEnd && p.status !== 'cancelled').length : null;
-      const cntOldTm  = todayAllB.filter(b => b.source === 'Old TM System' || b.source === 'Website').length;
+      const cntOldTm  = todayAllB.filter(b => b.source === 'Website').length;
       const tabAll    = document.getElementById('dtab-all');
       const tabHotel  = document.getElementById('dtab-hotel');
       const tabOta    = document.getElementById('dtab-ota');
@@ -3545,13 +3547,13 @@
       </div>`).join('') || '<div class="text-xs text-slate-500">No data</div>';
 
     // Today's departures
-    const depStatusStyle = s => { const l=(s||'').toLowerCase(); return l==='confirmed'?'background:rgba(21,128,61,0.3);color:#4ade80':l==='paid'?'background:rgba(29,78,216,0.3);color:#60a5fa':l==='cancelled'?'background:rgba(153,27,27,0.3);color:#f87171':l==='arrived'?'background:rgba(109,40,217,0.3);color:#c084fc':l==='to_be_paid'?'background:rgba(161,98,7,0.3);color:#facc15':'background:rgba(51,65,85,0.5);color:#94a3b8'; };
+    const depStatusStyle = s => { const l=(s||'').toLowerCase(); return l==='confirmed'?'background:rgba(21,128,61,0.3);color:#4ade80':l==='paid'?'background:rgba(29,78,216,0.3);color:#60a5fa':l==='cancelled'?'background:rgba(153,27,27,0.3);color:#f87171':l==='arrived'?'background:rgba(109,40,217,0.3);color:#c084fc':l==='to_be_paid'?'background:rgba(161,98,7,0.3);color:#facc15':l==='link_expired'?'background:rgba(234,88,12,0.3);color:#fb923c':'background:rgba(51,65,85,0.5);color:#94a3b8'; };
     const depRow = b => {
       const guestLine = b.guest || '—';
       const phoneHtml = b.phone ? `<span style="color:#60a5fa">${escapeHtml(b.phone)}</span>` : `<span style="color:#475569">no phone</span>`;
       const pickupHtml = b.pickup ? `<div class="text-xs text-slate-500 mt-0.5"><i class="fa-solid fa-location-dot text-slate-600 mr-1" style="font-size:9px"></i>${escapeHtml(b.pickup)}</div>` : '';
       const voucherBtn = b._dbBooking ? `<button onclick="openVoucher('${b.id}')" title="Voucher" style="background:none;border:none;cursor:pointer;color:#64748b;padding:0 2px" onmouseover="this.style.color='#f97316'" onmouseout="this.style.color='#64748b'"><i class="fa-solid fa-file-pdf text-xs"></i></button>` : '';
-      const paidBtn = b._dbBooking && ['to_be_paid','pending','payment_pending','pending_payment'].includes((b.status||'').toLowerCase()) ? `<button onclick="quickMarkPaid('${b.id}')" title="Mark as paid" style="background:none;border:none;cursor:pointer;padding:0 2px"><i class="fa-solid fa-circle-check text-xs" style="color:#22c55e"></i></button>` : '';
+      const paidBtn = b._dbBooking && ['to_be_paid','pending','payment_pending','pending_payment','link_expired'].includes((b.status||'').toLowerCase()) ? `<button onclick="quickMarkPaid('${b.id}')" title="Mark as paid" style="background:none;border:none;cursor:pointer;padding:0 2px"><i class="fa-solid fa-circle-check text-xs" style="color:#22c55e"></i></button>` : '';
       const noShowBtn = b._dbBooking && canMarkNoShow(b) ? `<button onclick="markNoShow('${b.id}')" title="No show" style="background:none;border:none;cursor:pointer;padding:0 2px"><i class="fa-solid fa-user-slash text-xs" style="color:#ef4444"></i></button>` : '';
       return `<div class="rounded-xl mb-1.5" style="padding:8px 10px;background:rgba(255,255,255,0.04)">
         <div class="flex items-center gap-1.5 mb-1">
@@ -3676,7 +3678,7 @@
     if (!recent.length) { listEl.innerHTML = '<div class="text-xs text-slate-500">No bookings yet</div>'; return; }
     const now = Date.now();
     const ago = ts => { const m=Math.floor((now-ts)/60000); return m<60?m+'m ago':m<1440?Math.floor(m/60)+'h ago':Math.floor(m/1440)+'d ago'; };
-    const srcColors = { Viator:'#f472b6', GYG:'#facc15', Klook:'#f87171', Musement:'#c084fc', Expedia:'#60a5fa', 'Partner Panel':'#38bdf8', 'TM Panel':'#94a3b8', 'Old TM System':'#64748b' };
+    const srcColors = { Viator:'#f472b6', GYG:'#facc15', Klook:'#f87171', Musement:'#c084fc', Expedia:'#60a5fa', 'Partner Panel':'#38bdf8', 'TM Panel':'#94a3b8', 'Website':'#64748b' };
     listEl.innerHTML = recent.map(b => {
       const c = srcColors[b.source] || '#94a3b8';
       return `<div class="flex items-center gap-2 rounded-lg mb-1" style="padding:5px 8px;background:rgba(255,255,255,0.04)">
@@ -3728,7 +3730,7 @@
     initDashMonthSelector();
     initSettleMonthDropdown();
     // Init msel before loadPartners/loadBookings so mselSetOptions calls inside them find initialized components
-    const STATUS_OPTS_EARLY = [{value:'paid',label:'Paid'},{value:'to_be_paid',label:'Driver pay'},{value:'payment_pending',label:'Link sent'},{value:'cancelled',label:'Cancelled'}];
+    const STATUS_OPTS_EARLY = [{value:'paid',label:'Paid'},{value:'to_be_paid',label:'Driver pay'},{value:'payment_pending',label:'Link sent'},{value:'link_expired',label:'Link expired'},{value:'cancelled',label:'Cancelled'}];
     mselInit('msel-ab-tour',  'All tours',    filterAllBookings);
     mselInit('msel-ab-hotel', 'All partners', filterAllBookings);
     mselInit('msel-ab-status','All statuses', filterAllBookings);
@@ -3800,6 +3802,7 @@
             _paymentType: nb.payment_type || null,
             _creationTs: nb.created_at ? new Date(nb.created_at).getTime() : Date.now(),
             _startTs: nb.date ? new Date(nb.date).getTime() : 0,
+            _rawDate: nb.date || null, _partnerId: nb.partner_id || null,
           });
         }
         // Add to partnerBookings so hotelbookings section reflects it immediately
@@ -3821,6 +3824,7 @@
             _paymentType: nb.payment_type || null,
             _creationTs: nb.created_at ? new Date(nb.created_at).getTime() : Date.now(),
             _startTs: nb.date ? new Date(nb.date).getTime() : 0,
+            _rawDate: nb.date || null, _partnerId: nb.partner_id || null,
           });
         }
         const tour = payload?.new?.tour ? ` · ${payload.new.tour}` : '';
@@ -4259,7 +4263,7 @@
       : channel.includes('GetYourGuide') ? 'GYG'
       : channel.includes('Klook') ? 'Klook'
       : channel.includes('Expedia') ? 'Expedia'
-      : channel.includes('Thousand Miles') ? 'Old TM System'
+      : channel.includes('Thousand Miles') ? 'Website'
       : (channel !== 'Bokun' ? channel : 'Bokun');
     const statusMap = { CONFIRMED: 'paid', CANCELLED: 'cancelled', PENDING: 'to_be_paid' };
     const codePrefix = (item.confirmationCode || '').replace(/^#/, '').split('-')[0].toUpperCase();
@@ -4743,7 +4747,7 @@
   function renderCategories() {
     const list = document.getElementById('categories-list');
     if (!list) return;
-    const locked = currentAdminRole === 'staff' || !editingUnlocked;
+    const locked = !editingUnlocked;
     list.innerHTML = allCategories.map(c => `
       <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${c.is_default ? 'bg-gray-100 text-gray-500' : 'bg-brand/10 text-brand'}">
         ${escapeHtml(c.label)}
@@ -4769,7 +4773,7 @@
   }
 
   async function deleteCategory(id, slug) {
-    if (currentAdminRole !== 'admin') { showToast('Admin role required.', 'error'); return; }
+    if (!editingUnlocked) { showToast('Unlock editing first.', 'error'); return; }
     const inUse = allTourConfig.some(t => (t.categories || []).includes(slug));
     if (inUse && !await showConfirm(`Some tours use "${slug}". Delete anyway?`)) return;
     const cat = allCategories.find(c => c.id === id);
@@ -4794,7 +4798,7 @@
     const list = document.getElementById('discount-codes-list');
     const empty = document.getElementById('discount-codes-empty');
     if (!list) return;
-    const locked = currentAdminRole === 'staff' || !editingUnlocked;
+    const locked = !editingUnlocked;
     const lockCls = locked ? 'pointer-events-none' : '';
     if (allDiscountCodes.length === 0) {
       list.innerHTML = '';
@@ -4815,7 +4819,7 @@
   function openEditDiscountCodeModal(id) { openDiscountCodeModal(id); }
 
   function openDiscountCodeModal(editId) {
-    if (!editingUnlocked || currentAdminRole === 'staff') return;
+    if (!editingUnlocked) return;
     const d = editId ? allDiscountCodes.find(x => x.id === editId) : null;
     document.getElementById('disc-editing-id').value = editId || '';
     document.getElementById('disc-modal-title').textContent = d ? 'Edit discount code' : 'Add discount code';
@@ -4844,13 +4848,15 @@
     errEl.classList.add('hidden');
     const payload = { code, discount_pct: pct, active };
     if (editId) {
+      const before = allDiscountCodes.find(x => x.id === editId);
       const { data, error } = await db.from('discount_codes').update(payload).eq('id', editId).select().single();
       if (error) { errEl.textContent = error.code === '23505' ? 'This code already exists.' : ('Error: ' + error.message); errEl.classList.remove('hidden'); return; }
       const idx = allDiscountCodes.findIndex(x => x.id === editId);
       if (idx >= 0) allDiscountCodes[idx] = data;
       closeDiscountCodeModal();
       renderDiscountCodes();
-      logActivity('discount_code_edited', `Discount code "${code}" updated`);
+      const discChanges = before ? describeChanges(before, payload, { code: 'code', discount_pct: 'discount %', active: 'active' }) : 'edited';
+      logActivity('discount_code_edited', `Discount code "${code}" updated — changed: ${discChanges}`);
     } else {
       const { data, error } = await db.from('discount_codes').insert(payload).select().single();
       if (error) { errEl.textContent = error.code === '23505' ? 'This code already exists.' : ('Error: ' + error.message); errEl.classList.remove('hidden'); return; }
@@ -4862,7 +4868,7 @@
   }
 
   async function deleteDiscountCode(id) {
-    if (currentAdminRole !== 'admin') { showToast('Admin role required.', 'error'); return; }
+    if (!editingUnlocked) { showToast('Unlock editing first.', 'error'); return; }
     const d = allDiscountCodes.find(x => x.id === id);
     if (!await showConfirm(`Delete discount code "${d?.code || 'this code'}"?`, { okLabel: 'Delete' })) return;
     const { error } = await db.from('discount_codes').delete().eq('id', id);
@@ -4977,13 +4983,6 @@
   }
 
   function renderTourConfigTable() {
-    if (currentAdminRole === 'staff') {
-      document.getElementById('tours-locked-banner')?.classList.add('hidden');
-      document.getElementById('tours-unlocked-banner')?.classList.add('hidden');
-      document.getElementById('tour-groups-card')?.classList.add('hidden');
-      document.getElementById('tour-categories-card')?.classList.add('hidden');
-      document.getElementById('discount-codes-card')?.classList.add('hidden');
-    }
     renderTourGroupsSection();
     const loading  = document.getElementById('tour-config-loading');
     const table    = document.getElementById('tour-config-table');
@@ -5004,7 +5003,7 @@
     const tbody = document.getElementById('tour-config-tbody');
     tbody.innerHTML = '';
     const isStaffRole = currentAdminRole === 'staff';
-    const locked = isStaffRole || !editingUnlocked;
+    const locked = !editingUnlocked;
     const lockCls = locked ? 'opacity-40 pointer-events-none select-none' : '';
     const calLocked = !isStaffRole && !editingUnlocked;
     const calLockCls = calLocked ? 'opacity-40 pointer-events-none select-none' : '';
@@ -5096,6 +5095,9 @@
     document.getElementById('add-tour-allow-hotel-pickup').checked = true;
     document.getElementById('add-tour-allow-meeting-point').checked = true;
     document.getElementById('add-tour-require-guest-names').checked = false;
+    document.getElementById('add-tour-pay-driver').checked = true;
+    document.getElementById('add-tour-pay-hotel').checked = true;
+    document.getElementById('add-tour-pay-link').checked = true;
     document.getElementById('add-tour-slots-list').innerHTML = '';
     addTourPickupToggle();
     setPricingType('add', 'per_person');
@@ -5218,6 +5220,11 @@
     const description  = document.getElementById('add-tour-description').value.trim() || null;
     const bokunId      = parseInt(document.getElementById('add-tour-bokun-id').value) || null;
     const requireGuestNames = document.getElementById('add-tour-require-guest-names').checked;
+    const paymentOptions = [];
+    if (document.getElementById('add-tour-pay-driver').checked) paymentOptions.push('driver');
+    if (document.getElementById('add-tour-pay-hotel').checked)  paymentOptions.push('hotel');
+    if (document.getElementById('add-tour-pay-link').checked)   paymentOptions.push('link');
+    if (!paymentOptions.length) { showToast('At least one payment option must be enabled.', 'error'); return; }
     const pricingType  = document.getElementById('add-tour-pricing-type')?.value || 'per_person';
     const groups       = [...document.querySelectorAll('#add-tour-groups-wrap .tg-group-cb:checked')].map(cb => cb.value);
     const categories   = [...document.querySelectorAll('#add-tour-categories-wrap .atc-cat-cb:checked')].map(cb => cb.value);
@@ -5237,6 +5244,7 @@
       allow_meeting_point: allowMeetingPoint,
       meeting_point: meetingPoint,
       require_guest_names: requireGuestNames,
+      payment_options: paymentOptions,
       groups,
       categories,
       manual_slots: manualSlots.length ? manualSlots : null,
@@ -5313,6 +5321,10 @@
     document.getElementById('edit-tour-allow-hotel-pickup').checked = t.allow_hotel_pickup !== false;
     document.getElementById('edit-tour-allow-meeting-point').checked = t.allow_meeting_point !== false;
     document.getElementById('edit-tour-require-guest-names').checked = !!t.require_guest_names;
+    const editTourPayOpts = t.payment_options && t.payment_options.length ? t.payment_options : ['driver', 'hotel', 'link'];
+    document.getElementById('edit-tour-pay-driver').checked = editTourPayOpts.includes('driver');
+    document.getElementById('edit-tour-pay-hotel').checked  = editTourPayOpts.includes('hotel');
+    document.getElementById('edit-tour-pay-link').checked   = editTourPayOpts.includes('link');
     document.getElementById('edit-tour-cutoff-hours').value = t.booking_cutoff_hours ?? '';
     document.getElementById('edit-tour-slot-capacity').value = t.slot_capacity ?? '';
     editTourPickupToggle();
@@ -5480,6 +5492,10 @@
     const allowHotelPickup = document.getElementById('edit-tour-allow-hotel-pickup').checked;
     const allowMeetingPoint = document.getElementById('edit-tour-allow-meeting-point').checked;
     const requireGuestNames = document.getElementById('edit-tour-require-guest-names').checked;
+    const paymentOptions = [];
+    if (document.getElementById('edit-tour-pay-driver').checked) paymentOptions.push('driver');
+    if (document.getElementById('edit-tour-pay-hotel').checked)  paymentOptions.push('hotel');
+    if (document.getElementById('edit-tour-pay-link').checked)   paymentOptions.push('link');
     if (!allowHotelPickup && !allowMeetingPoint) {
       showToast('At least one pickup option (hotel or meeting point) must be enabled.', 'error');
       return;
@@ -5489,19 +5505,24 @@
       document.getElementById('edit-tour-meeting-point').focus();
       return;
     }
+    if (!paymentOptions.length) {
+      showToast('At least one payment option must be enabled.', 'error');
+      return;
+    }
     const titleFields = bokunId ? {} : { title: newTitle || undefined };
     const tourEditBefore = _editTourSnapshot ? JSON.parse(_editTourSnapshot) : null;
     const tourEditAfter = JSON.parse(_getEditTourFormValues());
-    const { error } = await db.from('tour_config').update({ bokun_id: bokunId, bokun_force_rate_id: forceRateId, bokun_force_pickup_place_id: forcePickupId, groups, hidden_slot_ids: hiddenSlotIds, hidden_category_ids: hiddenCategoryIds, meeting_point: meetingPoint, allow_hotel_pickup: allowHotelPickup, allow_meeting_point: allowMeetingPoint, require_guest_names: requireGuestNames, photo_url: _editTourPhotoUrl, booking_cutoff_hours: cutoffHours, slot_capacity: slotCapacity, ...titleFields, ...nonBokunFields }).eq('id', editingTourId);
+    const { error } = await db.from('tour_config').update({ bokun_id: bokunId, bokun_force_rate_id: forceRateId, bokun_force_pickup_place_id: forcePickupId, groups, hidden_slot_ids: hiddenSlotIds, hidden_category_ids: hiddenCategoryIds, meeting_point: meetingPoint, allow_hotel_pickup: allowHotelPickup, allow_meeting_point: allowMeetingPoint, require_guest_names: requireGuestNames, payment_options: paymentOptions, photo_url: _editTourPhotoUrl, booking_cutoff_hours: cutoffHours, slot_capacity: slotCapacity, ...titleFields, ...nonBokunFields }).eq('id', editingTourId);
     if (error) { showToast('Failed to save tour changes.', 'error', error.message); return; }
     const t = allTourConfig.find(x => x.id === editingTourId);
-    if (t) { t.bokun_id = bokunId; t.bokun_force_rate_id = forceRateId; t.bokun_force_pickup_place_id = forcePickupId; t.groups = groups; t.hidden_slot_ids = hiddenSlotIds; t.hidden_category_ids = hiddenCategoryIds; t.meeting_point = meetingPoint; t.allow_hotel_pickup = allowHotelPickup; t.allow_meeting_point = allowMeetingPoint; t.require_guest_names = requireGuestNames; t.photo_url = _editTourPhotoUrl; t.booking_cutoff_hours = cutoffHours; t.slot_capacity = slotCapacity; if (!bokunId && newTitle) t.title = newTitle; Object.assign(t, nonBokunFields); }
+    if (t) { t.bokun_id = bokunId; t.bokun_force_rate_id = forceRateId; t.bokun_force_pickup_place_id = forcePickupId; t.groups = groups; t.hidden_slot_ids = hiddenSlotIds; t.hidden_category_ids = hiddenCategoryIds; t.meeting_point = meetingPoint; t.allow_hotel_pickup = allowHotelPickup; t.allow_meeting_point = allowMeetingPoint; t.require_guest_names = requireGuestNames; t.payment_options = paymentOptions; t.photo_url = _editTourPhotoUrl; t.booking_cutoff_hours = cutoffHours; t.slot_capacity = slotCapacity; if (!bokunId && newTitle) t.title = newTitle; Object.assign(t, nonBokunFields); }
     _editTourSnapshot = null;
     renderTourConfigTable();
     document.getElementById('modal-edit-tour').classList.add('hidden');
     showToast('Tour updated.');
     const tourEditLabels = { title: 'title', bokun: 'Bokun ID', mp: 'meeting point', hotel: 'hotel pickup',
-      meetingPt: 'meeting point enabled', requireNames: 'require guest names', groups: 'groups',
+      meetingPt: 'meeting point enabled', requireNames: 'require guest names',
+      payDriver: 'pay at driver enabled', payHotel: 'pay at hotel enabled', payLink: 'payment link enabled', groups: 'groups',
       forceRate: 'forced rate', forcePickup: 'forced pickup', photo: 'photo', hiddenSlots: 'hidden slots',
       hiddenCategories: 'hidden packages/categories',
       description: 'description', pricingType: 'pricing type', durationMins: 'duration', maxPax: 'max capacity',
@@ -5581,7 +5602,16 @@
     _infoBlocksSnapshot = null;
     document.getElementById('modal-info-blocks').classList.add('hidden');
     showToast('Info blocks saved.');
-    logActivity('tour_info_blocks_saved', `Tour "${t?.title || _infoBlocksTourId}" info blocks updated`, _infoBlocksTourId).catch(() => {});
+    const infoBefore = _infoBlocksSnapshot ? JSON.parse(_infoBlocksSnapshot) : [];
+    const namesBefore = infoBefore.map(b => b.name || '(untitled)');
+    const namesAfter = emailBlocks.map(b => b.name || '(untitled)');
+    const infoAdded = namesAfter.filter(n => !namesBefore.includes(n));
+    const infoRemoved = namesBefore.filter(n => !namesAfter.includes(n));
+    const infoParts = [];
+    if (infoAdded.length) infoParts.push(`added: ${infoAdded.join(', ')}`);
+    if (infoRemoved.length) infoParts.push(`removed: ${infoRemoved.join(', ')}`);
+    if (!infoParts.length && JSON.stringify(infoBefore) !== JSON.stringify(emailBlocks)) infoParts.push('content edited');
+    logActivity('tour_info_blocks_saved', `Tour "${t?.title || _infoBlocksTourId}" info blocks — ${infoParts.length ? infoParts.join('; ') : 'no changes'}`, _infoBlocksTourId).catch(() => {});
   }
 
   // ===== TOUR SLOT AVAILABILITY OVERRIDES (tsa*) =====
@@ -5970,7 +6000,8 @@
   }
 
   async function deleteTour(id) {
-    if (currentAdminRole !== 'admin') { showToast('Admin role required.', 'error'); return; }
+    if (currentAdminRole === 'staff') { showToast('Manager or admin role required.', 'error'); return; }
+    if (!editingUnlocked) { showToast('Unlock editing first.', 'error'); return; }
     const t = allTourConfig.find(x => x.id === id);
     if (!t || !await showConfirm(`Delete "${t.title}" from tour catalogue?`)) return;
     await db.from('tour_config').delete().eq('id', id);
@@ -6018,6 +6049,9 @@
       hotel: document.getElementById('edit-tour-allow-hotel-pickup')?.checked,
       meetingPt: document.getElementById('edit-tour-allow-meeting-point')?.checked,
       requireNames: document.getElementById('edit-tour-require-guest-names')?.checked,
+      payDriver: document.getElementById('edit-tour-pay-driver')?.checked,
+      payHotel: document.getElementById('edit-tour-pay-hotel')?.checked,
+      payLink: document.getElementById('edit-tour-pay-link')?.checked,
       groups,
       forceRate: document.getElementById('edit-tour-force-rate-id')?.value || '',
       forcePickup: document.getElementById('edit-tour-force-pickup-id')?.value || '',
@@ -6132,7 +6166,7 @@
     }
     const pending = new Set(window._pendingTourGroups || []);
     const fromTours = new Set(allTourConfig.flatMap(t => t.groups || []));
-    const locked = currentAdminRole === 'staff' || !editingUnlocked;
+    const locked = !editingUnlocked;
     wrap.innerHTML = allGroups.map(g => {
       const isPending = pending.has(g) && !fromTours.has(g);
       return `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${isPending ? 'bg-gray-100 text-gray-400' : groupColor(g)}">
@@ -6263,7 +6297,7 @@
 
   function pkgModalRefreshLockState() {
     if (!pkgModalTourId) return;
-    const locked = currentAdminRole === 'staff' || !editingUnlocked;
+    const locked = !editingUnlocked;
     const saveBtn = document.getElementById('pkg-modal-save-btn');
     const addBtn  = document.getElementById('pkg-modal-add-row-btn');
     if (saveBtn) saveBtn.style.display = locked ? 'none' : '';
@@ -6312,7 +6346,7 @@
     const container = document.getElementById('pkg-modal-rows');
     if (!container) return;
     const t = allTourConfig.find(x => x.id === pkgModalTourId);
-    const locked = currentAdminRole === 'staff' || !editingUnlocked;
+    const locked = !editingUnlocked;
     if (!pkgModalRows.length) {
       container.innerHTML = '<p style="font-size:12px;color:#64748b;font-style:italic;padding:4px 0 8px">No packages yet — click "+ Add package" below.</p>';
       return;
@@ -6393,7 +6427,7 @@
     const row = pkgModalRows[i];
     if (!row) return;
     if (row.id) {
-      if (currentAdminRole !== 'admin') { showToast('Admin role required.', 'error'); return; }
+      if (!editingUnlocked) { showToast('Unlock editing first.', 'error'); return; }
       const ok = await showConfirm(`Delete package "${row.title || ''}"?`);
       if (!ok) return;
       const { error } = await db.from('tour_commissions').delete().eq('id', row.id);
@@ -6415,7 +6449,7 @@
   }
 
   async function savePkgModal() {
-    if (currentAdminRole === 'staff' || !editingUnlocked) { showToast('Unlock editing first.', 'error'); return; }
+    if (!editingUnlocked) { showToast('Unlock editing first.', 'error'); return; }
     for (const row of pkgModalRows) {
       if (pkgModalIsBlank(row)) continue;
       if (!(row.title || '').trim()) { showToast('Every package needs a name.', 'error'); return; }
@@ -6461,7 +6495,19 @@
         }
       }
       const tTitle = allTourConfig.find(x => x.id === pkgModalTourId)?.title || pkgModalTourId;
-      logActivity('commission_edited', `Packages saved for tour "${tTitle}"`, pkgModalTourId);
+      const pkgFieldLabels = { title: 'name', price_pln: 'adult price', price_student: 'student price', price_child: 'child price', price_senior: 'senior price', price_infant: 'infant price', commission_pln: 'commission', transport_price_pln: 'transport price', transport_commission_pln: 'transport commission', active: 'active' };
+      const pkgChangeParts = [];
+      for (const row of pkgModalRows) {
+        if (pkgModalIsBlank(row)) continue;
+        if (row.id) {
+          const before = originalRows.find(o => o.id === row.id);
+          const diff = before ? describeChanges(before, row, pkgFieldLabels) : 'edited';
+          if (diff !== 'no changes') pkgChangeParts.push(`"${row.title}" — ${diff}`);
+        } else {
+          pkgChangeParts.push(`"${row.title}" added`);
+        }
+      }
+      logActivity('commission_edited', `Packages saved for tour "${tTitle}": ${pkgChangeParts.length ? pkgChangeParts.join('; ') : 'no changes'}`, pkgModalTourId);
       renderTourConfigTable();
       showToast('Packages saved.');
       closePkgModalForce();
@@ -6881,6 +6927,7 @@
     if (s === 'paid' || s === 'confirmed') return `<span class="status-paid text-xs font-semibold px-2.5 py-0.5 rounded-full">Paid</span>`;
     if (s === 'to_be_paid' || s === 'pending') return `<span class="status-pending text-xs font-semibold px-2.5 py-0.5 rounded-full">Driver pay</span>`;
     if (s === 'payment_pending' || s === 'pending_payment') return `<span class="status-pending-payment text-xs font-semibold px-2.5 py-0.5 rounded-full">Link sent</span>`;
+    if (s === 'link_expired') return `<span class="status-link-expired text-xs font-semibold px-2.5 py-0.5 rounded-full">Link expired</span>`;
     if (s === 'cancelled') return `<span class="status-cancelled text-xs font-semibold px-2.5 py-0.5 rounded-full">Cancelled</span>`;
     if (s === 'cancelling') return `<span class="text-xs font-semibold px-2.5 py-0.5 rounded-full" style="background:#fef3c7;color:#d97706;">Cancelling…</span>`;
     if (s === 'arrived') return `<span class="status-arrived text-xs font-semibold px-2.5 py-0.5 rounded-full">Arrived ✓</span>`;
@@ -6937,7 +6984,7 @@
       const sourceLabel = b.source === 'admin' ? 'Admin' : b.source === 'Partner Panel' ? 'Partner' : b.source;
       const _isCancelledRow = (b.status||'').toLowerCase() === 'cancelled';
       const _isUrgentLink = !!_paymentLinkUrgency(b);
-      const _trStyle = _isCancelledRow ? 'opacity:0.45' : (_isUrgentLink ? 'box-shadow:inset 3px 0 0 #f97316;background:rgba(249,115,22,0.06)' : (b.source === 'Partner Panel' ? 'box-shadow:inset 3px 0 0 #E8751A' : ''));
+      const _trStyle = _isCancelledRow ? 'opacity:0.45' : (_isUrgentLink ? 'box-shadow:inset 4px 0 0 #f97316;background:rgba(249,115,22,0.22)' : (b.source === 'Partner Panel' ? 'box-shadow:inset 3px 0 0 #E8751A' : (b.source === 'admin' ? 'box-shadow:inset 3px 0 0 #2563eb' : '')));
       return `<tr class="hover:bg-gray-50 transition-colors text-xs cursor-pointer" data-id="${b.id}" data-hotel="${escapeHtml(b.hotel)}" data-source="${escapeHtml(b.source)}" data-status="${escapeHtml(b.status)}"${_trStyle ? ` style="${_trStyle}"` : ''} onclick="openBookingDetail('${b.id}')">
           <td class="px-5 py-3 font-mono text-gray-400" style="white-space:nowrap">#${b.displayId || b.id}</td>
           <td class="px-4 py-3 font-medium text-dark" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(b.tour)}">${escapeHtml(b.tour)}</td>
@@ -6956,11 +7003,11 @@
           <td class="px-4 py-3 text-right whitespace-nowrap" onclick="event.stopPropagation()">
             ${b.notes ? `<span class="text-amber-400 cursor-default ml-1"><i class="fa-solid fa-note-sticky text-xs"></i></span>` : ''}
             ${b._dbBooking ? `<button onclick="event.stopPropagation();openVoucher('${b.id}')" title="View voucher" class="transition-colors ml-1" style="color:#f87171"><i class="fa-solid fa-file-pdf text-xs"></i></button>` : ''}
-            ${b._dbBooking && (['to_be_paid','pending','payment_pending','pending_payment'].includes((b.status||'').toLowerCase())) ? `<button onclick="event.stopPropagation();quickMarkPaid('${b.id}')" title="Mark as paid" class="text-green-400 hover:text-green-300 transition-colors ml-1.5"><i class="fa-solid fa-circle-check text-xs"></i></button>` : ''}
-            ${b._dbBooking && (['payment_pending','pending_payment'].includes((b.status||'').toLowerCase())) ? `<button onclick="event.stopPropagation();adminResendPaymentLink('${b.id}')" title="${b.email ? 'Resend payment link to guest' : 'Copy payment link'}" class="text-blue-400 hover:text-blue-300 transition-colors ml-1.5"><i class="fa-solid fa-${b.email ? 'paper-plane' : 'copy'} text-xs"></i></button>` : ''}
+            ${b._dbBooking && (['to_be_paid','pending','payment_pending','pending_payment','link_expired'].includes((b.status||'').toLowerCase())) ? `<button onclick="event.stopPropagation();quickMarkPaid('${b.id}')" title="Mark as paid" class="text-green-400 hover:text-green-300 transition-colors ml-1.5"><i class="fa-solid fa-circle-check text-xs"></i></button>` : ''}
+            ${b._dbBooking && (['payment_pending','pending_payment','link_expired'].includes((b.status||'').toLowerCase())) ? `<button onclick="event.stopPropagation();adminResendPaymentLink('${b.id}')" title="${b.email ? 'Resend payment link to guest' : 'Copy payment link'}" class="text-blue-400 hover:text-blue-300 transition-colors ml-1.5"><i class="fa-solid fa-${b.email ? 'paper-plane' : 'copy'} text-xs"></i></button>` : ''}
             ${b._dbBooking && canMarkNoShow(b) ? `<button onclick="event.stopPropagation();markNoShow('${b.id}')" title="No show — obciąż hotel pełną kwotą" class="text-red-400 hover:text-red-300 transition-colors ml-1.5"><i class="fa-solid fa-user-slash text-xs"></i></button>` : ''}
             ${b._dbBooking ? `<button onclick="event.stopPropagation();openEditBooking('${b.id}')" title="Edit booking" class="text-gray-400 hover:text-brand transition-colors ml-1.5"><i class="fa-solid fa-pen text-xs"></i></button>` : ''}
-            ${!b._dbBooking && b.source === 'Old TM System' ? `<button onclick="event.stopPropagation();openAssignHotelModal('${escapeHtml(b.id)}')" title="Assign to hotel" class="text-blue-400 hover:text-blue-300 transition-colors ml-1.5"><i class="fa-solid fa-hotel text-xs"></i></button>` : ''}
+            ${!b._dbBooking && b.source === 'Website' ? `<button onclick="event.stopPropagation();openAssignHotelModal('${escapeHtml(b.id)}')" title="Assign to hotel" class="text-blue-400 hover:text-blue-300 transition-colors ml-1.5"><i class="fa-solid fa-hotel text-xs"></i></button>` : ''}
             ${b._dbBooking && (b.status||'').toLowerCase() === 'cancelling' ? `<button onclick="event.stopPropagation();forceUnlockBooking('${escapeHtml(b.id)}')" title="Force unlock — stuck cancelling" class="text-amber-400 hover:text-amber-300 transition-colors ml-1.5"><i class="fa-solid fa-lock-open text-xs"></i></button>` : ''}
             ${b._dbBooking && !['cancelled','cancelling'].includes((b.status||'').toLowerCase()) ? `<button title="Cancel booking" class="text-red-500 hover:text-red-400 transition-colors ml-1.5" onclick="event.stopPropagation();cancelBooking('${escapeHtml(b.id)}','${escapeHtml((b.guest||'').replace(/'/g,"\\'"))}',${!!b._stripeSessionId},true)"><i class="fa-solid fa-xmark text-xs"></i></button>` : ''}
           </td>
@@ -7005,7 +7052,7 @@
     filterAllBookings();
   }
 
-  const STATUS_GROUPS = { paid: ['paid','confirmed'], to_be_paid: ['to_be_paid','pending'], payment_pending: ['payment_pending','pending_payment'], cancelled: ['cancelled'] };
+  const STATUS_GROUPS = { paid: ['paid','confirmed'], to_be_paid: ['to_be_paid','pending'], payment_pending: ['payment_pending','pending_payment'], link_expired: ['link_expired'], cancelled: ['cancelled'] };
 
   // 'hotel' = partner has commission enabled (real hotels); 'agency' = commission disabled (tour agencies/DMCs).
   // Bookings with no partner (direct/'—') never match either type.
@@ -7238,7 +7285,7 @@
     tbody.innerHTML = '';
     page.forEach(b => {
       const _hbIsCancelled = (b.status||'').toLowerCase() === 'cancelled';
-      const _hbTrStyle = _hbIsCancelled ? 'opacity:0.45' : (_paymentLinkUrgency(b) ? 'box-shadow:inset 3px 0 0 #f97316;background:rgba(249,115,22,0.06)' : '');
+      const _hbTrStyle = _hbIsCancelled ? 'opacity:0.45' : (_paymentLinkUrgency(b) ? 'box-shadow:inset 4px 0 0 #f97316;background:rgba(249,115,22,0.22)' : (b.source === 'Partner Panel' ? 'box-shadow:inset 3px 0 0 #E8751A' : (b.source === 'Admin' ? 'box-shadow:inset 3px 0 0 #2563eb' : '')));
       tbody.insertAdjacentHTML('beforeend', `
         <tr class="hover:bg-gray-50 transition-colors text-xs cursor-pointer" data-id="${b.id}" onclick="openBookingDetail('${b.id}')" style="${_hbTrStyle}">
           <td class="px-5 py-3 font-mono text-gray-400" style="white-space:nowrap">#${b.displayId || b.id}</td>
@@ -7258,8 +7305,8 @@
           <td class="px-4 py-3 text-right whitespace-nowrap" onclick="event.stopPropagation()">
             ${b.notes ? `<span class="text-amber-400 cursor-default ml-1"><i class="fa-solid fa-note-sticky text-xs"></i></span>` : ''}
             <button onclick="event.stopPropagation();openVoucher('${b.id}')" title="View voucher" class="transition-colors ml-1" style="color:#f87171"><i class="fa-solid fa-file-pdf text-xs"></i></button>
-            ${(['to_be_paid','pending','payment_pending','pending_payment'].includes((b.status||'').toLowerCase())) ? `<button onclick="event.stopPropagation();quickMarkPaid('${b.id}')" title="Mark as paid" class="text-green-400 hover:text-green-300 transition-colors ml-1.5"><i class="fa-solid fa-circle-check text-xs"></i></button>` : ''}
-            ${(['payment_pending','pending_payment'].includes((b.status||'').toLowerCase())) ? `<button onclick="event.stopPropagation();adminResendPaymentLink('${b.id}')" title="${b.email ? 'Resend payment link' : 'Copy payment link'}" class="text-blue-400 hover:text-blue-300 transition-colors ml-1.5"><i class="fa-solid fa-${b.email ? 'paper-plane' : 'copy'} text-xs"></i></button>` : ''}
+            ${(['to_be_paid','pending','payment_pending','pending_payment','link_expired'].includes((b.status||'').toLowerCase())) ? `<button onclick="event.stopPropagation();quickMarkPaid('${b.id}')" title="Mark as paid" class="text-green-400 hover:text-green-300 transition-colors ml-1.5"><i class="fa-solid fa-circle-check text-xs"></i></button>` : ''}
+            ${(['payment_pending','pending_payment','link_expired'].includes((b.status||'').toLowerCase())) ? `<button onclick="event.stopPropagation();adminResendPaymentLink('${b.id}')" title="${b.email ? 'Resend payment link' : 'Copy payment link'}" class="text-blue-400 hover:text-blue-300 transition-colors ml-1.5"><i class="fa-solid fa-${b.email ? 'paper-plane' : 'copy'} text-xs"></i></button>` : ''}
             ${canMarkNoShow(b) ? `<button onclick="event.stopPropagation();markNoShow('${b.id}')" title="No show — obciąż hotel pełną kwotą" class="text-red-400 hover:text-red-300 transition-colors ml-1.5"><i class="fa-solid fa-user-slash text-xs"></i></button>` : ''}
             <button onclick="event.stopPropagation();openEditBooking('${b.id}')" title="Edit booking" class="text-gray-400 hover:text-brand transition-colors ml-1.5"><i class="fa-solid fa-pen text-xs"></i></button>
             ${(b.status||'').toLowerCase() === 'cancelling' ? `<button onclick="event.stopPropagation();forceUnlockBooking('${escapeHtml(b.id)}')" title="Force unlock — stuck cancelling" class="text-amber-400 hover:text-amber-300 transition-colors ml-1.5"><i class="fa-solid fa-lock-open text-xs"></i></button>` : ''}
@@ -7488,9 +7535,10 @@
         const st = (data?.status || '').toLowerCase();
         const isCancelled = st === 'cancelled';
         const linkPending = st === 'payment_pending' || st === 'pending_payment';
+        const isLinkExpired = st === 'link_expired';
         const isPaid = st === 'paid' || st === 'confirmed';
-        const color = isCancelled ? '#6B7280' : linkPending ? '#2563EB' : (isPaid || data?.payment === 'hotel') ? '#16A34A' : data?.payment === 'driver' ? '#E8751A' : '#94A3B8';
-        const label = isCancelled ? 'Reservation Cancelled' : linkPending ? 'Payment link sent — awaiting payment' : (isPaid || data?.payment === 'hotel') ? 'Reservation Paid' : data?.payment === 'driver' ? 'To Be Paid at Driver' : 'Payment status unknown';
+        const color = isCancelled ? '#6B7280' : isLinkExpired ? '#ea580c' : linkPending ? '#2563EB' : (isPaid || data?.payment === 'hotel') ? '#16A34A' : data?.payment === 'driver' ? '#E8751A' : '#94A3B8';
+        const label = isCancelled ? 'Reservation Cancelled' : isLinkExpired ? 'Payment link expired — resend needed' : linkPending ? 'Payment link sent — awaiting payment' : (isPaid || data?.payment === 'hotel') ? 'Reservation Paid' : data?.payment === 'driver' ? 'To Be Paid at Driver' : 'Payment status unknown';
         return `<div style="margin:0 32px 26px;text-align:center;padding:13px 16px;border:2px solid ${color};border-radius:8px;">
           <div style="font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:${color};">${label}</div>
         </div>`;
@@ -7685,7 +7733,10 @@
         body: { booking_id: b.id, bokun_reservation_code: b._bokunCode || b.id, amount_pln: b.total || 0, pax: b.pax || 1, tour_name: b.tour, date: b.date, guest_name: b.guest, guest_email: b.email || null }
       });
       if (stripeErr || !stripeRes?.session_url) throw new Error(stripeErr?.message || 'No session URL');
-      await db.from('bookings').update({ stripe_session_id: stripeRes.session_id, stripe_session_url: stripeRes.session_url }).eq('id', bookingId);
+      await db.from('bookings').update({ status: 'payment_pending', stripe_session_id: stripeRes.session_id, stripe_session_url: stripeRes.session_url }).eq('id', bookingId);
+      b.status = 'payment_pending';
+      const pbForResend = partnerBookings.find(x => x.id === bookingId);
+      if (pbForResend) pbForResend.status = 'payment_pending';
       if (!b.email) {
         await navigator.clipboard.writeText(stripeRes.session_url).catch(() => {});
         showToast('Payment link copied to clipboard');
@@ -7693,6 +7744,8 @@
         showToast('Payment link resent to ' + b.email);
       }
       logActivity('booking_payment_link_resent', `Payment link resent for booking ${b._bokunCode || b.bokun_confirmation_code || b.id} (${b.guest})`, b.id).catch(() => {});
+      renderBookingsTable();
+      if (_hbLoaded) filterHotelBookings();
     } catch(e) {
       console.error('[adminResendPaymentLink]', e.message);
       const t = document.createElement('div');
@@ -7706,6 +7759,7 @@
 
   function _statusOptionLabel(s) {
     const labels = { paid: 'Paid', to_be_paid: 'Driver pay', payment_pending: 'Payment link sent',
+      pending_payment: 'Payment link sent', link_expired: 'Link expired',
       arrived: 'Arrived', no_show: 'No Show', confirmed: 'Confirmed', cancelled: 'Cancelled',
       cancelling: 'Cancelling…', refund_failed: 'Refund failed' };
     return labels[s] || (s ? s.charAt(0).toUpperCase() + s.slice(1) : 'Pending');
@@ -7909,7 +7963,7 @@
       partner_id: partnerId,
       bokun_confirmation_code: b.id,
       bokun_booking_id: null,
-      notes: 'Migrated from Old TM System',
+      notes: 'Migrated from Website',
       additional_guests: null,
     });
 
@@ -7923,7 +7977,7 @@
 
     closeAssignHotelModal();
     showToast('Booking assigned — reloading…');
-    logActivity('booking_assigned_to_hotel', `Old TM System booking ${b.displayId || b.id} (${b.tour} · ${b.guest}) assigned to hotel, total ${total} PLN`, newId).catch(() => {});
+    logActivity('booking_assigned_to_hotel', `Website booking ${b.displayId || b.id} (${b.tour} · ${b.guest}) assigned to hotel, total ${total} PLN`, newId).catch(() => {});
     await loadBookings();
   }
 
@@ -7946,7 +8000,7 @@
         pax: b.pax,
         total: b.total || null,
         pickup: b.pickup || null,
-        payment_type: (() => { const st = (b.status||'').toLowerCase(); if (['cancelled','cancelling','refund_failed'].includes(st)) return 'cancelled'; if (['paid','confirmed'].includes(st)) return 'cash'; if (b.payment_method === 'hotel') return 'hotel'; if (b.payment_method === 'link' || ['payment_pending','pending_payment'].includes(st)) return 'link'; return 'driver'; })(),
+        payment_type: (() => { const st = (b.status||'').toLowerCase(); if (['cancelled','cancelling','refund_failed'].includes(st)) return 'cancelled'; if (['paid','confirmed'].includes(st)) return 'cash'; if (b.payment_method === 'hotel') return 'hotel'; if (b.payment_method === 'link' || ['payment_pending','pending_payment','link_expired'].includes(st)) return 'link'; return 'driver'; })(),
       }});
       ok = true;
     } catch(e) { console.warn('[Resend]', e?.message); }
@@ -8809,11 +8863,11 @@
   let currentAdminEmail = '';
   let currentAdminName = '';
   let dashFilter = 'all'; // 'all' | 'hotel' | 'ota' | 'seller'
-  const DIRECT_SOURCES = new Set(['Partner Panel','TM Panel','admin','Website','Old TM System']);
+  const DIRECT_SOURCES = new Set(['Partner Panel','TM Panel','admin','Website']);
   function getFilteredBookings() {
     if (dashFilter === 'hotel')  return allBookings.filter(b => b.source === 'Partner Panel');
     if (dashFilter === 'ota')    return allBookings.filter(b => !DIRECT_SOURCES.has(b.source));
-    if (dashFilter === 'direct') return allBookings.filter(b => b.source === 'Old TM System' || b.source === 'Website');
+    if (dashFilter === 'direct') return allBookings.filter(b => b.source === 'Website');
     return allBookings;
   }
 
@@ -9472,7 +9526,7 @@
   function _paymentLinkUrgency(b) {
     const pm = b.payment_method || '';
     const s = (b.status || '').toLowerCase();
-    const isLink = pm === 'link' || s === 'payment_pending' || s === 'pending_payment';
+    const isLink = pm === 'link' || s === 'payment_pending' || s === 'pending_payment' || s === 'link_expired';
     if (!isLink || !b._startTs || ['cancelled', 'paid', 'cancelling'].includes(s)) return null;
     // b.date is a display-formatted string ("3 Sept 2026") by the time it reaches this object —
     // compare calendar days via _startTs (the raw timestamp) instead.
@@ -9754,7 +9808,7 @@
     }
 
     // Driver-pay / payment-link-pending warning
-    const DRIVER_PAY_STATUSES = ['to_be_paid', 'pending', 'payment_pending', 'pending_payment'];
+    const DRIVER_PAY_STATUSES = ['to_be_paid', 'pending', 'payment_pending', 'pending_payment', 'link_expired'];
     const driverPending = rows.filter(b => DRIVER_PAY_STATUSES.includes((b.status||'').toLowerCase()));
     const warnEl  = document.getElementById('settlement-driver-warning');
     const warnTxt = document.getElementById('settlement-driver-warning-text');
@@ -10324,6 +10378,25 @@
         </div>
         <div style="font-size:11px;color:#475569;margin-top:6px;margin-left:24px">When on, guests must enter first and last name for every participant (not just the lead booker) — enforced in the partner panel and in Create Booking.</div>
       </div>
+      <!-- Payment options -->
+      <div style="border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px;background:rgba(255,255,255,0.03)">
+        <div style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:8px">Payment options</div>
+        <div style="font-size:11px;color:#475569;margin-bottom:8px">Which payment methods can be used for this tour, in the partner panel and Create Booking?</div>
+        <div style="display:flex;gap:14px">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+            <input type="checkbox" id="add-tour-pay-driver" checked class="w-4 h-4 rounded accent-brand cursor-pointer">
+            <span style="font-size:12px;color:#94a3b8">Pay at driver</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+            <input type="checkbox" id="add-tour-pay-hotel" checked class="w-4 h-4 rounded accent-brand cursor-pointer">
+            <span style="font-size:12px;color:#94a3b8">Pay at hotel</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+            <input type="checkbox" id="add-tour-pay-link" checked class="w-4 h-4 rounded accent-brand cursor-pointer">
+            <span style="font-size:12px;color:#94a3b8">Payment link</span>
+          </label>
+        </div>
+      </div>
       <!-- Groups: chips + add new -->
       <div>
         <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#94a3b8;margin-bottom:6px">
@@ -10427,6 +10500,24 @@
           <label for="edit-tour-require-guest-names" style="font-size:12px;color:#94a3b8;cursor:pointer">Require full names for all participants</label>
         </div>
         <div style="font-size:11px;color:#475569;margin-top:6px;margin-left:24px">When on, guests must enter first and last name for every participant (not just the lead booker) — enforced in the partner panel and in Create Booking.</div>
+      </div>
+      <div style="border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px;background:rgba(255,255,255,0.03)">
+        <div style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:8px">Payment options</div>
+        <div style="font-size:11px;color:#475569;margin-bottom:8px">Which payment methods can be used for this tour, in the partner panel and Create Booking?</div>
+        <div style="display:flex;gap:14px">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+            <input type="checkbox" id="edit-tour-pay-driver" checked class="w-4 h-4 rounded accent-brand cursor-pointer">
+            <span style="font-size:12px;color:#94a3b8">Pay at driver</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+            <input type="checkbox" id="edit-tour-pay-hotel" checked class="w-4 h-4 rounded accent-brand cursor-pointer">
+            <span style="font-size:12px;color:#94a3b8">Pay at hotel</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+            <input type="checkbox" id="edit-tour-pay-link" checked class="w-4 h-4 rounded accent-brand cursor-pointer">
+            <span style="font-size:12px;color:#94a3b8">Payment link</span>
+          </label>
+        </div>
       </div>
       <!-- Groups: chips + add new -->
       <div>
@@ -10834,7 +10925,7 @@
 // ===== CUSTOM PACKAGES (Seller Panel) =====
 let cpData = [];
 let customToursLoaded = false;
-let cpMyStats = null; // manager-only: dokładne "ten miesiąc" totals z loadManagerMonthStats()
+let cpMyStats = null; // manager/staff — dokładne własne "ten miesiąc" totals z loadMyMonthStats()
 let cpServices = [];
 let cpCalMonth = new Date();
 let cpSelectedDateStr = '';
@@ -11005,12 +11096,22 @@ function updateCpService(idx, field, val) {
   if (field === 'net' || field === 'vat') {
     cpServices[idx].gross = parseFloat((cpServices[idx].net * (1 + cpServices[idx].vat / 100)).toFixed(2));
     const el = document.getElementById('cp-gross-' + idx);
-    if (el) el.textContent = fmtPln(cpServices[idx].gross);
+    if (el) el.value = cpServices[idx].gross || '';
+  } else if (field === 'gross') {
+    const vat = cpServices[idx].vat || 0;
+    cpServices[idx].net = parseFloat((cpServices[idx].gross / (1 + vat / 100)).toFixed(2));
+    const el = document.getElementById('cp-net-' + idx);
+    if (el) el.value = cpServices[idx].net || '';
   }
   if (field === 'margin_net' || field === 'margin_vat') {
     cpServices[idx].margin_gross = parseFloat((cpServices[idx].margin_net * (1 + cpServices[idx].margin_vat / 100)).toFixed(2));
     const el = document.getElementById('cp-margin-gross-' + idx);
-    if (el) el.textContent = fmtPln(cpServices[idx].margin_gross);
+    if (el) el.value = cpServices[idx].margin_gross || '';
+  } else if (field === 'margin_gross') {
+    const marginVat = cpServices[idx].margin_vat || 0;
+    cpServices[idx].margin_net = parseFloat((cpServices[idx].margin_gross / (1 + marginVat / 100)).toFixed(2));
+    const el = document.getElementById('cp-margin-net-' + idx);
+    if (el) el.value = cpServices[idx].margin_net || '';
   }
   recalcOrder();
 }
@@ -11044,8 +11145,6 @@ function renderCpServiceRows() {
         class="text-xs border border-gray-200 rounded-lg px-2 py-1.5 font-mono text-right focus:outline-none focus:ring-1 focus:ring-brand/30 w-full">
       <span style="font-size:11px;color:#9ca3af;flex-shrink:0">%</span>
     </div>`;
-  const calcVal = txt => `<div class="text-xs font-mono text-dark" style="padding:7px 4px">${txt}</div>`;
-
   container.innerHTML = cpServices.map((s, i) => {
     const mn = s.margin_net ?? s.margin ?? 0;
     const mv = s.margin_vat ?? 23;
@@ -11059,10 +11158,10 @@ function renderCpServiceRows() {
           <i class="fa-solid fa-xmark text-xs"></i>
         </button>
       </div>
-      <div style="display:grid;grid-template-columns:130px 70px 1fr;gap:8px;margin-bottom:8px">
+      <div style="display:grid;grid-template-columns:130px 70px 130px;gap:8px;margin-bottom:8px">
         <div>${lbl('Netto')}${numInput(i,'net',s.net,'0.00','cp-net-'+i)}</div>
         <div>${lbl('VAT')}${vatInput(i,'vat',s.vat)}</div>
-        <div>${lbl('Brutto')}${calcVal(`<span id="cp-gross-${i}">${fmtPln(s.gross)}</span>`)}</div>
+        <div>${lbl('Brutto')}${numInput(i,'gross',s.gross,'0.00','cp-gross-'+i)}</div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap">
         <span style="font-size:10px;color:#9ca3af;white-space:nowrap">or: price per person</span>
@@ -11073,10 +11172,10 @@ function renderCpServiceRows() {
           class="text-xs border border-gray-200 rounded-lg px-2 py-1 font-mono text-right focus:outline-none focus:ring-1 focus:ring-brand/30">
         <button type="button" onclick="cpApplyPerPerson(${i})" class="text-xs px-2 py-1 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-brand transition-colors">Apply</button>
       </div>
-      <div style="border-top:1px solid #f3f4f6;padding-top:8px;display:grid;grid-template-columns:130px 70px 1fr;gap:8px">
-        <div>${lbl('Margin netto')}${numInput(i,'margin_net',mn,'0.00')}</div>
+      <div style="border-top:1px solid #f3f4f6;padding-top:8px;display:grid;grid-template-columns:130px 70px 130px;gap:8px">
+        <div>${lbl('Margin netto')}${numInput(i,'margin_net',mn,'0.00','cp-margin-net-'+i)}</div>
         <div>${lbl('Margin VAT')}${vatInput(i,'margin_vat',mv)}</div>
-        <div>${lbl('Margin brutto')}${calcVal(`<span id="cp-margin-gross-${i}">${fmtPln(mg)}</span>`)}</div>
+        <div>${lbl('Margin brutto')}${numInput(i,'margin_gross',mg,'0.00','cp-margin-gross-'+i)}</div>
       </div>
     </div>`; }).join('');
 }
@@ -11578,26 +11677,21 @@ function renderCustomTours() {
   // Show/hide UI elements based on role
   const filterWrap = document.getElementById('cp-staff-filter-wrap');
   const exportBtn = document.getElementById('cp-export-btn');
+  filterWrap?.classList.remove('hidden');
   if (isAdminOrManager) {
-    filterWrap?.classList.remove('hidden');
     exportBtn?.classList.remove('hidden');
     exportBtn?.classList.add('flex');
   }
 
-  // Populate staff msel filter (admin/manager only)
-  if (isAdminOrManager) {
-    const sellers = [...new Set(cpData.map(p => p.sold_by_name).filter(Boolean))].sort();
-    mselSetOptions('msel-ct-staff', sellers.map(s => ({value: s, label: s})));
-  }
+  // Populate "Sold by" msel filter (everyone — staff now sees the full team's packages too)
+  const sellers = [...new Set(cpData.map(p => p.sold_by_name).filter(Boolean))].sort();
+  mselSetOptions('msel-ct-staff', sellers.map(s => ({value: s, label: s})));
 
-  // Filter data
+  // Filter data — staff now sees the same full/optionally-filtered set as admin/manager;
+  // their own numbers still come from cpMyStats below, not from this array.
   let filtered = cpData;
-  if (isStaff) {
-    filtered = cpData.filter(p => p.sold_by_email === currentAdminEmail);
-  } else {
-    const selFilter = mselGetVals('msel-ct-staff');
-    if (selFilter.length > 0) filtered = filtered.filter(p => selFilter.includes(p.sold_by_name));
-  }
+  const selFilter = mselGetVals('msel-ct-staff');
+  if (selFilter.length > 0) filtered = filtered.filter(p => selFilter.includes(p.sold_by_name));
 
   // Apply additional filters
   const ctSearch = (document.getElementById('ct-search')?.value || '').toLowerCase().trim();
@@ -11617,24 +11711,10 @@ function renderCustomTours() {
   if (ctStatus.length  > 0) filtered = filtered.filter(p => ctStatus.includes(p.status));
   if (ctPayment.length > 0) filtered = filtered.filter(p => ctPayment.includes(p.payment_method));
 
-  // Staff stats card
-  if (isStaff) {
-    const statsCard = document.getElementById('cp-my-stats');
-    statsCard?.classList.remove('hidden');
-    const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0,10);
-    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString().slice(0,10);
-    const myMonth = filtered.filter(p => (p.status === 'paid' || p.status === 'confirmed' || p.status === 'arrived') && p.created_at >= monthStart && p.created_at < monthEnd);
-    const totalVal = myMonth.reduce((s, p) => s + (p.guest_price || 0), 0);
-    const totalComm = myMonth.reduce((s, p) => s + (p.commission_amount || 0), 0);
-    document.getElementById('cp-stat-count').textContent = myMonth.length;
-    document.getElementById('cp-stat-value').textContent = fmtPln(totalVal);
-    document.getElementById('cp-stat-comm').textContent = fmtPln(totalComm);
-  }
-
-  // Manager stats card — dokładne dane "ten miesiąc", NIE liczone z cpData/filtered
-  // (cpData ma limit 200 wierszy łącznie dla wszystkich sprzedawców — mogłoby zaniżać wynik).
-  if (currentAdminRole === 'manager') {
+  // Staff/manager stats card — own numbers only, dokładne dane "ten miesiąc" z loadMyMonthStats(),
+  // NIE liczone z cpData/filtered (cpData jest teraz pełną, wspólną dla całego zespołu listą,
+  // ograniczoną do 200 wierszy — liczenie z niej dawałoby zbiorcze wyniki albo zaniżony wynik).
+  if (isStaff || currentAdminRole === 'manager') {
     const statsCard = document.getElementById('cp-my-stats');
     statsCard?.classList.remove('hidden');
     const s = cpMyStats || { count: 0, totalVal: 0, totalComm: 0 };
@@ -11844,7 +11924,7 @@ async function exportCpCsv() {
   _xlsDownload(html, `custom-packages-${today}.xls`);
 }
 
-async function loadManagerMonthStats() {
+async function loadMyMonthStats() {
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0,10);
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString().slice(0,10);
@@ -11854,7 +11934,7 @@ async function loadManagerMonthStats() {
     .in('status', ['paid', 'confirmed', 'arrived'])
     .gte('created_at', monthStart)
     .lt('created_at', monthEnd);
-  if (error) { console.error('loadManagerMonthStats:', error); cpMyStats = null; return; }
+  if (error) { console.error('loadMyMonthStats:', error); cpMyStats = null; return; }
   const rows = data || [];
   cpMyStats = {
     count: rows.length,
@@ -11864,11 +11944,10 @@ async function loadManagerMonthStats() {
 }
 
 async function loadCustomTours() {
-  let query = db.from('custom_packages').select('*').order('created_at', { ascending: false }).limit(200);
-  if (currentAdminRole === 'staff') query = query.eq('sold_by_email', currentAdminEmail);
+  const query = db.from('custom_packages').select('*').order('created_at', { ascending: false }).limit(200);
   const [{ data, error }] = await Promise.all([
     query,
-    currentAdminRole === 'manager' ? loadManagerMonthStats() : Promise.resolve(),
+    (currentAdminRole === 'manager' || currentAdminRole === 'staff') ? loadMyMonthStats() : Promise.resolve(),
   ]);
   if (error) { console.error('loadCustomTours:', error); return; }
   cpData = (data || []).map(p => ({ ...p, _creationTs: p.created_at ? new Date(p.created_at).getTime() : 0 }));
@@ -12228,7 +12307,7 @@ function openBookingDetail(id) {
   const isCancelled = ['cancelled','cancelling'].includes(st);
   const isPaid = ['paid','confirmed','arrived'].includes(st);
   const isDriverPay = ['to_be_paid','pending'].includes(st);
-  const isLinkPending = ['payment_pending','pending_payment'].includes(st);
+  const isLinkPending = ['payment_pending','pending_payment','link_expired'].includes(st);
 
   const btnVoucher = document.getElementById('bkd-btn-voucher');
   const btnEdit    = document.getElementById('bkd-btn-edit');
@@ -13447,6 +13526,9 @@ function abReset() {
   abPayment = 'driver'; abLastBookingData = null;
   abAppliedDiscountCode = null; abAppliedDiscountPct = null;
   abPriceOverrides = {};
+  const abSendEmailCb = document.getElementById('ab-send-email');
+  if (abSendEmailCb) abSendEmailCb.checked = true;
+  abUpdateSendEmailUI();
   document.getElementById('ab-search').value = '';
   abFilterTours();
 }
@@ -13492,6 +13574,7 @@ async function abLoadTours() {
         manualSlots: t.manual_slots || [],
         emailBlocks: t.email_blocks || [],
         description: t.description || null,
+        paymentOptions: t.payment_options || null,
       };
       if (t.bokun_id) {
         try {
@@ -13560,6 +13643,7 @@ async function abOpenTour(idx) {
   abRateSelections = []; abCategorySelections = []; abGuestCount = 1;
   abAppliedDiscountCode = null; abAppliedDiscountPct = null;
   abPriceOverrides = {};
+  abRefreshPaymentOptionsUI();
   abCurrentMonth = new Date();
   abCurrentMonth.setDate(1);
 
@@ -14347,6 +14431,38 @@ function abSelectPayment(method) {
     active.style.color = '#1a2332';
     active.style.background = 'rgba(232,117,26,0.08)';
   }
+  abUpdateSendEmailUI();
+}
+
+// Payment-link emails always go out immediately (the guest needs the link to pay) — the
+// "send confirmation email" checkbox only ever gates the driver/hotel confirmation email.
+function abUpdateSendEmailUI() {
+  const wrap = document.getElementById('ab-send-email-wrap');
+  const cb = document.getElementById('ab-send-email');
+  const label = document.getElementById('ab-send-email-label');
+  if (!wrap || !cb || !label) return;
+  if (abPayment === 'link') {
+    wrap.style.opacity = '0.5';
+    cb.disabled = true;
+    cb.checked = true;
+    label.textContent = 'Payment link email is always sent';
+  } else {
+    wrap.style.opacity = '';
+    cb.disabled = false;
+    label.textContent = 'Send confirmation email to guest';
+  }
+}
+
+// Only show payment methods allowed for the currently open tour (Edit Tour → Payment options).
+function abRefreshPaymentOptionsUI() {
+  const grid = document.getElementById('ab-payment-grid');
+  if (!grid) return;
+  const allowed = abCurrentTour?.paymentOptions?.length ? abCurrentTour.paymentOptions : ['driver', 'hotel', 'link'];
+  grid.querySelectorAll('.ab-pay-btn[data-payment]').forEach(btn => {
+    btn.style.display = allowed.includes(btn.dataset.payment) ? '' : 'none';
+  });
+  grid.className = `grid grid-cols-${allowed.length} gap-2`;
+  if (!allowed.includes(abPayment)) abSelectPayment(allowed[0]);
 }
 
 async function abSubmitBooking() {
@@ -14361,6 +14477,7 @@ async function abSubmitBooking() {
   const firstName = abGuests[0]?.firstName || '';
   const lastName  = abGuests[0]?.lastName  || '';
   const email      = (document.getElementById('ab-email')?.value || '').trim();
+  const abSendEmail = document.getElementById('ab-send-email')?.checked !== false;
   const phonePrefix = document.getElementById('ab-phone-prefix')?.value || '+48';
   const phoneNumber = (document.getElementById('ab-phone')?.value || '').trim();
   const phone       = phoneNumber ? (phonePrefix + ' ' + phoneNumber) : '';
@@ -14526,11 +14643,13 @@ async function abSubmitBooking() {
 
       const _payLabels = { driver: 'Pay at driver', hotel: 'Pay at hotel', link: 'Payment link' };
       const bookingNote = [
+        currentAdminName ? `Admin: ${currentAdminName}` : null,
         _payLabels[abPayment] || '',
         abRateSelections.filter(r=>r.count>0).map(r=>`${r.count}x ${r.rate.title}`).join(', ') ||
         abCategorySelections.filter(c=>c.count>0).map(c=>`${c.count}x ${c.category.pricingCategoryTitle||c.category.title}`).join(', ') ||
         (abSelectedNonBokunPkg ? abSelectedNonBokunPkg.title : ''),
         additionalGuestsStr ? `Guests: ${additionalGuestsStr}` : '',
+        _abPickupDesc ? `Pickup: ${_abPickupDesc}` : '',
         notes
       ].filter(Boolean).join(' | ');
 
@@ -14699,7 +14818,7 @@ async function abSubmitBooking() {
   };
 
   logActivity('admin_booking_created',
-    `${tour} · ${dateStr} · ${abGuestCount} pax · ${abPayment} · ${bokunConfirmationCode || bokunReservationCode || bookingId}`,
+    `${tour} · ${dateStr} · ${abGuestCount} pax · ${abPayment} · ${bokunConfirmationCode || bokunReservationCode || bookingId}${abSendEmail ? '' : ' · confirmation email not sent (unchecked)'}`,
     bookingId
   ).catch(() => {});
 
@@ -14718,7 +14837,7 @@ async function abSubmitBooking() {
       `Booking reference: ${refLabel}<br><a href="${stripeSessionUrl}" target="_blank" class="text-brand underline mt-2 inline-block">Payment link →</a>`;
   }
 
-  if (email && (abPayment === 'driver' || abPayment === 'hotel')) {
+  if (email && abSendEmail && (abPayment === 'driver' || abPayment === 'hotel')) {
     invokeEdge('send-booking-confirmation', { body: {
       booking_id: bookingId,
       bokun_booking_id: bokunBookingId || null,
@@ -14754,6 +14873,8 @@ async function abSubmitBooking() {
     language: detectedLanguage || null,
     payment_method: abPayment,
     package_lines: abPackageLines || null,
+    discount_code: abAppliedDiscountCode || null,
+    discount_pct: abAppliedDiscountPct || null,
   }}).catch(e => console.warn('[AB] office notification failed:', e?.message));
 }
 
@@ -15255,16 +15376,26 @@ async function mbSubmitBooking() {
   if (mbCurrentTour.bokunId && mbSelectedSlot?.startTimeId) {
     try {
       const effectiveRateId = mbCurrentTour.bokunForceRateId || mbSelectedRate?.id || null;
+      // Each passenger sent to Bokun must carry ITS OWN guest's name — guest 0 is the main
+      // contact (firstName/lastName), guests 1+ come from the per-guest "Guest N" fields
+      // (mb-extra-first-*/mb-extra-last-*) rather than all reusing the main guest's name.
+      const _mbGetGuest = (idx) => {
+        if (idx === 0) return [{questionId:'firstName',values:[firstName]},{questionId:'lastName',values:[lastName]}];
+        const ef = (document.getElementById(`mb-extra-first-${idx - 1}`)?.value || '').trim();
+        const el = (document.getElementById(`mb-extra-last-${idx - 1}`)?.value || '').trim();
+        return [{questionId:'firstName',values:[ef || firstName]},{questionId:'lastName',values:[el || lastName]}];
+      };
       const mbBuildPassengers = () => {
         if (mbCategorySelections.some(c=>c.count>0)) {
+          let gIdx = 0;
           return mbCategorySelections.filter(c=>c.count>0).flatMap(c =>
             Array.from({length:c.count}, ()=>({ pricingCategoryId:c.category.id, groupSize:1,
-              passengerDetails:[{questionId:'firstName',values:[firstName]},{questionId:'lastName',values:[lastName]}],
+              passengerDetails:_mbGetGuest(gIdx++),
               answers:[], extras:[] })));
         }
         const cat = mbCurrentTour.pricing?.[0];
-        return cat ? Array.from({length:mbGuestCount}, ()=>({ pricingCategoryId:cat.id, groupSize:1,
-          passengerDetails:[{questionId:'firstName',values:[firstName]},{questionId:'lastName',values:[lastName]}],
+        return cat ? Array.from({length:mbGuestCount}, (_, i)=>({ pricingCategoryId:cat.id, groupSize:1,
+          passengerDetails:_mbGetGuest(i),
           answers:[], extras:[] })) : [];
       };
       const { data: optRes } = await invokeEdge('bokun-sync', {
@@ -15459,6 +15590,10 @@ function mbViewVoucher() {
           <div>
             <label class="block text-xs font-semibold text-gray-600 mb-1.5">Email</label>
             <input id="ab-email" type="email" placeholder="guest@email.com" maxlength="254" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+            <label id="ab-send-email-wrap" class="flex items-center gap-1.5 mt-1.5 cursor-pointer">
+              <input type="checkbox" id="ab-send-email" checked class="w-3.5 h-3.5 rounded accent-brand cursor-pointer">
+              <span id="ab-send-email-label" class="text-xs text-gray-500">Send confirmation email to guest</span>
+            </label>
           </div>
           <div>
             <label class="block text-xs font-semibold text-gray-600 mb-1.5">Phone <span class="text-red-400">*</span></label>
@@ -15520,14 +15655,14 @@ function mbViewVoucher() {
         <!-- Payment method -->
         <div>
           <label class="block text-xs font-semibold text-gray-600 mb-2">Payment method</label>
-          <div class="grid grid-cols-3 gap-2">
-            <button onclick="abSelectPayment('driver')" id="ab-pay-driver" class="ab-pay-btn flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all border-2 border-brand bg-brand/5 text-dark">
+          <div class="grid grid-cols-3 gap-2" id="ab-payment-grid">
+            <button onclick="abSelectPayment('driver')" id="ab-pay-driver" data-payment="driver" class="ab-pay-btn flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all border-2 border-brand bg-brand/5 text-dark">
               <i class="fa-solid fa-car-side text-xs"></i> Pay at driver
             </button>
-            <button onclick="abSelectPayment('hotel')" id="ab-pay-hotel" class="ab-pay-btn flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm transition-all border border-gray-200 text-gray-500">
+            <button onclick="abSelectPayment('hotel')" id="ab-pay-hotel" data-payment="hotel" class="ab-pay-btn flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm transition-all border border-gray-200 text-gray-500">
               <i class="fa-solid fa-building text-xs"></i> Pay at hotel
             </button>
-            <button onclick="abSelectPayment('link')" id="ab-pay-link" class="ab-pay-btn flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm transition-all border border-gray-200 text-gray-500">
+            <button onclick="abSelectPayment('link')" id="ab-pay-link" data-payment="link" class="ab-pay-btn flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm transition-all border border-gray-200 text-gray-500">
               <i class="fa-solid fa-link text-xs"></i> Payment link
             </button>
           </div>

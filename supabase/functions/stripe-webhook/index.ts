@@ -374,8 +374,24 @@ Deno.serve(async (req) => {
         console.log('[Webhook] session.expired — custom_package already in status:', pkg?.status, customPackageId)
       }
     } else if (bookingId) {
-      const { data: existing } = await db.from('bookings').select('status, bokun_confirmation_code, email, guest, tour, date, pax').eq('id', bookingId).single()
+      const { data: existing } = await db.from('bookings').select('status, bokun_confirmation_code, email, guest, tour, date, time, pax').eq('id', bookingId).single()
       if (existing && !['cancelled', 'paid', 'cancelling', 'refund_failed'].includes(existing.status)) {
+        // Stripe sessions can't stay open past 24h, but the tour itself may still be days away —
+        // cancelling immediately would throw away a slot the guest still has plenty of time to pay
+        // for. Only cancel now if the tour is close (<23h); otherwise mark link_expired and let the
+        // guest/admin resend a link — cancel-expired-link-bookings (cron) will cancel it later if it's
+        // still unpaid once the tour actually gets within 23h.
+        let hoursUntilTour = Infinity
+        if (existing.date) {
+          const timePart = existing.time && /^\d{2}:\d{2}/.test(existing.time) ? existing.time.slice(0, 5) : '00:00'
+          const tourMs = new Date(`${existing.date}T${timePart}:00Z`).getTime()
+          if (!isNaN(tourMs)) hoursUntilTour = (tourMs - Date.now()) / (1000 * 60 * 60)
+        }
+        if (hoursUntilTour >= 23) {
+          await db.from('bookings').update({ status: 'link_expired' }).eq('id', bookingId)
+          console.log('[Webhook] booking marked link_expired (tour still far away):', bookingId)
+          return new Response(JSON.stringify({ received: true }), { headers: { ...CORS, 'Content-Type': 'application/json' } })
+        }
         if (existing.bokun_confirmation_code) {
           await bokunCancel(existing.bokun_confirmation_code)
         }
