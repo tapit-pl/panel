@@ -2335,7 +2335,7 @@
             <div class="text-sm font-bold" style="color:#f1f5f9" id="bkd-total"></div>
           </div>
           <div>
-            <div class="text-xs mb-0.5" style="color:#64748b">Commission</div>
+            <div class="text-xs mb-0.5" style="color:#64748b" id="bkd-comm-label">Commission</div>
             <div class="text-sm" style="color:#f1f5f9" id="bkd-comm"></div>
           </div>
           <div id="bkd-bokun-wrap">
@@ -2356,6 +2356,15 @@
       <div id="bkd-notes-wrap" class="hidden">
         <div class="text-xs font-semibold uppercase tracking-wide mb-2" style="color:#475569">Notes</div>
         <div class="rounded-xl p-3 text-sm leading-relaxed" style="background:rgba(255,255,255,0.04);color:#cbd5e1;white-space:pre-wrap" id="bkd-notes"></div>
+      </div>
+      <!-- Custom Tours package details (read-only, shown only for _isCp rows) -->
+      <div id="bkd-cp-extra-wrap" class="hidden">
+        <div class="text-xs font-semibold uppercase tracking-wide mb-2" style="color:#475569">Custom Tours package details</div>
+        <div class="rounded-xl p-3 mb-2" style="background:rgba(255,255,255,0.04)">
+          <div id="bkd-cp-services" class="space-y-2 mb-2"></div>
+          <div id="bkd-cp-pricing" class="space-y-1 pt-2" style="border-top:1px solid rgba(255,255,255,0.07)"></div>
+        </div>
+        <div class="rounded-xl p-3 grid grid-cols-2 gap-x-4 gap-y-2.5" style="background:rgba(255,255,255,0.04)" id="bkd-cp-fields"></div>
       </div>
       <!-- Timeline -->
       <div>
@@ -6922,8 +6931,9 @@
     return amt * (_eurPlnRate || 4.25);
   }
 
-  function statusBadge(status) {
+  function statusBadge(status, isCp) {
     const s = (status || '').toLowerCase();
+    if (isCp && s === 'pending') return `<span class="status-pending-payment text-xs font-semibold px-2.5 py-0.5 rounded-full">Awaiting payment</span>`;
     if (s === 'paid' || s === 'confirmed') return `<span class="status-paid text-xs font-semibold px-2.5 py-0.5 rounded-full">Paid</span>`;
     if (s === 'to_be_paid' || s === 'pending') return `<span class="status-pending text-xs font-semibold px-2.5 py-0.5 rounded-full">Driver pay</span>`;
     if (s === 'payment_pending' || s === 'pending_payment') return `<span class="status-pending-payment text-xs font-semibold px-2.5 py-0.5 rounded-full">Link sent</span>`;
@@ -6932,6 +6942,7 @@
     if (s === 'cancelling') return `<span class="text-xs font-semibold px-2.5 py-0.5 rounded-full" style="background:#fef3c7;color:#d97706;">Cancelling…</span>`;
     if (s === 'arrived') return `<span class="status-arrived text-xs font-semibold px-2.5 py-0.5 rounded-full">Arrived ✓</span>`;
     if (s === 'no_show') return `<span class="text-xs font-semibold px-2.5 py-0.5 rounded-full" style="background:#fef2f2;color:#dc2626;">No Show</span>`;
+    if (s === 'refund_failed') return `<span class="text-xs font-semibold px-2.5 py-0.5 rounded-full" style="background:#fff7ed;color:#c2410c;">Refund failed</span>`;
     return `<span class="status-pending text-xs font-semibold px-2.5 py-0.5 rounded-full">${status || 'Pending'}</span>`;
   }
 
@@ -6945,6 +6956,7 @@
 
   async function markNoShow(id) {
     const b = allBookings.find(x => x.id === id) || partnerBookings.find(x => x.id === id);
+    if (!b) return;
     if (!await showConfirm(`Oznaczyć rezerwację "${b?.guest || id}" jako No Show?\n\nHotel zostanie obciążony pełną ceną wycieczki.`)) return;
     const { error } = await db.from('bookings').update({ status: 'no_show' }).eq('id', id);
     if (error) { showToast('Failed to mark as no-show.', 'error', error.message); return; }
@@ -7053,6 +7065,11 @@
   }
 
   const STATUS_GROUPS = { paid: ['paid','confirmed'], to_be_paid: ['to_be_paid','pending'], payment_pending: ['payment_pending','pending_payment'], link_expired: ['link_expired'], cancelled: ['cancelled'] };
+  // Custom Tours packages mirrored into Hotel Bookings use their own native status vocabulary
+  // (never remapped) — 'pending' there means "awaiting stripe/bank/cash payment", NOT the same
+  // concept as bookings' 'pending' (grouped under to_be_paid/"Driver pay" above), so it must never
+  // share a filter group with it.
+  const CP_STATUS_GROUPS = { paid: ['paid','confirmed'], cancelled: ['cancelled','refund_failed'] };
 
   // 'hotel' = partner has commission enabled (real hotels); 'agency' = commission disabled (tour agencies/DMCs).
   // Bookings with no partner (direct/'—') never match either type.
@@ -7171,10 +7188,46 @@
 
   // ===== HOTEL BOOKINGS =====
   let partnerBookings = [];
+  // Custom Tours packages mirrored into Hotel Bookings — READ-ONLY. Never written to by any
+  // edit/cancel/mark-paid handler; rebuilt from cpData whenever Custom Tours reloads.
+  let cpHotelRows = [];
   let _hbLoaded = false;
   let _hbFiltered = [];
   let _hbPage = 0;
   const HB_PER_PAGE = 50;
+
+  function cpToHotelBookingRow(p) {
+    const dateFormatted = p.date ? new Date(p.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+    return {
+      id: p.id, displayId: 'TM-PKG-' + p.id.split('-')[0].toUpperCase(),
+      tour: p.package_name || '', guest: p.guest_name || '',
+      email: p.guest_email, phone: p.guest_phone, hotel: p.sold_by_name || 'Custom Tours', date: dateFormatted, time: p.time,
+      pickup: p.meeting_point, language: '', pax: p.pax || 0, total: p.guest_price || 0, currency: 'PLN',
+      comm: p.commission_amount || 0, source: 'Seller Panel', status: p.status, notes: p.notes || '',
+      additional_guests: '', payment_method: p.payment_method || '',
+      package_lines: null,
+      _dbBooking: false, _stripeSessionId: p.stripe_session_id || null, _bokunCode: null,
+      _bokunBookingId: null, _paymentType: null,
+      _creationTs: p._creationTs || 0,
+      _startTs: p.date ? new Date(p.date).getTime() : 0,
+      _rawDate: p.date || null, _partnerId: null,
+      _isCp: true, _cpRaw: p,
+    };
+  }
+
+  function _rebuildCpHotelRows() {
+    cpHotelRows = (cpData || []).map(cpToHotelBookingRow);
+  }
+
+  function _populateHbMselOptions() {
+    const combined = [...partnerBookings, ...cpHotelRows];
+    const hbTours = [...new Set(combined.map(b => b.tour).filter(Boolean))].sort();
+    mselSetOptions('msel-hb-tour', hbTours.map(t => ({value: t, label: t})));
+    const hbHotels = [...new Set(combined.map(b => b.hotel).filter(h => h && h !== '—'))].sort();
+    mselSetOptions('msel-hb-hotel', hbHotels.map(h => ({value: h, label: h})));
+    const hbSources = [...new Set(combined.map(b => b.source).filter(Boolean))].sort();
+    mselSetOptions('msel-hb-source', hbSources.map(s => ({value: s, label: s})));
+  }
 
   async function loadHotelBookings() {
     _hbLoaded = true;
@@ -7207,12 +7260,7 @@
     });
 
     // Populate msel filters
-    const hbTours = [...new Set(partnerBookings.map(b => b.tour).filter(Boolean))].sort();
-    mselSetOptions('msel-hb-tour', hbTours.map(t => ({value: t, label: t})));
-    const hbHotels = [...new Set(partnerBookings.map(b => b.hotel).filter(h => h && h !== '—'))].sort();
-    mselSetOptions('msel-hb-hotel', hbHotels.map(h => ({value: h, label: h})));
-    const hbSources = [...new Set(partnerBookings.map(b => b.source).filter(Boolean))].sort();
-    mselSetOptions('msel-hb-source', hbSources.map(s => ({value: s, label: s})));
+    _populateHbMselOptions();
 
     filterHotelBookings();
   }
@@ -7252,10 +7300,10 @@
     const cFromTs  = cFromVal ? new Date(cFromVal).setHours(0,0,0,0) : null;
     const cToTs    = cToVal   ? new Date(cToVal).setHours(23,59,59,999) : null;
 
-    _hbFiltered = partnerBookings.filter(b => {
+    _hbFiltered = [...partnerBookings, ...cpHotelRows].filter(b => {
       const matchQ      = !q        || b.tour.toLowerCase().includes(q) || b.guest.toLowerCase().includes(q) || String(b.id).toLowerCase().includes(q) || (b.phone || '').toLowerCase().includes(q) || (b.email || '').toLowerCase().includes(q) || (b.displayId || '').toLowerCase().includes(q);
       const matchHotel  = hotels.length === 0  || hotels.includes(b.hotel);
-      const matchStatus = statuses.length === 0 || statuses.some(s => (STATUS_GROUPS[s] || [s]).includes((b.status||'').toLowerCase()));
+      const matchStatus = statuses.length === 0 || statuses.some(s => (b._isCp ? (CP_STATUS_GROUPS[s] || []) : (STATUS_GROUPS[s] || [s])).includes((b.status||'').toLowerCase()));
       const matchTour   = tours.length === 0   || tours.includes(b.tour);
       const matchSource = sources.length === 0 || sources.includes(b.source);
       const matchPartnerType = partnerTypes.length === 0 || partnerTypes.includes(_bookingPartnerType(b));
@@ -7284,8 +7332,8 @@
     if (!tbody) return;
     tbody.innerHTML = '';
     page.forEach(b => {
-      const _hbIsCancelled = (b.status||'').toLowerCase() === 'cancelled';
-      const _hbTrStyle = _hbIsCancelled ? 'opacity:0.45' : (_paymentLinkUrgency(b) ? 'box-shadow:inset 4px 0 0 #f97316;background:rgba(249,115,22,0.22)' : (b.source === 'Partner Panel' ? 'box-shadow:inset 3px 0 0 #E8751A' : (b.source === 'Admin' ? 'box-shadow:inset 3px 0 0 #2563eb' : '')));
+      const _hbIsCancelled = ['cancelled','refund_failed'].includes((b.status||'').toLowerCase());
+      const _hbTrStyle = _hbIsCancelled ? 'opacity:0.45' : (_paymentLinkUrgency(b) ? 'box-shadow:inset 4px 0 0 #f97316;background:rgba(249,115,22,0.22)' : (b._isCp ? 'box-shadow:inset 3px 0 0 #a855f7' : (b.source === 'Partner Panel' ? 'box-shadow:inset 3px 0 0 #E8751A' : (b.source === 'Admin' ? 'box-shadow:inset 3px 0 0 #2563eb' : ''))));
       tbody.insertAdjacentHTML('beforeend', `
         <tr class="hover:bg-gray-50 transition-colors text-xs cursor-pointer" data-id="${b.id}" onclick="openBookingDetail('${b.id}')" style="${_hbTrStyle}">
           <td class="px-5 py-3 font-mono text-gray-400" style="white-space:nowrap">#${b.displayId || b.id}</td>
@@ -7301,8 +7349,11 @@
           <td class="px-4 py-3 text-right font-semibold text-dark whitespace-nowrap">${Math.round(b.total || 0).toLocaleString('pl')} zł</td>
           <td class="px-4 py-3 text-slate-300 text-xs">${escapeHtml(b.source)}</td>
           <td class="px-4 py-3 text-xs">${paymentMethodCell(b)}</td>
-          <td class="px-4 py-3 text-center">${statusBadge(b.status)}</td>
+          <td class="px-4 py-3 text-center">${statusBadge(b.status, b._isCp)}</td>
           <td class="px-4 py-3 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+            ${b._isCp ? `
+            <button onclick="event.stopPropagation();showSection('customtours');openCpDetail('${b.id}')" title="Open in Custom Tours" class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-lg transition-colors" style="background:rgba(168,85,247,0.13);border:1px solid rgba(168,85,247,0.35);color:#c084fc"><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>Custom Tours</button>
+            ` : `
             ${b.notes ? `<span class="text-amber-400 cursor-default ml-1"><i class="fa-solid fa-note-sticky text-xs"></i></span>` : ''}
             <button onclick="event.stopPropagation();openVoucher('${b.id}')" title="View voucher" class="transition-colors ml-1" style="color:#f87171"><i class="fa-solid fa-file-pdf text-xs"></i></button>
             ${(['to_be_paid','pending','payment_pending','pending_payment','link_expired'].includes((b.status||'').toLowerCase())) ? `<button onclick="event.stopPropagation();quickMarkPaid('${b.id}')" title="Mark as paid" class="text-green-400 hover:text-green-300 transition-colors ml-1.5"><i class="fa-solid fa-circle-check text-xs"></i></button>` : ''}
@@ -7311,6 +7362,7 @@
             <button onclick="event.stopPropagation();openEditBooking('${b.id}')" title="Edit booking" class="text-gray-400 hover:text-brand transition-colors ml-1.5"><i class="fa-solid fa-pen text-xs"></i></button>
             ${(b.status||'').toLowerCase() === 'cancelling' ? `<button onclick="event.stopPropagation();forceUnlockBooking('${escapeHtml(b.id)}')" title="Force unlock — stuck cancelling" class="text-amber-400 hover:text-amber-300 transition-colors ml-1.5"><i class="fa-solid fa-lock-open text-xs"></i></button>` : ''}
             ${!['cancelled','cancelling'].includes((b.status||'').toLowerCase()) ? `<button title="Cancel booking" class="text-red-500 hover:text-red-400 transition-colors ml-1.5" onclick="event.stopPropagation();cancelBooking('${escapeHtml(b.id)}','${escapeHtml((b.guest||'').replace(/'/g,"\\'"))}',${!!b._stripeSessionId},true)"><i class="fa-solid fa-xmark text-xs"></i></button>` : ''}
+            `}
           </td>
         </tr>`);
     });
@@ -7358,6 +7410,7 @@
 
   async function quickMarkPaid(id) {
     const b0 = allBookings.find(x => x.id === id);
+    if (!b0) return;
     const guestLabel = b0?.guest ? ` for ${b0.guest}` : '';
     if (!await showConfirm(`Mark booking${guestLabel} as Paid?`, { okLabel: 'Mark as paid', okColor: '#22c55e' })) return;
     const { error } = await db.from('bookings').update({ status: 'paid' }).eq('id', id);
@@ -7410,6 +7463,7 @@
   async function forceUnlockBooking(id) {
     if (currentAdminRole === 'staff') { showToast('Manager or admin role required.', 'error'); return; }
     const b = allBookings.find(x => x.id === id) || partnerBookings.find(x => x.id === id);
+    if (!b) return;
     if (!await showConfirm(`Force unlock booking for ${b?.guest || id}?\n\nThis sets status back to 'paid'. You may need to handle the cancellation or refund manually.`, { okLabel: 'Unlock', okColor: '#e8751a' })) return;
     const { error } = await db.from('bookings').update({ status: 'paid' }).eq('id', id).eq('status', 'cancelling');
     if (error) { showToast('Failed to unlock booking.', 'error', error.message); return; }
@@ -9552,6 +9606,17 @@
   function paymentMethodCell(b) {
     const pm = b.payment_method || '';
     const s  = (b.status || '').toLowerCase();
+    // Custom Tours payment methods — checked first since cp's native status 'pending' would
+    // otherwise collide with the bookings 'driver'/to_be_paid branch below.
+    if (pm === 'stripe') {
+      return `<span class="inline-flex items-center gap-1 whitespace-nowrap" style="color:#635BFF"><i class="fa-brands fa-stripe"></i> Stripe link</span>`;
+    }
+    if (pm === 'bank_transfer') {
+      return `<span class="inline-flex items-center gap-1 text-blue-500 whitespace-nowrap"><i class="fa-solid fa-building-columns text-xs"></i> Bank transfer</span>`;
+    }
+    if (pm === 'cash') {
+      return `<span class="inline-flex items-center gap-1 text-green-600 whitespace-nowrap"><i class="fa-solid fa-money-bill text-xs"></i> Cash</span>`;
+    }
     if (pm === 'link' || s === 'payment_pending' || s === 'pending_payment') {
       const urgency = _paymentLinkUrgency(b);
       return `<div class="flex flex-col gap-0.5">
@@ -11955,6 +12020,9 @@ async function loadCustomTours() {
   initDatePicker('ct-date-from', renderCustomTours);
   initDatePicker('ct-date-to', renderCustomTours);
   renderCustomTours();
+
+  _rebuildCpHotelRows();
+  if (_hbLoaded) { _populateHbMselOptions(); filterHotelBookings(); }
 }
 
 async function revertCpToPending(id) {
@@ -12198,7 +12266,7 @@ function closeCpDetail() {
 let _bkdCurrentId = null;
 
 function openBookingDetail(id) {
-  const b = allBookings.find(x => x.id === id) || partnerBookings.find(x => x.id === id);
+  const b = allBookings.find(x => x.id === id) || partnerBookings.find(x => x.id === id) || cpHotelRows.find(x => x.id === id);
   if (!b) return;
   _bkdCurrentId = id;
 
@@ -12208,7 +12276,7 @@ function openBookingDetail(id) {
 
   set('bkd-tour', b.tour);
   document.getElementById('bkd-ref').textContent = '#' + (b.displayId || b.id);
-  document.getElementById('bkd-status').innerHTML = statusBadge(b.status);
+  document.getElementById('bkd-status').innerHTML = statusBadge(b.status, b._isCp);
 
   // Guest
   set('bkd-guest', b.guest);
@@ -12264,6 +12332,10 @@ function openBookingDetail(id) {
     }
   }
   {
+    const commLabelEl = document.getElementById('bkd-comm-label');
+    if (commLabelEl) commLabelEl.textContent = b._isCp ? 'Seller commission' : 'Commission';
+  }
+  {
     const _commEl = document.getElementById('bkd-comm');
     if (_commEl) {
       if (b.comm != null) {
@@ -12299,6 +12371,42 @@ function openBookingDetail(id) {
   if (notesWrap && notesEl) {
     if (b.notes) { notesEl.textContent = b.notes; notesWrap.classList.remove('hidden'); }
     else notesWrap.classList.add('hidden');
+  }
+
+  // Custom Tours package details (read-only mirror)
+  const cpExtraWrap = document.getElementById('bkd-cp-extra-wrap');
+  if (cpExtraWrap) {
+    if (b._isCp && b._cpRaw) {
+      const p = b._cpRaw;
+      cpExtraWrap.classList.remove('hidden');
+      const services = Array.isArray(p.services) ? p.services : [];
+      document.getElementById('bkd-cp-services').innerHTML = services.length
+        ? services.map((s, i) => `
+            <div class="rounded-lg px-3 py-2.5" style="border:1px solid rgba(255,255,255,0.08)">
+              <div class="text-xs font-semibold mb-2" style="color:#e2e8f0">${i+1}. ${escapeHtml(s.name || '—')}</div>
+              <div class="grid grid-cols-4 gap-2 text-xs font-mono">
+                <div><div style="color:#64748b" class="mb-0.5">Net</div><div style="color:#cbd5e1" class="font-medium">${fmtPln(s.net)}</div></div>
+                <div><div style="color:#64748b" class="mb-0.5">VAT</div><div style="color:#cbd5e1" class="font-medium">${s.vat}%</div></div>
+                <div><div style="color:#64748b" class="mb-0.5">Gross</div><div style="color:#cbd5e1" class="font-medium">${fmtPln(s.gross)}</div></div>
+                <div><div style="color:#64748b" class="mb-0.5">Margin</div><div class="font-semibold" style="color:#e2e8f0">${fmtPln(s.margin_gross ?? s.margin ?? 0)}</div></div>
+              </div>
+            </div>`).join('')
+        : '<div class="text-xs" style="color:#64748b">Brak zapisanych usług.</div>';
+      const commRate = p.commission_rate || 0;
+      const commAmount = p.commission_amount || 0;
+      document.getElementById('bkd-cp-pricing').innerHTML = `
+        <div class="flex justify-between text-xs" style="color:#64748b"><span>Total net</span><span class="font-mono">${fmtPln(p.total_net)}</span></div>
+        <div class="flex justify-between text-xs" style="color:#64748b"><span>Total gross</span><span class="font-mono">${fmtPln(p.total_gross)}</span></div>
+        <div class="flex justify-between text-xs" style="color:#64748b"><span>Total margin</span><span class="font-mono">${fmtPln(p.total_margin)}</span></div>
+        <div class="flex justify-between text-sm font-bold pt-2 mt-1" style="border-top:1px solid rgba(255,255,255,0.07);color:#e2e8f0"><span>Guest price</span><span class="font-mono text-brand">${fmtPln(p.guest_price)}</span></div>
+        ${commAmount > 0 ? `<div class="flex justify-between text-xs" style="color:#64748b"><span>Seller commission (${commRate}% of margin)</span><span class="font-mono" style="color:#4ade80">−${fmtPln(commAmount)}</span></div>` : ''}`;
+      const gf = (label, val) => val != null && val !== '' ? `<div><div class="text-xs mb-0.5" style="color:#64748b">${label}</div><div class="text-xs font-medium" style="color:#cbd5e1">${escapeHtml(String(val))}</div></div>` : '';
+      document.getElementById('bkd-cp-fields').innerHTML =
+        gf('Meeting point', p.meeting_point) + gf('Sold by', p.sold_by_name) + gf('Commission rate', commRate ? commRate + '%' : null) +
+        (p.guest_note ? `<div class="col-span-2"><div class="text-xs mb-0.5" style="color:#64748b">Guest note</div><div class="text-xs font-medium" style="color:#cbd5e1;white-space:pre-wrap">${escapeHtml(p.guest_note)}</div></div>` : '');
+    } else {
+      cpExtraWrap.classList.add('hidden');
+    }
   }
 
   // Action buttons
