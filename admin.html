@@ -7313,6 +7313,10 @@
       const matchCTo    = !cToTs   || b._creationTs <= cToTs;
       return matchQ && matchHotel && matchStatus && matchTour && matchSource && matchPartnerType && matchFrom && matchTo && matchCFrom && matchCTo;
     });
+    // partnerBookings and cpHotelRows are each pre-sorted by created_at desc individually —
+    // re-sort the merged set so Custom Tours rows interleave chronologically instead of
+    // always landing after every partner/admin booking (and thus only on the last page).
+    _hbFiltered.sort((a, b) => (b._creationTs || 0) - (a._creationTs || 0));
     _hbPage = 0;
     renderHotelBookingsPage();
   }
