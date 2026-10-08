@@ -7313,10 +7313,16 @@
       const matchCTo    = !cToTs   || b._creationTs <= cToTs;
       return matchQ && matchHotel && matchStatus && matchTour && matchSource && matchPartnerType && matchFrom && matchTo && matchCFrom && matchCTo;
     });
-    // partnerBookings and cpHotelRows are each pre-sorted by created_at desc individually —
-    // re-sort the merged set so Custom Tours rows interleave chronologically instead of
-    // always landing after every partner/admin booking (and thus only on the last page).
-    _hbFiltered.sort((a, b) => (b._creationTs || 0) - (a._creationTs || 0));
+    // partnerBookings and cpHotelRows only arrive pre-sorted individually — re-sort the merged
+    // set so Custom Tours rows interleave correctly instead of always trailing at the end.
+    // Must match setHbView()'s convention: "recent" = newest booked first, "upcoming" = soonest
+    // tour date first (setHbView sorts partnerBookings alone before calling this — cpHotelRows
+    // never went through that, so the final sort has to happen here regardless of view).
+    if (currentHbView === 'upcoming') {
+      _hbFiltered.sort((a, b) => (a._startTs || 0) - (b._startTs || 0));
+    } else {
+      _hbFiltered.sort((a, b) => (b._creationTs || 0) - (a._creationTs || 0));
+    }
     _hbPage = 0;
     renderHotelBookingsPage();
   }
