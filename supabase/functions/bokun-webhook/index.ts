@@ -101,8 +101,12 @@ const BOKUN_STATUS_MAP: Record<string, string> = {
   ON_HOLD:   'payment_pending',
 }
 
-// Statuses that Bokun CONFIRM/PENDING events should never overwrite
-const PROTECTED_STATUSES = ['paid', 'to_be_paid', 'cancelled']
+// Statuses that Bokun CONFIRM/PENDING events should never overwrite.
+// payment_pending/pending_payment/link_expired are our own "awaiting Stripe payment link" states —
+// Bokun has no visibility into whether the guest has actually paid us (its own invoice for these
+// bookings is always zeroed via a 100%-discount promo code), so a bookings/create or status event
+// must never flip these to 'confirmed' and make an unpaid booking look paid in the panel.
+const PROTECTED_STATUSES = ['paid', 'to_be_paid', 'cancelled', 'payment_pending', 'pending_payment', 'link_expired']
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
