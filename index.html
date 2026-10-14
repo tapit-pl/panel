@@ -3548,6 +3548,7 @@ tailwind.config = {
     }
     const addr = currentPartner?.address;
     const validAddr = addr && !addr.includes('@') ? addr : null;
+    if (validAddr && currentPartner?.name) return `${currentPartner.name}, ${validAddr}`;
     return validAddr || currentPartner?.name || '';
   }
 
