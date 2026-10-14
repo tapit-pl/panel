@@ -8,6 +8,26 @@ function bokunDate(): string {
   return `${now.getUTCFullYear()}-${pad(now.getUTCMonth()+1)}-${pad(now.getUTCDate())} ${pad(now.getUTCHours())}:${pad(now.getUTCMinutes())}:${pad(now.getUTCSeconds())}`
 }
 
+// Tour date/time are stored as LOCAL Europe/Warsaw wall-clock time, not UTC — CEST/CET differs
+// from UTC by 1-2h depending on daylight saving, so a naive `new Date(dateStr+'T'+timeStr+':00Z')`
+// silently misreads the tour time by that much. This converts correctly for any date (DST-aware)
+// by comparing a naive UTC guess against how that same instant renders in Europe/Warsaw.
+function warsawLocalToUtcMs(dateStr: string, timeStr: string): number {
+  const [y, m, d] = dateStr.split('-').map(Number)
+  const [hh, mm] = timeStr.split(':').map(Number)
+  if ([y, m, d, hh, mm].some(Number.isNaN)) return NaN
+  const guessUtc = Date.UTC(y, m - 1, d, hh, mm, 0)
+  const dtf = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Europe/Warsaw', hourCycle: 'h23',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+  })
+  const parts = dtf.formatToParts(new Date(guessUtc))
+  const get = (type: string) => parseInt(parts.find(p => p.type === type)!.value, 10)
+  const asIfLocalWereUtc = Date.UTC(get('year'), get('month') - 1, get('day'), get('hour'), get('minute'), get('second'))
+  return guessUtc + (guessUtc - asIfLocalWereUtc)
+}
+
 async function hmac(secret: string, message: string): Promise<string> {
   const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-1' }, false, ['sign'])
   const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(message))
@@ -60,7 +80,7 @@ Deno.serve(async (req) => {
   const due = (candidates ?? []).filter(b => {
     if (!b.date) return true // no date on file — safest is to resolve it now rather than let it linger forever
     const timePart = b.time && /^\d{2}:\d{2}/.test(b.time) ? b.time.slice(0, 5) : '00:00'
-    const tourMs = new Date(`${b.date}T${timePart}:00Z`).getTime()
+    const tourMs = warsawLocalToUtcMs(b.date, timePart)
     if (isNaN(tourMs)) return true
     const hoursUntilTour = (tourMs - nowMs) / (1000 * 60 * 60)
     return hoursUntilTour < 23
