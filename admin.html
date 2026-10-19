@@ -14699,8 +14699,20 @@ async function abSubmitBooking() {
       // rate (not a category within one rate), so passengers built for it must use ITS OWN category,
       // never a different rate's or the tour-wide first one.
       let _abGuestIdx = 0;
+      // Bokun's per-rate price list isn't guaranteed to list "Adult" first — e.g. for some rates
+      // it comes back as [Infant, Student, Adult, Child], and blindly taking [0] silently books
+      // the wrong guest category. Prefer whichever entry Bokun itself flags as defaultCategory
+      // (cross-referenced via the tour-wide pricing list), only falling back to [0] if that
+      // category isn't present in this specific rate's own price list at all.
+      const _abPickDefaultCat = (ratePrices) => {
+        const list = ratePrices || [];
+        if (!list.length) return null;
+        const defaultCatId = (abCurrentTour?.pricing || []).find(c => c.defaultCategory)?.id;
+        const match = defaultCatId != null ? list.find(c => (c.pricingCategoryId ?? c.id) === defaultCatId) : null;
+        return match || list[0];
+      };
       const abBuildPassengersForRate = (rate, count) => {
-        const cat = rate?.pricesByCategory?.[0];
+        const cat = _abPickDefaultCat(rate?.pricesByCategory);
         const pricingCategoryId = (cat?.pricingCategoryId ?? cat?.id) ?? rate?.id;
         return Array.from({ length: count }, () => ({
           pricingCategoryId, groupSize: 1, passengerDetails: _abGetGuest(_abGuestIdx++), answers: [], extras: []
@@ -14732,7 +14744,7 @@ async function abSubmitBooking() {
         // was actually selected), which Bokun rejects as an unsupported pricing category for that
         // rate. Only fall back to abCurrentTour.pricing if no rate-specific category exists at all
         // (an empty passengers array is rejected by Bokun).
-        const _abFallbackCat = abSelectedRate?.pricesByCategory?.[0] || abSelectedSlot?.rates?.[0]?.pricesByCategory?.[0];
+        const _abFallbackCat = _abPickDefaultCat(abSelectedRate?.pricesByCategory) || _abPickDefaultCat(abSelectedSlot?.rates?.[0]?.pricesByCategory);
         const catId = (_abFallbackCat?.pricingCategoryId ?? _abFallbackCat?.id) ?? abCurrentTour.pricing?.[0]?.id;
         return catId != null
           ? Array.from({ length: abGuestCount }, (_, i) => ({
