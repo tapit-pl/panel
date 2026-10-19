@@ -3829,16 +3829,22 @@ tailwind.config = {
 
   function updatePayOptStyles() { selectTdPayment(tdPayment); }
 
-  // Payment methods shown must be allowed by BOTH the partner's own settings and the
-  // currently open tour's settings — recomputed on partner login and again every time a
-  // tour is opened, since tour-level restrictions can differ from tour to tour.
-  function refreshPaymentOptionsUI() {
-    const payGrid = document.getElementById('td-payment-grid');
-    if (!payGrid) return;
+  // Payment methods allowed by BOTH the partner's own settings and the currently open tour's
+  // settings. Shared by the UI refresh below AND the booking-submit fallback — neither may ever
+  // fall back to a hardcoded method (e.g. 'driver') the partner isn't actually permitted to use.
+  function _tdAllowedPayments() {
     const partnerAllowed = currentPartner?.payment_options?.length ? currentPartner.payment_options : ['driver', 'hotel', 'link'];
     const tourAllowed = tdCurrentTour?.paymentOptions?.length ? tdCurrentTour.paymentOptions : ['driver', 'hotel', 'link'];
     const intersected = partnerAllowed.filter(x => tourAllowed.includes(x));
-    const allowedPayments = intersected.length ? intersected : tourAllowed;
+    return intersected.length ? intersected : tourAllowed;
+  }
+
+  // Recomputed on partner login and again every time a tour is opened, since tour-level
+  // restrictions can differ from tour to tour.
+  function refreshPaymentOptionsUI() {
+    const payGrid = document.getElementById('td-payment-grid');
+    if (!payGrid) return;
+    const allowedPayments = _tdAllowedPayments();
     const visible = payGrid.querySelectorAll('.pay-opt[data-payment]');
     visible.forEach(el => {
       el.style.display = allowedPayments.includes(el.dataset.payment) ? '' : 'none';
@@ -3960,7 +3966,11 @@ tailwind.config = {
     const phone = phoneNumber ? phonePrefix + ' ' + phoneNumber : '';
     const nationality = document.getElementById('td-nationality').value.trim();
     const notes     = document.getElementById('td-notes').value.trim();
-    const payment   = tdPayment || 'driver';
+    // Never trust tdPayment blindly — re-validate against what's actually allowed right now
+    // (partner + tour settings) so a stale/never-corrected selection can't silently book a
+    // payment method the partner isn't permitted to use.
+    const _tdAllowed = _tdAllowedPayments();
+    const payment   = (tdPayment && _tdAllowed.includes(tdPayment)) ? tdPayment : _tdAllowed[0];
     const errEl     = document.getElementById('td-booking-error');
 
     if (!isValidName(firstName)) {
