@@ -3528,9 +3528,11 @@ tailwind.config = {
 
     document.getElementById('td-notes').value = '';
     renderAdditionalGuestFields(tdGuestCount);
-    const linkOpt = document.querySelector('.pay-opt[data-payment="link"]');
-    if (linkOpt) linkOpt.style.display = '';
-    selectTdPayment('driver');
+    // Payment method is cleared (never force-selected or force-shown here) so the partner has
+    // to explicitly click one — refreshPaymentOptionsUI() already set correct visibility when
+    // the tour was opened; this used to override it with a hardcoded 'driver' + forced "link"
+    // visibility, which could show a disallowed method as pre-selected.
+    selectTdPayment(null);
     tdUpdatePickup();
     _updateNonBokunPkgTotal();
     scrollModalTo(form);
@@ -3752,7 +3754,9 @@ tailwind.config = {
     }
   }
 
-  let tdPayment = 'driver';
+  // No default — payment method must always be an explicit, deliberate click by the partner,
+  // even when only one method is allowed for them (never auto-selected).
+  let tdPayment = null;
   let tdAppliedDiscountCode = null;
   let tdAppliedDiscountPct = null;
 
@@ -3850,8 +3854,11 @@ tailwind.config = {
       el.style.display = allowedPayments.includes(el.dataset.payment) ? '' : 'none';
     });
     payGrid.className = `grid gap-2 grid-cols-${allowedPayments.length}`;
+    // Clear (never auto-pick) whenever the current selection is no longer valid — e.g. a
+    // different tour was opened, or the partner's allowed methods changed. The partner must
+    // explicitly click a method every time, even if only one is shown.
     const currentStillAllowed = tdPayment && allowedPayments.includes(tdPayment);
-    if (!currentStillAllowed) selectTdPayment(allowedPayments[0]);
+    if (!currentStillAllowed) selectTdPayment(null);
   }
 
   // ── Bokun field-error helpers ──────────────────────────────────────────────
@@ -3966,12 +3973,18 @@ tailwind.config = {
     const phone = phoneNumber ? phonePrefix + ' ' + phoneNumber : '';
     const nationality = document.getElementById('td-nationality').value.trim();
     const notes     = document.getElementById('td-notes').value.trim();
-    // Never trust tdPayment blindly — re-validate against what's actually allowed right now
-    // (partner + tour settings) so a stale/never-corrected selection can't silently book a
-    // payment method the partner isn't permitted to use.
-    const _tdAllowed = _tdAllowedPayments();
-    const payment   = (tdPayment && _tdAllowed.includes(tdPayment)) ? tdPayment : _tdAllowed[0];
     const errEl     = document.getElementById('td-booking-error');
+
+    // Payment method must be an explicit, deliberate choice — never silently defaulted, even
+    // when only one method is allowed — and re-validated against what's actually allowed right
+    // now (partner + tour settings), not just "something was clicked at some point".
+    const _tdAllowed = _tdAllowedPayments();
+    if (!tdPayment || !_tdAllowed.includes(tdPayment)) {
+      errEl.textContent = 'Please select a payment method.';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    const payment = tdPayment;
 
     if (!isValidName(firstName)) {
       document.getElementById('td-first-err')?.classList.remove('hidden');
