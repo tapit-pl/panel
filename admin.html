@@ -4481,12 +4481,7 @@
       }
     } catch(e) { console.warn('Bokun load error:', e); }
 
-    const SOURCE_LABELS = { 'GYG': 'GetYourGuide', 'TM Panel': 'TM Panel', 'Partner Panel': 'Partner Panel' };
-    const abTours = [...new Set(allBookings.map(b => b.tour).filter(Boolean))].sort();
-    mselSetOptions('msel-ab-tour', abTours.map(t => ({value: t, label: t})));
-    const abSources = [...new Set(allBookings.map(b => b.source).filter(Boolean))].sort();
-    mselSetOptions('msel-ab-source', abSources.map(s => ({value: s, label: SOURCE_LABELS[s] || s})));
-
+    _populateAbMselOptions();
 
     _bookingsLoaded = true;
     hideBookingsLoading();
@@ -6994,9 +6989,9 @@
     if (!tbody) return;
     tbody.innerHTML = page.map(b => {
       const sourceLabel = b.source === 'admin' ? 'Admin' : b.source === 'Partner Panel' ? 'Partner' : b.source;
-      const _isCancelledRow = (b.status||'').toLowerCase() === 'cancelled';
+      const _isCancelledRow = ['cancelled','refund_failed'].includes((b.status||'').toLowerCase());
       const _isUrgentLink = !!_paymentLinkUrgency(b);
-      const _trStyle = _isCancelledRow ? 'opacity:0.45' : (_isUrgentLink ? 'box-shadow:inset 4px 0 0 #f97316;background:rgba(249,115,22,0.22)' : (b.source === 'Partner Panel' ? 'box-shadow:inset 3px 0 0 #E8751A' : (b.source === 'admin' ? 'box-shadow:inset 3px 0 0 #2563eb' : '')));
+      const _trStyle = _isCancelledRow ? 'opacity:0.45' : (_isUrgentLink ? 'box-shadow:inset 4px 0 0 #f97316;background:rgba(249,115,22,0.22)' : (b._isCp ? 'box-shadow:inset 3px 0 0 #a855f7' : (b.source === 'Partner Panel' ? 'box-shadow:inset 3px 0 0 #E8751A' : (b.source === 'admin' ? 'box-shadow:inset 3px 0 0 #2563eb' : ''))));
       return `<tr class="hover:bg-gray-50 transition-colors text-xs cursor-pointer" data-id="${b.id}" data-hotel="${escapeHtml(b.hotel)}" data-source="${escapeHtml(b.source)}" data-status="${escapeHtml(b.status)}"${_trStyle ? ` style="${_trStyle}"` : ''} onclick="openBookingDetail('${b.id}')">
           <td class="px-5 py-3 font-mono text-gray-400" style="white-space:nowrap">#${b.displayId || b.id}</td>
           <td class="px-4 py-3 font-medium text-dark" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(b.tour)}">${escapeHtml(b.tour)}</td>
@@ -7011,8 +7006,11 @@
           <td class="px-4 py-3 text-right font-semibold text-dark whitespace-nowrap">${Math.round(toPlnAmount(b)).toLocaleString('pl')} zł</td>
           <td class="px-4 py-3 text-slate-300 text-xs">${escapeHtml(sourceLabel)}</td>
           <td class="px-4 py-3 text-xs">${paymentMethodCell(b)}</td>
-          <td class="px-4 py-3 text-center">${statusBadge(b.status)}</td>
+          <td class="px-4 py-3 text-center">${statusBadge(b.status, b._isCp)}</td>
           <td class="px-4 py-3 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+            ${b._isCp ? `
+            <button onclick="event.stopPropagation();showSection('customtours');openCpDetail('${b.id}')" title="Open in Custom Tours" class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-lg transition-colors" style="background:rgba(168,85,247,0.13);border:1px solid rgba(168,85,247,0.35);color:#c084fc"><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>Custom Tours</button>
+            ` : `
             ${b.notes ? `<span class="text-amber-400 cursor-default ml-1"><i class="fa-solid fa-note-sticky text-xs"></i></span>` : ''}
             ${b._dbBooking ? `<button onclick="event.stopPropagation();openVoucher('${b.id}')" title="View voucher" class="transition-colors ml-1" style="color:#f87171"><i class="fa-solid fa-file-pdf text-xs"></i></button>` : ''}
             ${b._dbBooking && (['to_be_paid','pending','payment_pending','pending_payment','link_expired'].includes((b.status||'').toLowerCase())) ? `<button onclick="event.stopPropagation();quickMarkPaid('${b.id}')" title="Mark as paid" class="text-green-400 hover:text-green-300 transition-colors ml-1.5"><i class="fa-solid fa-circle-check text-xs"></i></button>` : ''}
@@ -7022,6 +7020,7 @@
             ${!b._dbBooking && b.source === 'Website' ? `<button onclick="event.stopPropagation();openAssignHotelModal('${escapeHtml(b.id)}')" title="Assign to hotel" class="text-blue-400 hover:text-blue-300 transition-colors ml-1.5"><i class="fa-solid fa-hotel text-xs"></i></button>` : ''}
             ${b._dbBooking && (b.status||'').toLowerCase() === 'cancelling' ? `<button onclick="event.stopPropagation();forceUnlockBooking('${escapeHtml(b.id)}')" title="Force unlock — stuck cancelling" class="text-amber-400 hover:text-amber-300 transition-colors ml-1.5"><i class="fa-solid fa-lock-open text-xs"></i></button>` : ''}
             ${b._dbBooking && !['cancelled','cancelling'].includes((b.status||'').toLowerCase()) ? `<button title="Cancel booking" class="text-red-500 hover:text-red-400 transition-colors ml-1.5" onclick="event.stopPropagation();cancelBooking('${escapeHtml(b.id)}','${escapeHtml((b.guest||'').replace(/'/g,"\\'"))}',${!!b._stripeSessionId},true)"><i class="fa-solid fa-xmark text-xs"></i></button>` : ''}
+            `}
           </td>
         </tr>`;
     }).join('');
@@ -7097,11 +7096,11 @@
     const createdFromTs  = createdFromVal ? new Date(createdFromVal).setHours(0,0,0,0) : null;
     const createdToTs    = createdToVal   ? new Date(createdToVal).setHours(23,59,59,999) : null;
 
-    const filtered = allBookings.filter(b => {
+    const filtered = [...allBookings, ...cpHotelRows].filter(b => {
       const matchQ      = !q        || b.tour.toLowerCase().includes(q) || b.guest.toLowerCase().includes(q) || String(b.id).toLowerCase().includes(q) || (b.phone || '').toLowerCase().includes(q) || (b.email || '').toLowerCase().includes(q) || (b.displayId || '').toLowerCase().includes(q);
       const matchHotel  = hotels.length === 0  || hotels.some(h => h === 'none' ? b.hotel === '—' : b.hotel === h);
       const matchSource = sources.length === 0 || sources.includes(b.source);
-      const matchStatus = statuses.length === 0 || statuses.some(s => (STATUS_GROUPS[s] || [s]).includes((b.status||'').toLowerCase()));
+      const matchStatus = statuses.length === 0 || statuses.some(s => (b._isCp ? (CP_STATUS_GROUPS[s] || []) : (STATUS_GROUPS[s] || [s])).includes((b.status||'').toLowerCase()));
       const matchTour   = tours.length === 0   || tours.includes(b.tour);
       const matchPartnerType = partnerTypes.length === 0 || partnerTypes.includes(_bookingPartnerType(b));
       const ts = b._startTs || 0;
@@ -7112,6 +7111,13 @@
       const matchCreatedTo   = !createdToTs   || cts <= createdToTs;
       return matchQ && matchHotel && matchSource && matchStatus && matchTour && matchPartnerType && matchFrom && matchTo && matchCreatedFrom && matchCreatedTo;
     });
+    // allBookings and cpHotelRows only arrive pre-sorted individually — re-sort the merged set so
+    // Custom Tours rows interleave correctly (see the identical fix in filterHotelBookings for why).
+    if (currentBookingView === 'upcoming') {
+      filtered.sort((a, b) => (a._startTs || 0) - (b._startTs || 0));
+    } else {
+      filtered.sort((a, b) => (b._creationTs || 0) - (a._creationTs || 0));
+    }
     renderBookingsTable(filtered);
   }
 
@@ -7217,6 +7223,15 @@
 
   function _rebuildCpHotelRows() {
     cpHotelRows = (cpData || []).map(cpToHotelBookingRow);
+  }
+
+  function _populateAbMselOptions() {
+    const SOURCE_LABELS = { 'GYG': 'GetYourGuide', 'TM Panel': 'TM Panel', 'Partner Panel': 'Partner Panel' };
+    const combined = [...allBookings, ...cpHotelRows];
+    const abTours = [...new Set(combined.map(b => b.tour).filter(Boolean))].sort();
+    mselSetOptions('msel-ab-tour', abTours.map(t => ({value: t, label: t})));
+    const abSources = [...new Set(combined.map(b => b.source).filter(Boolean))].sort();
+    mselSetOptions('msel-ab-source', abSources.map(s => ({value: s, label: SOURCE_LABELS[s] || s})));
   }
 
   function _populateHbMselOptions() {
@@ -12033,6 +12048,7 @@ async function loadCustomTours() {
 
   _rebuildCpHotelRows();
   if (_hbLoaded) { _populateHbMselOptions(); filterHotelBookings(); }
+  if (_bookingsLoaded) { _populateAbMselOptions(); filterAllBookings(); }
 }
 
 async function revertCpToPending(id) {
