@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
   if (!email) return new Response(JSON.stringify({ error: 'Missing email' }), { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } })
 
   // Find partner id first
-  const { data: partner } = await adminClient.from('partners').select('id').eq('email', email).single()
+  const { data: partner } = await adminClient.from('partners').select('id, name').eq('email', email).single()
   const partnerId = partner?.id
 
   if (partnerId) {
@@ -45,8 +45,18 @@ Deno.serve(async (req) => {
       await adminClient.from('bookings').update({ staff_id: null }).in('staff_id', staffIds)
     }
 
-    // Cascade: nullify partner_id in bookings, print_orders, tickets (keep historical data)
-    await adminClient.from('bookings').update({ partner_id: null, source: 'Partner Panel' }).eq('partner_id', partnerId)
+    // Cascade: nullify partner_id in bookings, print_orders, tickets (keep historical data).
+    // Note: `source` is intentionally left untouched — it used to be overwritten to
+    // 'Partner Panel' here, which destroyed the booking's real origin (admin/Manual/etc.)
+    // and made a deleted partner's bookings indistinguishable from ones that never had a
+    // partner at all. Instead, record which partner this was directly on each affected
+    // booking so the history survives the deletion.
+    const { data: affectedBookings } = await adminClient.from('bookings').select('id, notes').eq('partner_id', partnerId)
+    const removalNote = `[Partner "${partner.name}" removed ${new Date().toISOString().slice(0, 10)}]`
+    for (const bk of affectedBookings ?? []) {
+      const notes = bk.notes ? `${bk.notes}\n${removalNote}` : removalNote
+      await adminClient.from('bookings').update({ partner_id: null, notes }).eq('id', bk.id)
+    }
     await adminClient.from('print_orders').update({ partner_id: null }).eq('partner_id', partnerId)
     await adminClient.from('tickets').update({ partner_id: null }).eq('partner_id', partnerId)
 
