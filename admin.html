@@ -3784,6 +3784,13 @@
       loadTickets().catch(e => console.warn('loadTickets failed:', e)),
       loadTailorEnquiries().catch(e => console.warn('loadTailorEnquiries failed:', e)),
     ]);
+    // Pre-load Hotel Bookings and Seller Panel in background — scheduled here (right after
+    // partners load, before the slow loadBookings()/Bokun sync below) so the 2.5-3s delay is
+    // measured from login, not from whenever that sync finishes. Previously these two lines
+    // sat after `await loadBookings()`, so on a slow Bokun sync the "background" load could
+    // take just as long as All Bookings itself before Hotel Bookings/Custom Tours ever started.
+    setTimeout(() => { if (!_hbLoaded) loadHotelBookings(); }, 3000);
+    setTimeout(async () => { if (!customToursLoaded) { await loadCustomTours(); if (dashFilter === 'all' && document.getElementById('section-dashboard')?.classList.contains('active')) updateDashboardKPIs(); } }, 2500);
     await loadBookings();
     await setDashFilter('all');
     db.channel('bookings-realtime')
@@ -3889,9 +3896,6 @@
     initDatePicker('ticket-filter-to', applyTicketFilters);
     initDatePicker('activity-filter-from', filterActivity);
     initDatePicker('activity-filter-to', filterActivity);
-    // Pre-load Hotel Bookings and Seller Panel in background — delayed to avoid interfering with initial dashboard render
-    setTimeout(() => { if (!_hbLoaded) loadHotelBookings(); }, 3000);
-    setTimeout(async () => { if (!customToursLoaded) { await loadCustomTours(); if (dashFilter === 'all' && document.getElementById('section-dashboard')?.classList.contains('active')) updateDashboardKPIs(); } }, 2500);
   }
 
   function applyAdminRoleUI() {
