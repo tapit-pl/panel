@@ -6384,6 +6384,8 @@
           <input type="text" value="${escapeHtml(pkg.title || '')}" placeholder="e.g. City Tour Adult" style="${dInput}${dLock}"
             onchange="pkgModalSetField(${i}, 'title', this.value)">
         </div>
+        <button onclick="pkgModalMoveRow(${i}, -1)" title="Move up" ${i === 0 ? 'disabled' : ''} style="width:34px;height:34px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(255,255,255,0.04);color:#94a3b8;border:none;cursor:pointer;${dLock}${i === 0 ? 'opacity:0.3;pointer-events:none;' : ''}" onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#f1f5f9'" onmouseout="this.style.background='rgba(255,255,255,0.04)';this.style.color='#94a3b8'"><i class="fa-solid fa-arrow-up text-xs"></i></button>
+        <button onclick="pkgModalMoveRow(${i}, 1)" title="Move down" ${i === pkgModalRows.length - 1 ? 'disabled' : ''} style="width:34px;height:34px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(255,255,255,0.04);color:#94a3b8;border:none;cursor:pointer;${dLock}${i === pkgModalRows.length - 1 ? 'opacity:0.3;pointer-events:none;' : ''}" onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#f1f5f9'" onmouseout="this.style.background='rgba(255,255,255,0.04)';this.style.color='#94a3b8'"><i class="fa-solid fa-arrow-down text-xs"></i></button>
         <button onclick="pkgModalDeleteRow(${i})" title="Delete package" style="width:34px;height:34px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(255,255,255,0.04);color:#94a3b8;border:none;cursor:pointer;${dLock}" onmouseover="this.style.background='rgba(220,38,38,0.15)';this.style.color='#f87171'" onmouseout="this.style.background='rgba(255,255,255,0.04)';this.style.color='#94a3b8'"><i class="fa-solid fa-trash text-xs"></i></button>
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
@@ -6416,6 +6418,14 @@
   function pkgModalSetField(i, key, val, isNumber) {
     if (!pkgModalRows[i]) return;
     pkgModalRows[i][key] = isNumber ? (val === '' ? null : (parseInt(val)||0)) : val;
+    renderPkgModalRows();
+  }
+
+  function pkgModalMoveRow(i, dir) {
+    if (!editingUnlocked) { showToast('Unlock editing first.', 'error'); return; }
+    const j = i + dir;
+    if (j < 0 || j >= pkgModalRows.length) return;
+    [pkgModalRows[i], pkgModalRows[j]] = [pkgModalRows[j], pkgModalRows[i]];
     renderPkgModalRows();
   }
 
@@ -6477,8 +6487,8 @@
     const origLabel = btn.textContent;
     btn.disabled = true; btn.textContent = 'Saving…';
     try {
-      let nextOrder = allCommissions.reduce((m, c) => Math.max(m, c.sort_order || 0), 0);
-      for (const row of pkgModalRows) {
+      for (let i = 0; i < pkgModalRows.length; i++) {
+        const row = pkgModalRows[i];
         if (pkgModalIsBlank(row)) continue;
         const payload = {
           title: row.title.trim(),
@@ -6487,23 +6497,24 @@
           commission_pln: row.commission_pln || 0,
           transport_price_pln: row.transport_price_pln, transport_commission_pln: row.transport_commission_pln,
           active: row.active !== false,
+          sort_order: (i + 1) * 10, // persists the order the admin arranged with the up/down buttons
         };
+        row.sort_order = payload.sort_order;
         if (row.id) {
           const { error } = await db.from('tour_commissions').update(payload).eq('id', row.id);
           if (error) throw error;
           const c = allCommissions.find(x => x.id === row.id);
           if (c) Object.assign(c, payload);
         } else {
-          nextOrder += 10;
           const { data, error } = await db.from('tour_commissions')
-            .insert({ ...payload, tour_config_id: pkgModalTourId, sort_order: nextOrder })
+            .insert({ ...payload, tour_config_id: pkgModalTourId })
             .select().single();
           if (error) throw error;
           allCommissions.push(data);
         }
       }
       const tTitle = allTourConfig.find(x => x.id === pkgModalTourId)?.title || pkgModalTourId;
-      const pkgFieldLabels = { title: 'name', price_pln: 'adult price', price_student: 'student price', price_child: 'child price', price_senior: 'senior price', price_infant: 'infant price', commission_pln: 'commission', transport_price_pln: 'transport price', transport_commission_pln: 'transport commission', active: 'active' };
+      const pkgFieldLabels = { title: 'name', price_pln: 'adult price', price_student: 'student price', price_child: 'child price', price_senior: 'senior price', price_infant: 'infant price', commission_pln: 'commission', transport_price_pln: 'transport price', transport_commission_pln: 'transport commission', active: 'active', sort_order: 'order' };
       const pkgChangeParts = [];
       for (const row of pkgModalRows) {
         if (pkgModalIsBlank(row)) continue;
