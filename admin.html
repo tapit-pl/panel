@@ -12097,7 +12097,6 @@ async function revertCpToPending(id) {
 }
 
 async function restoreCp(id) {
-  if (currentAdminRole === 'staff') { showToast('Manager or admin role required', 'error'); return; }
   const p = cpData.find(x => x.id === id);
   if (!p) return;
   if (p.stripe_refunded) { showToast('Cannot restore — Stripe refund was already issued for this package.', 'error'); return; }
@@ -12292,10 +12291,9 @@ function openCpDetail(id) {
   document.getElementById('cpd-payment').innerHTML = `<div class="flex items-center gap-2 text-sm font-medium" style="color:#cbd5e1">${payIcons[p.payment_method] || ''}<span>${payLabels[p.payment_method] || escapeHtml(p.payment_method || '—')}</span></div>`;
 
   // Actions
-  const canRevertToPending = currentAdminRole === 'admin';
   const isCancelledPkg = p.status === 'cancelled';
   const isArrivedPkg = p.status === 'arrived';
-  const canRestore = (p.status === 'cancelled' || p.status === 'refund_failed') && !p.stripe_refunded && currentAdminRole !== 'staff';
+  const canRestore = (p.status === 'cancelled' || p.status === 'refund_failed') && !p.stripe_refunded;
   const pdfBtnDetail = `<button onclick="openCpVoucher('${p.id}')" class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl transition-colors" style="background:rgba(255,255,255,0.08);color:#cbd5e1" onmouseover="this.style.background='rgba(255,255,255,0.13)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'"><i class="fa-solid fa-file-invoice"></i>Print PDF</button>`;
   const cancelArrivedBtnDetail = `<button onclick="cancelArrivedCp('${p.id}');closeCpDetail()" class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl transition-colors" style="background:rgba(239,68,68,0.15);color:#f87171" onmouseover="this.style.background='rgba(239,68,68,0.25)'" onmouseout="this.style.background='rgba(239,68,68,0.15)'"><i class="fa-solid fa-xmark"></i>Cancel</button>`;
   document.getElementById('cpd-actions').innerHTML = isArrivedPkg ? `${pdfBtnDetail}${cancelArrivedBtnDetail}` : `
@@ -12304,7 +12302,7 @@ function openCpDetail(id) {
     ${!isCancelledPkg ? `<button onclick="openCpEdit('${p.id}')" class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl transition-colors" style="background:rgba(249,115,22,0.15);color:#f97316" onmouseover="this.style.background='rgba(249,115,22,0.25)'" onmouseout="this.style.background='rgba(249,115,22,0.15)'"><i class="fa-solid fa-pen"></i>Edit</button>` : ''}
     ${!isCancelledPkg && p.status !== 'paid' && p.status !== 'confirmed' ? `<button onclick="markCpPaid('${p.id}');closeCpDetail()" class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl transition-colors" style="background:rgba(21,128,61,0.2);color:#4ade80" onmouseover="this.style.background='rgba(21,128,61,0.3)'" onmouseout="this.style.background='rgba(21,128,61,0.2)'"><i class="fa-solid fa-check"></i>Mark as paid</button>` : ''}
     ${!isCancelledPkg && p.status !== 'paid' && p.status !== 'confirmed' && p.payment_method === 'bank_transfer' && p.guest_email ? `<div style="flex-basis:100%;font-size:11px;color:#64748b;padding-top:4px"><i class="fa-solid fa-envelope mr-1" style="color:#f97316;opacity:0.8"></i>Voucher zostanie wysłany do <strong style="color:#94a3b8">${escapeHtml(p.guest_email)}</strong></div>` : ''}
-    ${canRevertToPending && (p.status === 'paid' || p.status === 'confirmed') && ['bank_transfer','cash'].includes(p.payment_method) ? `<button onclick="revertCpToPending('${p.id}')" class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl transition-colors" style="background:rgba(217,119,6,0.15);color:#fbbf24" onmouseover="this.style.background='rgba(217,119,6,0.25)'" onmouseout="this.style.background='rgba(217,119,6,0.15)'"><i class="fa-solid fa-rotate-left"></i>Revert to pending</button>` : ''}
+    ${(p.status === 'paid' || p.status === 'confirmed') && ['bank_transfer','cash'].includes(p.payment_method) ? `<button onclick="revertCpToPending('${p.id}')" class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl transition-colors" style="background:rgba(217,119,6,0.15);color:#fbbf24" onmouseover="this.style.background='rgba(217,119,6,0.25)'" onmouseout="this.style.background='rgba(217,119,6,0.15)'"><i class="fa-solid fa-rotate-left"></i>Revert to pending</button>` : ''}
     ${canRestore ? `<button onclick="restoreCp('${p.id}')" class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl transition-colors" style="background:rgba(217,119,6,0.15);color:#fbbf24" onmouseover="this.style.background='rgba(217,119,6,0.25)'" onmouseout="this.style.background='rgba(217,119,6,0.15)'"><i class="fa-solid fa-rotate-left"></i>Restore booking</button>` : ''}
     ${!isCancelledPkg && p.payment_method === 'stripe' && p.status !== 'paid' && p.status !== 'confirmed' ? `<button onclick="resendCpStripeLink('${p.id}')" class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl transition-colors" style="background:rgba(59,130,246,0.12);color:#60a5fa" onmouseover="this.style.background='rgba(59,130,246,0.22)'" onmouseout="this.style.background='rgba(59,130,246,0.12)'"><i class="fa-solid fa-paper-plane"></i>Send payment link</button>` : ''}
     ${!isCancelledPkg ? `<button onclick="cancelCpFromDetail('${p.id}','${escapeHtml(p.guest_name||'')}')" class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl transition-colors ml-auto" style="background:rgba(220,38,38,0.15);color:#f87171" onmouseover="this.style.background='rgba(220,38,38,0.25)'" onmouseout="this.style.background='rgba(220,38,38,0.15)'"><i class="fa-solid fa-xmark"></i>Cancel booking</button>` : ''}`;
