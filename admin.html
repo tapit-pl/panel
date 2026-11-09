@@ -1574,11 +1574,11 @@
               </div>
               <div>
                 <label class="block text-xs font-semibold text-gray-600 mb-1.5">Additional notes <span class="text-gray-300">(optional)</span></label>
-                <textarea id="ord-notes" rows="2" placeholder="Other guests' names, special requests…" maxlength="500" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand resize-none"></textarea>
+                <textarea id="ord-notes" rows="2" placeholder="Other guests' names, special requests…" oninput="autoGrowTextarea(this)" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand resize-none"></textarea>
               </div>
               <div>
                 <label class="block text-xs font-semibold text-gray-600 mb-1.5">Guest info <span class="text-gray-300">(shown in email &amp; voucher, optional)</span></label>
-                <textarea id="ord-guest-note" rows="2" placeholder="e.g. bring comfortable shoes, meeting point details…" maxlength="1000" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand resize-none"></textarea>
+                <textarea id="ord-guest-note" rows="2" placeholder="e.g. bring comfortable shoes, meeting point details…" oninput="autoGrowTextarea(this)" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand resize-none"></textarea>
               </div>
             </div>
 
@@ -9480,6 +9480,12 @@
     logActivity('partner_password_changed', `Password changed for partner ${p.name} (${p.email})`, p.email);
   }
 
+  function autoGrowTextarea(el) {
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = (el.scrollHeight + el.offsetHeight - el.clientHeight) + 'px';
+  }
+
   function showToast(msg, type, detail) {
     const isError = type === 'error';
     const t = document.createElement('div');
@@ -11394,6 +11400,8 @@ function openOrderBuilder() {
   cpServices = [];
   const ids = ['ord-package-name','ord-commission-rate','ord-guest-firstname','ord-guest-surname','ord-guest-email','ord-guest-phone','ord-pax','ord-meeting-point','ord-date','ord-time','ord-notes','bt-title'];
   ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  autoGrowTextarea(document.getElementById('ord-notes'));
+  autoGrowTextarea(document.getElementById('ord-guest-note'));
   document.getElementById('ord-phone-prefix').value = '+48';
   document.getElementById('phone-prefix-val').textContent = '🇵🇱 +48';
   initPhonePrefixDrop();
@@ -13694,6 +13702,7 @@ function abReset() {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
+  autoGrowTextarea(document.getElementById('ab-notes'));
   document.getElementById('ab-modal-form-section')?.classList.add('hidden');
   document.getElementById('ab-step-success')?.classList.add('hidden');
   const abSendEmailCb = document.getElementById('ab-send-email');
@@ -15801,7 +15810,7 @@ function mbViewVoucher() {
         <!-- Notes -->
         <div>
           <label class="block text-xs font-semibold text-gray-600 mb-1.5">Notes <span class="text-gray-400 font-normal">(optional)</span></label>
-          <textarea id="ab-notes" rows="2" maxlength="500" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 resize-none"></textarea>
+          <textarea id="ab-notes" rows="2" oninput="autoGrowTextarea(this)" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30 resize-none"></textarea>
         </div>
 
         <!-- Transport pickup -->
