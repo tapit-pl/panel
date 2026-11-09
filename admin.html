@@ -13653,6 +13653,7 @@ function abCloseModal() {
   modal.classList.remove('flex');
   document.body.style.overflow = '';
   document.documentElement.style.overflow = '';
+  abReset(); // every close (discard or after a completed booking) starts the next one fully blank
 }
 
 function abHasBookingData() {
@@ -13683,6 +13684,18 @@ function abReset() {
   abPayment = 'driver'; abLastBookingData = null;
   abAppliedDiscountCode = null; abAppliedDiscountPct = null;
   abPriceOverrides = {};
+  // Wipe the guest-name rows directly — abRenderGuestRows() deliberately carries values
+  // forward across re-renders within ONE booking (e.g. bumping pax shouldn't blank names
+  // already typed), so the only safe place to actually clear them is here, at the boundary
+  // between one booking and the next.
+  const guestRows = document.getElementById('ab-guest-rows');
+  if (guestRows) guestRows.innerHTML = '';
+  ['ab-email', 'ab-phone', 'ab-notes', 'ab-pickup-address'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('ab-modal-form-section')?.classList.add('hidden');
+  document.getElementById('ab-step-success')?.classList.add('hidden');
   const abSendEmailCb = document.getElementById('ab-send-email');
   if (abSendEmailCb) abSendEmailCb.checked = true;
   abUpdateSendEmailUI();
