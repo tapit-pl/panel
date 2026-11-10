@@ -13985,7 +13985,7 @@ function abRenderPriceOverrideSection() {
           oninput="abSetPriceOverride('${item.key.replace(/'/g,"\\'")}', this.value)"
           style="${pct > 0 ? 'color:#E8751A;font-weight:600' : ''}"
           class="w-16 text-sm text-right border border-gray-200 rounded-lg px-1.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-brand/30">
-        <span class="text-xs text-gray-400">PLN</span>
+        <span class="text-xs text-gray-400">PLN${item.isPackageTotal ? '' : ' /per person'}</span>
       </div>
     </div>`;
   }).join('');
