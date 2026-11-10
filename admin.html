@@ -14800,6 +14800,8 @@ function abSyncFormSummary() {
     : abCategorySelections.filter(c=>c.count>0).map(c=>`${c.count}× ${c.category.pricingCategoryTitle||c.category.title}`).join(', ');
   const summaryEl = document.getElementById('ab-category-summary');
   if (summaryEl) { summaryEl.textContent = summary; summaryEl.classList.remove('hidden'); }
+  abRenderGuestRows();
+  abRenderPriceOverrideSection();
 }
 
 function abProceedFromRates() {
@@ -14847,6 +14849,10 @@ function abSelectNonBokunPkg(i, pkg) {
   btn.disabled = false;
   btn.className = 'px-5 py-2.5 rounded-xl text-sm font-semibold transition-all text-white cursor-pointer';
   btn.style.background = '#E8751A';
+  const formSection = document.getElementById('ab-modal-form-section');
+  if (formSection && !formSection.classList.contains('hidden')) {
+    abRenderPriceOverrideSection();
+  }
 }
 
 function abProceedFromNonBokunPkg() {
@@ -15846,6 +15852,9 @@ function mbProceedToForm() {
   const extraList = document.getElementById('mb-extra-guests-list');
   if (extraCount > 0 && mbCurrentTour?.requireGuestNames) {
     const req = ' <span class="text-red-400">*</span>';
+    const oldVals = {};
+    extraList.querySelectorAll('input[id^="mb-extra-first-"], input[id^="mb-extra-last-"]')
+      .forEach(el => { oldVals[el.id] = el.value; });
     extraList.innerHTML = Array.from({length: extraCount}, (_,i) => `
       <div>
         <div class="text-xs font-semibold text-gray-500 mb-1">Guest ${i + 2}${req}</div>
@@ -15856,15 +15865,13 @@ function mbProceedToForm() {
             class="text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
         </div>
       </div>`).join('');
+    Object.entries(oldVals).forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.value = val; });
     extraContainer.classList.remove('hidden');
   } else {
     extraList.innerHTML = '';
     extraContainer.classList.add('hidden');
   }
 
-  ['mb-first','mb-last','mb-email','mb-phone'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
-  });
   document.getElementById('mb-form-error').classList.add('hidden');
   mbNavTo('mb-step-form');
 }
