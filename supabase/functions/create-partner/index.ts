@@ -46,6 +46,9 @@ Deno.serve(async (req) => {
     if (!email || !newRole || !newPassword) {
       return new Response(JSON.stringify({ error: 'Missing required fields: email, password, role' }), { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } })
     }
+    if (!firstName || !String(firstName).trim() || !lastName || !String(lastName).trim()) {
+      return new Response(JSON.stringify({ error: 'Missing required fields: firstName, lastName' }), { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } })
+    }
     const validRoles = ['admin', 'manager', 'staff']
     if (!validRoles.includes(newRole)) {
       return new Response(JSON.stringify({ error: 'Invalid role' }), { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } })

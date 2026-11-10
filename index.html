@@ -253,7 +253,7 @@ tailwind.config = {
       <button class="tab-btn whitespace-nowrap px-4 py-2.5 text-xs font-medium text-gray-600 hover:text-brand transition-colors" onclick="setTab(this, 'tab-departures')">Today's departures</button>
       <button class="tab-btn whitespace-nowrap px-4 py-2.5 text-xs font-medium text-gray-600 hover:text-brand transition-colors" onclick="setTab(this, 'tab-updates')">Updates <span id="notif-badge-tab" class="ml-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full hidden"></span></button>
       <button class="tab-btn whitespace-nowrap px-4 py-2.5 text-xs font-medium text-gray-600 hover:text-brand transition-colors" id="nav-btn-commissions" onclick="setTab(this, 'tab-faq')">Commissions</button>
-      <button class="tab-btn whitespace-nowrap px-4 py-2.5 text-xs font-medium text-gray-600 hover:text-brand transition-colors" onclick="setTab(this, 'tab-tailor')">Tailor made</button>
+      <button class="tab-btn whitespace-nowrap px-4 py-2.5 text-xs font-medium text-gray-600 hover:text-brand transition-colors" onclick="setTab(this, 'tab-tailor')">Tailor made <span id="tailor-tab-badge" class="ml-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full hidden"></span></button>
       <button class="tab-btn whitespace-nowrap px-4 py-2.5 text-xs font-medium text-gray-600 hover:text-brand transition-colors" id="nav-btn-support" onclick="setTab(this, 'tab-support')">Support <span id="support-tab-badge" class="ml-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full hidden"></span></button>
       <button class="tab-btn whitespace-nowrap px-4 py-2.5 text-xs font-medium text-gray-600 hover:text-brand transition-colors" onclick="setTab(this, 'tab-instructions')">Instructions</button>
     </div>
@@ -472,7 +472,30 @@ tailwind.config = {
           </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-sm p-6 space-y-6">
+        <!-- My Enquiries (active) -->
+        <div id="tt-list-section" class="hidden mb-5">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold text-gray-400 uppercase tracking-wide">My Enquiries</span>
+          </div>
+          <div id="tt-list" class="space-y-2"></div>
+        </div>
+
+        <!-- Resolved Enquiries -->
+        <div id="tt-resolved-section" class="hidden mb-5">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold text-gray-400 uppercase tracking-wide">Resolved</span>
+          </div>
+          <div id="tt-resolved-list" class="space-y-2"></div>
+        </div>
+
+        <!-- New enquiry toggle -->
+        <div class="mb-3 flex items-center gap-2">
+          <button onclick="ttToggleForm()" id="tt-new-btn" class="flex items-center gap-2 text-xs font-semibold text-brand hover:text-brand-dark transition-colors">
+            <i class="fa-solid fa-plus"></i> New enquiry
+          </button>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm p-6 space-y-6 hidden" id="tailor-tab-form-wrap">
 
           <!-- 1. Type of enquiry -->
           <div>
@@ -1581,6 +1604,37 @@ tailwind.config = {
   </div>
 </div>
 
+<!-- ===================== TAILOR MADE THREAD PANEL ===================== -->
+<div id="panel-tailor-thread-backdrop" class="fixed inset-0 z-40 hidden bg-black/40 modal-bg" onclick="closeTailorEnquiryPanel()"></div>
+<div id="panel-tailor-thread" class="fixed inset-y-0 right-0 z-50 hidden w-full sm:w-[420px] bg-white shadow-2xl flex-col">
+  <div class="p-5 border-b border-gray-100 flex items-start justify-between shrink-0">
+    <div class="flex-1 min-w-0">
+      <h3 class="font-bold text-dark text-sm leading-tight" id="tte-subject">Enquiry</h3>
+      <div class="flex items-center gap-2 mt-1.5">
+        <span id="tte-status-badge" class="text-xs font-semibold px-2 py-0.5 rounded-full"></span>
+        <span class="text-xs text-gray-400" id="tte-category"></span>
+      </div>
+    </div>
+    <button onclick="closeTailorEnquiryPanel()" class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-gray-200 transition-colors shrink-0 ml-3">
+      <i class="fa-solid fa-xmark text-sm"></i>
+    </button>
+  </div>
+  <div class="flex-1 overflow-y-auto p-4 space-y-3" id="tte-messages">
+    <div class="text-center text-xs text-gray-400 py-8">Loading…</div>
+  </div>
+  <div id="tte-reply-wrap" class="border-t border-gray-100 p-4 shrink-0">
+    <textarea id="tte-reply-input" rows="3" placeholder="Write your reply…" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand resize-none mb-2"></textarea>
+    <div class="flex items-center justify-end">
+      <button onclick="sendTailorReply()" id="tte-reply-btn" class="flex items-center gap-2 bg-brand hover:bg-brand-dark text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors">
+        <i class="fa-solid fa-paper-plane text-xs"></i> Send
+      </button>
+    </div>
+  </div>
+  <div id="tte-closed-notice" class="hidden border-t border-gray-100 p-4 text-center text-xs text-gray-400 shrink-0">
+    This enquiry has been <strong>resolved</strong>. To follow up, please send a new enquiry.
+  </div>
+</div>
+
 <!-- ===================== BOOKING FORM MODAL ===================== -->
 <!-- Discard booking confirmation -->
 <div id="modal-discard" class="fixed inset-0 z-[70] hidden modal-bg bg-black/60 items-center justify-center p-4" onclick="if(event.target===this)keepEditing()">
@@ -2053,6 +2107,7 @@ tailwind.config = {
 
     loadPartnerBanner().catch(e => console.warn('loadPartnerBanner:', e));
     loadPartnerTickets().catch(e => console.warn('loadPartnerTickets:', e));
+    loadPartnerTailorEnquiries().catch(e => console.warn('loadPartnerTailorEnquiries:', e));
 
     db.channel('partner-support-watch')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages' }, async (payload) => {
@@ -2107,6 +2162,48 @@ tailwind.config = {
       })
       .subscribe();
     setInterval(() => loadPartnerTickets().catch(() => {}), 15000);
+
+    db.channel('partner-tailor-watch')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'tailor_messages' }, async (payload) => {
+        const msg = payload?.new;
+        if (!msg || msg.sender_type !== 'admin') return;
+        const { data: enquiry } = await db.from('tailor_enquiries')
+          .select('id, client_name').eq('id', msg.enquiry_id).eq('partner_email', currentPartner.email).maybeSingle();
+        if (!enquiry) return;
+        showPartnerToast('Thousand Miles replied to your tailor made enquiry: ' + (enquiry.client_name || ''));
+        await loadPartnerTailorEnquiries();
+        if (openTailorEnquiryId === msg.enquiry_id) {
+          await refreshTailorThread(msg.enquiry_id);
+          const now = new Date().toISOString();
+          await db.from('tailor_reads').upsert(
+            { enquiry_id: msg.enquiry_id, user_email: currentPartner.email, last_read_at: now },
+            { onConflict: 'enquiry_id,user_email' }
+          );
+          partnerTailorReadMap[msg.enquiry_id] = now;
+          showTailorHelpBadge(countUnreadTailorEnquiries());
+          renderPartnerTailorEnquiries();
+        }
+      })
+      .subscribe();
+
+    db.channel('partner-tailor-status-watch')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tailor_enquiries', filter: `partner_email=eq.${currentPartner.email}` }, async () => {
+        await loadPartnerTailorEnquiries();
+        if (openTailorEnquiryId) {
+          const e = partnerTailorEnquiries.find(x => x.id === openTailorEnquiryId);
+          if (e) {
+            const statusLabel = { open: 'Open', in_progress: 'In Progress', resolved: 'Resolved' };
+            const statusColor = { open: 'background:#FEF3C7;color:#92400E', in_progress: 'background:#DBEAFE;color:#1E40AF', resolved: 'background:#D1FAE5;color:#065F46' };
+            const badge = document.getElementById('tte-status-badge');
+            if (badge) { badge.textContent = statusLabel[e.status] || e.status; badge.style.cssText = statusColor[e.status] || statusColor.open; }
+            const isClosed = e.status === 'resolved';
+            document.getElementById('tte-reply-wrap')?.classList.toggle('hidden', isClosed);
+            document.getElementById('tte-closed-notice')?.classList.toggle('hidden', !isClosed);
+          }
+        }
+      })
+      .subscribe();
+    setInterval(() => loadPartnerTailorEnquiries().catch(() => {}), 15000);
 
     goTo('screen-dashboard');
   }
@@ -5437,6 +5534,9 @@ tailwind.config = {
       logPartnerActivity('tailor_enquiry_submitted', `${clientName.value.trim()} · ${enquiryType} · ${pax.value} pax`).catch(() => {});
       document.getElementById('tailor-confirm').classList.remove('hidden');
       document.getElementById('tailor-confirm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      loadPartnerTailorEnquiries().catch(() => {});
+      document.getElementById('tailor-tab-form-wrap')?.classList.add('hidden');
+      document.getElementById('tt-new-btn').innerHTML = '<i class="fa-solid fa-plus"></i> New enquiry';
     } catch(e) {
       console.error('[tailor submit]', e);
       errEl.textContent = 'Something went wrong. Please try again.';
@@ -6006,6 +6106,181 @@ tailwind.config = {
     btn?.remove();
     list.insertAdjacentHTML('beforeend', list._hiddenCards);
     list._hiddenCards = '';
+  }
+
+  // ---- Tailor made: partner list + thread ----
+  let partnerTailorEnquiries = [];
+  let openTailorEnquiryId = null;
+  let partnerTailorReadMap = {};
+
+  function countUnreadTailorEnquiries() {
+    return partnerTailorEnquiries.filter(e => {
+      const adminMsgs = (e.tailor_messages || []).filter(m => m.sender_type === 'admin');
+      if (!adminMsgs.length) return false;
+      const latestAt = Math.max(...adminMsgs.map(m => new Date(m.created_at).getTime()));
+      const readAt   = partnerTailorReadMap[e.id] ? new Date(partnerTailorReadMap[e.id]).getTime() : 0;
+      return latestAt > readAt;
+    }).length;
+  }
+
+  function showTailorHelpBadge(count) {
+    const badge = document.getElementById('tailor-tab-badge');
+    if (!badge) return;
+    if (count > 0) { badge.textContent = count; badge.classList.remove('hidden'); }
+    else { badge.classList.add('hidden'); }
+  }
+
+  async function loadPartnerTailorEnquiries() {
+    if (!currentPartner?.email) return;
+    const { data } = await db.from('tailor_enquiries')
+      .select('id, client_name, enquiry_type, status, created_at, updated_at, tailor_messages(id, sender_type, created_at)')
+      .eq('partner_email', currentPartner.email)
+      .order('updated_at', { ascending: false });
+    partnerTailorEnquiries = data || [];
+
+    const ids = partnerTailorEnquiries.map(e => e.id);
+    if (ids.length > 0) {
+      const { data: reads } = await db.from('tailor_reads').select('enquiry_id, last_read_at').eq('user_email', currentPartner.email).in('enquiry_id', ids);
+      partnerTailorReadMap = {};
+      (reads || []).forEach(r => { partnerTailorReadMap[r.enquiry_id] = r.last_read_at; });
+    }
+
+    showTailorHelpBadge(countUnreadTailorEnquiries());
+    renderPartnerTailorEnquiries();
+    const wrap = document.getElementById('tailor-tab-form-wrap');
+    if (wrap && partnerTailorEnquiries.length === 0) wrap.classList.remove('hidden');
+  }
+
+  function renderPartnerTailorEnquiries() {
+    const section = document.getElementById('tt-list-section');
+    const list = document.getElementById('tt-list');
+    const resolvedSection = document.getElementById('tt-resolved-section');
+    const resolvedList = document.getElementById('tt-resolved-list');
+    const statusLabel = { open: 'Open', in_progress: 'In Progress', resolved: 'Resolved' };
+    const statusColor = { open: 'background:#FEF3C7;color:#92400E', in_progress: 'background:#DBEAFE;color:#1E40AF', resolved: 'background:#D1FAE5;color:#065F46' };
+    const TYPE_LABELS = { group:'Group Tour', corporate:'Corporate Event', bachelor:'Bachelor / Bachelorette', teambuilding:'Team Building', private:'Private Tour', other:'Other' };
+
+    const active = partnerTailorEnquiries.filter(e => e.status === 'open' || e.status === 'in_progress');
+    const resolved = partnerTailorEnquiries.filter(e => e.status === 'resolved');
+
+    const buildCard = (e) => {
+      const msgs = e.tailor_messages || [];
+      const adminMsgs = msgs.filter(m => m.sender_type === 'admin');
+      const sc = statusColor[e.status] || statusColor.open;
+      const sl = statusLabel[e.status] || e.status;
+      const date = new Date(e.updated_at || e.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+      const readAt = partnerTailorReadMap[e.id] ? new Date(partnerTailorReadMap[e.id]).getTime() : 0;
+      const latestAdminAt = adminMsgs.length ? Math.max(...adminMsgs.map(m => new Date(m.created_at).getTime())) : 0;
+      const isUnread = latestAdminAt > readAt;
+      const newAdminMsgs = adminMsgs.filter(m => new Date(m.created_at).getTime() > readAt);
+      return `<div onclick="openTailorEnquiryPanel('${e.id}')" class="bg-white rounded-xl shadow-sm p-4 flex items-start gap-3 cursor-pointer hover:shadow-md transition-shadow ${isUnread ? '' : 'opacity-50'}">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background:#FFF3EA"><i class="fa-solid fa-wand-magic-sparkles text-brand text-xs"></i></div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 flex-wrap"><span class="text-sm font-semibold text-dark truncate">${escapeHtml(e.client_name)}</span></div>
+          <div class="flex items-center gap-2 mt-1 flex-wrap">
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-full" style="${sc}">${sl}</span>
+            <span class="text-xs text-gray-400">${escapeHtml(TYPE_LABELS[e.enquiry_type] || e.enquiry_type || '')}</span>
+            <span class="text-xs text-gray-300">·</span><span class="text-xs text-gray-400">${date}</span>
+            ${newAdminMsgs.length > 0 ? `<span class="text-xs text-brand font-medium">${newAdminMsgs.length} new repl${newAdminMsgs.length > 1 ? 'ies' : 'y'}</span>` : ''}
+          </div>
+        </div>
+        <i class="fa-solid fa-chevron-right text-gray-300 text-xs mt-1 shrink-0"></i>
+      </div>`;
+    };
+
+    if (active.length) { section.classList.remove('hidden'); list.innerHTML = active.map(buildCard).join(''); }
+    else section.classList.add('hidden');
+
+    if (resolved.length) { resolvedSection.classList.remove('hidden'); resolvedList.innerHTML = resolved.map(buildCard).join(''); }
+    else resolvedSection.classList.add('hidden');
+  }
+
+  async function openTailorEnquiryPanel(id) {
+    openTailorEnquiryId = id;
+    const e = partnerTailorEnquiries.find(x => x.id === id);
+    if (!e) return;
+    const statusLabel = { open: 'Open', in_progress: 'In Progress', resolved: 'Resolved' };
+    const statusColor = { open: 'background:#FEF3C7;color:#92400E', in_progress: 'background:#DBEAFE;color:#1E40AF', resolved: 'background:#D1FAE5;color:#065F46' };
+    document.getElementById('tte-subject').textContent = e.client_name;
+    const badge = document.getElementById('tte-status-badge');
+    badge.textContent = statusLabel[e.status] || e.status;
+    badge.style.cssText = statusColor[e.status] || statusColor.open;
+    document.getElementById('tte-category').textContent = e.enquiry_type || '';
+
+    const isClosed = e.status === 'resolved';
+    document.getElementById('tte-reply-wrap').classList.toggle('hidden', isClosed);
+    document.getElementById('tte-closed-notice').classList.toggle('hidden', !isClosed);
+    document.getElementById('tte-reply-input').value = '';
+
+    document.getElementById('panel-tailor-thread').classList.remove('hidden');
+    document.getElementById('panel-tailor-thread').classList.add('flex');
+    document.getElementById('panel-tailor-thread-backdrop').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+
+    await refreshTailorThread(id);
+
+    const now = new Date().toISOString();
+    await db.from('tailor_reads').upsert({ enquiry_id: id, user_email: currentPartner.email, last_read_at: now }, { onConflict: 'enquiry_id,user_email' });
+    partnerTailorReadMap[id] = now;
+    showTailorHelpBadge(countUnreadTailorEnquiries());
+    renderPartnerTailorEnquiries();
+  }
+
+  async function refreshTailorThread(id) {
+    const msgsEl = document.getElementById('tte-messages');
+    const { data: msgs } = await db.from('tailor_messages').select('*').eq('enquiry_id', id).order('created_at', { ascending: true });
+    if (!msgs || msgs.length === 0) { msgsEl.innerHTML = '<div class="text-center text-xs text-gray-400 py-8">No messages yet.</div>'; return; }
+    msgsEl.innerHTML = msgs.map(m => {
+      const isAdmin = m.sender_type === 'admin';
+      const time = new Date(m.created_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+      const name = isAdmin ? (m.sender_name || 'Thousand Miles') : (m.sender_name || 'You');
+      const bubbleBg = isAdmin ? 'background:#FFF3EA;border:1px solid rgba(232,117,26,0.2)' : 'background:#F8FAFC;border:1px solid #e2e8f0';
+      return `<div class="flex ${isAdmin ? 'justify-end' : 'justify-start'}">
+        <div style="max-width:85%;${bubbleBg};border-radius:14px;padding:10px 14px">
+          <div class="text-xs font-semibold mb-1" style="${isAdmin ? 'color:#E8751A' : 'color:#1a2332'}">${escapeHtml(name)}</div>
+          <div class="text-sm text-dark whitespace-pre-wrap leading-relaxed">${escapeHtml(m.message || '')}</div>
+          <div class="text-xs text-gray-400 mt-1.5 text-right">${time}</div>
+        </div>
+      </div>`;
+    }).join('');
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+  }
+
+  async function sendTailorReply() {
+    if (!openTailorEnquiryId) return;
+    const input = document.getElementById('tte-reply-input');
+    const msg = (input?.value || '').trim();
+    if (!msg) return;
+    const btn = document.getElementById('tte-reply-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i>';
+    try {
+      await db.from('tailor_messages').insert({
+        enquiry_id: openTailorEnquiryId, sender_type: 'partner',
+        sender_email: currentPartner?.email || '', sender_name: currentPartner?.name || '', message: msg,
+      });
+      input.value = '';
+      await refreshTailorThread(openTailorEnquiryId);
+      await loadPartnerTailorEnquiries();
+    } catch(e) { console.error('sendTailorReply', e); }
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-paper-plane text-xs"></i> Send';
+  }
+
+  function closeTailorEnquiryPanel() {
+    document.getElementById('panel-tailor-thread').classList.add('hidden');
+    document.getElementById('panel-tailor-thread').classList.remove('flex');
+    document.getElementById('panel-tailor-thread-backdrop').classList.add('hidden');
+    document.body.style.overflow = '';
+    openTailorEnquiryId = null;
+  }
+
+  function ttToggleForm() {
+    const wrap = document.getElementById('tailor-tab-form-wrap');
+    const btn  = document.getElementById('tt-new-btn');
+    const hidden = wrap.classList.contains('hidden');
+    wrap.classList.toggle('hidden', !hidden);
+    btn.innerHTML = hidden ? '<i class="fa-solid fa-minus"></i> Cancel' : '<i class="fa-solid fa-plus"></i> New enquiry';
   }
 
   // ---- partner attach ----

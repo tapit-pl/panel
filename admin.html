@@ -1409,6 +1409,15 @@
               <p class="text-xs text-gray-400 mt-0.5">Personalised tour enquiries submitted by partners</p>
             </div>
           </div>
+          <div class="flex gap-2 mb-4 flex-wrap items-center">
+            <button onclick="filterTailor('active')" id="tailorfilter-active" class="ticket-filter-btn text-xs px-3 py-1.5 rounded-lg font-semibold border border-brand bg-brand text-white transition-colors">Active</button>
+            <button onclick="filterTailor('open')" id="tailorfilter-open" class="ticket-filter-btn text-xs px-3 py-1.5 rounded-lg font-semibold border border-gray-200 bg-white text-gray-500 transition-colors">Open</button>
+            <button onclick="filterTailor('in_progress')" id="tailorfilter-in_progress" class="ticket-filter-btn text-xs px-3 py-1.5 rounded-lg font-semibold border border-gray-200 bg-white text-gray-500 transition-colors">In Progress</button>
+            <button onclick="filterTailor('resolved')" id="tailorfilter-resolved" class="ticket-filter-btn text-xs px-3 py-1.5 rounded-lg font-semibold border border-gray-200 bg-white text-gray-500 transition-colors">Resolved</button>
+            <button type="button" onclick="toggleTailorMine()" id="tailor-mine-toggle" class="text-xs px-3 py-1.5 rounded-lg font-semibold border border-gray-200 bg-white text-gray-500 transition-colors ml-2">
+              <i class="fa-solid fa-user mr-1"></i>My enquiries
+            </button>
+          </div>
           <div class="bg-white rounded-xl shadow-sm overflow-hidden">
             <table class="w-full text-xs">
               <thead>
@@ -1420,6 +1429,8 @@
                   <th class="text-left px-4 py-3 text-gray-400 font-semibold">Received</th>
                   <th class="text-center px-4 py-3 text-gray-400 font-semibold">Priority</th>
                   <th class="text-center px-4 py-3 text-gray-400 font-semibold">Pax</th>
+                  <th class="text-center px-4 py-3 text-gray-400 font-semibold">Status</th>
+                  <th class="text-left px-4 py-3 text-gray-400 font-semibold">Assigned to</th>
                   <th class="px-4 py-3"></th>
                 </tr>
               </thead>
@@ -1738,12 +1749,12 @@
                   class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30">
               </div>
               <div>
-                <label class="block text-xs font-semibold text-gray-600 mb-1.5">First name</label>
+                <label class="block text-xs font-semibold text-gray-600 mb-1.5">First name <span class="text-red-400">*</span></label>
                 <input type="text" id="add-staff-firstname" placeholder="First name"
                   class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30">
               </div>
               <div>
-                <label class="block text-xs font-semibold text-gray-600 mb-1.5">Last name</label>
+                <label class="block text-xs font-semibold text-gray-600 mb-1.5">Last name <span class="text-red-400">*</span></label>
                 <input type="text" id="add-staff-lastname" placeholder="Last name"
                   class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand/30">
               </div>
@@ -1847,6 +1858,9 @@
             <button onclick="filterTickets('open')" id="tfilter-open" class="ticket-filter-btn text-xs px-3 py-1.5 rounded-lg font-semibold border border-gray-200 bg-white text-gray-500 transition-colors">Open</button>
             <button onclick="filterTickets('in_progress')" id="tfilter-in_progress" class="ticket-filter-btn text-xs px-3 py-1.5 rounded-lg font-semibold border border-gray-200 bg-white text-gray-500 transition-colors">In Progress</button>
             <button onclick="filterTickets('resolved')" id="tfilter-resolved" class="ticket-filter-btn text-xs px-3 py-1.5 rounded-lg font-semibold border border-gray-200 bg-white text-gray-500 transition-colors">Resolved</button>
+            <button type="button" onclick="toggleTicketMine()" id="ticket-mine-toggle" class="text-xs px-3 py-1.5 rounded-lg font-semibold border border-gray-200 bg-white text-gray-500 transition-colors ml-2">
+              <i class="fa-solid fa-user mr-1"></i>My tickets
+            </button>
           </div>
 
           <div class="bg-white rounded-2xl shadow-sm p-4 mb-4">
@@ -1893,6 +1907,7 @@
                   <th class="text-left px-4 py-3 text-gray-400 font-semibold">Received</th>
                   <th class="text-center px-4 py-3 text-gray-400 font-semibold">Priority</th>
                   <th class="text-center px-4 py-3 text-gray-400 font-semibold">Status</th>
+                  <th class="text-left px-4 py-3 text-gray-400 font-semibold">Assigned to</th>
                   <th class="px-4 py-3"></th>
                 </tr>
               </thead>
@@ -2394,6 +2409,22 @@
       <button onclick="closeTailorDetail()" class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-gray-100 text-gray-400"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+      <div class="flex items-center gap-3 flex-wrap">
+        <div class="flex-1 min-w-[140px]">
+          <div class="text-xs font-semibold uppercase tracking-wide mb-1" style="color:#64748b">Status</div>
+          <div class="cdrop" style="width:100%">
+            <select id="tmd-status-select" class="fsel" onchange="saveTailorStatus()">
+              <option value="open">Open</option>
+              <option value="in_progress">In Progress</option>
+              <option value="resolved">Resolved</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex-1 min-w-[140px]">
+          <div class="text-xs font-semibold uppercase tracking-wide mb-1" style="color:#64748b">Assigned to</div>
+          <div class="cdrop" style="width:100%"><select id="tmd-assigned-select" class="fsel" onchange="saveTailorAssignment()"></select></div>
+        </div>
+      </div>
       <div class="grid grid-cols-2 gap-3">
         <div>
           <div class="text-xs font-semibold uppercase tracking-wide mb-1" style="color:#64748b">Group Name</div>
@@ -2426,6 +2457,29 @@
         <div class="text-xs font-semibold uppercase tracking-wide mb-1.5" style="color:#64748b">Message</div>
         <div id="tmd-message" class="text-sm leading-relaxed" style="color:#cbd5e1;white-space:pre-wrap"></div>
       </div>
+      <div>
+        <div class="text-xs font-semibold uppercase tracking-wide mb-1.5" style="color:#64748b">Messages</div>
+        <div id="tmd-messages" class="space-y-3 max-h-56 overflow-y-auto"></div>
+      </div>
+      <div>
+        <div class="text-xs font-semibold uppercase tracking-wide mb-1.5" style="color:#64748b">Activity</div>
+        <div id="tmd-timeline" class="space-y-1.5"></div>
+      </div>
+    </div>
+    <div class="px-4 py-3 flex-shrink-0" style="border-top:1px solid rgba(255,255,255,0.07)">
+      <div id="tmd-reply-wrap">
+        <textarea id="tmd-reply" rows="3" class="w-full text-sm rounded-xl px-3 py-2.5 mb-2 resize-none" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#e2e8f0" placeholder="Type your reply to the partner…"></textarea>
+        <div class="flex gap-2 mb-2">
+          <button onclick="saveTailorReply()" class="flex-1 btn-ol text-sm font-semibold py-2.5 rounded-xl transition-colors">Send</button>
+          <button onclick="closeTailorDetail()" class="px-5 py-2.5 border border-gray-200 text-gray-300 text-sm font-semibold rounded-xl transition-colors">Close</button>
+        </div>
+        <button onclick="saveTailorReplyAndResolve()" class="w-full bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2">
+          <i class="fa-solid fa-circle-check text-xs"></i> Send & resolve
+        </button>
+      </div>
+      <div id="tmd-reply-blocked" class="hidden text-xs text-gray-400 text-center py-2">
+        Set status to <strong>In Progress</strong> to reply.
+      </div>
     </div>
   </div>
 </div>
@@ -2454,6 +2508,11 @@
           <option value="resolved">Resolved</option>
         </select>
       </div>
+    </div>
+    <!-- Assigned to -->
+    <div class="px-6 py-2.5 border-b border-gray-100 flex items-center gap-3 shrink-0">
+      <span class="text-xs text-gray-400 shrink-0">Assigned to</span>
+      <div class="cdrop" style="flex:1;min-width:160px"><select id="td-assigned-select" class="fsel" onchange="saveTicketAssignment()"></select></div>
     </div>
     <!-- Category / Priority strip -->
     <div class="px-6 py-2.5 border-b border-gray-100 flex items-center gap-2 flex-wrap shrink-0" id="td-ticket-chips">
@@ -3779,6 +3838,8 @@
     ['settle-hotel','settle-month'].forEach(id => { const s = document.getElementById(id); if (s) initCustomDropdown(s); });
     const { data: _tc } = await db.from('tour_config').select('title, email_blocks');
     if (_tc) allTourConfig = _tc;
+    // Lista pracowników musi być gotowa przed pierwszym renderem kolumny "Assigned to"
+    await loadStaffUsers().catch(e => console.warn('loadStaffUsers failed:', e));
     // Tickets nie zależą od bookings — ładuj równolegle (błędy nie blokują dashboard)
     const ticketsInit = Promise.all([
       loadTickets().catch(e => console.warn('loadTickets failed:', e)),
@@ -3875,6 +3936,22 @@
       })
       .subscribe();
     setInterval(() => loadTickets().catch(() => {}), 20000);
+
+    // Real-time: odśwież Tailor made przy nowym/zmienionym zgłoszeniu lub wiadomości
+    db.channel('tailor-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tailor_enquiries' }, async () => { await loadTailorEnquiries(); })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'tailor_messages' }, async (payload) => {
+        const msg = payload?.new;
+        if (msg?.enquiry_id) {
+          if (currentTailorId === msg.enquiry_id) {
+            const { data: msgs } = await db.from('tailor_messages').select('*').eq('enquiry_id', msg.enquiry_id).order('created_at', { ascending: true });
+            renderTailorMessageThread(msgs || []);
+          }
+          await loadTailorEnquiries();
+        }
+      })
+      .subscribe();
+    setInterval(() => loadTailorEnquiries().catch(() => {}), 20000);
     await ticketsInit;
     await loadNotifications().catch(e => console.warn('loadNotifications:', e));
     await loadActivityLog().catch(e => console.warn('loadActivityLog:', e));
@@ -4563,6 +4640,11 @@
     partner_activated:  { label: 'Partner activated',  color: 'text-green-600',  icon: 'fa-check' },
     ticket_replied:     { label: 'Ticket replied',     color: 'text-purple-600', icon: 'fa-reply' },
     ticket_resolved:    { label: 'Ticket resolved',    color: 'text-green-600',  icon: 'fa-circle-check' },
+    ticket_assigned:    { label: 'Ticket assigned',    color: 'text-blue-600',   icon: 'fa-user-check' },
+    tailor_assigned:    { label: 'Enquiry assigned',   color: 'text-blue-600',   icon: 'fa-user-check' },
+    tailor_replied:     { label: 'Enquiry replied',    color: 'text-purple-600', icon: 'fa-reply' },
+    tailor_resolved:    { label: 'Enquiry resolved',   color: 'text-green-600',  icon: 'fa-circle-check' },
+    tailor_updated:     { label: 'Enquiry updated',    color: 'text-blue-600',   icon: 'fa-pen' },
     print_status:       { label: 'Print order updated',color: 'text-orange-500', icon: 'fa-print' },
     notification_sent:  { label: 'Notification sent',  color: 'text-brand',      icon: 'fa-bell' },
     login:              { label: 'Logged in',          color: 'text-gray-500',   icon: 'fa-right-to-bracket' },
@@ -8216,7 +8298,7 @@
     // update it unconditionally, but skip the (potentially large) DOM rebuild below
     // when the Support tab isn't on screen. Avoids a full table rebuild every 20s /
     // on every realtime event while the admin is elsewhere in the panel.
-    const unreadCount = allTickets.filter(t => t.unread).length;
+    const unreadCount = allTickets.filter(t => t.unread || (!t.assigned_to && t.status !== 'resolved')).length;
     const sidebarBadge = document.getElementById('sidebar-support-badge');
     if (sidebarBadge) { sidebarBadge.classList.toggle('hidden', unreadCount === 0); }
     if (!document.getElementById('section-support')?.classList.contains('active')) return;
@@ -8240,14 +8322,23 @@
           <td class="px-4 py-3 text-gray-400 whitespace-nowrap">${escapeHtml(t.received)}</td>
           <td class="px-4 py-3 text-center"><span class="text-xs font-semibold px-2 py-0.5 rounded-full ${pClass}">${PLABELS[t.priority]||t.priority}</span></td>
           <td class="px-4 py-3 text-center"><span class="text-xs font-semibold px-2 py-0.5 rounded-full ${sClass}">${SLABELS[t.status]||t.status}</span></td>
+          <td class="px-4 py-3 text-gray-600">${escapeHtml(staffDisplayName(t.assigned_to))}</td>
           <td class="px-4 py-3 text-right"><button class="text-gray-300 hover:text-brand text-xs"><i class="fa-solid fa-arrow-right"></i></button></td>
         </tr>`);
     });
   }
 
+  function toggleTicketMine() {
+    ticketOnlyMine = !ticketOnlyMine;
+    const btn = document.getElementById('ticket-mine-toggle');
+    btn.classList.toggle('bg-brand', ticketOnlyMine); btn.classList.toggle('text-white', ticketOnlyMine); btn.classList.toggle('border-brand', ticketOnlyMine);
+    btn.classList.toggle('bg-white', !ticketOnlyMine); btn.classList.toggle('text-gray-500', !ticketOnlyMine); btn.classList.toggle('border-gray-200', !ticketOnlyMine);
+    applyTicketFilters();
+  }
+
   function filterTickets(f) {
     currentTicketFilter = f;
-    document.querySelectorAll('.ticket-filter-btn').forEach(b => {
+    document.querySelectorAll('#section-support .ticket-filter-btn').forEach(b => {
       const active = b.id === 'tfilter-' + f;
       b.classList.toggle('bg-brand', active); b.classList.toggle('text-white', active); b.classList.toggle('border-brand', active);
       b.classList.toggle('bg-white', !active); b.classList.toggle('text-gray-500', !active); b.classList.toggle('border-gray-200', !active);
@@ -8270,6 +8361,7 @@
     if (partnerVals.length)  filtered = filtered.filter(t => partnerVals.includes(t.partner));
     if (fromFilter)      filtered = filtered.filter(t => t.createdAtRaw >= fromFilter);
     if (toFilter)        filtered = filtered.filter(t => (t.createdAtRaw || '').slice(0,10) <= toFilter);
+    if (ticketOnlyMine)  filtered = filtered.filter(t => t.assigned_to === currentAdminEmail);
     if (search) filtered = filtered.filter(t =>
       (t.partner || '').toLowerCase().includes(search) ||
       (t.subject || '').toLowerCase().includes(search) ||
@@ -8322,6 +8414,7 @@
         category:      t.category,
         priority:      t.priority,
         status:        t.status,
+        assigned_to:   t.assigned_to || null,
         msgCount:      msgs.length,
         received:      new Date(t.created_at).toLocaleDateString('en',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}),
         updated:       new Date(t.updated_at).toLocaleDateString('en',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}),
@@ -8565,6 +8658,7 @@
     tdStatusSel.value = t.status;
     const tdCdropVal = tdStatusSel.closest('.cdrop')?.querySelector('.cdrop-val');
     if (tdCdropVal) tdCdropVal.textContent = tdStatusSel.options[tdStatusSel.selectedIndex]?.text || '';
+    populateAssigneeSelect('td-assigned-select', t.assigned_to || currentAdminEmail || '');
     updateTicketReplyVisibility(t.status);
     document.getElementById('td-reply').value         = '';
     tdClearAttachments();
@@ -8646,6 +8740,27 @@
     await logActivity(action, `Ticket "${t?.subject}" → ${status}`, editingTicketId);
     applyTicketFilters();
     showToast('Status updated');
+  }
+
+  // Przypisanie → zawsze wymusza in_progress (niezależnie od dzisiejszej ręcznej kontroli statusu
+  // w Supporcie). Odznaczenie (Unassigned) NIE cofa statusu. Reassign zawsze możliwy, niezależnie
+  // od aktualnego statusu ticketu (nawet już Resolved).
+  async function saveTicketAssignment() {
+    if (!editingTicketId) return;
+    const sel = document.getElementById('td-assigned-select');
+    const assignedTo = sel.value || null;
+    const t = allTickets.find(x => x.id === editingTicketId);
+    const newStatus = assignedTo ? 'in_progress' : (t?.status || 'open');
+    const { error } = await db.from('support_tickets').update({ assigned_to: assignedTo, status: newStatus }).eq('id', editingTicketId);
+    if (error) { showToast('Error updating assignment', 'error'); return; }
+    if (t) { t.assigned_to = assignedTo; t.status = newStatus; }
+    const tdStatusSel = document.getElementById('td-status-select');
+    tdStatusSel.value = newStatus;
+    syncFselLabel('td-status-select');
+    updateTicketReplyVisibility(newStatus);
+    await logActivity('ticket_assigned', `Ticket "${t?.subject}" → assigned to ${assignedTo ? staffDisplayName(assignedTo) : 'Unassigned'}`, editingTicketId);
+    applyTicketFilters();
+    showToast('Assignment updated.');
   }
 
   async function saveTicket() {
@@ -8777,6 +8892,33 @@
 
   const allTailorEnquiries = [];
   let currentTailorId = null;
+  let ticketOnlyMine = false;
+  let tailorOnlyMine = false;
+  let currentTailorFilter = 'active';
+
+  // Współdzielone przez Tailor made i Support
+  function staffDisplayName(email) {
+    if (!email) return '—';
+    const u = allStaffUsers.find(x => x.email === email);
+    return u ? ([u.first_name, u.last_name].filter(Boolean).join(' ') || u.email) : email;
+  }
+
+  // Lista aktywnych pracowników (wszystkie role), plus bieżący przypisany na końcu
+  // oznaczony "(inactive)" jeśli deaktywowany — tak zostaje widoczny mimo ukrycia z wyboru.
+  function populateAssigneeSelect(selectId, currentValue) {
+    const sel = document.getElementById(selectId);
+    if (!sel) return;
+    const active = allStaffUsers.filter(u => u.active !== false);
+    const options = active.map(u => ({ value: u.email, label: staffDisplayName(u.email) }));
+    if (currentValue && !active.find(u => u.email === currentValue)) {
+      options.push({ value: currentValue, label: staffDisplayName(currentValue) + ' (inactive)' });
+    }
+    options.sort((a, b) => a.label.localeCompare(b.label));
+    sel.innerHTML = '<option value="">Unassigned</option>' +
+      options.map(o => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.label)}</option>`).join('');
+    sel.value = currentValue || '';
+    syncFselLabel(selectId);
+  }
 
   const TAILOR_TYPE_LABELS = {
     group: 'Group Tour', corporate: 'Corporate Event', bachelor: 'Bachelor / Bachelorette',
@@ -8786,7 +8928,7 @@
   const TAILOR_URGENCY_CLASS  = { '24h': 'bg-red-50 text-red-600', '3days': 'bg-orange-50 text-orange-600', 'relaxed': 'bg-green-50 text-green-700' };
 
   async function loadTailorEnquiries() {
-    const { data, error } = await db.from('tailor_enquiries').select('*').order('created_at', { ascending: false });
+    const { data, error } = await db.from('tailor_enquiries').select('*').order('updated_at', { ascending: false });
     if (error) { console.error('[tailor]', error); return; }
 
     const myEmail = currentAdminEmail || '';
@@ -8812,42 +8954,77 @@
         budget:       e.budget || '',
         urgency:      e.urgency || 'relaxed',
         message:      e.message || '',
+        status:       e.status || 'open',
+        assigned_to:  e.assigned_to || null,
         received:     new Date(e.created_at).toLocaleDateString('en',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}),
         unread:       readAt < createdAt,
       });
     });
-    renderTailorEnquiries();
+    applyTailorFilters();
   }
 
-  function renderTailorEnquiries() {
+  function filterTailor(f) {
+    currentTailorFilter = f;
+    document.querySelectorAll('#section-tailormade .ticket-filter-btn').forEach(b => {
+      const active = b.id === 'tailorfilter-' + f;
+      b.classList.toggle('bg-brand', active); b.classList.toggle('text-white', active); b.classList.toggle('border-brand', active);
+      b.classList.toggle('bg-white', !active); b.classList.toggle('text-gray-500', !active); b.classList.toggle('border-gray-200', !active);
+    });
+    applyTailorFilters();
+  }
+
+  function toggleTailorMine() {
+    tailorOnlyMine = !tailorOnlyMine;
+    const btn = document.getElementById('tailor-mine-toggle');
+    btn.classList.toggle('bg-brand', tailorOnlyMine); btn.classList.toggle('text-white', tailorOnlyMine); btn.classList.toggle('border-brand', tailorOnlyMine);
+    btn.classList.toggle('bg-white', !tailorOnlyMine); btn.classList.toggle('text-gray-500', !tailorOnlyMine); btn.classList.toggle('border-gray-200', !tailorOnlyMine);
+    applyTailorFilters();
+  }
+
+  function applyTailorFilters() {
+    let filtered = currentTailorFilter === 'active'
+      ? allTailorEnquiries.filter(e => e.status === 'open' || e.status === 'in_progress')
+      : allTailorEnquiries.filter(e => e.status === currentTailorFilter);
+    if (tailorOnlyMine) filtered = filtered.filter(e => e.assigned_to === currentAdminEmail);
+    renderTailorEnquiries(filtered);
+  }
+
+  function renderTailorEnquiries(rows) {
+    // Badge must stay accurate regardless of which tab is visible — update it unconditionally,
+    // but skip the (potentially large) DOM rebuild when the Tailor made tab isn't on screen.
+    const needsAttention = allTailorEnquiries.filter(e => e.unread || (!e.assigned_to && e.status !== 'resolved')).length;
+    const badge = document.getElementById('sidebar-tailormade-badge');
+    if (badge) badge.classList.toggle('hidden', needsAttention === 0);
+    if (!document.getElementById('section-tailormade')?.classList.contains('active')) return;
+
     const tbody = document.getElementById('tailor-tbody');
     if (!tbody) return;
+    const data = rows !== undefined ? rows : allTailorEnquiries;
     tbody.innerHTML = '';
-    if (!allTailorEnquiries.length) {
-      tbody.innerHTML = '<tr><td colspan="8" class="px-5 py-8 text-center text-xs text-gray-400">No enquiries yet.</td></tr>';
-      const badge = document.getElementById('sidebar-tailormade-badge');
-      if (badge) badge.classList.add('hidden');
-      return;
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="10" class="px-5 py-8 text-center text-xs text-gray-400">No enquiries yet.</td></tr>';
+    } else {
+      const SLABELS = { open:'Open', in_progress:'In Progress', resolved:'Resolved' };
+      data.forEach(e => {
+        const rowOpacity = e.unread ? '' : 'opacity-40';
+        const urgLabel = TAILOR_URGENCY_LABELS[e.urgency] || e.urgency;
+        const urgClass = TAILOR_URGENCY_CLASS[e.urgency] || 'bg-gray-100 text-gray-500';
+        const sClass = e.status==='open' ? 'bg-red-100 text-red-700' : e.status==='in_progress' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700';
+        tbody.insertAdjacentHTML('beforeend', `
+          <tr class="hover:bg-gray-50 transition-colors cursor-pointer text-xs ${rowOpacity}" onclick="openTailorDetail('${e.id}')">
+            <td class="px-5 py-3 font-mono text-gray-400">${escapeHtml(e.id.substring(0,8).toUpperCase())}</td>
+            <td class="px-4 py-3 font-medium text-dark">${escapeHtml(e.partner)}</td>
+            <td class="px-4 py-3 text-gray-600 max-w-xs truncate">${escapeHtml(e.client_name)}</td>
+            <td class="px-4 py-3 text-gray-500">${escapeHtml(e.enquiry_type)}</td>
+            <td class="px-4 py-3 text-gray-400 whitespace-nowrap">${escapeHtml(e.received)}</td>
+            <td class="px-4 py-3 text-center"><span class="text-xs font-semibold px-2 py-0.5 rounded-full ${urgClass}">${escapeHtml(urgLabel)}</span></td>
+            <td class="px-4 py-3 text-center font-semibold text-dark">${escapeHtml(String(e.pax))}</td>
+            <td class="px-4 py-3 text-center"><span class="text-xs font-semibold px-2 py-0.5 rounded-full ${sClass}">${SLABELS[e.status]||e.status}</span></td>
+            <td class="px-4 py-3 text-gray-600">${escapeHtml(staffDisplayName(e.assigned_to))}</td>
+            <td class="px-4 py-3 text-right"><button class="text-gray-300 hover:text-brand text-xs"><i class="fa-solid fa-arrow-right"></i></button></td>
+          </tr>`);
+      });
     }
-    allTailorEnquiries.forEach(e => {
-      const rowOpacity = e.unread ? '' : 'opacity-40';
-      const urgLabel = TAILOR_URGENCY_LABELS[e.urgency] || e.urgency;
-      const urgClass = TAILOR_URGENCY_CLASS[e.urgency] || 'bg-gray-100 text-gray-500';
-      tbody.insertAdjacentHTML('beforeend', `
-        <tr class="hover:bg-gray-50 transition-colors cursor-pointer text-xs ${rowOpacity}" onclick="openTailorDetail('${e.id}')">
-          <td class="px-5 py-3 font-mono text-gray-400">${escapeHtml(e.id.substring(0,8).toUpperCase())}</td>
-          <td class="px-4 py-3 font-medium text-dark">${escapeHtml(e.partner)}</td>
-          <td class="px-4 py-3 text-gray-600 max-w-xs truncate">${escapeHtml(e.client_name)}</td>
-          <td class="px-4 py-3 text-gray-500">${escapeHtml(e.enquiry_type)}</td>
-          <td class="px-4 py-3 text-gray-400 whitespace-nowrap">${escapeHtml(e.received)}</td>
-          <td class="px-4 py-3 text-center"><span class="text-xs font-semibold px-2 py-0.5 rounded-full ${urgClass}">${escapeHtml(urgLabel)}</span></td>
-          <td class="px-4 py-3 text-center font-semibold text-dark">${escapeHtml(String(e.pax))}</td>
-          <td class="px-4 py-3 text-right"><button class="text-gray-300 hover:text-brand text-xs"><i class="fa-solid fa-arrow-right"></i></button></td>
-        </tr>`);
-    });
-    const unreadCount = allTailorEnquiries.filter(e => e.unread).length;
-    const badge = document.getElementById('sidebar-tailormade-badge');
-    if (badge) { badge.classList.toggle('hidden', unreadCount === 0); }
   }
 
   async function openTailorDetail(id) {
@@ -8865,16 +9042,26 @@
     document.getElementById('tmd-urgency').textContent= TAILOR_URGENCY_LABELS[e.urgency] || e.urgency;
     document.getElementById('tmd-message').textContent= e.message;
 
+    document.getElementById('tmd-status-select').value = e.status || 'open';
+    syncFselLabel('tmd-status-select');
+    populateAssigneeSelect('tmd-assigned-select', e.assigned_to || currentAdminEmail || '');
+    updateTailorReplyVisibility(e.status || 'open');
+    document.getElementById('tmd-reply').value = '';
+    document.getElementById('tmd-messages').innerHTML = '<div class="text-xs text-gray-400 text-center py-4">Loading…</div>';
+
     const panel = document.getElementById('tailor-detail-panel');
     panel.classList.remove('hidden');
     panel.style.display = 'flex';
 
+    const { data: msgs, error } = await db.from('tailor_messages').select('*').eq('enquiry_id', id).order('created_at', { ascending: true });
+    if (!error) renderTailorMessageThread(msgs || []);
+    renderEntityTimeline('tmd-timeline', id);
+
     const myEmail = currentAdminEmail || '';
     if (myEmail && e.unread) {
       await db.from('tailor_reads').upsert({ enquiry_id: id, user_email: myEmail, last_read_at: new Date().toISOString() }, { onConflict: 'enquiry_id,user_email' });
-      const idx = allTailorEnquiries.findIndex(x => x.id === id);
-      if (idx >= 0) allTailorEnquiries[idx].unread = false;
-      renderTailorEnquiries();
+      e.unread = false;
+      applyTailorFilters();
     }
   }
 
@@ -8882,6 +9069,115 @@
     const panel = document.getElementById('tailor-detail-panel');
     if (panel) { panel.style.display = 'none'; panel.classList.add('hidden'); }
     currentTailorId = null;
+  }
+
+  function updateTailorReplyVisibility(status) {
+    const canReply = status === 'in_progress';
+    document.getElementById('tmd-reply-wrap')?.classList.toggle('hidden', !canReply);
+    document.getElementById('tmd-reply-blocked')?.classList.toggle('hidden', canReply);
+  }
+
+  function renderTailorMessageThread(msgs) {
+    const el = document.getElementById('tmd-messages');
+    if (!el) return;
+    if (!msgs.length) { el.innerHTML = '<div style="font-size:12px;color:#64748b;text-align:center;padding:16px 0">No messages yet.</div>'; return; }
+    el.innerHTML = msgs.map(m => {
+      const isAdmin = m.sender_type === 'admin';
+      const time = new Date(m.created_at).toLocaleString('en',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+      const bubbleBg = isAdmin ? 'rgba(255,255,255,0.12)' : '#E8751A';
+      return `<div style="display:flex;justify-content:${isAdmin?'flex-start':'flex-end'}">
+        <div style="max-width:75%;background:${bubbleBg};color:#f1f5f9;border-radius:16px;padding:10px 14px;${isAdmin?'border:1px solid rgba(255,255,255,0.08)':''}">
+          <div style="font-size:11px;margin-bottom:4px;color:${isAdmin?'rgba(241,245,249,0.5)':'rgba(255,255,255,0.55)'}">${escapeHtml(m.sender_name||m.sender_email)} · ${time}</div>
+          <div style="font-size:13px;line-height:1.5;white-space:pre-wrap">${escapeHtml(m.message)}</div>
+        </div>
+      </div>`;
+    }).join('');
+    el.scrollTop = el.scrollHeight;
+  }
+
+  async function saveTailorStatus() {
+    if (!currentTailorId) return;
+    const status = document.getElementById('tmd-status-select').value;
+    const { error } = await db.from('tailor_enquiries').update({ status }).eq('id', currentTailorId);
+    if (error) { showToast('Error updating status', 'error'); return; }
+    const e = allTailorEnquiries.find(x => x.id === currentTailorId);
+    if (e) e.status = status;
+    updateTailorReplyVisibility(status);
+    await logActivity(status === 'resolved' ? 'tailor_resolved' : 'tailor_updated', `Enquiry "${e?.client_name}" → ${status}`, currentTailorId);
+    applyTailorFilters();
+    showToast('Status updated');
+  }
+
+  // Przypisanie → zawsze wymusza in_progress. Odznaczenie (Unassigned) NIE cofa statusu.
+  async function saveTailorAssignment() {
+    if (!currentTailorId) return;
+    const sel = document.getElementById('tmd-assigned-select');
+    const assignedTo = sel.value || null;
+    const e = allTailorEnquiries.find(x => x.id === currentTailorId);
+    const newStatus = assignedTo ? 'in_progress' : (e?.status || 'open');
+    const { error } = await db.from('tailor_enquiries').update({ assigned_to: assignedTo, status: newStatus }).eq('id', currentTailorId);
+    if (error) { showToast('Error updating assignment', 'error'); return; }
+    if (e) { e.assigned_to = assignedTo; e.status = newStatus; }
+    document.getElementById('tmd-status-select').value = newStatus;
+    syncFselLabel('tmd-status-select');
+    updateTailorReplyVisibility(newStatus);
+    await logActivity('tailor_assigned', `Enquiry "${e?.client_name}" → assigned to ${assignedTo ? staffDisplayName(assignedTo) : 'Unassigned'}`, currentTailorId);
+    applyTailorFilters();
+    showToast('Assignment updated.');
+  }
+
+  async function saveTailorReply() {
+    const e = allTailorEnquiries.find(x => x.id === currentTailorId);
+    if (!e) return;
+    const status = document.getElementById('tmd-status-select').value;
+    const reply  = (document.getElementById('tmd-reply').value || '').trim();
+    try {
+      await db.from('tailor_enquiries').update({ status }).eq('id', currentTailorId);
+      if (reply) {
+        await db.from('tailor_messages').insert({
+          enquiry_id: currentTailorId, sender_type: 'admin',
+          sender_email: currentAdminEmail || 'admin', sender_name: currentAdminName || 'Thousand Miles Team',
+          message: reply,
+        });
+        const myEmail = currentAdminEmail || '';
+        if (myEmail) await db.from('tailor_reads').upsert({ enquiry_id: currentTailorId, user_email: myEmail, last_read_at: new Date().toISOString() }, { onConflict: 'enquiry_id,user_email' });
+      }
+      await logActivity(status==='resolved' ? 'tailor_resolved' : reply ? 'tailor_replied' : 'tailor_updated', `Enquiry "${e.client_name}" → ${status}${reply?' (reply sent)':''}`, currentTailorId);
+      e.status = status; e.unread = false;
+      document.getElementById('tmd-reply').value = '';
+      const { data: msgs } = await db.from('tailor_messages').select('*').eq('enquiry_id', currentTailorId).order('created_at', { ascending: true });
+      renderTailorMessageThread(msgs||[]);
+      applyTailorFilters();
+      showToast('Enquiry updated.');
+    } catch(err) { console.error('saveTailorReply', err); showToast('Error saving enquiry.', 'error'); }
+  }
+
+  async function saveTailorReplyAndResolve() {
+    const e = allTailorEnquiries.find(x => x.id === currentTailorId);
+    if (!e) return;
+    const reply = (document.getElementById('tmd-reply').value || '').trim();
+    try {
+      await db.from('tailor_enquiries').update({ status: 'resolved' }).eq('id', currentTailorId);
+      if (reply) {
+        await db.from('tailor_messages').insert({
+          enquiry_id: currentTailorId, sender_type: 'admin',
+          sender_email: currentAdminEmail || 'admin', sender_name: currentAdminName || 'Thousand Miles Team',
+          message: reply,
+        });
+        const myEmail = currentAdminEmail || '';
+        if (myEmail) await db.from('tailor_reads').upsert({ enquiry_id: currentTailorId, user_email: myEmail, last_read_at: new Date().toISOString() }, { onConflict: 'enquiry_id,user_email' });
+      }
+      await logActivity('tailor_resolved', `Enquiry "${e.client_name}" → resolved${reply?' (reply sent)':''}`, currentTailorId);
+      e.status = 'resolved'; e.unread = false;
+      document.getElementById('tmd-status-select').value = 'resolved';
+      syncFselLabel('tmd-status-select');
+      document.getElementById('tmd-reply').value = '';
+      updateTailorReplyVisibility('resolved');
+      const { data: msgs } = await db.from('tailor_messages').select('*').eq('enquiry_id', currentTailorId).order('created_at', { ascending: true });
+      renderTailorMessageThread(msgs||[]);
+      applyTailorFilters();
+      showToast('Enquiry resolved.');
+    } catch(err) { console.error('saveTailorReplyAndResolve', err); showToast('Error resolving enquiry.', 'error'); }
   }
 
   // ===================== END TAILOR MADE =====================
@@ -13384,6 +13680,8 @@ async function submitAddStaff() {
   const role = document.getElementById('add-staff-role').value;
   if (!email) { showToast('Email is required', 'error'); return; }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { showToast('Invalid email address', 'error'); return; }
+  if (!firstName) { showToast('First name is required', 'error'); return; }
+  if (!lastName)  { showToast('Last name is required', 'error'); return; }
   if (!password || password.length < 8) { showToast('Password must be at least 8 characters', 'error'); return; }
   if (currentAdminRole === 'manager' && role === 'admin') { showToast('Managers cannot create admin accounts.', 'error'); return; }
 
