@@ -8951,7 +8951,9 @@
   const TAILOR_URGENCY_CLASS  = { '24h': 'bg-red-50 text-red-600', '3days': 'bg-orange-50 text-orange-600', 'relaxed': 'bg-green-50 text-green-700' };
 
   async function loadTailorEnquiries() {
-    const { data, error } = await db.from('tailor_enquiries').select('*').order('updated_at', { ascending: false });
+    const { data, error } = await db.from('tailor_enquiries')
+      .select('*, tailor_messages(id, created_at, sender_type)')
+      .order('updated_at', { ascending: false });
     if (error) { console.error('[tailor]', error); return; }
 
     const myEmail = currentAdminEmail || '';
@@ -8964,8 +8966,10 @@
 
     allTailorEnquiries.length = 0;
     (data||[]).forEach(e => {
+      const msgs = e.tailor_messages || [];
+      const lastPartner = msgs.filter(m => m.sender_type==='partner').sort((a,b) => b.created_at.localeCompare(a.created_at))[0];
       const readAt    = readMap[e.id] ? new Date(readMap[e.id]).getTime() : 0;
-      const createdAt = new Date(e.created_at).getTime();
+      const createdAt = lastPartner ? new Date(lastPartner.created_at).getTime() : new Date(e.created_at).getTime();
       allTailorEnquiries.push({
         id:           e.id,
         partner:      e.partner_name || e.partner_email || '—',
