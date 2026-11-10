@@ -8298,7 +8298,7 @@
     // update it unconditionally, but skip the (potentially large) DOM rebuild below
     // when the Support tab isn't on screen. Avoids a full table rebuild every 20s /
     // on every realtime event while the admin is elsewhere in the panel.
-    const unreadCount = allTickets.filter(t => t.unread || (!t.assigned_to && t.status !== 'resolved')).length;
+    const unreadCount = allTickets.filter(t => t.unread).length;
     const sidebarBadge = document.getElementById('sidebar-support-badge');
     if (sidebarBadge) { sidebarBadge.classList.toggle('hidden', unreadCount === 0); }
     if (!document.getElementById('section-support')?.classList.contains('active')) return;
@@ -8658,7 +8658,7 @@
     tdStatusSel.value = t.status;
     const tdCdropVal = tdStatusSel.closest('.cdrop')?.querySelector('.cdrop-val');
     if (tdCdropVal) tdCdropVal.textContent = tdStatusSel.options[tdStatusSel.selectedIndex]?.text || '';
-    populateAssigneeSelect('td-assigned-select', t.assigned_to || currentAdminEmail || '');
+    populateAssigneeSelect('td-assigned-select', t.assigned_to || '');
     updateTicketReplyVisibility(t.status);
     document.getElementById('td-reply').value         = '';
     tdClearAttachments();
@@ -8992,7 +8992,7 @@
   function renderTailorEnquiries(rows) {
     // Badge must stay accurate regardless of which tab is visible — update it unconditionally,
     // but skip the (potentially large) DOM rebuild when the Tailor made tab isn't on screen.
-    const needsAttention = allTailorEnquiries.filter(e => e.unread || (!e.assigned_to && e.status !== 'resolved')).length;
+    const needsAttention = allTailorEnquiries.filter(e => e.unread).length;
     const badge = document.getElementById('sidebar-tailormade-badge');
     if (badge) badge.classList.toggle('hidden', needsAttention === 0);
     if (!document.getElementById('section-tailormade')?.classList.contains('active')) return;
@@ -9044,7 +9044,7 @@
 
     document.getElementById('tmd-status-select').value = e.status || 'open';
     syncFselLabel('tmd-status-select');
-    populateAssigneeSelect('tmd-assigned-select', e.assigned_to || currentAdminEmail || '');
+    populateAssigneeSelect('tmd-assigned-select', e.assigned_to || '');
     updateTailorReplyVisibility(e.status || 'open');
     document.getElementById('tmd-reply').value = '';
     document.getElementById('tmd-messages').innerHTML = '<div class="text-xs text-gray-400 text-center py-4">Loading…</div>';
