@@ -85,7 +85,14 @@ async function findStripeSessionByBookingId(bookingId: string, stripeKey: string
   return session?.id || null
 }
 
-async function stripeRefund(stripeSessionId: string | null, bookingId: string): Promise<{ ok: boolean, refundId?: string, error?: string }> {
+async function stripeRefund(
+  stripeSessionId: string | null,
+  bookingId: string,
+  opts?: { amountPln?: number, reason?: string },
+): Promise<{ ok: boolean, refundId?: string, refundedAmount?: number, error?: string }> {
+  // Explicit "no refund" choice — skip Stripe entirely, nothing to do here.
+  if (opts?.amountPln === 0) return { ok: true, refundedAmount: 0 }
+
   const stripeKey = Deno.env.get('STRIPE_SECRET_KEY')!
 
   // If session ID not in DB, search Stripe by booking_id metadata
@@ -111,19 +118,29 @@ async function stripeRefund(stripeSessionId: string | null, bookingId: string): 
     return { ok: true }
   }
 
+  const params: Record<string, string> = { payment_intent: paymentIntent }
+  if (opts?.amountPln != null) {
+    // PLN → grosze conversion happens here, server-side, right before the Stripe call —
+    // never trust/forward a client-sent grosze value, the browser only ever sends whole PLN.
+    params.amount = String(Math.round(opts.amountPln * 100))
+  }
+  if (opts?.reason) params.reason = opts.reason
+
   const refundRes = await fetch('https://api.stripe.com/v1/refunds', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${stripeKey}`,
       'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: new URLSearchParams({ payment_intent: paymentIntent }).toString(),
+    body: new URLSearchParams(params).toString(),
   })
   const refund = await refundRes.json()
-  console.log('[Cancel] Stripe refund:', JSON.stringify({ id: refund.id, status: refund.status, error: refund.error }))
+  console.log('[Cancel] Stripe refund:', JSON.stringify({ id: refund.id, status: refund.status, amount: refund.amount, error: refund.error }))
 
   if (refund.error) return { ok: false, error: refund.error.message }
-  return { ok: true, refundId: refund.id }
+  // Stripe's own refund.amount (in grosze) is the source of truth for what was persisted —
+  // not what the client asked for or what we think the total is.
+  return { ok: true, refundId: refund.id, refundedAmount: typeof refund.amount === 'number' ? refund.amount / 100 : opts?.amountPln }
 }
 
 Deno.serve(async (req) => {
@@ -135,8 +152,19 @@ Deno.serve(async (req) => {
   const { data: { user } } = await authClient.auth.getUser()
   if (!user) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...CORS, 'Content-Type': 'application/json' } })
 
-  const { booking_id, custom_package_id } = await req.json()
+  const { booking_id, custom_package_id, refund_amount, refund_reason } = await req.json()
   if (!booking_id && !custom_package_id) return new Response(JSON.stringify({ error: 'Missing booking_id or custom_package_id' }), { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } })
+
+  // refund_amount: absent/null = full refund (legacy behavior); 0 = explicit no-refund; >0 = partial/exact amount in PLN.
+  if (refund_amount !== undefined && refund_amount !== null) {
+    if (typeof refund_amount !== 'number' || !isFinite(refund_amount) || refund_amount < 0) {
+      return new Response(JSON.stringify({ error: 'Invalid refund_amount' }), { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } })
+    }
+  }
+  const ALLOWED_REFUND_REASONS = ['duplicate', 'fraudulent', 'requested_by_customer']
+  if (refund_reason != null && !ALLOWED_REFUND_REASONS.includes(refund_reason)) {
+    return new Response(JSON.stringify({ error: 'Invalid refund_reason' }), { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } })
+  }
 
   const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
 
@@ -156,16 +184,22 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Already cancelled' }), { status: 409, headers: { ...CORS, 'Content-Type': 'application/json' } })
     }
 
+    if (refund_amount != null && refund_amount > Number(pkg.guest_price || 0)) {
+      return new Response(JSON.stringify({ error: 'refund_amount exceeds guest_price' }), { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } })
+    }
+
     const results: Record<string, unknown> = {}
 
     if (pkg.stripe_session_id) {
-      const refund = await stripeRefund(pkg.stripe_session_id, custom_package_id)
+      const refund = await stripeRefund(pkg.stripe_session_id, custom_package_id, { amountPln: refund_amount, reason: refund_reason })
       results.stripe = refund
       const refundFailed = !refund.ok
+      const refundedAmt = refund.refundedAmount || 0
       await db.from('custom_packages').update({
         status: refundFailed ? 'refund_failed' : 'cancelled',
         status_before_cancel: pkg.status,
-        stripe_refunded: !refundFailed,
+        stripe_refunded: refundedAmt > 0,
+        refund_amount: refundedAmt,
       }).eq('id', custom_package_id)
       await sendCancellationEmail({ ref: custom_package_id, tour_name: pkg.package_name, date: pkg.date, guest_email: pkg.guest_email })
       return new Response(JSON.stringify({ success: true, ...results }), { headers: { ...CORS, 'Content-Type': 'application/json' } })
@@ -191,6 +225,10 @@ Deno.serve(async (req) => {
     }
   }
 
+  if (refund_amount != null && refund_amount > Number(booking.total || 0)) {
+    return new Response(JSON.stringify({ error: 'refund_amount exceeds booking total' }), { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } })
+  }
+
   // Atomic lock: only proceed if current status is not already cancelled/refund_failed
   // This prevents double-refund from concurrent cancel requests
   const { data: locked } = await db
@@ -209,7 +247,7 @@ Deno.serve(async (req) => {
 
   // Refund Stripe if payment was made
   if (booking.stripe_session_id || booking.payment_method === 'link') {
-    const refund = await stripeRefund(booking.stripe_session_id, booking_id)
+    const refund = await stripeRefund(booking.stripe_session_id, booking_id, { amountPln: refund_amount, reason: refund_reason })
     results.stripe = refund
   }
 
@@ -221,8 +259,14 @@ Deno.serve(async (req) => {
   }
 
   // Update DB status — if refund failed, use refund_failed so admin can investigate
-  const refundFailed = results.stripe && !(results.stripe as { ok: boolean }).ok
-  await db.from('bookings').update({ status: refundFailed ? 'refund_failed' : 'cancelled' }).eq('id', booking_id)
+  const stripeResult = results.stripe as { ok: boolean, refundedAmount?: number } | undefined
+  const refundFailed = !!stripeResult && !stripeResult.ok
+  const refundedAmt = stripeResult?.refundedAmount || 0
+  await db.from('bookings').update({
+    status: refundFailed ? 'refund_failed' : 'cancelled',
+    stripe_refunded: refundedAmt > 0,
+    refund_amount: refundedAmt,
+  }).eq('id', booking_id)
 
   await sendCancellationEmail({
     ref: booking.bokun_confirmation_code ? String(booking.bokun_confirmation_code).replace(/^TM-/i, '') : booking_id,

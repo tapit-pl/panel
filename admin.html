@@ -6941,14 +6941,18 @@
     return amt * (_eurPlnRate || 4.25);
   }
 
-  function statusBadge(status, isCp) {
+  function statusBadge(status, isCp, refundAmount, totalAmount) {
     const s = (status || '').toLowerCase();
     if (isCp && s === 'pending') return `<span class="status-pending-payment text-xs font-semibold px-2.5 py-0.5 rounded-full">Awaiting payment</span>`;
     if (s === 'paid' || s === 'confirmed') return `<span class="status-paid text-xs font-semibold px-2.5 py-0.5 rounded-full">Paid</span>`;
     if (s === 'to_be_paid' || s === 'pending') return `<span class="status-pending text-xs font-semibold px-2.5 py-0.5 rounded-full">Driver pay</span>`;
     if (s === 'payment_pending' || s === 'pending_payment') return `<span class="status-pending-payment text-xs font-semibold px-2.5 py-0.5 rounded-full">Link sent</span>`;
     if (s === 'link_expired') return `<span class="status-link-expired text-xs font-semibold px-2.5 py-0.5 rounded-full">Link expired</span>`;
-    if (s === 'cancelled') return `<span class="status-cancelled text-xs font-semibold px-2.5 py-0.5 rounded-full">Cancelled</span>`;
+    if (s === 'cancelled') {
+      const refunded = Number(refundAmount || 0), total = Number(totalAmount || 0);
+      if (refunded > 0 && refunded < total) return `<span class="status-cancelled text-xs font-semibold px-2.5 py-0.5 rounded-full">Partial refund · ${Math.round(refunded).toLocaleString('pl')}/${Math.round(total).toLocaleString('pl')} zł</span>`;
+      return `<span class="status-cancelled text-xs font-semibold px-2.5 py-0.5 rounded-full">Cancelled</span>`;
+    }
     if (s === 'cancelling') return `<span class="text-xs font-semibold px-2.5 py-0.5 rounded-full" style="background:#fef3c7;color:#d97706;">Cancelling…</span>`;
     if (s === 'arrived') return `<span class="status-arrived text-xs font-semibold px-2.5 py-0.5 rounded-full">Arrived ✓</span>`;
     if (s === 'no_show') return `<span class="text-xs font-semibold px-2.5 py-0.5 rounded-full" style="background:#fef2f2;color:#dc2626;">No Show</span>`;
@@ -7021,7 +7025,7 @@
           <td class="px-4 py-3 text-right font-semibold text-dark whitespace-nowrap">${Math.round(toPlnAmount(b)).toLocaleString('pl')} zł</td>
           <td class="px-4 py-3 text-slate-300 text-xs">${escapeHtml(sourceLabel)}</td>
           <td class="px-4 py-3 text-xs">${paymentMethodCell(b)}</td>
-          <td class="px-4 py-3 text-center">${statusBadge(b.status, b._isCp)}</td>
+          <td class="px-4 py-3 text-center">${statusBadge(b.status, b._isCp, b.refund_amount, b.total)}</td>
           <td class="px-4 py-3 text-right whitespace-nowrap" onclick="event.stopPropagation()">
             ${b._isCp ? `
             <button onclick="event.stopPropagation();showSection('customtours');openCpDetail('${b.id}')" title="Open in Custom Tours" class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-lg transition-colors" style="background:rgba(168,85,247,0.13);border:1px solid rgba(168,85,247,0.35);color:#c084fc"><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>Custom Tours</button>
@@ -7389,7 +7393,7 @@
           <td class="px-4 py-3 text-right font-semibold text-dark whitespace-nowrap">${Math.round(b.total || 0).toLocaleString('pl')} zł</td>
           <td class="px-4 py-3 text-slate-300 text-xs">${escapeHtml(b.source)}</td>
           <td class="px-4 py-3 text-xs">${paymentMethodCell(b)}</td>
-          <td class="px-4 py-3 text-center">${statusBadge(b.status, b._isCp)}</td>
+          <td class="px-4 py-3 text-center">${statusBadge(b.status, b._isCp, b.refund_amount, b.total)}</td>
           <td class="px-4 py-3 text-right whitespace-nowrap" onclick="event.stopPropagation()">
             ${b._isCp ? `
             <button onclick="event.stopPropagation();showSection('customtours');openCpDetail('${b.id}')" title="Open in Custom Tours" class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-lg transition-colors" style="background:rgba(168,85,247,0.13);border:1px solid rgba(168,85,247,0.35);color:#c084fc"><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>Custom Tours</button>
@@ -7472,12 +7476,28 @@
   });
 
   async function cancelBooking(id, guestName, hasStripe, isDbBooking = true) {
-    const refundMsg = hasStripe ? ' and refund the Stripe payment' : '';
-    if (!await showConfirm(`Cancel booking for ${guestName}${refundMsg}?\n\nThis cannot be undone.`, { okLabel: 'Cancel booking', okColor: '#dc2626' })) return;
+    const b0 = allBookings.find(x => x.id === id) || partnerBookings.find(x => x.id === id);
+    const amount = Number(b0?.total || 0);
+    const paidViaStripe = hasStripe && ['paid', 'confirmed'].includes((b0?.status || '').toLowerCase());
+
+    let refundChoice = null;
+    if (paidViaStripe) {
+      const result = await showStripeCancelDialog(guestName, { amount, entityLabel: 'booking' });
+      if (!result) return;
+      refundChoice = result;
+    } else {
+      if (!await showConfirm(`Cancel booking for ${guestName}?\n\nThis cannot be undone.`, { okLabel: 'Cancel booking', okColor: '#dc2626' })) return;
+    }
+
     const btn = document.querySelector(`[data-action="cancel"][data-id="${id}"]`);
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-xs"></i>'; }
     try {
       const body = isDbBooking ? { booking_id: id } : { bokun_confirmation_code: id };
+      if (refundChoice) {
+        body.refund_reason = refundChoice.reason;
+        if (refundChoice.choice === 'partial') body.refund_amount = refundChoice.amount;
+        else if (refundChoice.choice === 'no_refund') body.refund_amount = 0;
+      }
       const { data, error } = await invokeEdge('cancel-booking', { body });
       if (error || !data?.success) {
         showToast('Failed to cancel booking.', 'error', error?.message || data?.error);
@@ -7487,11 +7507,30 @@
       if (data?.bokun?.ok === false) {
         showToast('Cancelled in system — Bokun cancellation failed. Cancel manually in Bokun.', 'error');
       }
+      const refundFailed = data?.stripe?.ok === false;
+      const refundedAmt = data?.stripe?.refundedAmount || 0;
+      let refundDetail = '';
+      if (refundFailed) {
+        showToast('Booking cancelled — Stripe refund failed. Refund manually in Stripe dashboard.', 'error');
+        refundDetail = ' — refund failed';
+      } else if (refundChoice?.choice === 'partial') {
+        showToast(`Booking cancelled — partial refund of ${fmtPln(refundedAmt)} issued.`, 'success');
+        refundDetail = ` — partial refund ${fmtPln(refundedAmt)}`;
+      } else if (refundChoice?.choice === 'no_refund') {
+        showToast('Booking cancelled (no refund).', 'success');
+        refundDetail = ' — no refund';
+      } else if (paidViaStripe) {
+        showToast('Booking cancelled and Stripe payment refunded.', 'success');
+        refundDetail = ` — full refund ${fmtPln(refundedAmt)}`;
+      } else {
+        showToast('Booking cancelled.', 'success');
+      }
+      const newStatus = refundFailed ? 'refund_failed' : 'cancelled';
       const b = allBookings.find(x => x.id === id);
-      if (b) b.status = 'cancelled';
+      if (b) { b.status = newStatus; b.refund_amount = refundedAmt; b.stripe_refunded = refundedAmt > 0; }
       const pb = partnerBookings.find(x => x.id === id);
-      if (pb) pb.status = 'cancelled';
-      logActivity('booking_cancelled', `Booking ${allBookings.find(x=>x.id===id)?.bokun_confirmation_code||id} (${guestName}) cancelled`, id).catch(() => {});
+      if (pb) { pb.status = newStatus; pb.refund_amount = refundedAmt; pb.stripe_refunded = refundedAmt > 0; }
+      logActivity('booking_cancelled', `Booking ${allBookings.find(x=>x.id===id)?.bokun_confirmation_code||id} (${guestName}) cancelled${refundDetail}`, id).catch(() => {});
       filterAllBookings();
       if (_hbLoaded) filterHotelBookings();
     } catch(e) {
@@ -9509,22 +9548,42 @@
     setTimeout(() => t.remove(), detail ? 5500 : 3500);
   }
 
-  function showStripeCancelDialog(guestName) {
+  function showStripeCancelDialog(guestName, { amount = 0, entityLabel = 'booking' } = {}) {
     return new Promise(resolve => {
+      const amt = Number(amount) || 0;
       const overlay = document.createElement('div');
       overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:9999';
       overlay.innerHTML = `
         <div style="background:#1a2332;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:28px 24px;max-width:400px;width:90%;box-shadow:0 24px 48px rgba(0,0,0,0.4)">
-          <div style="font-size:15px;font-weight:600;color:#e2e8f0;margin-bottom:8px">Cancel booking</div>
-          <div style="font-size:13px;color:#94a3b8;margin-bottom:24px;line-height:1.5">Cancel package for <strong style="color:#e2e8f0">${guestName || 'this guest'}</strong>. This package was paid via Stripe — choose how to proceed:</div>
+          <div style="font-size:15px;font-weight:600;color:#e2e8f0;margin-bottom:8px">Cancel ${entityLabel}</div>
+          <div style="font-size:13px;color:#94a3b8;margin-bottom:16px;line-height:1.5">Cancel ${entityLabel} for <strong style="color:#e2e8f0">${guestName || 'this guest'}</strong>${amt > 0 ? ` — paid <strong style="color:#e2e8f0">${fmtPln(amt)}</strong> via Stripe` : ''}. Choose how to proceed:</div>
+          <div style="margin-bottom:14px">
+            <label style="display:block;font-size:11px;color:#64748b;margin-bottom:4px">Reason (optional)</label>
+            <select id="scd-reason" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#e2e8f0;border-radius:8px;padding:7px 10px;font-size:12px">
+              <option value="">— none —</option>
+              <option value="requested_by_customer">Requested by customer</option>
+              <option value="duplicate">Duplicate charge</option>
+              <option value="fraudulent">Fraudulent</option>
+            </select>
+          </div>
           <div style="display:flex;flex-direction:column;gap:10px">
             <button id="scd-refund" style="background:rgba(220,38,38,0.15);border:1px solid rgba(220,38,38,0.4);color:#f87171;padding:11px 16px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;text-align:left">
-              <i class="fa-solid fa-rotate-left mr-2"></i>Cancel with refund
-              <div style="font-size:11px;font-weight:400;color:#f87171;opacity:0.8;margin-top:3px">Cancels booking and refunds full payment to guest's card</div>
+              <i class="fa-solid fa-rotate-left mr-2"></i>Cancel with full refund
+              <div style="font-size:11px;font-weight:400;color:#f87171;opacity:0.8;margin-top:3px">Cancels ${entityLabel} and refunds full payment to guest's card</div>
             </button>
+            ${amt > 0 ? `
+            <button id="scd-partial-toggle" type="button" style="background:rgba(249,115,22,0.15);border:1px solid rgba(249,115,22,0.4);color:#f97316;padding:11px 16px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;text-align:left">
+              <i class="fa-solid fa-rotate-left mr-2"></i>Cancel with partial refund
+              <div style="font-size:11px;font-weight:400;color:#f97316;opacity:0.8;margin-top:3px">Cancels ${entityLabel} and refunds a chosen amount to guest's card</div>
+            </button>
+            <div id="scd-partial-panel" class="hidden" style="padding:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(249,115,22,0.3);border-radius:10px;display:flex;flex-direction:column;gap:8px">
+              <input id="scd-partial-amount" type="number" min="0.01" step="0.01" max="${amt}" placeholder="Amount in PLN (max ${fmtPln(amt)})" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:#e2e8f0;border-radius:8px;padding:8px 10px;font-size:13px;box-sizing:border-box">
+              <div id="scd-partial-error" class="hidden" style="color:#f87171;font-size:11px"></div>
+              <button id="scd-partial-confirm" disabled style="background:rgba(249,115,22,0.25);border:1px solid rgba(249,115,22,0.5);color:#fdba74;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:not-allowed;opacity:0.5">Confirm partial refund</button>
+            </div>` : ''}
             <button id="scd-norefund" style="background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.35);color:#fbbf24;padding:11px 16px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;text-align:left">
               <i class="fa-solid fa-ban mr-2"></i>Cancel without refund
-              <div style="font-size:11px;font-weight:400;color:#fbbf24;opacity:0.8;margin-top:3px">Cancels booking but keeps the payment — no refund to guest</div>
+              <div style="font-size:11px;font-weight:400;color:#fbbf24;opacity:0.8;margin-top:3px">Cancels ${entityLabel} but keeps the payment — no refund to guest</div>
             </button>
             <button id="scd-cancel" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#64748b;padding:10px 16px;border-radius:10px;font-size:13px;cursor:pointer">
               Back — do not cancel
@@ -9532,10 +9591,34 @@
           </div>
         </div>`;
       document.body.appendChild(overlay);
+      const getReason = () => overlay.querySelector('#scd-reason').value || undefined;
       const cleanup = result => { overlay.remove(); resolve(result); };
-      overlay.querySelector('#scd-refund').onclick = () => cleanup('refund');
-      overlay.querySelector('#scd-norefund').onclick = () => cleanup('no_refund');
+      overlay.querySelector('#scd-refund').onclick = () => cleanup({ choice: 'refund', reason: getReason() });
+      overlay.querySelector('#scd-norefund').onclick = () => cleanup({ choice: 'no_refund', reason: getReason() });
       overlay.querySelector('#scd-cancel').onclick = () => cleanup(null);
+      if (amt > 0) {
+        const panel = overlay.querySelector('#scd-partial-panel');
+        const amountInput = overlay.querySelector('#scd-partial-amount');
+        const confirmBtn = overlay.querySelector('#scd-partial-confirm');
+        const errorEl = overlay.querySelector('#scd-partial-error');
+        overlay.querySelector('#scd-partial-toggle').onclick = () => { panel.classList.toggle('hidden'); if (!panel.classList.contains('hidden')) amountInput.focus(); };
+        const validate = () => {
+          const v = parseFloat(amountInput.value);
+          const valid = isFinite(v) && v > 0 && v <= amt;
+          confirmBtn.disabled = !valid;
+          confirmBtn.style.opacity = valid ? '1' : '0.5';
+          confirmBtn.style.cursor = valid ? 'pointer' : 'not-allowed';
+          if (amountInput.value && !valid) {
+            errorEl.textContent = `Enter an amount between 0.01 and ${fmtPln(amt)}`;
+            errorEl.classList.remove('hidden');
+          } else {
+            errorEl.classList.add('hidden');
+          }
+          return valid ? v : null;
+        };
+        amountInput.oninput = validate;
+        confirmBtn.onclick = () => { const v = validate(); if (v) cleanup({ choice: 'partial', amount: v, reason: getReason() }); };
+      }
     });
   }
 
@@ -12190,20 +12273,34 @@ async function cancelCp(id, guestName) {
   const pkg = cpData.find(x => x.id === id);
   if (!pkg) return;
   const hasStripe = !!(pkg?.stripe_session_id) && (pkg?.status === 'paid' || pkg?.status === 'confirmed');
-  let stripeRefundDone = false;
+  let refundedAmountForEmail = 0;
+  let refundDetail = '';
   if (hasStripe) {
-    const choice = await showStripeCancelDialog(guestName);
-    if (!choice) return;
-    if (choice === 'refund') {
-      const { data, error } = await invokeEdge('cancel-booking', { body: { custom_package_id: id } });
+    const result = await showStripeCancelDialog(guestName, { amount: pkg.guest_price, entityLabel: 'package' });
+    if (!result) return;
+    const { choice, amount, reason } = result;
+    if (choice === 'refund' || choice === 'partial') {
+      const body = { custom_package_id: id, refund_reason: reason };
+      if (choice === 'partial') body.refund_amount = amount;
+      const { data, error } = await invokeEdge('cancel-booking', { body });
       if (error || !data?.success) { showToast('Failed to cancel package.', 'error', error?.message || data?.error); return; }
       const refundFailed = data?.stripe?.ok === false;
-      stripeRefundDone = !refundFailed;
-      showToast(refundFailed ? 'Package cancelled — Stripe refund failed. Refund manually in Stripe dashboard.' : 'Package cancelled and Stripe payment refunded.', refundFailed ? 'error' : 'success');
+      refundedAmountForEmail = data?.stripe?.refundedAmount || 0;
+      if (refundFailed) {
+        showToast('Package cancelled — Stripe refund failed. Refund manually in Stripe dashboard.', 'error');
+        refundDetail = ' — refund failed';
+      } else if (choice === 'partial') {
+        showToast(`Package cancelled — partial refund of ${fmtPln(refundedAmountForEmail)} issued.`, 'success');
+        refundDetail = ` — partial refund ${fmtPln(refundedAmountForEmail)}`;
+      } else {
+        showToast('Package cancelled and Stripe payment refunded.', 'success');
+        refundDetail = ` — full refund ${fmtPln(refundedAmountForEmail)}`;
+      }
     } else {
       const { error } = await db.from('custom_packages').update({ status: 'cancelled', status_before_cancel: pkg.status }).eq('id', id);
       if (error) { showToast('Failed to cancel package.', 'error', error.message); return; }
       showToast('Package cancelled (no refund).', 'success');
+      refundDetail = ' — no refund';
     }
   } else {
     if (!await showConfirm(`Cancel package for "${guestName || 'this guest'}"?`, { okLabel: 'Cancel booking', okColor: '#dc2626' })) return;
@@ -12211,10 +12308,11 @@ async function cancelCp(id, guestName) {
     if (error) { showToast('Failed to cancel package.', 'error', error.message); return; }
     showToast('Package cancelled.', 'success');
   }
+  logActivity('package_cancelled', `Package "${pkg.package_name}" (${guestName || pkg.guest_name || 'guest'}) cancelled${refundDetail}`, id).catch(() => {});
   if (pkg.guest_email) {
     const shortId = 'TM-PKG-' + id.split('-')[0].toUpperCase();
-    const cancelBlocks = stripeRefundDone
-      ? [{ name: 'Refund information:', info: `A full refund of ${(pkg.guest_price || 0).toFixed(2)} PLN has been issued to your original payment method. It may take 5–10 business days to appear on your statement.` }]
+    const cancelBlocks = refundedAmountForEmail > 0
+      ? [{ name: 'Refund information:', info: `A refund of ${fmtPln(refundedAmountForEmail)} has been issued to your original payment method. It may take 5–10 business days to appear on your statement.` }]
       : null;
     await invokeEdge('send-booking-confirmation', { body: {
       booking_id: shortId,
@@ -12288,7 +12386,11 @@ function openCpDetail(id) {
   // Payment
   const payLabels = { stripe: 'Stripe link', bank_transfer: 'Bank transfer', cash: 'Cash' };
   const payIcons = { stripe: '<i class="fa-brands fa-stripe" style="color:#635BFF;font-size:1.25rem"></i>', bank_transfer: '<i class="fa-solid fa-building-columns" style="color:#60a5fa"></i>', cash: '<i class="fa-solid fa-money-bill" style="color:#4ade80"></i>' };
-  document.getElementById('cpd-payment').innerHTML = `<div class="flex items-center gap-2 text-sm font-medium" style="color:#cbd5e1">${payIcons[p.payment_method] || ''}<span>${payLabels[p.payment_method] || escapeHtml(p.payment_method || '—')}</span></div>`;
+  const cpdRefundAmt = Number(p.refund_amount || 0);
+  const cpdRefundLine = cpdRefundAmt > 0
+    ? `<div class="text-xs mt-1" style="color:#fbbf24">Refunded: ${fmtPln(cpdRefundAmt)}${cpdRefundAmt >= Number(p.guest_price || 0) ? ' (full)' : ' / ' + fmtPln(p.guest_price)}</div>`
+    : '';
+  document.getElementById('cpd-payment').innerHTML = `<div class="flex items-center gap-2 text-sm font-medium" style="color:#cbd5e1">${payIcons[p.payment_method] || ''}<span>${payLabels[p.payment_method] || escapeHtml(p.payment_method || '—')}</span></div>${cpdRefundLine}`;
 
   // Actions
   const isCancelledPkg = p.status === 'cancelled';
@@ -12335,7 +12437,7 @@ function openBookingDetail(id) {
 
   set('bkd-tour', b.tour);
   document.getElementById('bkd-ref').textContent = '#' + (b.displayId || b.id);
-  document.getElementById('bkd-status').innerHTML = statusBadge(b.status, b._isCp);
+  document.getElementById('bkd-status').innerHTML = statusBadge(b.status, b._isCp, b.refund_amount, b.total);
 
   // Guest
   set('bkd-guest', b.guest);
@@ -12365,8 +12467,13 @@ function openBookingDetail(id) {
   set('bkd-source', b.source === 'admin' ? 'Admin' : (b.source || '—'));
 
   // Payment
-  document.getElementById('bkd-payment').innerHTML = b.payment_method ? paymentMethodCell(b) : '—';
   const totalAmt = toPlnAmount(b);
+  let bkdPaymentHtml = b.payment_method ? paymentMethodCell(b) : '—';
+  if (Number(b.refund_amount) > 0) {
+    const isFullRefund = Number(b.refund_amount) >= totalAmt;
+    bkdPaymentHtml += `<div class="text-xs mt-1" style="color:#fbbf24">Refunded: ${Math.round(b.refund_amount).toLocaleString('pl')} PLN${isFullRefund ? ' (full)' : ' / ' + Math.round(totalAmt).toLocaleString('pl') + ' PLN'}</div>`;
+  }
+  document.getElementById('bkd-payment').innerHTML = bkdPaymentHtml;
   set('bkd-total', Math.round(totalAmt).toLocaleString('pl') + ' PLN');
   {
     const discWrap = document.getElementById('bkd-discount-wrap');
