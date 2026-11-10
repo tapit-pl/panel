@@ -4791,17 +4791,29 @@
 
   // Scoped mini activity feed for a single entity (booking, package, ...) — reused from
   // anywhere that has a ref id, unlike the main Activity Log which is capped/paginated.
+  const _timelineState = {};
+  const _TIMELINE_PAGE_SIZE = 5;
+
   async function renderEntityTimeline(containerId, ref) {
     const el = document.getElementById(containerId);
     if (!el || !ref) return;
     el.innerHTML = '<div style="font-size:12px;color:#64748b">Loading…</div>';
     const { data, error } = await db.from('audit_log').select('*').eq('ref', ref).order('created_at', { ascending: false });
-    if (error) { el.innerHTML = ''; return; }
+    if (error) { el.innerHTML = ''; delete _timelineState[containerId]; return; }
     if (!data || data.length === 0) {
       el.innerHTML = '<div style="font-size:12px;color:#475569;font-style:italic">No activity recorded for this item.</div>';
+      delete _timelineState[containerId];
       return;
     }
-    el.innerHTML = data.map(l => {
+    _timelineState[containerId] = { data, shown: _TIMELINE_PAGE_SIZE };
+    renderTimelinePage(containerId);
+  }
+
+  function renderTimelinePage(containerId) {
+    const el = document.getElementById(containerId);
+    const state = _timelineState[containerId];
+    if (!el || !state) return;
+    const rows = state.data.slice(0, state.shown).map(l => {
       const meta = ACTION_LABELS[l.action] || { label: l.action, icon: 'fa-circle' };
       const dt = new Date(l.created_at);
       const dateStr = dt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -4815,6 +4827,17 @@
         ${l.user_email ? `<div style="color:#475569;margin-top:1px;font-size:11px">by ${escapeHtml(l.user_email)}</div>` : ''}
       </div>`;
     }).join('');
+    const seeMore = state.shown < state.data.length
+      ? `<button type="button" onclick="expandEntityTimeline('${containerId}')" style="font-size:12px;color:#c9a96e;background:none;border:none;cursor:pointer;padding:6px 0;font-weight:600">See more</button>`
+      : '';
+    el.innerHTML = rows + seeMore;
+  }
+
+  function expandEntityTimeline(containerId) {
+    const state = _timelineState[containerId];
+    if (!state) return;
+    state.shown += _TIMELINE_PAGE_SIZE;
+    renderTimelinePage(containerId);
   }
 
   let allTourConfig = [];
