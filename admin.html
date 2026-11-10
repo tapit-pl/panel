@@ -9990,6 +9990,42 @@
     });
   }
 
+  // ---- Duplicate-submission guard (shared by abSubmitBooking + mbSubmitBooking) ----
+  function bookingDupeLockKey({ bokunId, startTimeId, tour, dateStr, time, email }) {
+    const emailNorm = (email || '').trim().toLowerCase();
+    const slotPart = startTimeId != null ? `${bokunId}:${startTimeId}` : `${(tour||'').trim().toLowerCase()}:${time||''}`;
+    return `${slotPart}|${dateStr}|${emailNorm}`;
+  }
+
+  function acquireSubmitLock(key, maxAgeMs = 90000) {
+    try {
+      const stored = localStorage.getItem('tm_booking_inflight:' + key);
+      if (stored) {
+        const ts = parseInt(stored, 10);
+        if (!isNaN(ts) && (Date.now() - ts) < maxAgeMs) return false;
+      }
+      localStorage.setItem('tm_booking_inflight:' + key, String(Date.now()));
+      return true;
+    } catch(e) { return true; } // localStorage unavailable (private mode etc.) — fail open, existing-booking check still protects
+  }
+
+  function releaseSubmitLock(key) {
+    try { localStorage.removeItem('tm_booking_inflight:' + key); } catch(e) {}
+  }
+
+  async function checkExistingBooking({ dateStr, startTimeId, tour, time, email }) {
+    let q = db.from('bookings')
+      .select('id, bokun_confirmation_code, status, created_by_name, created_at')
+      .eq('date', dateStr)
+      .ilike('email', (email||'').trim())
+      .neq('status', 'cancelled')
+      .order('created_at', { ascending: false })
+      .limit(1);
+    q = startTimeId != null ? q.eq('start_time_id', String(startTimeId)) : q.eq('tour', tour).eq('time', time);
+    const { data } = await q.maybeSingle();
+    return data || null;
+  }
+
   let settleMode = 'month';
 
   function setSettleMode(mode) {
@@ -15146,6 +15182,21 @@ async function abSubmitBooking() {
     errEl.classList.remove('hidden'); return;
   }
 
+  const dateStr = abSelectedDate;
+  const tour = abCurrentTour.dbTitle || abCurrentTour.title;
+  const abDupeKey = bookingDupeLockKey({ bokunId: abCurrentTour.bokunId, startTimeId: abSelectedSlot?.startTimeId, tour, dateStr, time: abSelectedSlot?.startTime, email });
+  if (!acquireSubmitLock(abDupeKey)) {
+    errEl.textContent = 'This booking is already being submitted — please wait a moment.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+  const abExistingBooking = await checkExistingBooking({ dateStr, startTimeId: abSelectedSlot?.startTimeId, tour, time: abSelectedSlot?.startTime, email });
+  if (abExistingBooking) {
+    const when = new Date(abExistingBooking.created_at).toLocaleString('en-GB');
+    const proceedAnyway = await showConfirm(`A booking for ${email} already exists for this tour and date (ref ${abExistingBooking.bokun_confirmation_code || abExistingBooking.id.slice(0,8)}, status "${abExistingBooking.status}", created by ${abExistingBooking.created_by_name || 'unknown'} on ${when}). Create another one anyway?`, { okLabel: 'Create another', okColor: '#dc2626', cancelLabel: 'Cancel' });
+    if (!proceedAnyway) { releaseSubmitLock(abDupeKey); return; }
+  }
+
   btn.disabled = true;
   btn.textContent = 'Creating booking…';
 
@@ -15163,9 +15214,7 @@ async function abSubmitBooking() {
     : (abCurrentTour?.meetingPoint || 'Meeting point — no hotel transport');
 
   const bookingId = crypto.randomUUID();
-  const dateStr = abSelectedDate;
   const guest = `${firstName} ${lastName}`;
-  const tour = abCurrentTour.dbTitle || abCurrentTour.title;
 
   // ── Price calculation ──
   const _hasRates = abRateSelections.some(r => r.count > 0);
@@ -15375,6 +15424,7 @@ async function abSubmitBooking() {
     if (bokunFieldErr?.fieldId) _showBokunFieldError(bokunFieldErr.fieldId, bokunFieldErr.userMsg);
     btn.disabled = false;
     btn.textContent = 'Confirm booking';
+    releaseSubmitLock(abDupeKey);
     return;
   }
 
@@ -15419,6 +15469,7 @@ async function abSubmitBooking() {
   if (dbErr) {
     btn.disabled = false;
     btn.textContent = 'Confirm booking';
+    releaseSubmitLock(abDupeKey);
     errEl.textContent = 'Database error: ' + dbErr.message;
     errEl.classList.remove('hidden');
     return;
@@ -15441,6 +15492,7 @@ async function abSubmitBooking() {
 
   btn.disabled = false;
   btn.textContent = 'Confirm booking';
+  releaseSubmitLock(abDupeKey);
 
   abLastBookingData = {
     bookingId,
@@ -16000,12 +16052,30 @@ async function mbSubmitBooking() {
     if (ef || el) extraGuests.push(`${ef} ${el}`.trim());
   }
 
+  const dateStr = mbSelectedDate;
+  const tour = mbCurrentTour.title;
+  // Manual Booking allows a blank guest email (unlike Create Booking / Partner Panel) — the
+  // duplicate guard is keyed on email, so skip it entirely rather than false-matching unrelated
+  // blank-email walk-in bookings against each other.
+  const mbDupeKey = email ? bookingDupeLockKey({ bokunId: mbCurrentTour.bokunId, startTimeId: mbSelectedSlot?.startTimeId, tour, dateStr, time: mbSelectedSlot?.startTime, email }) : null;
+  if (mbDupeKey) {
+    if (!acquireSubmitLock(mbDupeKey)) {
+      errEl.textContent = 'This booking is already being submitted — please wait a moment.';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    const mbExistingBooking = await checkExistingBooking({ dateStr, startTimeId: mbSelectedSlot?.startTimeId, tour, time: mbSelectedSlot?.startTime, email });
+    if (mbExistingBooking) {
+      const when = new Date(mbExistingBooking.created_at).toLocaleString('en-GB');
+      const proceedAnyway = await showConfirm(`A booking for ${email} already exists for this tour and date (ref ${mbExistingBooking.bokun_confirmation_code || mbExistingBooking.id.slice(0,8)}, status "${mbExistingBooking.status}", created by ${mbExistingBooking.created_by_name || 'unknown'} on ${when}). Create another one anyway?`, { okLabel: 'Create another', okColor: '#dc2626', cancelLabel: 'Cancel' });
+      if (!proceedAnyway) { releaseSubmitLock(mbDupeKey); return; }
+    }
+  }
+
   btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Creating booking…';
 
   const bookingId = crypto.randomUUID();
-  const dateStr = mbSelectedDate;
   const guest = `${firstName} ${lastName}`;
-  const tour = mbCurrentTour.title;
   const mbHasRates = mbRateSelections.some(r=>r.count>0);
   const mbHasCats  = mbCategorySelections.some(c=>c.count>0);
   const mbPackageLines = mbHasRates
@@ -16100,6 +16170,7 @@ async function mbSubmitBooking() {
     errEl.classList.remove('hidden');
     if (bokunFieldErr?.fieldId) _showBokunFieldError(bokunFieldErr.fieldId, bokunFieldErr.userMsg);
     btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i>Create a booking';
+    releaseSubmitLock(mbDupeKey);
     return;
   }
 
@@ -16119,6 +16190,7 @@ async function mbSubmitBooking() {
   });
 
   btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i>Create a booking';
+  releaseSubmitLock(mbDupeKey);
   if (dbErr) { errEl.textContent = 'Database error: '+dbErr.message; errEl.classList.remove('hidden'); return; }
 
   mbLastBookingData = {

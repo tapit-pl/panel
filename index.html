@@ -1693,6 +1693,20 @@ tailwind.config = {
   </div>
 </div>
 
+<!-- ===================== YES/NO CONFIRM MODAL (generic) ===================== -->
+<div id="modal-yesno" class="fixed inset-0 z-50 hidden modal-bg bg-black/50 items-center justify-center p-4">
+  <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl fade-in p-6">
+    <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <i class="fa-solid fa-triangle-exclamation text-amber-500 text-xl"></i>
+    </div>
+    <p id="modal-yesno-msg" class="text-sm text-dark text-center leading-relaxed"></p>
+    <div class="flex gap-3 mt-5">
+      <button id="modal-yesno-cancel" class="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors">Cancel</button>
+      <button id="modal-yesno-ok" class="flex-1 py-2.5 bg-red-500 hover:bg-red-600 rounded-xl text-sm font-semibold text-white transition-colors">Confirm</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===================== VOUCHER PREVIEW ===================== -->
 <div id="modal-voucher" class="fixed inset-0 z-50 hidden modal-bg bg-black/50 items-center justify-center p-4">
   <!-- Print actions dialog (visible on screen) -->
@@ -4059,6 +4073,61 @@ tailwind.config = {
     counter.classList.toggle('hidden', len < 400);
   }
 
+  // ---- Duplicate-submission guard (shared by submitTourBooking) ----
+  function bookingDupeLockKey({ bokunId, startTimeId, tour, dateStr, time, email }) {
+    const emailNorm = (email || '').trim().toLowerCase();
+    const slotPart = startTimeId != null ? `${bokunId}:${startTimeId}` : `${(tour||'').trim().toLowerCase()}:${time||''}`;
+    return `${slotPart}|${dateStr}|${emailNorm}`;
+  }
+
+  function acquireSubmitLock(key, maxAgeMs = 90000) {
+    try {
+      const stored = localStorage.getItem('tm_booking_inflight:' + key);
+      if (stored) {
+        const ts = parseInt(stored, 10);
+        if (!isNaN(ts) && (Date.now() - ts) < maxAgeMs) return false;
+      }
+      localStorage.setItem('tm_booking_inflight:' + key, String(Date.now()));
+      return true;
+    } catch(e) { return true; } // localStorage unavailable (private mode etc.) — fail open, existing-booking check still protects
+  }
+
+  function releaseSubmitLock(key) {
+    try { localStorage.removeItem('tm_booking_inflight:' + key); } catch(e) {}
+  }
+
+  async function checkExistingBooking({ dateStr, startTimeId, tour, time, email }) {
+    let q = db.from('bookings')
+      .select('id, bokun_confirmation_code, status, created_by_name, created_at')
+      .eq('date', dateStr)
+      .ilike('email', (email||'').trim())
+      .neq('status', 'cancelled')
+      .order('created_at', { ascending: false })
+      .limit(1);
+    q = startTimeId != null ? q.eq('start_time_id', String(startTimeId)) : q.eq('tour', tour).eq('time', time);
+    const { data } = await q.maybeSingle();
+    return data || null;
+  }
+
+  function showYesNo(msg, { okLabel = 'Confirm', cancelLabel = 'Cancel' } = {}) {
+    return new Promise(resolve => {
+      const modal = document.getElementById('modal-yesno');
+      document.getElementById('modal-yesno-msg').textContent = msg;
+      const okBtn = document.getElementById('modal-yesno-ok');
+      okBtn.textContent = okLabel;
+      document.getElementById('modal-yesno-cancel').textContent = cancelLabel;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      const close = (result) => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        resolve(result);
+      };
+      okBtn.onclick = () => close(true);
+      document.getElementById('modal-yesno-cancel').onclick = () => close(false);
+    });
+  }
+
   async function submitTourBooking() {
     const form = document.getElementById('td-booking-form');
     const dateStr = form.dataset.date;
@@ -4141,12 +4210,26 @@ tailwind.config = {
       }
     }
 
+    const tour = tdCurrentTour?.dbTitle || tdCurrentTour?.title || '';
+    const _tdSlotTime = tdSelectedTimeSlot?._displayTime || tdSelectedTimeSlot?.startTime || null;
+    const dupeKey = bookingDupeLockKey({ bokunId: tdCurrentTour?.bokunId, startTimeId: tdSelectedTimeSlot?.startTimeId, tour, dateStr, time: _tdSlotTime, email });
+    if (!acquireSubmitLock(dupeKey)) {
+      errEl.textContent = 'This booking is already being submitted — please wait a moment.';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    const existingBooking = await checkExistingBooking({ dateStr, startTimeId: tdSelectedTimeSlot?.startTimeId, tour, time: _tdSlotTime, email });
+    if (existingBooking) {
+      const when = new Date(existingBooking.created_at).toLocaleString('en-GB');
+      const proceedAnyway = await showYesNo(`A booking for ${email} already exists for this tour and date (ref ${existingBooking.bokun_confirmation_code || existingBooking.id.slice(0,8)}, status "${existingBooking.status}", created by ${existingBooking.created_by_name || 'unknown'} on ${when}). Create another one anyway?`);
+      if (!proceedAnyway) { releaseSubmitLock(dupeKey); return; }
+    }
+
     const btn = document.getElementById('td-submit-btn');
     btn.disabled = true;
     btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Saving...';
     errEl.classList.add('hidden');
 
-    const tour = tdCurrentTour?.dbTitle || tdCurrentTour?.title || '';
     const guest = `${firstName} ${lastName}`;
     const extraGuests = Array.from({ length: tdGuestCount - 1 }, (_, i) => {
       const f = document.getElementById(`td-extra-first-${i}`)?.value.trim();
@@ -4180,6 +4263,7 @@ tailwind.config = {
       errEl.textContent = 'Your account has been deactivated. Please contact support.'
       errEl.classList.remove('hidden')
       btn.disabled = false
+      releaseSubmitLock(dupeKey)
       setTimeout(async () => { await db.auth.signOut(); window.location.reload() }, 2000)
       return
     }
@@ -4399,6 +4483,7 @@ tailwind.config = {
       if (bokunFieldErr?.fieldId) _showBokunFieldError(bokunFieldErr.fieldId, bokunFieldErr.userMsg);
       btn.disabled = false;
       btn.innerHTML = '<i class="fa-solid fa-check"></i> Confirm booking';
+      releaseSubmitLock(dupeKey);
       return;
     }
 
@@ -4448,6 +4533,7 @@ tailwind.config = {
 
     btn.disabled = false;
     btn.innerHTML = '<i class="fa-solid fa-check"></i> Confirm booking';
+    releaseSubmitLock(dupeKey);
 
     if (error) {
       console.error('[Booking] DB insert error:', JSON.stringify(error));
